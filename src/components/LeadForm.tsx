@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { NeedSelector } from "@/components/NeedSelector";
-import { MAX_NEEDS, SERVICE_BY_ID } from "@/data/services";
+import { COMMON_NEEDS, SERVICE_BY_ID, SERVICES } from "@/data/services";
 import {
   PROFILE_COMPANY_FIELD,
   PROFILES,
@@ -102,6 +102,8 @@ export function LeadForm() {
   const setProfile = useAppStore((s) => s.setProfile);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [specialNeed, setSpecialNeed] = useState(false);
+  const [specialistReferral, setSpecialistReferral] = useState(false);
 
   const companyField = profile
     ? PROFILE_COMPANY_FIELD[profile]
@@ -135,8 +137,11 @@ export function LeadForm() {
         }
       }
     }
-    if (selectedNeeds.length === 0) {
+    if (selectedNeeds.length === 0 && !specialistReferral) {
       next.needs = "Sélectionnez au moins un besoin.";
+    }
+    if (specialNeed && !data.message.trim()) {
+      next.message = "Précisez votre besoin particulier.";
     }
     setErrors(next);
     if (Object.keys(next).length > 0) {
@@ -161,7 +166,15 @@ export function LeadForm() {
       city: payload.city,
       sector: payload.sector,
       message: payload.message,
-      needs: selectedNeeds.map((id) => SERVICE_BY_ID[id].formLabel),
+      needs: [
+        ...selectedNeeds.map((id) => SERVICE_BY_ID[id].formLabel),
+        ...(specialistReferral ? ["Orientation vers un spécialiste : création d'entreprise, conseil ou assistance juridique"] : []),
+      ],
+      details: selectedNeeds.flatMap((id) =>
+        COMMON_NEEDS[id]
+          .filter((choice) => fd.getAll(`detail-${id}`).includes(choice))
+          .map((choice) => `${SERVICE_BY_ID[id].formLabel} : ${choice}`),
+      ),
     });
     setSubmitting(true);
     window.open(url, "_blank", "noopener,noreferrer");
@@ -185,7 +198,7 @@ export function LeadForm() {
           </p>
           <ul className="mt-8 grid gap-3 sm:grid-cols-3">
             {[
-              `1 à ${MAX_NEEDS} besoins`,
+              "Choix rapides et précis",
               "Transmission via WhatsApp",
               "Une démarche centralisée",
             ].map((item) => (
@@ -405,14 +418,42 @@ export function LeadForm() {
               <NeedSelector error={errors.needs} />
             </div>
 
+            {selectedNeeds.length > 0 ? (
+              <div className="mt-8 space-y-5">
+                <h3 className="font-display text-lg font-bold text-navy">Quels services vous intéressent ?</h3>
+                <p className="text-sm text-muted">Cochez les demandes qui vous concernent. Plusieurs choix sont possibles.</p>
+                {SERVICES.filter((service) => selectedNeeds.includes(service.id)).map((service) => (
+                  <fieldset key={service.id} className="rounded-md border border-line bg-ice p-4">
+                    <legend className="px-1 font-display font-semibold text-navy">{service.title}</legend>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {COMMON_NEEDS[service.id].map((choice) => (
+                        <label key={choice} className="flex cursor-pointer items-start gap-3 rounded-md bg-paper p-3 text-sm text-navy hover:ring-1 hover:ring-electric">
+                          <input type="checkbox" name={`detail-${service.id}`} value={choice} className="mt-0.5 size-4 accent-royal" />
+                          <span>{choice}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ))}
+              </div>
+            ) : null}
+
             <div className="mt-8">
-              <Label htmlFor="message">Parlez-nous de votre besoin</Label>
-              <Textarea
-                id="message"
-                name="message"
-                rows={5}
-                placeholder="Décrivez votre situation, votre objectif ou toute information utile pour mieux comprendre votre demande..."
-              />
+              <label className="flex cursor-pointer items-center gap-3 font-semibold text-navy">
+                <input type="checkbox" checked={specialNeed} onChange={(event) => setSpecialNeed(event.target.checked)} className="size-4 accent-royal" />
+                J'ai un besoin particulier à préciser
+              </label>
+              {specialNeed ? (
+                <div className="mt-3">
+                  <Label htmlFor="message">Précisez votre demande</Label>
+                  <Textarea id="message" name="message" rows={3} aria-invalid={!!errors.message} placeholder="Quelques mots suffisent..." />
+                  {errors.message ? <p className="mt-1 text-sm font-semibold text-destructive" role="alert">{errors.message}</p> : null}
+                </div>
+              ) : null}
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-md border border-line bg-ice p-4 text-sm text-navy">
+                <input type="checkbox" checked={specialistReferral} onChange={(event) => setSpecialistReferral(event.target.checked)} className="mt-0.5 size-4 accent-royal" />
+                <span><strong>Création d'entreprise ou question juridique</strong><br />Je souhaite être orienté vers un spécialiste, comme CJA.</span>
+              </label>
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">

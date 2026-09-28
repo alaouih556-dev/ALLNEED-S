@@ -18,7 +18,7 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Sélectionnez votre situation : ALLNEEDS adapte ensuite les informations demandées et vous oriente vers les interlocuteurs et solutions utiles.",
       "Pour une création d'entreprise, le point de départ couvre la structuration du projet, les démarches et les interlocuteurs pertinents.",
       "Pour une implantation au Maroc, le point de départ couvre le contexte du projet, l'orientation vers les institutions concernées et les besoins liés à l'implantation.",
-      "ALLNEEDS ne crée pas l'entreprise à votre place et ne se substitue pas aux institutions, aux notaire ou aux conseils compétents.",
+      "Pour la création d'entreprise, le conseil et l'assistance juridiques, ALLNEEDS vous oriente vers des spécialistes, comme CJA. Ces prestations ne sont pas réalisées directement par ALLNEEDS.",
     ],
   },
   {
@@ -32,13 +32,13 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: "Dois-je connaître exactement la solution dont j'ai besoin ?",
     answer: [
       "Non. Vous n'avez pas besoin d'avoir déjà identifié le partenaire, le programme ou le produit adapté.",
-      "Décrivez votre situation. ALLNEEDS vous aide à structurer le besoin et à avancer vers une orientation pertinente.",
+      "Cochez les demandes courantes qui vous concernent. Un champ libre apparaît si vous avez un besoin particulier à préciser.",
     ],
   },
   {
     question: "Que se passe-t-il après l'envoi de ma demande ?",
     answer: [
-      "Votre demande est transmise via WhatsApp, avec les informations que vous avez renseignées et les besoins sélectionnés.",
+      "Votre demande est transmise via WhatsApp, avec les informations renseignées, les besoins sélectionnés et les demandes courantes cochées.",
       "Nous poursuivons ensuite l'échange afin de comprendre votre contexte et d'étudier les pistes d'orientation les plus adaptées.",
     ],
   },

@@ -11,6 +11,7 @@ export type WhatsAppPayload = {
   city: string;
   sector: string;
   needs: string[];
+  details?: string[];
   message?: string;
 };
 
@@ -26,6 +27,9 @@ export function buildWhatsAppMessage(payload: WhatsAppPayload): string {
 
   const role = payload.role?.trim();
   const country = payload.country?.trim();
+  const details = payload.details?.length
+    ? payload.details.map((item) => `• ${item}`).join("\n")
+    : "• À préciser lors de l'échange";
 
   const lines = [
     "Bonjour ALLNEEDS,",
@@ -44,6 +48,9 @@ export function buildWhatsAppMessage(payload: WhatsAppPayload): string {
     "",
     "Besoins sélectionnés :",
     needs,
+    "",
+    "Demandes cochées :",
+    details,
     "",
     "Informations complémentaires :",
     extra,

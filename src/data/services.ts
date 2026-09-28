@@ -225,3 +225,14 @@ export const SERVICE_BY_ID = Object.fromEntries(
 ) as Record<NeedId, Service>;
 
 export const MAX_NEEDS = 8;
+
+export const COMMON_NEEDS: Record<NeedId, string[]> = {
+  assurance: ["Assurer les véhicules", "Protéger les locaux et équipements", "Responsabilité civile professionnelle", "Assurer les salariés"],
+  fournisseurs: ["Trouver un fournisseur", "Comparer des devis", "Acheter des équipements", "Chercher des matières premières"],
+  digital: ["Créer ou améliorer un site web", "Réseaux sociaux et publicité", "Identité visuelle", "Solutions télécom et outils digitaux"],
+  formation: ["Former les salariés", "Formation commerciale", "Formation technique", "Management et digital"],
+  recrutement: ["Recruter un commercial", "Recruter un profil administratif", "Recruter un profil technique", "Définir le profil recherché"],
+  financement: ["Financer un investissement", "Trouver une aide ou un programme", "Préparer un dossier de financement", "Développer mon activité"],
+  commercial: ["Trouver de nouveaux clients", "Qualifier et suivre les prospects", "Conclure davantage de ventes", "Structurer la prospection"],
+  comptabilite: ["Tenue comptable", "Déclarations fiscales", "Facturation et suivi des paiements", "Tableaux de bord financiers"],
+};
