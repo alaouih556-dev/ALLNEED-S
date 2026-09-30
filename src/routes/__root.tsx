@@ -1,51 +1,36 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { AuthProvider } from "@/lib/auth/provider";
-import { PreviewHostBridge } from "@/components/preview-host-bridge";
-import appCss from "../styles.css?url";
-
-const APP_NAME = "ALLNEEDS | Solutions pour entreprises";
-const DESCRIPTION =
-  "ALLNEEDS centralise les besoins des entreprises, des créateurs d'entreprise et des investisseurs étrangers, et facilite leur orientation vers des solutions et partenaires adaptés : assurance, fournisseurs, communication & digital, formation, recrutement, financement & aides, accompagnement commercial, comptabilité & gestion fiscale.";
+import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { Toaster } from '@/components/layouts'
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: APP_NAME },
-      { name: "description", content: DESCRIPTION },
-      { name: "theme-color", content: "#071A3D" },
-      { name: "application-name", content: "ALLNEEDS" },
-    ],
-    links: [
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/__grok/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
-      },
-    ],
-  }),
-  component: RootDocument,
-});
+  component: RootLayout,
+  notFoundComponent: NotFound,
+})
 
-function RootDocument() {
+function RootLayout() {
   return (
-    <html lang="fr" className="antialiased" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body className="min-h-dvh bg-ice text-ink">
-        <PreviewHostBridge />
-        <AuthProvider>
-          <Outlet />
-        </AuthProvider>
-        <Scripts />
-      </body>
-    </html>
-  );
+    <div className="flex min-h-screen flex-col">
+      <Outlet />
+      <Toaster />
+    </div>
+  )
+}
+
+function NotFound() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
+      <p className="font-display text-7xl text-sand-400">404</p>
+      <div>
+        <h1 className="display-2">Page introuvable</h1>
+        <p className="lede mx-auto mt-3 max-w-md">
+          Cette page n’existe pas ou a été déplacée. Reprenons depuis l’accueil.
+        </p>
+      </div>
+      <a
+        href="/"
+        className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-5 text-sm font-semibold text-white transition hover:bg-brand-800"
+      >
+        Retour à l’accueil
+      </a>
+    </div>
+  )
 }
