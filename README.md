@@ -1,61 +1,54 @@
-# ALLNEEDS — Frontend de démonstration
+# ALLNEEDS — frontend + diagnostic + espaces métier
 
-Application React + Vite + TypeScript + Tailwind + TanStack Router en mode **frontend uniquement**. L’état est partagé entre l’espace client (`/app/*`) et l’espace administration (`/admin/*`) via un **store React Context + reducer + persistance `localStorage`** (`allneeds.demo.v2`). Toutes les données affichées sont fictives.
+Projet complet reconstitué depuis le ZIP de code fourni, avec les corrections TypeScript précédentes et les extensions SaaS. Le site public, le client et l'administration sont conservés. Les configurations de démarrage absentes de ce ZIP ont été recréées.
 
-## Stack
+## Démarrage
 
-- [React 18](https://react.dev/) + [Vite 6](https://vitejs.dev/)
-- [TypeScript strict](https://www.typescriptlang.org/)
-- [Tailwind CSS 3.4](https://tailwindcss.com/)
-- [TanStack Router 1.95](https://tanstack.com/router/latest) (avec génération automatique de routes)
+Node.js 22.12 minimum (ou 24). Dans le dossier extrait :
 
-## Installation
-
-```bash
+```powershell
 npm install
-```
-
-## Développement
-
-```bash
+npm run typecheck
+npm run test:saas
+npm run build
 npm run dev
 ```
 
-L’application est disponible sur [http://localhost:5173](http://localhost:5173).
+Ouvrir l'adresse affichée par Vite. Utiliser le sélecteur client/admin existant.
 
-## Build & vérification de types
+- `/app/espace-metier` : espaces Santé, Éducation et Tourisme (sélecteur de secteur dans la démo).
+- `/app/diagnostic-auto` : questionnaire par secteur, 4 axes et 28 questions des grilles existantes, brouillon, scores, priorités, impression/PDF via navigateur et export JSON.
+- `/admin/diagnostics-auto` : avis de relecture partagé dans le même navigateur, restitué au client à la prochaine ouverture de son bilan.
 
-```bash
-npm run build
-npm run typecheck
-```
+## Fonctions ajoutées
 
-## Identité, contenu et démonstration
+Santé : fiches patients fictives, références de dossiers, rendez-vous par praticien, suivi administratif des visites, index d'archives, factures et règlements partiels.
 
-- Langue : **français uniquement**.
-- Les mentions légales, coordonnées et références restent volontairement entre crochets `[à compléter]`.
-- Jeu de données de démonstration complet et cohérent entre client et admin (`src/data/demo.ts`).
-- Bascule de rôle : en haut à droite de l’application, passer de `Client` à `Admin` pour voir les deux espaces. Les actions effectuées dans l’un sont immédiatement visibles dans l’autre.
-- Réinitialisation : dans le menu latéral (espace client ou admin), le bouton « Réinitialiser » remet le jeu de démonstration à son état initial (dans `localStorage`).
+Éducation : inscriptions et statuts, responsables légaux, groupes et enseignants, séances, présence, index documentaire et échéances de scolarité.
 
-## Structure des routes
+Tourisme : voyageurs, unités et prix/nuit, réservations de séjour avec contrôle dates/capacité/conflits, activités et créneaux, réservations d'activités avec capacité, tables et réservations restaurant, fournisseurs, factures et règlements.
 
-- Site public : `/`, `/secteurs`, `/secteurs/$sector` (enseignement/santé/tourisme), `/missions`, `/missions/$code`, `/acces`, `/tarifs`, `/demande`, `/diagnostic`, `/faq`, `/contact`, `/a-propos`, `/conditions`
-- Authentification : `/connexion`, `/inscription`, `/onboarding`
-- Espace client : `/app` (tableau de bord, besoins, prestataires, devis, diagnostics, missions, livrables, rendez-vous, messages, documents, abonnement)
-- Administration : `/admin` (vue d’ensemble, pipeline, clients, qualification, diagnostics internes, besoins, prestataires, missions, quotas & abonnements, relances)
+Restauration : ingrédients avec unité/coût/stock/seuil, réceptions fournisseur, création de recettes avec quantités par portion, modification du prix de vente, coût ingrédients et marge ingrédients, vente des portions, diminution du stock, refus si stock insuffisant, historique des ventes avec coût figé au moment de la vente. La marge affichée ne comprend pas les charges, taxes, main-d'œuvre et pertes.
 
-## Partage des données (principe)
+Les modules disposent de formulaires, recherche, modification/suppression et export JSON de l'espace. Les créneaux d'une ressource ne peuvent pas se chevaucher. Les dates de départ sont exclusives : arrivée le jour du départ précédent autorisée.
 
-Le store (`src/store/store.tsx`) contient l’ensemble de l’état (besoins, prestataires, devis, diagnostics, missions, jalons, livrables, rendez-vous, messages, documents, leads, demandes entrantes, réservations). Toute action admin (proposer un prestataire, saisir un devis, publier un diagnostic, avancer un jalon…) modifie le **même état** que celui consulté par le client. Cela garantit la cohérence de la démonstration.
+## Diagnostic
 
-## Points d’attention
+Autoévaluation déclarative 1–5. Les questions originales sont conservées : elles sont affichées avec une échelle de maîtrise, sans interpréter automatiquement leurs réponses factuelles. Le score d'un axe n'est affiché qu'une fois toutes ses questions évaluées. Pas de score global incomplet ; question vide != zéro. Priorités : jusqu'à trois questions renseignées avec les scores les plus faibles (<=3). Recommandations organisationnelles générales explicables, sans score commercial client ni prescription clinique.
 
-- Les liens dynamiques vers les secteurs utilisent le paramètre `$sector` (`/secteurs/$sector`) avec route dédiée.
-- Le typage TanStack Router est strict (liens typés via `LinkProps['to']`).
-- Pas de backend : tout est persistant uniquement dans le navigateur pour la démo.
-- Aucune donnée sensible n’est utilisée (données fictives).
+## Limites de cette livraison frontend
 
-## Licence & usage
+Données fictives dans localStorage, séparées par identifiant d'organisation de démonstration et secteur. Ceci ne remplace pas l'isolation serveur ni une base de données sécurisée. Le store existant utilise une organisation de démonstration fixe. Les rôles sont des simulations, pas une authentification de production.
 
-Ce dépôt est fourni à titre de maquette de démonstration. Les contenus sont adaptables selon vos besoins.
+Les archives sont un index de métadonnées : pas de dépôt de documents médicaux. Les factures sont des registres administratifs de démo, sans numérotation fiscale, TVA ou génération comptable certifiée. Les règlements sont saisis manuellement : pas de transactions bancaires réelles. Les portails séparés patient/parent/voyageur, le backend, l'envoi de mails, les intégrations OTA/POS, les notifications automatiques et les abonnements SaaS payants ne sont pas implémentés.
+
+Une activité est une fiche de créneau ; utilisez un nom unique par créneau. Les réservations utilisent les noms exacts des ressources existantes. Le catalogue ne doit pas être renommé après réservation sans mettre à jour les références. Les commandes restaurant représentent les ventes de portions ; pas encore de workflow cuisine multi-lignes, retours, annulations de stock ou ticket de caisse.
+
+## Validation effectuée
+
+- Génération des routes et TypeScript : réussies.
+- Build de production : réussi (avertissement de taille du bundle).
+- 12 contrôles métier : coûts, décrément de stock, refus stock insuffisant/quantité invalide, dates et chevauchements de réservation, capacités, règlement supérieur au dû.
+- Vérification navigateur non exécutée : navigateur Playwright absent de l'environnement. Aucune validation visuelle ou de bout en bout prétendue.
+
+Dépendances actualisées aux versions disponibles pour cette vérification : React 19, Vite 8, Tailwind 4. La configuration Tailwind existante est chargée via `@config` et le plugin Vite Tailwind. Code splitting TanStack désactivé pour éviter le problème de chemin Windows contenant une apostrophe.

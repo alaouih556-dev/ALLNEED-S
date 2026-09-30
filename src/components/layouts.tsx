@@ -73,6 +73,8 @@ interface NavItem {
 
 function buildClientNav(unreadMessages: number, pendingDocs: number): NavItem[] {
   return [
+    { label: 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" /> },
+    { label: 'Diagnostic automatique', to: '/app/diagnostic-auto', icon: <Gauge className="h-4 w-4" /> },
     { label: 'Tableau de bord', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'Besoins', to: '/app/besoins', icon: <Inbox className="h-4 w-4" /> },
     { label: 'Prestataires', to: '/app/prestataires', icon: <Network className="h-4 w-4" /> },
@@ -89,6 +91,7 @@ function buildClientNav(unreadMessages: number, pendingDocs: number): NavItem[] 
 
 function buildAdminNav(): NavItem[] {
   return [
+    { label: 'Revue diagnostics auto', to: '/admin/diagnostics-auto', icon: <Gauge className="h-4 w-4" /> },
     { label: 'Vue d’ensemble', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
     { label: 'Clients', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },

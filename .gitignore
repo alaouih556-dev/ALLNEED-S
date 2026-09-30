@@ -1,9 +1,7 @@
-﻿
 node_modules/
 dist/
 .env
 .env.*
 !.env.example
 *.bak
-backup-fix-*/
-typecheck-errors.txt
+backup*/

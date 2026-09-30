@@ -25,6 +25,7 @@ import { Route as PublicDiagnosticRouteImport } from './routes/_public/diagnosti
 import { Route as PublicFaqRouteImport } from './routes/_public/faq'
 import { Route as PublicTarifsRouteImport } from './routes/_public/tarifs'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminDiagnosticsAutoRouteImport } from './routes/admin/diagnostics-auto'
 import { Route as AdminGrilleRouteImport } from './routes/admin/grille'
 import { Route as AdminPipelineRouteImport } from './routes/admin/pipeline'
 import { Route as AdminQualificationRouteImport } from './routes/admin/qualification'
@@ -33,8 +34,10 @@ import { Route as AdminRelancesRouteImport } from './routes/admin/relances'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppAbonnementRouteImport } from './routes/app/abonnement'
 import { Route as AppDevisRouteImport } from './routes/app/devis'
+import { Route as AppDiagnosticAutoRouteImport } from './routes/app/diagnostic-auto'
 import { Route as AppDiagnosticsRouteImport } from './routes/app/diagnostics'
 import { Route as AppDocumentsRouteImport } from './routes/app/documents'
+import { Route as AppEspaceMetierRouteImport } from './routes/app/espace-metier'
 import { Route as AppLivrablesRouteImport } from './routes/app/livrables'
 import { Route as AppMessagesRouteImport } from './routes/app/messages'
 import { Route as AppPrestatairesRouteImport } from './routes/app/prestataires'
@@ -136,6 +139,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDiagnosticsAutoRoute = AdminDiagnosticsAutoRouteImport.update({
+  id: '/diagnostics-auto',
+  path: '/diagnostics-auto',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminGrilleRoute = AdminGrilleRouteImport.update({
   id: '/grille',
   path: '/grille',
@@ -176,6 +184,11 @@ const AppDevisRoute = AppDevisRouteImport.update({
   path: '/devis',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDiagnosticAutoRoute = AppDiagnosticAutoRouteImport.update({
+  id: '/diagnostic-auto',
+  path: '/diagnostic-auto',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDiagnosticsRoute = AppDiagnosticsRouteImport.update({
   id: '/diagnostics',
   path: '/diagnostics',
@@ -184,6 +197,11 @@ const AppDiagnosticsRoute = AppDiagnosticsRouteImport.update({
 const AppDocumentsRoute = AppDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEspaceMetierRoute = AppEspaceMetierRouteImport.update({
+  id: '/espace-metier',
+  path: '/espace-metier',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLivrablesRoute = AppLivrablesRouteImport.update({
@@ -308,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/diagnostic': typeof PublicDiagnosticRoute
   '/faq': typeof PublicFaqRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/qualification': typeof AdminQualificationRoute
@@ -315,8 +334,10 @@ export interface FileRoutesByFullPath {
   '/admin/relances': typeof AdminRelancesRoute
   '/app/abonnement': typeof AppAbonnementRoute
   '/app/devis': typeof AppDevisRoute
+  '/app/diagnostic-auto': typeof AppDiagnosticAutoRoute
   '/app/diagnostics': typeof AppDiagnosticsRoute
   '/app/documents': typeof AppDocumentsRoute
+  '/app/espace-metier': typeof AppEspaceMetierRoute
   '/app/livrables': typeof AppLivrablesRoute
   '/app/messages': typeof AppMessagesRoute
   '/app/prestataires': typeof AppPrestatairesRoute
@@ -353,6 +374,7 @@ export interface FileRoutesByTo {
   '/diagnostic': typeof PublicDiagnosticRoute
   '/faq': typeof PublicFaqRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/qualification': typeof AdminQualificationRoute
@@ -360,8 +382,10 @@ export interface FileRoutesByTo {
   '/admin/relances': typeof AdminRelancesRoute
   '/app/abonnement': typeof AppAbonnementRoute
   '/app/devis': typeof AppDevisRoute
+  '/app/diagnostic-auto': typeof AppDiagnosticAutoRoute
   '/app/diagnostics': typeof AppDiagnosticsRoute
   '/app/documents': typeof AppDocumentsRoute
+  '/app/espace-metier': typeof AppEspaceMetierRoute
   '/app/livrables': typeof AppLivrablesRoute
   '/app/messages': typeof AppMessagesRoute
   '/app/prestataires': typeof AppPrestatairesRoute
@@ -403,6 +427,7 @@ export interface FileRoutesById {
   '/_public/diagnostic': typeof PublicDiagnosticRoute
   '/_public/faq': typeof PublicFaqRoute
   '/_public/tarifs': typeof PublicTarifsRoute
+  '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/qualification': typeof AdminQualificationRoute
@@ -410,8 +435,10 @@ export interface FileRoutesById {
   '/admin/relances': typeof AdminRelancesRoute
   '/app/abonnement': typeof AppAbonnementRoute
   '/app/devis': typeof AppDevisRoute
+  '/app/diagnostic-auto': typeof AppDiagnosticAutoRoute
   '/app/diagnostics': typeof AppDiagnosticsRoute
   '/app/documents': typeof AppDocumentsRoute
+  '/app/espace-metier': typeof AppEspaceMetierRoute
   '/app/livrables': typeof AppLivrablesRoute
   '/app/messages': typeof AppMessagesRoute
   '/app/prestataires': typeof AppPrestatairesRoute
@@ -454,6 +481,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/faq'
     | '/tarifs'
+    | '/admin/diagnostics-auto'
     | '/admin/grille'
     | '/admin/pipeline'
     | '/admin/qualification'
@@ -461,8 +489,10 @@ export interface FileRouteTypes {
     | '/admin/relances'
     | '/app/abonnement'
     | '/app/devis'
+    | '/app/diagnostic-auto'
     | '/app/diagnostics'
     | '/app/documents'
+    | '/app/espace-metier'
     | '/app/livrables'
     | '/app/messages'
     | '/app/prestataires'
@@ -499,6 +529,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/faq'
     | '/tarifs'
+    | '/admin/diagnostics-auto'
     | '/admin/grille'
     | '/admin/pipeline'
     | '/admin/qualification'
@@ -506,8 +537,10 @@ export interface FileRouteTypes {
     | '/admin/relances'
     | '/app/abonnement'
     | '/app/devis'
+    | '/app/diagnostic-auto'
     | '/app/diagnostics'
     | '/app/documents'
+    | '/app/espace-metier'
     | '/app/livrables'
     | '/app/messages'
     | '/app/prestataires'
@@ -548,6 +581,7 @@ export interface FileRouteTypes {
     | '/_public/diagnostic'
     | '/_public/faq'
     | '/_public/tarifs'
+    | '/admin/diagnostics-auto'
     | '/admin/grille'
     | '/admin/pipeline'
     | '/admin/qualification'
@@ -555,8 +589,10 @@ export interface FileRouteTypes {
     | '/admin/relances'
     | '/app/abonnement'
     | '/app/devis'
+    | '/app/diagnostic-auto'
     | '/app/diagnostics'
     | '/app/documents'
+    | '/app/espace-metier'
     | '/app/livrables'
     | '/app/messages'
     | '/app/prestataires'
@@ -706,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/diagnostics-auto': {
+      id: '/admin/diagnostics-auto'
+      path: '/diagnostics-auto'
+      fullPath: '/admin/diagnostics-auto'
+      preLoaderRoute: typeof AdminDiagnosticsAutoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/grille': {
       id: '/admin/grille'
       path: '/grille'
@@ -762,6 +805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDevisRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/diagnostic-auto': {
+      id: '/app/diagnostic-auto'
+      path: '/diagnostic-auto'
+      fullPath: '/app/diagnostic-auto'
+      preLoaderRoute: typeof AppDiagnosticAutoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/diagnostics': {
       id: '/app/diagnostics'
       path: '/diagnostics'
@@ -774,6 +824,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/app/documents'
       preLoaderRoute: typeof AppDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/espace-metier': {
+      id: '/app/espace-metier'
+      path: '/espace-metier'
+      fullPath: '/app/espace-metier'
+      preLoaderRoute: typeof AppEspaceMetierRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/livrables': {
@@ -968,6 +1025,7 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 interface AdminRouteChildren {
+  AdminDiagnosticsAutoRoute: typeof AdminDiagnosticsAutoRoute
   AdminGrilleRoute: typeof AdminGrilleRoute
   AdminPipelineRoute: typeof AdminPipelineRoute
   AdminQualificationRoute: typeof AdminQualificationRoute
@@ -983,6 +1041,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDiagnosticsAutoRoute: AdminDiagnosticsAutoRoute,
   AdminGrilleRoute: AdminGrilleRoute,
   AdminPipelineRoute: AdminPipelineRoute,
   AdminQualificationRoute: AdminQualificationRoute,
@@ -1002,8 +1061,10 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface AppRouteChildren {
   AppAbonnementRoute: typeof AppAbonnementRoute
   AppDevisRoute: typeof AppDevisRoute
+  AppDiagnosticAutoRoute: typeof AppDiagnosticAutoRoute
   AppDiagnosticsRoute: typeof AppDiagnosticsRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
+  AppEspaceMetierRoute: typeof AppEspaceMetierRoute
   AppLivrablesRoute: typeof AppLivrablesRoute
   AppMessagesRoute: typeof AppMessagesRoute
   AppPrestatairesRoute: typeof AppPrestatairesRoute
@@ -1018,8 +1079,10 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAbonnementRoute: AppAbonnementRoute,
   AppDevisRoute: AppDevisRoute,
+  AppDiagnosticAutoRoute: AppDiagnosticAutoRoute,
   AppDiagnosticsRoute: AppDiagnosticsRoute,
   AppDocumentsRoute: AppDocumentsRoute,
+  AppEspaceMetierRoute: AppEspaceMetierRoute,
   AppLivrablesRoute: AppLivrablesRoute,
   AppMessagesRoute: AppMessagesRoute,
   AppPrestatairesRoute: AppPrestatairesRoute,
