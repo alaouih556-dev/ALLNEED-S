@@ -3,12 +3,14 @@ import { Link } from '@tanstack/react-router'
 import { useDemo } from '@/store/store'
 import { modules, seed, titles, validateRow, recipeCost, sell, type Industry, type Row, type Workspace as Data, type Recipe } from './model'
 import './workspace.css'
+import { Tourism } from './Tourism'
 const money=(n:number)=>new Intl.NumberFormat('fr-MA',{style:'currency',currency:'MAD'}).format(n)
 export function Workspace(){
  const { user }=useDemo()
  const [industry,setIndustry]=useState<Industry>('tourisme')
  const [tab,setTab]=useState('overview')
  const org=String((user as {orgId?:string})?.orgId||'demo')
+ if(industry==='tourisme')return <div className="saas"><div className="saas-toolbar"><strong>ALLNEEDS · Vos espaces métier</strong><div><button onClick={()=>setIndustry('sante')}>Santé</button><button onClick={()=>setIndustry('enseignement')}>Éducation</button></div></div><Tourism/></div>
  return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · OPÉRATIONS</span><h1>Tout votre quotidien.<br/>Un espace qui vous ressemble.</h1><p>Organisez votre établissement, suivez vos clients et gardez une vision claire de votre activité.</p><div className="saas-sector">{(Object.keys(titles) as Industry[]).map(s=><button key={s} aria-pressed={industry===s} onClick={()=>{setIndustry(s);setTab('overview')}}>{titles[s]}</button>)}</div></header><p className="saas-notice">Démonstration frontend · données fictives enregistrées dans ce navigateur. Les rôles et paiements ne constituent pas une authentification ni un paiement en ligne.</p><WorkspaceBody key={org+industry} industry={industry} org={org} tab={tab} setTab={setTab}/></div>
 }
 function WorkspaceBody({industry,org,tab,setTab}:{industry:Industry;org:string;tab:string;setTab:(s:string)=>void}){
@@ -39,7 +41,7 @@ function WorkspaceBody({industry,org,tab,setTab}:{industry:Industry;org:string;t
  {industry==='tourisme'&&['stock','recipes','sales'].includes(tab)&&<Restaurant tab={tab} ws={ws} setWs={setWs} setNotice={setNotice}/>}
  </main></div></>
 }
-function Restaurant({tab,ws,setWs,setNotice}:{tab:string;ws:Data;setWs:(d:Data)=>void;setNotice:(s:string)=>void}){
+export function Restaurant({tab,ws,setWs,setNotice}:{tab:string;ws:Data;setWs:(d:Data)=>void;setNotice:(s:string)=>void}){
  const [recipe,setRecipe]=useState(ws.recipes[0]?.id||'')
  const [parts,setParts]=useState<Recipe['items']>([])
  const [selected,setSelected]=useState(ws.ingredients[0]?.id||'')

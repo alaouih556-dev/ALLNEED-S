@@ -1,7 +1,7 @@
 {
   "name": "allneeds-frontend",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,9 @@
     "routes:generate": "node scripts/generate-routes.mjs",
     "pretypecheck": "npm run routes:generate",
     "typecheck": "tsc --noEmit",
-    "test:saas": "node scripts/test-saas.mjs"
+    "test:saas": "node scripts/test-saas.mjs",
+    "test:tourisme": "node scripts/test-tourism.mjs",
+    "test:render": "node scripts/test-render.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.39",

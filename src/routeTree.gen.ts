@@ -59,6 +59,7 @@ import { Route as AppBesoinsIndexRouteImport } from './routes/app/besoins/index'
 import { Route as AppBesoinsIdRouteImport } from './routes/app/besoins/$id'
 import { Route as AppMissionsIndexRouteImport } from './routes/app/missions/index'
 import { Route as AppMissionsIdRouteImport } from './routes/app/missions/$id'
+import { Route as AppTourismeBranchRouteImport } from './routes/app/tourisme/$branch'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -310,6 +311,11 @@ const AppMissionsIdRoute = AppMissionsIdRouteImport.update({
   path: '/missions/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTourismeBranchRoute = AppTourismeBranchRouteImport.update({
+  id: '/tourisme/$branch',
+  path: '/tourisme/$branch',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -352,6 +358,7 @@ export interface FileRoutesByFullPath {
   '/admin/clients/$id': typeof AdminClientsIdRoute
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
+  '/app/tourisme/$branch': typeof AppTourismeBranchRoute
   '/missions/': typeof PublicMissionsIndexRoute
   '/secteurs/': typeof PublicSecteursIndexRoute
   '/admin/besoins/': typeof AdminBesoinsIndexRoute
@@ -401,6 +408,7 @@ export interface FileRoutesByTo {
   '/admin/clients/$id': typeof AdminClientsIdRoute
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
+  '/app/tourisme/$branch': typeof AppTourismeBranchRoute
   '/missions': typeof PublicMissionsIndexRoute
   '/secteurs': typeof PublicSecteursIndexRoute
   '/admin/besoins': typeof AdminBesoinsIndexRoute
@@ -454,6 +462,7 @@ export interface FileRoutesById {
   '/admin/clients/$id': typeof AdminClientsIdRoute
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
+  '/app/tourisme/$branch': typeof AppTourismeBranchRoute
   '/_public/missions/': typeof PublicMissionsIndexRoute
   '/_public/secteurs/': typeof PublicSecteursIndexRoute
   '/admin/besoins/': typeof AdminBesoinsIndexRoute
@@ -507,6 +516,7 @@ export interface FileRouteTypes {
     | '/admin/clients/$id'
     | '/app/besoins/$id'
     | '/app/missions/$id'
+    | '/app/tourisme/$branch'
     | '/missions/'
     | '/secteurs/'
     | '/admin/besoins/'
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/admin/clients/$id'
     | '/app/besoins/$id'
     | '/app/missions/$id'
+    | '/app/tourisme/$branch'
     | '/missions'
     | '/secteurs'
     | '/admin/besoins'
@@ -608,6 +619,7 @@ export interface FileRouteTypes {
     | '/admin/clients/$id'
     | '/app/besoins/$id'
     | '/app/missions/$id'
+    | '/app/tourisme/$branch'
     | '/_public/missions/'
     | '/_public/secteurs/'
     | '/admin/besoins/'
@@ -980,6 +992,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMissionsIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/tourisme/$branch': {
+      id: '/app/tourisme/$branch'
+      path: '/tourisme/$branch'
+      fullPath: '/app/tourisme/$branch'
+      preLoaderRoute: typeof AppTourismeBranchRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -1072,6 +1091,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppBesoinsIdRoute: typeof AppBesoinsIdRoute
   AppMissionsIdRoute: typeof AppMissionsIdRoute
+  AppTourismeBranchRoute: typeof AppTourismeBranchRoute
   AppBesoinsIndexRoute: typeof AppBesoinsIndexRoute
   AppMissionsIndexRoute: typeof AppMissionsIndexRoute
 }
@@ -1090,6 +1110,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppBesoinsIdRoute: AppBesoinsIdRoute,
   AppMissionsIdRoute: AppMissionsIdRoute,
+  AppTourismeBranchRoute: AppTourismeBranchRoute,
   AppBesoinsIndexRoute: AppBesoinsIndexRoute,
   AppMissionsIndexRoute: AppMissionsIndexRoute,
 }
