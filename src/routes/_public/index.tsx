@@ -1,5 +1,4 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, Building2, CheckCircle2, HeartPulse, Hotel, Layers3, ShieldCheck, Sparkles, Stethoscope } from 'lucide-react'
 import { SECTORS } from '@/data/catalog'
 import { Badge, Button, Card, SectionHeading } from '@/components/ui'
@@ -41,13 +40,6 @@ const sectors = [
 
 function HomePage() {
   const selectedSector = useSelectedSector()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (selectedSector) navigate({ to: '/secteurs/$sector', params: { sector: selectedSector }, replace: true })
-  }, [selectedSector, navigate])
-
-  if (selectedSector) return <main className="container-page py-24 text-center text-sm text-ink-500">Ouverture de votre espace {SECTORS[selectedSector].name}…</main>
 
   return (
     <>
@@ -79,8 +71,11 @@ function HomePage() {
             const content = SECTORS[sector.id]
             return (
               <Link key={sector.id} to="/secteurs/$sector" params={{ sector: sector.id }} className="group" onClick={() => selectSector(sector.id)}>
-                <Card className="h-full p-7 transition duration-200 group-hover:-translate-y-1 group-hover:border-brand-300 group-hover:shadow-lift">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><sector.icon className="h-6 w-6" /></div>
+                <Card className={`h-full p-7 transition duration-200 group-hover:-translate-y-1 group-hover:border-brand-300 group-hover:shadow-lift ${selectedSector === sector.id ? 'border-brand-300 ring-2 ring-brand-100' : ''}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><sector.icon className="h-6 w-6" /></div>
+                    {selectedSector === sector.id ? <Badge tone="brand">Secteur actuel</Badge> : null}
+                  </div>
                   <p className="mt-7 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">ALLNEEDS {sector.label}</p>
                   <h2 className="mt-2 font-display text-3xl tracking-tight text-ink-950">{content.tagline}</h2>
                   <p className="mt-4 text-sm leading-relaxed text-ink-600">{sector.subtitle}</p>
