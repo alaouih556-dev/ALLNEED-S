@@ -99,6 +99,12 @@ export interface ConciergeAccount {
   createdOrgIds: string[]
 }
 
+export const DEMO_CLIENT_PROFILES = {
+  'usr-amina': { orgId: 'org-amal', name: 'Amina Bennani', email: 'a.bennani@al-amal.ma', roleLabel: 'Direction · Enseignement', initials: 'AB' },
+  'usr-youssef': { orgId: 'org-nour', name: 'Dr Youssef Idrissi', email: 'direction@clinique-nour.ma', roleLabel: 'Direction · Santé', initials: 'YI' },
+  'usr-salma': { orgId: 'org-riad', name: 'Salma Ouazzani', email: 'salma@riad-lumen.ma', roleLabel: 'Direction · Tourisme', initials: 'SO' },
+} as const
+
 
 export interface DemoState {
   role: Role
@@ -653,14 +659,15 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<StoreValue>(() => {
     const concierge = state.concierges[0]
+    const clientProfile = DEMO_CLIENT_PROFILES[state.userId as keyof typeof DEMO_CLIENT_PROFILES] ?? DEMO_CLIENT_PROFILES['usr-amina']
     const user: AppUser = {
       id: state.userId,
-      orgId: state.role === 'client' ? 'org-amal' : '',
-      name: state.role === 'admin' ? 'Nada Bennani' : state.role === 'concierge' ? (concierge?.name ?? 'Concierge ALLNEEDS') : 'Amina Bennani',
-      email: state.role === 'admin' ? 'nada@allneeds.ma' : state.role === 'concierge' ? (concierge?.email ?? 'concierge@allneeds.ma') : 'a.bennani@al-amal.ma',
+      orgId: state.role === 'client' ? clientProfile.orgId : '',
+      name: state.role === 'admin' ? 'Nada Bennani' : state.role === 'concierge' ? (concierge?.name ?? 'Concierge ALLNEEDS') : clientProfile.name,
+      email: state.role === 'admin' ? 'nada@allneeds.ma' : state.role === 'concierge' ? (concierge?.email ?? 'concierge@allneeds.ma') : clientProfile.email,
       role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction',
-      roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Concierge' : 'Direction',
-      initials: state.role === 'admin' ? 'NB' : state.role === 'concierge' ? 'YM' : 'AB',
+      roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Concierge' : clientProfile.roleLabel,
+      initials: state.role === 'admin' ? 'NB' : state.role === 'concierge' ? 'YM' : clientProfile.initials,
     }
     return {
       state,
@@ -668,7 +675,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
       user,
       role: state.role,
       setRole,
-      orgId: 'org-amal',
+      orgId: state.role === 'client' ? clientProfile.orgId : '',
     }
   }, [state, setRole])
 

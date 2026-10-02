@@ -7,18 +7,14 @@ import { Tourism } from './Tourism'
 const money=(n:number)=>new Intl.NumberFormat('fr-MA',{style:'currency',currency:'MAD'}).format(n)
 export function Workspace(){
  const { user,state }=useDemo()
- const [industry,setIndustry]=useState<Industry|null>(null)
  const [tab,setTab]=useState('overview')
- const org=String((user as {orgId?:string})?.orgId||'demo')
- const sectorMeta:Record<Industry,{title:string;subtitle:string;accent:string}>={
-  sante:{title:'Santé',subtitle:'Patients, rendez-vous, équipe, paiements et charges.',accent:'Cabinets · centres · laboratoires'},
-  enseignement:{title:'Éducation',subtitle:'Élèves, inscriptions, équipe, paiements et organisation.',accent:'Écoles · crèches · centres de formation'},
-  tourisme:{title:'Tourisme',subtitle:'Réservations, hébergement, restauration, activités et transport.',accent:'Hôtels · riads · restaurants · agences'},
- }
- if(!industry)return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · ESPACES MÉTIER</span><h1>Vos SaaS sont visibles.<br/>L’accès reste contrôlé.</h1><p>Chaque secteur apparaît dans votre espace, mais il reste verrouillé tant que l’administrateur ALLNEEDS ne vous a pas donné l’autorisation.</p></header><div className="saas-access-grid">{(Object.keys(sectorMeta) as Industry[]).map(s=>{const allowed=state.saasAccess[s];const meta=sectorMeta[s];return <button key={s} className={'saas-access-card '+(allowed?'is-open':'is-locked')} disabled={!allowed} onClick={()=>allowed&&setIndustry(s)}><span className="saas-access-status">{allowed?'Accès autorisé':'Accès verrouillé'}</span><h2>{meta.title}</h2><p>{meta.subtitle}</p><small>{meta.accent}</small><strong>{allowed?'Ouvrir mon espace →':'Disponible après validation admin'}</strong></button>})}</div><p className="saas-notice">Le verrouillage est volontaire : voir un module ne signifie pas avoir le droit de l’utiliser. Dans la version connectée au backend, ces droits seront contrôlés côté serveur.</p></div>
- if(industry==='tourisme')return <div className="saas"><div className="saas-toolbar"><strong>ALLNEEDS · Tourisme</strong><button onClick={()=>setIndustry(null)}>← Tous les espaces</button></div><Tourism/></div>
- return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · OPÉRATIONS</span><h1>Tout votre quotidien.<br/>Un espace qui vous ressemble.</h1><p>Organisez votre établissement, suivez vos clients et gardez une vision claire de votre activité.</p><div className="saas-sector"><button onClick={()=>setIndustry(null)}>← Tous les espaces</button><button aria-pressed="true">{titles[industry]}</button></div></header><WorkspaceBody key={org+industry} industry={industry} org={org} tab={tab} setTab={setTab}/></div>
+ const org=state.orgs.find(item=>item.id===user.orgId)
+ const industry=(org?.sector||'sante') as Industry
+ const orgKey=String(user.orgId||'demo')
+ if(industry==='tourisme')return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · TOURISME</span><h1>{org?.name||'Votre établissement'}<br/>Votre espace métier.</h1><p>Réservations, hébergement, restauration, activités, transport et agence : uniquement les outils correspondant à votre entreprise.</p></header><Tourism/></div>
+ return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · {industry==='sante'?'SANTÉ':'ENSEIGNEMENT'}</span><h1>{org?.name||'Votre établissement'}<br/>Votre espace métier.</h1><p>{industry==='sante'?'Patients, rendez-vous, équipe, paiements et charges.':'Inscriptions, élèves, équipe, paiements et organisation.'} Aucun autre secteur n’est affiché dans votre compte.</p></header><WorkspaceBody key={orgKey+industry} industry={industry} org={orgKey} tab={tab} setTab={setTab}/></div>
 }
+
 function WorkspaceBody({industry,org,tab,setTab}:{industry:Industry;org:string;tab:string;setTab:(s:string)=>void}){
  const storageKey=`allneeds.saas.v1.${org}.${industry}`
  const [ws,setWs]=useState<Data>(()=>{try{const d=JSON.parse(localStorage.getItem(storageKey)||'null');return d&&d.rows&&Array.isArray(d.recipes)?d:seed(industry)}catch{return seed(industry)}})
