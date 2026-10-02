@@ -20,6 +20,7 @@ import {
   RefreshCcw,
   Settings2,
   ShieldCheck,
+  UserRoundCog,
 } from 'lucide-react'
 import { useDemo, type Role } from '@/store/store'
 import { cn } from '@/lib/utils'
@@ -89,10 +90,19 @@ function buildClientNav(unreadMessages: number, pendingDocs: number): NavItem[] 
   ]
 }
 
+
+function buildConciergeNav(): NavItem[] {
+  return [
+    { label: 'Mon portefeuille', to: '/concierge' as any, icon: <LayoutDashboard className="h-4 w-4" /> },
+    { label: 'Entreprises suivies', to: '/concierge/entreprises' as any, icon: <Building2 className="h-4 w-4" /> },
+  ]
+}
+
 function buildAdminNav(): NavItem[] {
   return [
     { label: 'Revue diagnostics auto', to: '/admin/diagnostics-auto', icon: <Gauge className="h-4 w-4" /> },
     { label: 'Vue d’ensemble', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { label: 'Concierges & accès', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
     { label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
     { label: 'Clients', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },
     { label: 'Qualification', to: '/admin/qualification', icon: <ClipboardList className="h-4 w-4" /> },
@@ -115,7 +125,7 @@ export function AppShell({
   variant,
 }: {
   children: ReactNode
-  variant: 'client' | 'admin'
+  variant: 'client' | 'admin' | 'concierge'
 }) {
   const { state, dispatch, user, role } = useDemo()
   const navigate = useNavigate()
@@ -123,11 +133,11 @@ export function AppShell({
   const unread = state.threads.reduce((acc, t) => acc + t.unread, 0)
   const pendingDocs = state.documents.filter((d) => d.status !== 'valide').length
 
-  const nav = variant === 'admin' ? buildAdminNav() : buildClientNav(unread, pendingDocs)
+  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(unread, pendingDocs)
 
   function switchRole(next: Role) {
     dispatch({ type: 'SET_ROLE', role: next })
-    navigate({ to: next === 'admin' ? '/admin' : '/app' })
+    navigate({ to: next === 'admin' ? '/admin' : next === 'concierge' ? ('/concierge' as any) : '/app' })
   }
 
   return (
@@ -141,7 +151,7 @@ export function AppShell({
             <span className="leading-none">
               <span className="block text-sm font-bold tracking-tight text-ink-950">ALLNEEDS</span>
               <span className="block text-[0.65rem] font-semibold uppercase tracking-widest text-ink-400">
-                {variant === 'admin' ? 'Administration' : 'Espace client'}
+                {variant === 'admin' ? 'Administration' : variant === 'concierge' ? 'Concierge' : 'Espace client'}
               </span>
             </span>
           </Link>
@@ -196,47 +206,28 @@ export function AppShell({
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink-950">
-                {variant === 'admin' ? 'Administration ALLNEEDS' : 'École Al Amal'}
+                {variant === 'admin' ? 'Administration ALLNEEDS' : variant === 'concierge' ? 'Portefeuille concierge' : 'École Al Amal'}
               </p>
               <p className="truncate text-xs text-ink-500">
-                {variant === 'admin' ? 'Vue interne · données de démonstration' : 'École privée · Casablanca · 240 élèves'}
+                {variant === 'admin' ? 'Vue interne · gestion des accès' : variant === 'concierge' ? 'Accès limité aux entreprises attribuées' : 'École privée · Casablanca · 240 élèves'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden items-center rounded-lg border border-ink-200 p-0.5 sm:flex">
-              <button
-                type="button"
-                onClick={() => switchRole('client')}
-                className={cn(
-                  'rounded-md px-3 py-1.5 text-xs font-semibold transition',
-                  role === 'client' ? 'bg-ink-950 text-white' : 'text-ink-500 hover:text-ink-800',
-                )}
-              >
-                Client
-              </button>
-              <button
-                type="button"
-                onClick={() => switchRole('admin')}
-                className={cn(
-                  'rounded-md px-3 py-1.5 text-xs font-semibold transition',
-                  role === 'admin' ? 'bg-ink-950 text-white' : 'text-ink-500 hover:text-ink-800',
-                )}
-              >
-                Admin
-              </button>
+            <div className="hidden rounded-full border border-ink-200 bg-ink-50 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-wider text-ink-600 sm:block">
+              {variant === 'admin' ? 'Administrateur' : variant === 'concierge' ? 'Concierge' : 'Client'}
             </div>
 
-            <Link
-              to="/app/messages"
-              className="relative rounded-lg p-2 text-ink-500 transition hover:bg-ink-100 hover:text-ink-900"
-            >
-              <Bell className="h-4 w-4" />
-              {unread > 0 ? (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-              ) : null}
-            </Link>
+            {variant === 'client' ? (
+              <Link
+                to="/app/messages"
+                className="relative rounded-lg p-2 text-ink-500 transition hover:bg-ink-100 hover:text-ink-900"
+              >
+                <Bell className="h-4 w-4" />
+                {unread > 0 ? <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" /> : null}
+              </Link>
+            ) : null}
 
             <div className="flex items-center gap-2 border-l border-ink-100 pl-2">
               <Avatar name={user.name} size="sm" />

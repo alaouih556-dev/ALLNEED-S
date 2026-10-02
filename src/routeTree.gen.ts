@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as ConciergeRouteImport } from './routes/concierge'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -25,6 +26,7 @@ import { Route as PublicDiagnosticRouteImport } from './routes/_public/diagnosti
 import { Route as PublicFaqRouteImport } from './routes/_public/faq'
 import { Route as PublicTarifsRouteImport } from './routes/_public/tarifs'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminConciergesRouteImport } from './routes/admin/concierges'
 import { Route as AdminDiagnosticsAutoRouteImport } from './routes/admin/diagnostics-auto'
 import { Route as AdminGrilleRouteImport } from './routes/admin/grille'
 import { Route as AdminPipelineRouteImport } from './routes/admin/pipeline'
@@ -32,6 +34,8 @@ import { Route as AdminQualificationRouteImport } from './routes/admin/qualifica
 import { Route as AdminQuotasRouteImport } from './routes/admin/quotas'
 import { Route as AdminRelancesRouteImport } from './routes/admin/relances'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as ConciergeIndexRouteImport } from './routes/concierge/index'
+import { Route as ConciergeEntreprisesRouteImport } from './routes/concierge/entreprises'
 import { Route as AppAbonnementRouteImport } from './routes/app/abonnement'
 import { Route as AppDevisRouteImport } from './routes/app/devis'
 import { Route as AppDiagnosticAutoRouteImport } from './routes/app/diagnostic-auto'
@@ -73,6 +77,11 @@ const AdminRoute = AdminRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConciergeRoute = ConciergeRouteImport.update({
+  id: '/concierge',
+  path: '/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnexionRoute = ConnexionRouteImport.update({
@@ -140,6 +149,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminConciergesRoute = AdminConciergesRouteImport.update({
+  id: '/concierges',
+  path: '/concierges',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDiagnosticsAutoRoute = AdminDiagnosticsAutoRouteImport.update({
   id: '/diagnostics-auto',
   path: '/diagnostics-auto',
@@ -174,6 +188,16 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const ConciergeIndexRoute = ConciergeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeEntreprisesRoute = ConciergeEntreprisesRouteImport.update({
+  id: '/entreprises',
+  path: '/entreprises',
+  getParentRoute: () => ConciergeRoute,
 } as any)
 const AppAbonnementRoute = AppAbonnementRouteImport.update({
   id: '/abonnement',
@@ -632,6 +656,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  ConciergeRoute: typeof ConciergeRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
@@ -1044,6 +1069,7 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 interface AdminRouteChildren {
+  AdminConciergesRoute: typeof AdminConciergesRoute
   AdminDiagnosticsAutoRoute: typeof AdminDiagnosticsAutoRoute
   AdminGrilleRoute: typeof AdminGrilleRoute
   AdminPipelineRoute: typeof AdminPipelineRoute
@@ -1060,6 +1086,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminConciergesRoute: AdminConciergesRoute,
   AdminDiagnosticsAutoRoute: AdminDiagnosticsAutoRoute,
   AdminGrilleRoute: AdminGrilleRoute,
   AdminPipelineRoute: AdminPipelineRoute,
@@ -1076,6 +1103,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface ConciergeRouteChildren {
+  ConciergeIndexRoute: typeof ConciergeIndexRoute
+  ConciergeEntreprisesRoute: typeof ConciergeEntreprisesRoute
+}
+
+const ConciergeRouteChildren: ConciergeRouteChildren = {
+  ConciergeIndexRoute: ConciergeIndexRoute,
+  ConciergeEntreprisesRoute: ConciergeEntreprisesRoute,
+}
+
+const ConciergeRouteWithChildren = ConciergeRoute._addFileChildren(ConciergeRouteChildren)
 
 interface AppRouteChildren {
   AppAbonnementRoute: typeof AppAbonnementRoute
@@ -1118,6 +1157,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  ConciergeRoute: ConciergeRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,

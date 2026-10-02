@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { ArrowRight, Building2, Eye, EyeOff, KeyRound, ShieldCheck, UserRoundCog } from 'lucide-react'
 import { AuthLayout } from '@/components/AuthLayout'
-import { Alert, Button, Card, Checkbox, Field, Input, Select } from '@/components/ui'
+import { Alert, Button, Card, Checkbox, Field, Input } from '@/components/ui'
+import { useDemo, type Role } from '@/store/store'
 
 export const Route = createFileRoute('/connexion')({
   component: ConnexionPage,
@@ -10,16 +11,23 @@ export const Route = createFileRoute('/connexion')({
 })
 
 const DEMO_ACCOUNTS = [
-  { role: 'Client', email: 'a.bennani@al-amal.ma', target: '/app', label: 'Espace client' },
-  { role: 'Admin', email: 'nada@allneeds.ma', target: '/admin', label: 'Dashboard admin' },
-] as const
+  { role: 'client' as const, title: 'Client', email: 'a.bennani@al-amal.ma', target: '/app' as const, icon: Building2, desc: 'Suit ses besoins, missions, documents et accès SaaS.' },
+  { role: 'concierge' as const, title: 'Concierge', email: 'concierge.sante@allneeds.ma', target: '/concierge' as const, icon: UserRoundCog, desc: 'Ne voit que les secteurs et entreprises que l’admin lui attribue ou qu’il apporte.' },
+  { role: 'admin' as const, title: 'Administrateur', email: 'nada@allneeds.ma', target: '/admin' as const, icon: ShieldCheck, desc: 'Crée les concierges, attribue les entreprises et ouvre les accès SaaS.' },
+]
 
 function ConnexionPage() {
   const navigate = useNavigate()
+  const { setRole } = useDemo()
   const [email, setEmail] = useState('a.bennani@al-amal.ma')
   const [password, setPassword] = useState('demonstration')
   const [show, setShow] = useState(false)
   const [error, setError] = useState('')
+
+  function openRole(role: Role, target: '/app' | '/admin' | '/concierge') {
+    setRole(role)
+    navigate({ to: target as any })
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -27,96 +35,59 @@ function ConnexionPage() {
       setError('Saisissez une adresse e-mail valide.')
       return
     }
-    const isAdmin = email.includes('allneeds')
-    navigate({ to: isAdmin ? '/admin' : '/app' })
+    const normalized = email.toLowerCase()
+    if (normalized.includes('concierge')) return openRole('concierge', '/concierge')
+    if (normalized.endsWith('@allneeds.ma')) return openRole('admin', '/admin')
+    return openRole('client', '/app')
   }
 
   return (
     <AuthLayout
-      title="Connexion à votre espace"
-      subtitle="Retrouvez vos besoins, vos prestataires, vos devis et vos livrables."
-      footer={
-        <>
-          Pas encore de compte ?{' '}
-          <Link to="/inscription" className="font-semibold text-brand-700">
-            Créer un compte
-          </Link>
-        </>
-      }
+      title="Choisissez votre espace ALLNEEDS"
+      subtitle="Trois profils séparés : Client, Concierge et Administrateur. Chaque profil n'accède qu'aux fonctions qui lui sont autorisées."
+      footer={<>Pas encore de compte client ? <Link to="/inscription" className="font-semibold text-brand-700">Faire une demande</Link></>}
     >
+      <div className="mb-7 grid gap-3 sm:grid-cols-3">
+        {DEMO_ACCOUNTS.map((account) => (
+          <button
+            key={account.role}
+            type="button"
+            onClick={() => { setEmail(account.email); openRole(account.role, account.target) }}
+            className="rounded-xl border border-ink-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-sm"
+          >
+            <account.icon className="h-5 w-5 text-brand-700" />
+            <p className="mt-3 text-sm font-bold text-ink-950">{account.title}</p>
+            <p className="mt-1 text-[0.72rem] leading-relaxed text-ink-500">{account.desc}</p>
+          </button>
+        ))}
+      </div>
+
       <form onSubmit={submit} className="space-y-5">
         <Field label="Adresse e-mail" required>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@etablissement.ma" />
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@entreprise.ma" />
         </Field>
-
         <Field label="Mot de passe" required>
           <div className="relative">
-            <Input
-              type={show ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShow((v) => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-ink-400 transition hover:bg-ink-100 hover:text-ink-700"
-            >
+            <Input type={show ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="pr-10" />
+            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-ink-400 hover:bg-ink-100" aria-label="Afficher le mot de passe">
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </Field>
-
         <div className="flex items-center justify-between">
           <Checkbox defaultChecked label="Rester connecté" />
-          <button type="button" className="text-xs font-semibold text-brand-700 hover:text-brand-900">
-            Mot de passe oublié ?
-          </button>
+          <button type="button" className="text-xs font-semibold text-brand-700">Mot de passe oublié ?</button>
         </div>
-
         {error ? <Alert tone="danger">{error}</Alert> : null}
-
-        <Button type="submit" size="lg" fullWidth>
-          Se connecter
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <Button type="submit" size="lg" fullWidth>Se connecter <ArrowRight className="h-4 w-4" /></Button>
       </form>
 
-      <div className="mt-10">
-        <Card className="p-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Comptes de démonstration</p>
-          <p className="mt-2 text-xs leading-relaxed text-ink-500">
-            Le mot de passe est ignoré. L’adresse e-mail détermine le rôle : un e-mail en @allneeds.ma ouvre le
-            dashboard admin, tout autre ouvre l’espace client.
-          </p>
-          <div className="mt-4 space-y-2">
-            {DEMO_ACCOUNTS.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                onClick={() => {
-                  setEmail(account.email)
-                  navigate({ to: account.target })
-                }}
-                className="flex w-full items-center justify-between gap-3 rounded-lg border border-ink-200 px-4 py-2.5 text-left transition hover:border-ink-400 hover:bg-ink-50"
-              >
-                <span>
-                  <span className="block text-sm font-semibold text-ink-900">{account.role}</span>
-                  <span className="block text-xs text-ink-500">{account.email}</span>
-                </span>
-                <span className="text-xs font-semibold text-brand-700">{account.label}</span>
-              </button>
-            ))}
-          </div>
-          <div className="mt-4">
-            <Select defaultValue="membre">
-              <option value="membre">Membre ACCÈS</option>
-              <option value="mission">Client en mission</option>
-              <option value="nouveau">Nouveau contact</option>
-            </Select>
-          </div>
-        </Card>
-      </div>
+      <Card className="mt-8 p-4">
+        <div className="flex items-start gap-3">
+          <KeyRound className="mt-0.5 h-4 w-4 text-brand-700" />
+          <p className="text-xs leading-relaxed text-ink-500">Démo UX : le mot de passe n'est pas vérifié. Les autorisations sont simulées côté interface pour valider le parcours avant connexion au vrai backend.</p>
+        </div>
+      </Card>
     </AuthLayout>
   )
 }

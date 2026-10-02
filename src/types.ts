@@ -269,7 +269,7 @@ export interface AppUser {
   orgId: string
   name: string
   email: string
-  role: 'direction' | 'admin' | 'pedagogique'
+  role: 'direction' | 'admin' | 'pedagogique' | 'concierge'
   roleLabel: string
   initials: string
 }

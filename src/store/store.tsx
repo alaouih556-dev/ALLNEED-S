@@ -87,7 +87,18 @@ export interface PublicBooking {
   status: 'confirme' | 'propose' | 'realise' | 'annule'
 }
 
-export type Role = 'client' | 'admin'
+export type Role = 'client' | 'admin' | 'concierge'
+
+export interface ConciergeAccount {
+  id: string
+  name: string
+  email: string
+  active: boolean
+  sectors: Sector[]
+  assignedOrgIds: string[]
+  createdOrgIds: string[]
+}
+
 
 export interface DemoState {
   role: Role
@@ -109,6 +120,8 @@ export interface DemoState {
   notifications: NotificationItem[]
   requests: PublicRequest[]
   bookings: PublicBooking[]
+  concierges: ConciergeAccount[]
+  saasAccess: Record<Sector, boolean>
   toasts: Toast[]
   now: string
 }
@@ -181,6 +194,18 @@ const initialState: DemoState = {
       notes: 'Créneau proposé mardi 10h.',
     },
   ],
+  concierges: [
+    {
+      id: 'conc-001',
+      name: 'Yassine El Mansouri',
+      email: 'concierge.sante@allneeds.ma',
+      active: true,
+      sectors: ['sante'],
+      assignedOrgIds: ['org-nour'],
+      createdOrgIds: [],
+    },
+  ],
+  saasAccess: { enseignement: false, sante: true, tourisme: false },
   bookings: [
     {
       id: 'bk-001',
@@ -244,6 +269,12 @@ function stamp(base: string, offsetMinutes = 0) {
 export type DemoAction =
   | { type: 'RESET' }
   | { type: 'SET_ROLE'; role: Role }
+  | { type: 'SAAS_SET_ACCESS'; sector: Sector; value: boolean }
+  | { type: 'CONCIERGE_CREATE'; account: ConciergeAccount }
+  | { type: 'CONCIERGE_TOGGLE'; id: string }
+  | { type: 'CONCIERGE_ASSIGN_ORG'; id: string; orgId: string; value: boolean }
+  | { type: 'CONCIERGE_ASSIGN_SECTOR'; id: string; sector: Sector; value: boolean }
+  | { type: 'CONCIERGE_ADD_ORG'; conciergeId: string; org: ClientOrg }
   | { type: 'SWITCH_USER'; userId: string }
   | { type: 'SET_ONBOARDED'; value: boolean }
   | { type: 'TOAST_ADD'; toast: Omit<Toast, 'id'> }
@@ -301,6 +332,24 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case 'SET_ROLE':
       return { ...state, role: action.role }
+
+    case 'SAAS_SET_ACCESS':
+      return { ...state, saasAccess: { ...state.saasAccess, [action.sector]: action.value } }
+
+    case 'CONCIERGE_CREATE':
+      return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge créé', action.account.email)
+
+    case 'CONCIERGE_TOGGLE':
+      return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, active: !c.active } : c) }
+
+    case 'CONCIERGE_ASSIGN_ORG':
+      return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, assignedOrgIds: action.value ? Array.from(new Set([...c.assignedOrgIds, action.orgId])) : c.assignedOrgIds.filter((x) => x !== action.orgId) } : c) }
+
+    case 'CONCIERGE_ASSIGN_SECTOR':
+      return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, sectors: action.value ? Array.from(new Set([...c.sectors, action.sector])) : c.sectors.filter((x) => x !== action.sector) } : c) }
+
+    case 'CONCIERGE_ADD_ORG':
+      return withToast({ ...state, orgs: [action.org, ...state.orgs], concierges: state.concierges.map((c) => c.id === action.conciergeId ? { ...c, createdOrgIds: [action.org.id, ...c.createdOrgIds] } : c) }, 'Entreprise ajoutée', action.org.name)
 
     case 'SWITCH_USER':
       return { ...state, userId: action.userId }
@@ -603,14 +652,15 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const setRole = useCallback((role: Role) => dispatch({ type: 'SET_ROLE', role }), [])
 
   const value = useMemo<StoreValue>(() => {
+    const concierge = state.concierges[0]
     const user: AppUser = {
       id: state.userId,
-      orgId: 'org-amal',
-      name: state.role === 'admin' ? 'Nada Bennani' : 'Amina Bennani',
-      email: state.role === 'admin' ? 'nada@allneeds.ma' : 'a.bennani@al-amal.ma',
-      role: state.role === 'admin' ? 'admin' : 'direction',
-      roleLabel: state.role === 'admin' ? 'ALLNEEDS · Consultante senior' : 'Direction',
-      initials: state.role === 'admin' ? 'NB' : 'AB',
+      orgId: state.role === 'client' ? 'org-amal' : '',
+      name: state.role === 'admin' ? 'Nada Bennani' : state.role === 'concierge' ? (concierge?.name ?? 'Concierge ALLNEEDS') : 'Amina Bennani',
+      email: state.role === 'admin' ? 'nada@allneeds.ma' : state.role === 'concierge' ? (concierge?.email ?? 'concierge@allneeds.ma') : 'a.bennani@al-amal.ma',
+      role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction',
+      roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Concierge' : 'Direction',
+      initials: state.role === 'admin' ? 'NB' : state.role === 'concierge' ? 'YM' : 'AB',
     }
     return {
       state,

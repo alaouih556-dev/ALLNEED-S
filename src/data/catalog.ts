@@ -894,7 +894,7 @@ export const ACCESS_CATEGORIES: Record<Sector, { title: string; items: string[] 
     },
     {
       title: 'Charges & prestataires',
-      items: ['Transport', 'Restauration', 'Mobilier', 'Fournitures', 'Assurance', 'Télécom'],
+      items: ['Transport scolaire', 'Restauration', 'Mobilier', 'Fournitures', 'Assurance scolaire', 'Télécom'],
     },
   ],
   sante: [
@@ -963,11 +963,11 @@ const COMPARAISON_COMMUNE: { label: string; values: [string | null, string | nul
   { label: 'Positionnement', values: ['Comprendre', 'Structurer', 'Agir'] },
   { label: 'Diagnostic 4 leviers', values: ['✓', '✓', '✓'] },
   { label: '3 priorités', values: ['✓', '✓', '✓'] },
-  { label: 'Process d’admission', values: ['—', '✓', '✓'] },
+  { label: 'Process d’inscription', values: ['—', '✓', '✓'] },
   { label: 'Formation équipe d’accueil', values: ['—', '1 × 2 h', '✓'] },
   { label: 'Identité visuelle', values: ['—', '✓', '✓'] },
   { label: 'Réseaux sociaux', values: ['—', '2', '2 + suivi'] },
-  { label: 'Site ou page d’admission', values: ['—', '4 pages', '4 pages'] },
+  { label: 'Site ou page d’inscription', values: ['—', '4 pages', '4 pages'] },
   { label: 'Fiches de poste', values: ['—', '3', '3'] },
   { label: 'Tableau de bord', values: ['—', '1', '1 + suivi'] },
   { label: 'Plan d’action', values: ['—', '—', '✓'] },
@@ -992,7 +992,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
     tagline: 'Votre réseau de solutions pour écoles privées, crèches et centres de formation',
     audience:
       'Écoles privées · crèches et maternelles · centres de formation · établissements de soutien scolaire',
-    promise: 'Le besoin de votre établissement est le point de départ. Vous formez, nous structurons.',
+    promise: 'Le besoin de votre établissement est le point de départ. Vous formez, nous structurons. Nous identifions les priorités de votre établissement, construisons les solutions adaptées et mobilisons les compétences nécessaires. Un seul interlocuteur, des livrables concrets, un périmètre clair dès le départ. Nous n’intervenons jamais sur le contenu pédagogique.',
     steps: [
       {
         code: 'STARTER',
@@ -1097,7 +1097,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       },
       {
         q: 'Quand faut-il démarrer PERFORMANCE ?',
-        a: "Plusieurs mois avant vos périodes d'inscription. Le planning est calonné avec vous lors du cadrage.",
+        a: "Plusieurs mois avant vos périodes d'inscription. Le planning est calé avec vous lors du cadrage.",
       },
       {
         q: 'La remise abonnés est-elle cumulable avec l’offre de lancement ?',
