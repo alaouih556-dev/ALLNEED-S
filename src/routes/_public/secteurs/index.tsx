@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
-import { CtaBand, SectorTabs } from '@/components/marketing'
+import { CtaBand } from '@/components/marketing'
 import { Card } from '@/components/ui'
+import { selectSector, useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/secteurs/')({
   component: SecteursPage,
@@ -22,6 +23,12 @@ const EXTRA: Record<string, { volume: string; example: string }> = {
 }
 
 function SecteursPage() {
+  const selectedSector = useSelectedSector()
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (selectedSector) navigate({ to: '/secteurs/$sector', params: { sector: selectedSector }, replace: true })
+  }, [selectedSector, navigate])
+  if (selectedSector) return <main className="container-page py-24 text-center text-sm text-ink-500">Ouverture de votre secteur…</main>
   return (
     <>
       <section className="border-b border-ink-100 bg-ink-50">
@@ -32,9 +39,6 @@ function SecteursPage() {
             La méthode ne change pas : comprendre, structurer, agir. Ce qui change, ce sont les leviers, les
             indicateurs et le calendrier de votre établissement.
           </p>
-          <div className="mt-8">
-            <SectorTabs />
-          </div>
         </div>
       </section>
 
@@ -72,7 +76,7 @@ function SecteursPage() {
                   </div>
                 </dl>
 
-                <Link to="/secteurs/$sector" params={{ sector }} className="mt-7">
+                <Link to="/secteurs/$sector" params={{ sector }} className="mt-7" onClick={() => selectSector(sector)}>
                   <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
                     Voir le détail {SECTOR_LABEL[sector]}
                     <ArrowRight className="h-3.5 w-3.5" />

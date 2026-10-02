@@ -7,6 +7,7 @@ import { CtaBand } from '@/components/marketing'
 import { AccordionList } from '@/components/MissionPage'
 import { Alert, Badge, Button, Card, SectionHeading } from '@/components/ui'
 import type { Sector } from '@/types'
+import { useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/tarifs')({
   component: TarifsPage,
@@ -23,6 +24,8 @@ export const Route = createFileRoute('/_public/tarifs')({
 })
 
 function TarifsPage() {
+  const selectedSector = useSelectedSector()
+  const visibleSectors: Sector[] = selectedSector ? [selectedSector] : SECTOR_ORDER
   return (
     <>
       <section className="border-b border-ink-100 bg-ink-50">
@@ -39,12 +42,12 @@ function TarifsPage() {
       <section className="container-page py-16">
         <SectionHeading
           eyebrow="Missions"
-          title="Prix de lancement par secteur"
+          title={selectedSector ? `Tarifs ${SECTORS[selectedSector].name}` : "Prix de lancement par secteur"}
           description="Le même cadre, des prix alignés sur la taille et la complexité de votre établissement."
         />
 
         <div className="mt-12 space-y-12">
-          {SECTOR_ORDER.map((sector: Sector) => (
+          {visibleSectors.map((sector: Sector) => (
             <div key={sector}>
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div>

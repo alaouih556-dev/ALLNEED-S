@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Info, Minus, Plus } from 'luci
 import { LAUNCH_OFFER, PLANS, SECTORS } from '@/data/catalog'
 import { money } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { ComparisonTable, CtaBand, MissionTabs, SectorTabs } from '@/components/marketing'
+import { ComparisonTable, CtaBand, MissionTabs } from '@/components/marketing'
 import { Alert, Badge, Button, Card, KeyValue } from '@/components/ui'
 import type { MissionCode, Sector } from '@/types'
 
@@ -19,10 +19,7 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
       <section className="border-b border-ink-100 bg-ink-50">
         <div className="container-page py-12">
           <div className="mb-6">
-            <SectorTabs active={sector} />
-          </div>
-          <div className="mb-6">
-            <MissionTabs active={code} />
+            <MissionTabs active={code} sector={sector} />
           </div>
 
           <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
@@ -256,9 +253,6 @@ export function MissionIndex({ sector }: { sector: Sector }) {
                 Voir tous les tarifs
               </Button>
             </Link>
-          </div>
-          <div className="mt-10">
-            <SectorTabs active={sector} />
           </div>
         </div>
       </section>

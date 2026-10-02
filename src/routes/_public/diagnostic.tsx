@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, CalendarCheck, CheckCircle2, Clock, Video } from 'lucide-react'
 import { LAUNCH_OFFER, SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { useDemo } from '@/store/store'
 import { Alert, Badge, Button, Card, Field, Input, Select, Textarea } from '@/components/ui'
 import type { Sector } from '@/types'
+import { useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/diagnostic')({
   component: DiagnosticPage,
@@ -43,6 +44,7 @@ function nextBusinessDays(count: number) {
 
 export function DiagnosticPage() {
   const { dispatch } = useDemo()
+  const selectedSector = useSelectedSector()
   const days = nextBusinessDays(6)
 
   const [form, setForm] = useState({
@@ -61,6 +63,10 @@ export function DiagnosticPage() {
   })
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (selectedSector) setForm((current) => ({ ...current, sector: selectedSector }))
+  }, [selectedSector])
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -242,13 +248,15 @@ export function DiagnosticPage() {
 
               <div className="grid gap-5 sm:grid-cols-3">
                 <Field label="Secteur">
-                  <Select value={form.sector} onChange={(e) => set('sector', e.target.value as Sector)}>
-                    {SECTOR_ORDER.map((sector) => (
-                      <option key={sector} value={sector}>
-                        {SECTOR_LABEL[sector]}
-                      </option>
-                    ))}
-                  </Select>
+                  {selectedSector ? (
+                    <div className="flex h-11 items-center rounded-xl border border-ink-200 bg-ink-50 px-3 text-sm font-semibold text-ink-800">{SECTOR_LABEL[selectedSector]}</div>
+                  ) : (
+                    <Select value={form.sector} onChange={(e) => set('sector', e.target.value as Sector)}>
+                      {SECTOR_ORDER.map((sector) => (
+                        <option key={sector} value={sector}>{SECTOR_LABEL[sector]}</option>
+                      ))}
+                    </Select>
+                  )}
                 </Field>
                 <Field label="Ville">
                   <Input value={form.city} onChange={(e) => set('city', e.target.value)} placeholder="Casablanca" />

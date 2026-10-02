@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { LAUNCH_OFFER, SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { cn } from '@/lib/utils'
+import { useSelectedSector } from '@/lib/sector-filter'
 import { Badge, Button, Card } from '@/components/ui'
 import type { FeatureRow, MissionCode, Sector } from '@/types'
 
@@ -40,8 +41,7 @@ export function LaunchBanner() {
 /* Header                                                              */
 /* ------------------------------------------------------------------ */
 
-const PUBLIC_LINKS = [
-  { label: 'Secteurs', to: '/secteurs' },
+const BASE_PUBLIC_LINKS = [
   { label: 'Missions', to: '/missions' },
   { label: 'Accès', to: '/acces' },
   { label: 'Tarifs', to: '/tarifs' },
@@ -50,6 +50,10 @@ const PUBLIC_LINKS = [
 
 export function PublicHeader() {
   const [open, setOpen] = useState(false)
+  const selectedSector = useSelectedSector()
+  const publicLinks = selectedSector
+    ? [{ label: SECTOR_LABEL[selectedSector], to: `/secteurs/${selectedSector}` }, ...BASE_PUBLIC_LINKS]
+    : [{ label: 'Secteurs', to: '/secteurs' }, ...BASE_PUBLIC_LINKS]
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur">
@@ -67,10 +71,11 @@ export function PublicHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {PUBLIC_LINKS.map((link) => (
+          {publicLinks.map((link) => (
             <Link
               key={link.to}
-              to={link.to}
+              to={link.to as any}
+              search={selectedSector && link.to === '/missions' ? { secteur: selectedSector } : undefined}
               className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-950"
               activeProps={{ className: 'bg-ink-50 text-ink-950' }}
             >
@@ -106,10 +111,11 @@ export function PublicHeader() {
       {open ? (
         <div className="border-t border-ink-100 bg-white lg:hidden">
           <div className="container-page space-y-1 py-4">
-            {PUBLIC_LINKS.map((link) => (
+            {publicLinks.map((link) => (
               <Link
                 key={link.to}
-                to={link.to}
+                to={link.to as any}
+                search={selectedSector && link.to === '/missions' ? { secteur: selectedSector } : undefined}
                 onClick={() => setOpen(false)}
                 className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-50"
               >
@@ -140,6 +146,7 @@ export function PublicHeader() {
 /* ------------------------------------------------------------------ */
 
 export function PublicFooter() {
+  const selectedSector = useSelectedSector()
   return (
     <footer className="mt-24 border-t border-ink-100 bg-ink-50">
       <div className="container-page py-14">
@@ -163,7 +170,7 @@ export function PublicFooter() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Secteurs</p>
             <ul className="mt-4 space-y-2.5 text-sm">
-              {SECTOR_ORDER.map((sector) => (
+              {(selectedSector ? [selectedSector] : SECTOR_ORDER).map((sector) => (
                 <li key={sector}>
                   <Link to="/secteurs/$sector" params={{ sector }} className="text-ink-600 transition hover:text-ink-950">
                     {SECTOR_LABEL[sector]}
@@ -177,17 +184,17 @@ export function PublicFooter() {
             <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Missions</p>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
-                <Link to="/missions/$code" params={{ code: 'starter' }} className="text-ink-600 transition hover:text-ink-950">
+                <Link to="/missions/$code" params={{ code: 'starter' }} search={selectedSector ? { secteur: selectedSector } : undefined} className="text-ink-600 transition hover:text-ink-950">
                   STARTER
                 </Link>
               </li>
               <li>
-                <Link to="/missions/$code" params={{ code: 'pro' }} className="text-ink-600 transition hover:text-ink-950">
+                <Link to="/missions/$code" params={{ code: 'pro' }} search={selectedSector ? { secteur: selectedSector } : undefined} className="text-ink-600 transition hover:text-ink-950">
                   PRO
                 </Link>
               </li>
               <li>
-                <Link to="/missions/$code" params={{ code: 'performance' }} className="text-ink-600 transition hover:text-ink-950">
+                <Link to="/missions/$code" params={{ code: 'performance' }} search={selectedSector ? { secteur: selectedSector } : undefined} className="text-ink-600 transition hover:text-ink-950">
                   PERFORMANCE
                 </Link>
               </li>
@@ -307,7 +314,7 @@ export function SectorTabs({ active }: { active?: Sector }) {
 /* Mission tabs                                                        */
 /* ------------------------------------------------------------------ */
 
-export function MissionTabs({ active }: { active?: MissionCode }) {
+export function MissionTabs({ active, sector }: { active?: MissionCode; sector?: Sector }) {
   const codes: MissionCode[] = ['STARTER', 'PRO', 'PERFORMANCE']
   return (
     <div className="grid gap-3 sm:grid-cols-3">
@@ -316,6 +323,7 @@ export function MissionTabs({ active }: { active?: MissionCode }) {
           key={code}
           to="/missions/$code"
           params={{ code: code.toLowerCase() }}
+          search={sector ? { secteur: sector } : undefined}
           className={cn(
             'rounded-xl border px-4 py-3 transition',
             active === code

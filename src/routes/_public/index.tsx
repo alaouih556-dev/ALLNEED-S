@@ -1,7 +1,9 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { ArrowRight, Building2, CheckCircle2, HeartPulse, Hotel, Layers3, ShieldCheck, Sparkles, Stethoscope } from 'lucide-react'
 import { SECTORS } from '@/data/catalog'
 import { Badge, Button, Card, SectionHeading } from '@/components/ui'
+import { selectSector, useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/')({
   component: HomePage,
@@ -38,6 +40,15 @@ const sectors = [
 ]
 
 function HomePage() {
+  const selectedSector = useSelectedSector()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (selectedSector) navigate({ to: '/secteurs/$sector', params: { sector: selectedSector }, replace: true })
+  }, [selectedSector, navigate])
+
+  if (selectedSector) return <main className="container-page py-24 text-center text-sm text-ink-500">Ouverture de votre espace {SECTORS[selectedSector].name}…</main>
+
   return (
     <>
       <section className="relative overflow-hidden border-b border-ink-100">
@@ -67,7 +78,7 @@ function HomePage() {
           {sectors.map((sector) => {
             const content = SECTORS[sector.id]
             return (
-              <Link key={sector.id} to="/secteurs/$sector" params={{ sector: sector.id }} className="group">
+              <Link key={sector.id} to="/secteurs/$sector" params={{ sector: sector.id }} className="group" onClick={() => selectSector(sector.id)}>
                 <Card className="h-full p-7 transition duration-200 group-hover:-translate-y-1 group-hover:border-brand-300 group-hover:shadow-lift">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><sector.icon className="h-6 w-6" /></div>
                   <p className="mt-7 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">ALLNEEDS {sector.label}</p>

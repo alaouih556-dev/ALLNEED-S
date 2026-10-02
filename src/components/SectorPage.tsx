@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { ArrowRight, CheckCircle2, ClipboardList, FileCheck2, Info, LockKeyhole, Timer } from 'lucide-react'
 import { LAUNCH_OFFER, PLANS, SECTORS } from '@/data/catalog'
 import { money } from '@/lib/format'
@@ -11,11 +12,11 @@ import {
   MissionTabs,
   OneLiners,
   ReasonCards,
-  SectorTabs,
   StepBlocks,
 } from '@/components/marketing'
 import { Alert, Badge, Button, Card, SectionHeading } from '@/components/ui'
 import type { Sector } from '@/types'
+import { selectSector } from '@/lib/sector-filter'
 
 
 const HEALTH_LEVERS = [
@@ -156,6 +157,7 @@ function TourismDiagnosticDetail() {
 }
 
 export function SectorPage({ sector }: { sector: Sector }) {
+  useEffect(() => { selectSector(sector) }, [sector])
   const content = SECTORS[sector]
   const plans = PLANS[sector]
 
@@ -163,10 +165,6 @@ export function SectorPage({ sector }: { sector: Sector }) {
     <>
       <section className="border-b border-ink-100 bg-ink-50">
         <div className="container-page py-12">
-          <div className="mb-8">
-            <SectorTabs active={sector} />
-          </div>
-
           <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
             <div>
               <p className="eyebrow">{content.name}</p>

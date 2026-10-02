@@ -16,6 +16,7 @@ import { ComparisonTable, CtaBand } from '@/components/marketing'
 import { AccordionList } from '@/components/MissionPage'
 import { Alert, Badge, Button, Card, SectionHeading } from '@/components/ui'
 import type { Sector } from '@/types'
+import { useSelectedSector } from '@/lib/sector-filter'
 
 const SECTORS: Sector[] = ['enseignement', 'sante', 'tourisme']
 
@@ -39,7 +40,8 @@ export const Route = createFileRoute('/_public/acces')({
 
 function AccesPage() {
   const { secteur: rawSector } = Route.useSearch()
-  const sector = rawSector ?? 'enseignement'
+  const selectedSector = useSelectedSector()
+  const sector = selectedSector ?? rawSector ?? 'enseignement'
 
   return (
     <>
@@ -100,7 +102,6 @@ function AccesPage() {
       <div className="border-b border-ink-100 bg-white">
         <div className="container-page flex flex-wrap items-center justify-between gap-4 py-5">
           <p className="text-sm font-medium text-ink-500">Exemples de besoins et missions par secteur</p>
-          <SectorSwitch active={sector} />
         </div>
       </div>
 
@@ -393,27 +394,5 @@ function AccesPage() {
         secondary={{ label: 'Réserver le diagnostic', to: '/diagnostic' }}
       />
     </>
-  )
-}
-
-function SectorSwitch({ active }: { active: Sector }) {
-  return (
-    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-      {SECTOR_ORDER.map((sector) => (
-        <Link
-          key={sector}
-          to="/acces"
-          search={{ secteur: sector }}
-          className={cn(
-            'shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition',
-            active === sector
-              ? 'border-ink-950 bg-ink-950 text-white'
-              : 'border-ink-200 bg-white text-ink-600 hover:border-ink-400 hover:text-ink-950',
-          )}
-        >
-          {SECTOR_LABEL[sector]}
-        </Link>
-      ))}
-    </div>
   )
 }

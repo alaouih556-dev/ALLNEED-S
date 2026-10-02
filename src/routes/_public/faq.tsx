@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { SECTORS, SECTOR_ORDER } from '@/data/catalog'
 import { FaqList, CtaBand } from '@/components/marketing'
 import { Card, Input, SectionHeading } from '@/components/ui'
+import { useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/faq')({
   component: FaqPage,
@@ -99,11 +100,12 @@ const ACCES_FAQ = [
 
 export function FaqPage() {
   const [query, setQuery] = useState('')
+  const selectedSector = useSelectedSector()
 
   const filtered = useMemo(() => {
     const all = [
       { group: 'Général', items: GENERALES },
-      ...SECTOR_ORDER.map((sector) => ({ group: SECTORS[sector].name, items: SECTORS[sector].faq })),
+      ...(selectedSector ? [{ group: SECTORS[selectedSector].name, items: SECTORS[selectedSector].faq }] : SECTOR_ORDER.map((sector) => ({ group: SECTORS[sector].name, items: SECTORS[sector].faq }))),
       { group: 'ALLNEEDS ACCÈS', items: ACCES_FAQ },
     ]
     if (!query.trim()) return all
@@ -116,7 +118,7 @@ export function FaqPage() {
         ),
       }))
       .filter((block) => block.items.length > 0)
-  }, [query])
+  }, [query, selectedSector])
 
   return (
     <>
