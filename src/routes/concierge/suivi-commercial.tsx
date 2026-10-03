@@ -5,7 +5,7 @@ import { Badge, Card, Progress } from '@/components/ui'
 import { LEAD_STAGE } from '@/lib/status'
 import { money } from '@/lib/format'
 
-export const Route = createFileRoute('/concierge/suivi-commercial' as any)({ component: ConciergeCommercial })
+export const Route = createFileRoute('/concierge/suivi-commercial')({ component: ConciergeCommercial })
 function ConciergeCommercial(){
  const {state}=useDemo(); const {orgIds,orgs}=conciergeScope(state); const leads=state.leads.filter(l=>l.convertedOrgId && orgIds.has(l.convertedOrgId))
  return <ConciergeGuard><ConciergeHeading eyebrow="Pilotage" title="Suivi commercial & accès" description="Qualification, abonnement et statut SaaS des entreprises de votre portefeuille. Les droits globaux restent gérés par l’administrateur."/>

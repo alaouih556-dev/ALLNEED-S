@@ -6,7 +6,7 @@ import { SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { useDemo } from '@/store/store'
 import type { Sector } from '@/types'
 
-export const Route = createFileRoute('/admin/concierges' as any)({ component: AdminConcierges })
+export const Route = createFileRoute('/admin/concierges')({ component: AdminConcierges })
 
 function AdminConcierges() {
   const { state, dispatch } = useDemo()

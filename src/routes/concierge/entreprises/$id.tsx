@@ -6,7 +6,7 @@ import { SECTOR_LABEL } from '@/data/catalog'
 import { MISSION_STATUS, NEED_STATUS } from '@/lib/status'
 import { dateTime, money } from '@/lib/format'
 
-export const Route = createFileRoute('/concierge/entreprises/$id' as any)({ component: ConciergeCompanyDetail })
+export const Route = createFileRoute('/concierge/entreprises/$id')({ component: ConciergeCompanyDetail })
 
 function ConciergeCompanyDetail(){
   const { id } = Route.useParams() as { id: string }

@@ -4,7 +4,7 @@ import { Badge, Button, Card, SectionHeading } from '@/components/ui'
 import { SECTOR_LABEL } from '@/data/catalog'
 import { conciergeScope, useDemo } from '@/store/store'
 
-export const Route = createFileRoute('/concierge/' as any)({ component: ConciergeDashboard })
+export const Route = createFileRoute('/concierge/')({ component: ConciergeDashboard })
 
 function ConciergeDashboard() {
   const { state } = useDemo()

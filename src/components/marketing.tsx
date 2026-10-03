@@ -72,15 +72,15 @@ export function PublicHeader() {
 
         <nav className="hidden items-center gap-1 lg:flex">
           {publicLinks.map((link) => (
-            <Link
+            <PublicNavigationLink
               key={link.to}
-              to={link.to as any}
-              search={selectedSector && link.to === '/missions' ? { secteur: selectedSector } : undefined}
+              to={link.to} sector={selectedSector}
+
               className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-950"
               activeProps={{ className: 'bg-ink-50 text-ink-950' }}
             >
               {link.label}
-            </Link>
+            </PublicNavigationLink>
           ))}
         </nav>
 
@@ -112,15 +112,15 @@ export function PublicHeader() {
         <div className="border-t border-ink-100 bg-white lg:hidden">
           <div className="container-page space-y-1 py-4">
             {publicLinks.map((link) => (
-              <Link
+              <PublicNavigationLink
                 key={link.to}
-                to={link.to as any}
-                search={selectedSector && link.to === '/missions' ? { secteur: selectedSector } : undefined}
+                to={link.to} sector={selectedSector}
+
                 onClick={() => setOpen(false)}
                 className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-50"
               >
                 {link.label}
-              </Link>
+              </PublicNavigationLink>
             ))}
             <div className="grid gap-2 pt-3">
               <Link to="/diagnostic" onClick={() => setOpen(false)}>
@@ -551,4 +551,10 @@ export function HighlightGrid({ items }: { items: { title: string; detail: strin
 
 export function sectorName(sector: Sector) {
   return SECTORS[sector].name
+}
+
+function PublicNavigationLink({to,sector,children,className,onClick,activeProps}:{to:string;sector:Sector|null;children:ReactNode;className?:string;onClick?:()=>void;activeProps?:{className:string}}){
+ const props={children,className,onClick,activeProps}
+ if(to==='/missions')return <Link to="/missions" search={{secteur:sector??undefined}} {...props}/>
+ return <Link to={to as LinkProps['to']} {...props}/>
 }

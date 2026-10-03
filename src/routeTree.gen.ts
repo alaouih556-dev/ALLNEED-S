@@ -34,8 +34,6 @@ import { Route as AdminQualificationRouteImport } from './routes/admin/qualifica
 import { Route as AdminQuotasRouteImport } from './routes/admin/quotas'
 import { Route as AdminRelancesRouteImport } from './routes/admin/relances'
 import { Route as AppIndexRouteImport } from './routes/app/index'
-import { Route as ConciergeIndexRouteImport } from './routes/concierge/index'
-import { Route as ConciergeEntreprisesRouteImport } from './routes/concierge/entreprises'
 import { Route as AppAbonnementRouteImport } from './routes/app/abonnement'
 import { Route as AppDevisRouteImport } from './routes/app/devis'
 import { Route as AppDiagnosticAutoRouteImport } from './routes/app/diagnostic-auto'
@@ -46,6 +44,15 @@ import { Route as AppLivrablesRouteImport } from './routes/app/livrables'
 import { Route as AppMessagesRouteImport } from './routes/app/messages'
 import { Route as AppPrestatairesRouteImport } from './routes/app/prestataires'
 import { Route as AppRendezVousRouteImport } from './routes/app/rendez-vous'
+import { Route as ConciergeIndexRouteImport } from './routes/concierge/index'
+import { Route as ConciergeBesoinsRouteImport } from './routes/concierge/besoins'
+import { Route as ConciergeDiagnosticsRouteImport } from './routes/concierge/diagnostics'
+import { Route as ConciergeDocumentsRouteImport } from './routes/concierge/documents'
+import { Route as ConciergeMessagesRouteImport } from './routes/concierge/messages'
+import { Route as ConciergeMissionsRouteImport } from './routes/concierge/missions'
+import { Route as ConciergePrestatairesRouteImport } from './routes/concierge/prestataires'
+import { Route as ConciergeRendezVousRouteImport } from './routes/concierge/rendez-vous'
+import { Route as ConciergeSuiviCommercialRouteImport } from './routes/concierge/suivi-commercial'
 import { Route as PublicMissionsIndexRouteImport } from './routes/_public/missions/index'
 import { Route as PublicMissionsCodeRouteImport } from './routes/_public/missions/$code'
 import { Route as PublicSecteursIndexRouteImport } from './routes/_public/secteurs/index'
@@ -64,6 +71,8 @@ import { Route as AppBesoinsIdRouteImport } from './routes/app/besoins/$id'
 import { Route as AppMissionsIndexRouteImport } from './routes/app/missions/index'
 import { Route as AppMissionsIdRouteImport } from './routes/app/missions/$id'
 import { Route as AppTourismeBranchRouteImport } from './routes/app/tourisme/$branch'
+import { Route as ConciergeEntreprisesIndexRouteImport } from './routes/concierge/entreprises/index'
+import { Route as ConciergeEntreprisesIdRouteImport } from './routes/concierge/entreprises/$id'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -189,16 +198,6 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const ConciergeIndexRoute = ConciergeIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ConciergeRoute,
-} as any)
-const ConciergeEntreprisesRoute = ConciergeEntreprisesRouteImport.update({
-  id: '/entreprises',
-  path: '/entreprises',
-  getParentRoute: () => ConciergeRoute,
-} as any)
 const AppAbonnementRoute = AppAbonnementRouteImport.update({
   id: '/abonnement',
   path: '/abonnement',
@@ -249,6 +248,52 @@ const AppRendezVousRoute = AppRendezVousRouteImport.update({
   path: '/rendez-vous',
   getParentRoute: () => AppRoute,
 } as any)
+const ConciergeIndexRoute = ConciergeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeBesoinsRoute = ConciergeBesoinsRouteImport.update({
+  id: '/besoins',
+  path: '/besoins',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeDiagnosticsRoute = ConciergeDiagnosticsRouteImport.update({
+  id: '/diagnostics',
+  path: '/diagnostics',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeDocumentsRoute = ConciergeDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeMessagesRoute = ConciergeMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeMissionsRoute = ConciergeMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergePrestatairesRoute = ConciergePrestatairesRouteImport.update({
+  id: '/prestataires',
+  path: '/prestataires',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeRendezVousRoute = ConciergeRendezVousRouteImport.update({
+  id: '/rendez-vous',
+  path: '/rendez-vous',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeSuiviCommercialRoute =
+  ConciergeSuiviCommercialRouteImport.update({
+    id: '/suivi-commercial',
+    path: '/suivi-commercial',
+    getParentRoute: () => ConciergeRoute,
+  } as any)
 const PublicMissionsIndexRoute = PublicMissionsIndexRouteImport.update({
   id: '/missions/',
   path: '/missions/',
@@ -340,11 +385,23 @@ const AppTourismeBranchRoute = AppTourismeBranchRouteImport.update({
   path: '/tourisme/$branch',
   getParentRoute: () => AppRoute,
 } as any)
+const ConciergeEntreprisesIndexRoute =
+  ConciergeEntreprisesIndexRouteImport.update({
+    id: '/entreprises/',
+    path: '/entreprises/',
+    getParentRoute: () => ConciergeRoute,
+  } as any)
+const ConciergeEntreprisesIdRoute = ConciergeEntreprisesIdRouteImport.update({
+  id: '/entreprises/$id',
+  path: '/entreprises/$id',
+  getParentRoute: () => ConciergeRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/concierge': typeof ConciergeRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
@@ -356,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/diagnostic': typeof PublicDiagnosticRoute
   '/faq': typeof PublicFaqRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
   '/admin/pipeline': typeof AdminPipelineRoute
@@ -372,8 +430,17 @@ export interface FileRoutesByFullPath {
   '/app/messages': typeof AppMessagesRoute
   '/app/prestataires': typeof AppPrestatairesRoute
   '/app/rendez-vous': typeof AppRendezVousRoute
+  '/concierge/besoins': typeof ConciergeBesoinsRoute
+  '/concierge/diagnostics': typeof ConciergeDiagnosticsRoute
+  '/concierge/documents': typeof ConciergeDocumentsRoute
+  '/concierge/messages': typeof ConciergeMessagesRoute
+  '/concierge/missions': typeof ConciergeMissionsRoute
+  '/concierge/prestataires': typeof ConciergePrestatairesRoute
+  '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
+  '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/concierge/': typeof ConciergeIndexRoute
   '/missions/$code': typeof PublicMissionsCodeRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -383,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
   '/app/tourisme/$branch': typeof AppTourismeBranchRoute
+  '/concierge/entreprises/$id': typeof ConciergeEntreprisesIdRoute
   '/missions/': typeof PublicMissionsIndexRoute
   '/secteurs/': typeof PublicSecteursIndexRoute
   '/admin/besoins/': typeof AdminBesoinsIndexRoute
@@ -392,6 +460,7 @@ export interface FileRoutesByFullPath {
   '/admin/prestataires/': typeof AdminPrestatairesIndexRoute
   '/app/besoins/': typeof AppBesoinsIndexRoute
   '/app/missions/': typeof AppMissionsIndexRoute
+  '/concierge/entreprises/': typeof ConciergeEntreprisesIndexRoute
 }
 export interface FileRoutesByTo {
   '/connexion': typeof ConnexionRoute
@@ -405,6 +474,7 @@ export interface FileRoutesByTo {
   '/diagnostic': typeof PublicDiagnosticRoute
   '/faq': typeof PublicFaqRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
   '/admin/pipeline': typeof AdminPipelineRoute
@@ -421,9 +491,18 @@ export interface FileRoutesByTo {
   '/app/messages': typeof AppMessagesRoute
   '/app/prestataires': typeof AppPrestatairesRoute
   '/app/rendez-vous': typeof AppRendezVousRoute
+  '/concierge/besoins': typeof ConciergeBesoinsRoute
+  '/concierge/diagnostics': typeof ConciergeDiagnosticsRoute
+  '/concierge/documents': typeof ConciergeDocumentsRoute
+  '/concierge/messages': typeof ConciergeMessagesRoute
+  '/concierge/missions': typeof ConciergeMissionsRoute
+  '/concierge/prestataires': typeof ConciergePrestatairesRoute
+  '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
+  '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/concierge': typeof ConciergeIndexRoute
   '/missions/$code': typeof PublicMissionsCodeRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -433,6 +512,7 @@ export interface FileRoutesByTo {
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
   '/app/tourisme/$branch': typeof AppTourismeBranchRoute
+  '/concierge/entreprises/$id': typeof ConciergeEntreprisesIdRoute
   '/missions': typeof PublicMissionsIndexRoute
   '/secteurs': typeof PublicSecteursIndexRoute
   '/admin/besoins': typeof AdminBesoinsIndexRoute
@@ -442,12 +522,14 @@ export interface FileRoutesByTo {
   '/admin/prestataires': typeof AdminPrestatairesIndexRoute
   '/app/besoins': typeof AppBesoinsIndexRoute
   '/app/missions': typeof AppMissionsIndexRoute
+  '/concierge/entreprises': typeof ConciergeEntreprisesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_public': typeof PublicRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/concierge': typeof ConciergeRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
@@ -459,6 +541,7 @@ export interface FileRoutesById {
   '/_public/diagnostic': typeof PublicDiagnosticRoute
   '/_public/faq': typeof PublicFaqRoute
   '/_public/tarifs': typeof PublicTarifsRoute
+  '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
   '/admin/pipeline': typeof AdminPipelineRoute
@@ -475,9 +558,18 @@ export interface FileRoutesById {
   '/app/messages': typeof AppMessagesRoute
   '/app/prestataires': typeof AppPrestatairesRoute
   '/app/rendez-vous': typeof AppRendezVousRoute
+  '/concierge/besoins': typeof ConciergeBesoinsRoute
+  '/concierge/diagnostics': typeof ConciergeDiagnosticsRoute
+  '/concierge/documents': typeof ConciergeDocumentsRoute
+  '/concierge/messages': typeof ConciergeMessagesRoute
+  '/concierge/missions': typeof ConciergeMissionsRoute
+  '/concierge/prestataires': typeof ConciergePrestatairesRoute
+  '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
+  '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
   '/_public/': typeof PublicIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/concierge/': typeof ConciergeIndexRoute
   '/_public/missions/$code': typeof PublicMissionsCodeRoute
   '/_public/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/_public/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -487,6 +579,7 @@ export interface FileRoutesById {
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
   '/app/tourisme/$branch': typeof AppTourismeBranchRoute
+  '/concierge/entreprises/$id': typeof ConciergeEntreprisesIdRoute
   '/_public/missions/': typeof PublicMissionsIndexRoute
   '/_public/secteurs/': typeof PublicSecteursIndexRoute
   '/admin/besoins/': typeof AdminBesoinsIndexRoute
@@ -496,6 +589,7 @@ export interface FileRoutesById {
   '/admin/prestataires/': typeof AdminPrestatairesIndexRoute
   '/app/besoins/': typeof AppBesoinsIndexRoute
   '/app/missions/': typeof AppMissionsIndexRoute
+  '/concierge/entreprises/': typeof ConciergeEntreprisesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -503,6 +597,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/app'
+    | '/concierge'
     | '/connexion'
     | '/inscription'
     | '/onboarding'
@@ -514,6 +609,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/faq'
     | '/tarifs'
+    | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
     | '/admin/pipeline'
@@ -530,8 +626,17 @@ export interface FileRouteTypes {
     | '/app/messages'
     | '/app/prestataires'
     | '/app/rendez-vous'
+    | '/concierge/besoins'
+    | '/concierge/diagnostics'
+    | '/concierge/documents'
+    | '/concierge/messages'
+    | '/concierge/missions'
+    | '/concierge/prestataires'
+    | '/concierge/rendez-vous'
+    | '/concierge/suivi-commercial'
     | '/admin/'
     | '/app/'
+    | '/concierge/'
     | '/missions/$code'
     | '/secteurs/$sector'
     | '/secteurs/enseignement'
@@ -541,6 +646,7 @@ export interface FileRouteTypes {
     | '/app/besoins/$id'
     | '/app/missions/$id'
     | '/app/tourisme/$branch'
+    | '/concierge/entreprises/$id'
     | '/missions/'
     | '/secteurs/'
     | '/admin/besoins/'
@@ -550,6 +656,7 @@ export interface FileRouteTypes {
     | '/admin/prestataires/'
     | '/app/besoins/'
     | '/app/missions/'
+    | '/concierge/entreprises/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/connexion'
@@ -563,6 +670,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/faq'
     | '/tarifs'
+    | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
     | '/admin/pipeline'
@@ -579,9 +687,18 @@ export interface FileRouteTypes {
     | '/app/messages'
     | '/app/prestataires'
     | '/app/rendez-vous'
+    | '/concierge/besoins'
+    | '/concierge/diagnostics'
+    | '/concierge/documents'
+    | '/concierge/messages'
+    | '/concierge/missions'
+    | '/concierge/prestataires'
+    | '/concierge/rendez-vous'
+    | '/concierge/suivi-commercial'
     | '/'
     | '/admin'
     | '/app'
+    | '/concierge'
     | '/missions/$code'
     | '/secteurs/$sector'
     | '/secteurs/enseignement'
@@ -591,6 +708,7 @@ export interface FileRouteTypes {
     | '/app/besoins/$id'
     | '/app/missions/$id'
     | '/app/tourisme/$branch'
+    | '/concierge/entreprises/$id'
     | '/missions'
     | '/secteurs'
     | '/admin/besoins'
@@ -600,11 +718,13 @@ export interface FileRouteTypes {
     | '/admin/prestataires'
     | '/app/besoins'
     | '/app/missions'
+    | '/concierge/entreprises'
   id:
     | '__root__'
     | '/_public'
     | '/admin'
     | '/app'
+    | '/concierge'
     | '/connexion'
     | '/inscription'
     | '/onboarding'
@@ -616,6 +736,7 @@ export interface FileRouteTypes {
     | '/_public/diagnostic'
     | '/_public/faq'
     | '/_public/tarifs'
+    | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
     | '/admin/pipeline'
@@ -632,9 +753,18 @@ export interface FileRouteTypes {
     | '/app/messages'
     | '/app/prestataires'
     | '/app/rendez-vous'
+    | '/concierge/besoins'
+    | '/concierge/diagnostics'
+    | '/concierge/documents'
+    | '/concierge/messages'
+    | '/concierge/missions'
+    | '/concierge/prestataires'
+    | '/concierge/rendez-vous'
+    | '/concierge/suivi-commercial'
     | '/_public/'
     | '/admin/'
     | '/app/'
+    | '/concierge/'
     | '/_public/missions/$code'
     | '/_public/secteurs/$sector'
     | '/_public/secteurs/enseignement'
@@ -644,6 +774,7 @@ export interface FileRouteTypes {
     | '/app/besoins/$id'
     | '/app/missions/$id'
     | '/app/tourisme/$branch'
+    | '/concierge/entreprises/$id'
     | '/_public/missions/'
     | '/_public/secteurs/'
     | '/admin/besoins/'
@@ -653,13 +784,14 @@ export interface FileRouteTypes {
     | '/admin/prestataires/'
     | '/app/besoins/'
     | '/app/missions/'
+    | '/concierge/entreprises/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  ConciergeRoute: typeof ConciergeRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
+  ConciergeRoute: typeof ConciergeRouteWithChildren
   ConnexionRoute: typeof ConnexionRoute
   InscriptionRoute: typeof InscriptionRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -686,6 +818,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/concierge': {
+      id: '/concierge'
+      path: '/concierge'
+      fullPath: '/concierge'
+      preLoaderRoute: typeof ConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connexion': {
@@ -777,6 +916,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/concierges': {
+      id: '/admin/concierges'
+      path: '/concierges'
+      fullPath: '/admin/concierges'
+      preLoaderRoute: typeof AdminConciergesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/diagnostics-auto': {
@@ -897,6 +1043,69 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/rendez-vous'
       preLoaderRoute: typeof AppRendezVousRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/concierge/': {
+      id: '/concierge/'
+      path: '/'
+      fullPath: '/concierge/'
+      preLoaderRoute: typeof ConciergeIndexRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/besoins': {
+      id: '/concierge/besoins'
+      path: '/besoins'
+      fullPath: '/concierge/besoins'
+      preLoaderRoute: typeof ConciergeBesoinsRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/diagnostics': {
+      id: '/concierge/diagnostics'
+      path: '/diagnostics'
+      fullPath: '/concierge/diagnostics'
+      preLoaderRoute: typeof ConciergeDiagnosticsRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/documents': {
+      id: '/concierge/documents'
+      path: '/documents'
+      fullPath: '/concierge/documents'
+      preLoaderRoute: typeof ConciergeDocumentsRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/messages': {
+      id: '/concierge/messages'
+      path: '/messages'
+      fullPath: '/concierge/messages'
+      preLoaderRoute: typeof ConciergeMessagesRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/missions': {
+      id: '/concierge/missions'
+      path: '/missions'
+      fullPath: '/concierge/missions'
+      preLoaderRoute: typeof ConciergeMissionsRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/prestataires': {
+      id: '/concierge/prestataires'
+      path: '/prestataires'
+      fullPath: '/concierge/prestataires'
+      preLoaderRoute: typeof ConciergePrestatairesRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/rendez-vous': {
+      id: '/concierge/rendez-vous'
+      path: '/rendez-vous'
+      fullPath: '/concierge/rendez-vous'
+      preLoaderRoute: typeof ConciergeRendezVousRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/suivi-commercial': {
+      id: '/concierge/suivi-commercial'
+      path: '/suivi-commercial'
+      fullPath: '/concierge/suivi-commercial'
+      preLoaderRoute: typeof ConciergeSuiviCommercialRouteImport
+      parentRoute: typeof ConciergeRoute
     }
     '/_public/missions/': {
       id: '/_public/missions/'
@@ -1024,6 +1233,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTourismeBranchRouteImport
       parentRoute: typeof AppRoute
     }
+    '/concierge/entreprises/': {
+      id: '/concierge/entreprises/'
+      path: '/entreprises'
+      fullPath: '/concierge/entreprises/'
+      preLoaderRoute: typeof ConciergeEntreprisesIndexRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
+    '/concierge/entreprises/$id': {
+      id: '/concierge/entreprises/$id'
+      path: '/entreprises/$id'
+      fullPath: '/concierge/entreprises/$id'
+      preLoaderRoute: typeof ConciergeEntreprisesIdRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
   }
 }
 
@@ -1104,18 +1327,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface ConciergeRouteChildren {
-  ConciergeIndexRoute: typeof ConciergeIndexRoute
-  ConciergeEntreprisesRoute: typeof ConciergeEntreprisesRoute
-}
-
-const ConciergeRouteChildren: ConciergeRouteChildren = {
-  ConciergeIndexRoute: ConciergeIndexRoute,
-  ConciergeEntreprisesRoute: ConciergeEntreprisesRoute,
-}
-
-const ConciergeRouteWithChildren = ConciergeRoute._addFileChildren(ConciergeRouteChildren)
-
 interface AppRouteChildren {
   AppAbonnementRoute: typeof AppAbonnementRoute
   AppDevisRoute: typeof AppDevisRoute
@@ -1156,11 +1367,43 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ConciergeRouteChildren {
+  ConciergeBesoinsRoute: typeof ConciergeBesoinsRoute
+  ConciergeDiagnosticsRoute: typeof ConciergeDiagnosticsRoute
+  ConciergeDocumentsRoute: typeof ConciergeDocumentsRoute
+  ConciergeMessagesRoute: typeof ConciergeMessagesRoute
+  ConciergeMissionsRoute: typeof ConciergeMissionsRoute
+  ConciergePrestatairesRoute: typeof ConciergePrestatairesRoute
+  ConciergeRendezVousRoute: typeof ConciergeRendezVousRoute
+  ConciergeSuiviCommercialRoute: typeof ConciergeSuiviCommercialRoute
+  ConciergeIndexRoute: typeof ConciergeIndexRoute
+  ConciergeEntreprisesIdRoute: typeof ConciergeEntreprisesIdRoute
+  ConciergeEntreprisesIndexRoute: typeof ConciergeEntreprisesIndexRoute
+}
+
+const ConciergeRouteChildren: ConciergeRouteChildren = {
+  ConciergeBesoinsRoute: ConciergeBesoinsRoute,
+  ConciergeDiagnosticsRoute: ConciergeDiagnosticsRoute,
+  ConciergeDocumentsRoute: ConciergeDocumentsRoute,
+  ConciergeMessagesRoute: ConciergeMessagesRoute,
+  ConciergeMissionsRoute: ConciergeMissionsRoute,
+  ConciergePrestatairesRoute: ConciergePrestatairesRoute,
+  ConciergeRendezVousRoute: ConciergeRendezVousRoute,
+  ConciergeSuiviCommercialRoute: ConciergeSuiviCommercialRoute,
+  ConciergeIndexRoute: ConciergeIndexRoute,
+  ConciergeEntreprisesIdRoute: ConciergeEntreprisesIdRoute,
+  ConciergeEntreprisesIndexRoute: ConciergeEntreprisesIndexRoute,
+}
+
+const ConciergeRouteWithChildren = ConciergeRoute._addFileChildren(
+  ConciergeRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  ConciergeRoute: ConciergeRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
+  ConciergeRoute: ConciergeRouteWithChildren,
   ConnexionRoute: ConnexionRoute,
   InscriptionRoute: InscriptionRoute,
   OnboardingRoute: OnboardingRoute,
