@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Building2, CheckCircle2, HeartPulse, Hotel, Layers3, ShieldCheck, Sparkles, Stethoscope } from 'lucide-react'
+import { ArrowRight, Building2, CheckCircle2, HeartPulse, Hotel, Layers3, ShieldCheck, Stethoscope } from 'lucide-react'
 import { SECTORS } from '@/data/catalog'
 import { Badge, Button, Card, SectionHeading } from '@/components/ui'
 import { selectSector, useSelectedSector } from '@/lib/sector-filter'
@@ -102,14 +102,6 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="container-page py-20">
-        <div className="rounded-3xl bg-ink-950 p-8 text-white sm:p-12">
-          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div><div className="flex items-center gap-2 text-sand-300"><Sparkles className="h-4 w-4" /><span className="text-xs font-bold uppercase tracking-wider">UX séparée par rôle</span></div><h2 className="mt-4 font-display text-4xl tracking-tight">Client, Concierge et Administrateur n’ont pas le même écran.</h2><p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-200">Le client suit sa structure. Le concierge ne voit que les entreprises et secteurs attribués ou apportés par lui. L’administrateur gère les comptes, les affectations et les droits d’accès.</p></div>
-            <Link to="/connexion"><Button size="lg" variant="secondary">Voir les 3 espaces <ArrowRight className="h-4 w-4" /></Button></Link>
-          </div>
-        </div>
-      </section>
     </>
   )
 }

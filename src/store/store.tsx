@@ -128,6 +128,8 @@ export interface DemoState {
   bookings: PublicBooking[]
   concierges: ConciergeAccount[]
   saasAccess: Record<Sector, boolean>
+  saasAccessByOrg: Record<string, boolean>
+  registrationProfile: { sector: Sector; workspaceProfile: string; tier: string | null; payment: string | null } | null
   toasts: Toast[]
   now: string
 }
@@ -212,6 +214,8 @@ const initialState: DemoState = {
     },
   ],
   saasAccess: { enseignement: false, sante: true, tourisme: false },
+  saasAccessByOrg: { 'org-amal': false, 'org-nour': true, 'org-riad': false },
+  registrationProfile: null,
   bookings: [
     {
       id: 'bk-001',
@@ -276,6 +280,8 @@ export type DemoAction =
   | { type: 'RESET' }
   | { type: 'SET_ROLE'; role: Role }
   | { type: 'SAAS_SET_ACCESS'; sector: Sector; value: boolean }
+  | { type: 'SAAS_SET_ORG_ACCESS'; orgId: string; value: boolean }
+  | { type: 'REGISTRATION_SET'; profile: NonNullable<DemoState['registrationProfile']> }
   | { type: 'CONCIERGE_CREATE'; account: ConciergeAccount }
   | { type: 'CONCIERGE_TOGGLE'; id: string }
   | { type: 'CONCIERGE_ASSIGN_ORG'; id: string; orgId: string; value: boolean }
@@ -341,6 +347,12 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case 'SAAS_SET_ACCESS':
       return { ...state, saasAccess: { ...state.saasAccess, [action.sector]: action.value } }
+
+    case 'SAAS_SET_ORG_ACCESS':
+      return { ...state, saasAccessByOrg: { ...state.saasAccessByOrg, [action.orgId]: action.value } }
+
+    case 'REGISTRATION_SET':
+      return { ...state, registrationProfile: action.profile }
 
     case 'CONCIERGE_CREATE':
       return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge créé', action.account.email)
@@ -658,7 +670,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const setRole = useCallback((role: Role) => dispatch({ type: 'SET_ROLE', role }), [])
 
   const value = useMemo<StoreValue>(() => {
-    const concierge = state.concierges[0]
+    const concierge = state.concierges.find((item) => item.id === state.userId) ?? state.concierges[0]
     const clientProfile = DEMO_CLIENT_PROFILES[state.userId as keyof typeof DEMO_CLIENT_PROFILES] ?? DEMO_CLIENT_PROFILES['usr-amina']
     const user: AppUser = {
       id: state.userId,
@@ -691,6 +703,18 @@ export function useDemo(): StoreValue {
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
+
+
+export function conciergeScope(state: DemoState, conciergeId = state.userId) {
+  const concierge = state.concierges.find((item) => item.id === conciergeId) ?? state.concierges[0]
+  const orgIds = new Set([...(concierge?.assignedOrgIds ?? []), ...(concierge?.createdOrgIds ?? [])])
+  const orgs = state.orgs.filter((org) => orgIds.has(org.id) && (concierge?.sectors.includes(org.sector) ?? false))
+  return { concierge, orgIds: new Set(orgs.map((org) => org.id)), orgs }
+}
+
+export function orgHasSaasAccess(state: DemoState, orgId: string, sector: Sector) {
+  return state.saasAccessByOrg[orgId] ?? state.saasAccess[sector] ?? false
+}
 
 export function makeNeed(input: {
   orgId: string

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useDemo } from '@/store/store'
+import { LockKeyhole } from 'lucide-react'
+import { orgHasSaasAccess, useDemo } from '@/store/store'
 import { modules, seed, titles, validateRow, recipeCost, sell, type Industry, type Row, type Workspace as Data, type Recipe } from './model'
 import './workspace.css'
 import { Tourism } from './Tourism'
@@ -11,6 +12,8 @@ export function Workspace(){
  const org=state.orgs.find(item=>item.id===user.orgId)
  const industry=(org?.sector||'sante') as Industry
  const orgKey=String(user.orgId||'demo')
+ const accessGranted=org ? orgHasSaasAccess(state, org.id, org.sector) : false
+ if(!accessGranted)return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · {industry==='sante'?'SANTÉ':industry==='tourisme'?'TOURISME':'ENSEIGNEMENT'}</span><h1>{org?.name||'Votre établissement'}<br/>Votre espace métier.</h1><p>L’espace SaaS correspondant à votre secteur est visible dans votre compte, mais reste verrouillé jusqu’à validation par ALLNEEDS.</p></header><section className="saas-panel" style={{maxWidth:760,margin:'2rem auto'}}><div style={{display:'flex',gap:'1rem',alignItems:'flex-start'}}><span style={{display:'grid',placeItems:'center',width:48,height:48,borderRadius:14,background:'#eef2f4'}}><LockKeyhole size={22}/></span><div><h2 style={{marginTop:0}}>Accès SaaS en attente de validation</h2><p className="saas-muted">Votre secteur est bien enregistré : <strong>{industry==='sante'?'Santé':industry==='tourisme'?'Tourisme':'Enseignement'}</strong>. Les outils ne sont pas cliquables tant que l’administrateur n’a pas activé l’accès de votre entreprise.</p><p className="saas-muted">Vous pouvez continuer à utiliser vos besoins, diagnostics, missions, documents et rendez-vous depuis le menu.</p></div></div></section></div>
  if(industry==='tourisme')return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · TOURISME</span><h1>{org?.name||'Votre établissement'}<br/>Votre espace métier.</h1><p>Réservations, hébergement, restauration, activités, transport et agence : uniquement les outils correspondant à votre entreprise.</p></header><Tourism/></div>
  return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · {industry==='sante'?'SANTÉ':'ENSEIGNEMENT'}</span><h1>{org?.name||'Votre établissement'}<br/>Votre espace métier.</h1><p>{industry==='sante'?'Patients, rendez-vous, équipe, paiements et charges.':'Inscriptions, élèves, équipe, paiements et organisation.'} Aucun autre secteur n’est affiché dans votre compte.</p></header><WorkspaceBody key={orgKey+industry} industry={industry} org={orgKey} tab={tab} setTab={setTab}/></div>
 }

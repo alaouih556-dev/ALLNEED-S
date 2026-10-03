@@ -73,14 +73,12 @@ function TarifsPage() {
                     <div className="mt-5 space-y-2">
                       <div className="flex items-baseline justify-between">
                         <span className="text-xs text-ink-500">Prix normal HT</span>
-                        <span className="text-sm font-semibold tabular-nums text-ink-700">
-                          {plan.priceNormal === 0 ? 'Offert' : money(plan.priceNormal)}
-                        </span>
+                        <span className="text-sm font-semibold tabular-nums text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</span>
                       </div>
                       <div className="flex items-baseline justify-between">
                         <span className="text-xs font-semibold text-brand-700">Prix de lancement HT</span>
                         <span className="font-display text-2xl tabular-nums text-ink-950">
-                          {plan.priceLaunch === null ? 'Offert' : money(plan.priceLaunch)}
+                          {plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}
                         </span>
                       </div>
                     </div>

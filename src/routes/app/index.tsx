@@ -32,15 +32,17 @@ export const Route = createFileRoute('/app/')({
 })
 
 export function ClientDashboard() {
-  const { state } = useDemo()
+  const { state, orgId, user } = useDemo()
+  const org = state.orgs.find((o) => o.id === orgId)
+  const hasAccessSubscription = state.registrationProfile === null || Boolean(state.registrationProfile.tier)
 
-  const orgNeeds = state.needs.filter((n) => n.orgId === 'org-amal')
+  const orgNeeds = state.needs.filter((n) => n.orgId === orgId)
   const activeNeeds = orgNeeds.filter((n) => !['clos', 'signe'].includes(n.status))
-  const openMissions = state.missions.filter((m) => m.orgId === 'org-amal' && m.status !== 'terminee')
+  const openMissions = state.missions.filter((m) => m.orgId === orgId && m.status !== 'terminee')
   const pendingDocs = state.documents.filter((d) => d.status !== 'valide')
   const unread = state.threads.reduce((acc, t) => acc + t.unread, 0)
   const nextMeetings = state.meetings
-    .filter((m) => m.orgId === 'org-amal' && (m.status === 'confirme' || m.status === 'propose'))
+    .filter((m) => m.orgId === orgId && (m.status === 'confirme' || m.status === 'propose'))
     .sort((a, b) => a.at.localeCompare(b.at))
 
   const tier = ACCESS_OFFERS.find((o) => o.tier === state.subscription.tier) ?? ACCESS_OFFERS[0]
@@ -55,11 +57,11 @@ export function ClientDashboard() {
     <>
       <PageHeader
         eyebrow="Espace client"
-        title="Bonjour Amina, voici où vous en êtes."
-        description="École Al Amal · Casablanca · 240 élèves"
+        title={`Bonjour ${user.name.split(' ')[0]}, voici où vous en êtes.`}
+        description={`${org?.name ?? 'Votre établissement'} · ${org?.city ?? ''} · ${org?.kind ?? ''}`}
         actions={
           <>
-            <Link to="/demande">
+            <Link to="/app/besoins">
               <Button variant="outline" size="sm">
                 <Inbox className="h-3.5 w-3.5" />
                 Nouveau besoin
@@ -83,13 +85,11 @@ export function ClientDashboard() {
           tone="brand"
           icon={<Inbox className="h-3.5 w-3.5" />}
         />
-        <Stat
-          label="Pool ACCÈS restant"
-          value={poolRemaining}
+        {hasAccessSubscription ? <Stat
+          label="Pool ACCÈS restant" value={poolRemaining}
           hint={`${tier.needsPerYear} besoins/an · ${percentage(poolUsed, tier.needsPerYear)} % consommés`}
-          tone={poolRemaining <= 3 ? 'warning' : 'success'}
-          icon={<Network className="h-3.5 w-3.5" />}
-        />
+          tone={poolRemaining <= 3 ? 'warning' : 'success'} icon={<Network className="h-3.5 w-3.5" />}
+        /> : <Stat label="ALLNEEDS ACCÈS" value="Non souscrit" hint="CONNECT · PLUS · PRIORITÉ disponibles dans votre compte" tone="brand" icon={<Network className="h-3.5 w-3.5" />} />}
         <Stat
           label="Missions en cours"
           value={openMissions.length}
@@ -247,56 +247,26 @@ export function ClientDashboard() {
 
         <aside className="space-y-6">
           {/* Abonnement */}
-          <Card>
-            <CardHeader title={`Abonnement ${tier.name}`} description={tier.tagline} />
-            <CardBody>
-              <div className="flex items-end justify-between">
-                <p className="font-display text-3xl leading-none text-ink-950">
-                  {poolRemaining}
-                  <span className="ml-1 text-base text-ink-400">/ {tier.needsPerYear}</span>
-                </p>
-                <p className="text-xs text-ink-500">besoins restants</p>
-              </div>
-
-              <Progress
-                className="mt-4"
-                value={percentage(poolUsed, tier.needsPerYear)}
-                tone={poolRemaining <= 3 ? 'amber' : 'brand'}
-              />
-
-              <ul className="mt-5 space-y-2.5 text-sm text-ink-600">
-                <li className="flex items-center gap-2">
-                  <Clock className="h-3.5 w-3.5 text-ink-400" />
-                  Première proposition sous {tier.firstProposal}
-                </li>
-                <li className="flex items-center gap-2">
-                  <MessageSquare className="h-3.5 w-3.5 text-ink-400" />
-                  Réponse sous {tier.responseTime}
-                </li>
-                <li className="flex items-center gap-2">
-                  <Receipt className="h-3.5 w-3.5 text-ink-400" />
-                  {tier.quoteComparison}
-                </li>
-              </ul>
-
-              <div className="mt-5 rounded-lg bg-ink-50 p-3">
-                <p className="text-xs text-ink-500">
-                  Renouvellement le {longDate(state.subscription.renewsAt)} ({monthsLeft} mois)
-                </p>
-                {daysLeft <= 45 ? (
-                  <p className="mt-1 text-xs font-semibold text-amber-700">
-                    Préavis de non-reconduction à donner avant le {longDate(addDaysSafe(30))}
-                  </p>
-                ) : null}
-              </div>
-
-              <Link to="/app/abonnement" className="mt-5 block">
-                <Button size="sm" fullWidth variant="outline">
-                  Gérer mon abonnement
-                </Button>
-              </Link>
-            </CardBody>
-          </Card>
+          {hasAccessSubscription ? (
+            <Card>
+              <CardHeader title={`Abonnement ${tier.name}`} description={tier.tagline} />
+              <CardBody>
+                <div className="flex items-end justify-between"><p className="font-display text-3xl leading-none text-ink-950">{poolRemaining}<span className="ml-1 text-base text-ink-400">/ {tier.needsPerYear}</span></p><p className="text-xs text-ink-500">besoins restants</p></div>
+                <Progress className="mt-4" value={percentage(poolUsed, tier.needsPerYear)} tone={poolRemaining <= 3 ? 'amber' : 'brand'} />
+                <ul className="mt-5 space-y-2.5 text-sm text-ink-600"><li className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-ink-400"/>Première proposition sous {tier.firstProposal}</li><li className="flex items-center gap-2"><MessageSquare className="h-3.5 w-3.5 text-ink-400"/>Réponse sous {tier.responseTime}</li><li className="flex items-center gap-2"><Receipt className="h-3.5 w-3.5 text-ink-400"/>{tier.quoteComparison}</li></ul>
+                <div className="mt-5 rounded-lg bg-ink-50 p-3"><p className="text-xs text-ink-500">Renouvellement le {longDate(state.subscription.renewsAt)} ({monthsLeft} mois)</p>{daysLeft <= 45 ? <p className="mt-1 text-xs font-semibold text-amber-700">Préavis de non-reconduction à donner avant le {longDate(addDaysSafe(30))}</p> : null}</div>
+                <Link to="/app/abonnement" className="mt-5 block"><Button size="sm" fullWidth variant="outline">Gérer mon abonnement</Button></Link>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card className="border-brand-200 bg-brand-50/40">
+              <CardHeader title="Découvrez ALLNEEDS ACCÈS" description="Un abonnement séparé, à choisir uniquement si vous souhaitez nous confier vos besoins de prestataires." />
+              <CardBody>
+                <div className="grid gap-2 text-xs text-ink-600"><p><strong>CONNECT</strong> · 6 besoins/an</p><p><strong>PLUS</strong> · 15 besoins/an</p><p><strong>PRIORITÉ</strong> · 30 besoins/an</p></div>
+                <Link to="/app/abonnement" className="mt-5 block"><Button size="sm" fullWidth>Découvrir les abonnements</Button></Link>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Conformité */}
           <Card>

@@ -54,13 +54,9 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sand-300">
                   {plan.priceLaunch === null ? 'PRIX DE LANCEMENT' : 'PRIX DE LANCEMENT'}
                 </p>
-                <div className="mt-3 flex items-baseline gap-3">
-                  <p className="font-display text-5xl leading-none tracking-tight">
-                    {plan.priceLaunch === null ? 'Offert' : money(plan.priceLaunch)}
-                  </p>
-                  {plan.priceLaunch !== null ? (
-                    <span className="text-sm text-ink-400 line-through">{money(plan.priceNormal)}</span>
-                  ) : null}
+                <div className="mt-3">
+                  <p className="text-sm text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p>
+                  <p className="mt-1 font-display text-5xl leading-none tracking-tight">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
                 </div>
                 <p className="mt-3 text-sm text-ink-300">{plan.priceNote}</p>
                 <p className="mt-1 text-xs text-ink-400">{plan.payment}</p>
@@ -169,6 +165,8 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
         </div>
       </section>
 
+      {plan.code !== 'STARTER' ? <section className="container-page pb-4"><Card className="border-brand-200 bg-brand-50/40 p-6"><p className="eyebrow">Après votre mission</p><h2 className="mt-2 font-display text-2xl text-ink-950">Prolonger avec ALLNEEDS ACCÈS</h2><p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">CONNECT, PLUS et PRIORITÉ servent à trouver, vérifier et suivre les prestataires tout au long de l’année. Après une mission PRO ou PERFORMANCE, la fiche prévoit aussi un avantage sur la première année PLUS.</p><Link to="/acces" search={{ secteur: sector }} className="mt-4 inline-block"><Button size="sm">Voir ALLNEEDS ACCÈS</Button></Link></Card></section> : null}
+
       <section className="container-page py-16">
         <h2 className="display-2">Comparer avec les autres formules</h2>
         <div className="mt-8">
@@ -184,9 +182,7 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
               </div>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-600">{other.tagline}</p>
               <div className="mt-5 flex items-center justify-between">
-                <p className="font-display text-2xl text-ink-950">
-                  {other.priceLaunch === null ? 'Offert' : money(other.priceLaunch)}
-                </p>
+                <div><p className="text-[0.68rem] text-ink-400 line-through">{money(other.priceNormal)}{other.code !== 'STARTER' ? ' HT' : ''}</p><p className="font-display text-2xl text-ink-950">{other.priceLaunch === null ? 'OFFERT' : money(other.priceLaunch)}</p></div>
                 <Link to="/missions/$code" params={{ code: other.code.toLowerCase() }} search={{ secteur: sector }}>
                   <Button size="sm" variant="outline">
                     Voir {other.name}
@@ -266,13 +262,10 @@ export function MissionIndex({ sector }: { sector: Sector }) {
                 <Badge tone="brand">{plan.verb}</Badge>
               </div>
               <h2 className="mt-3 font-display text-2xl tracking-tight text-ink-950">{plan.name}</h2>
-              <div className="mt-3 flex items-baseline gap-2">
-                <p className="font-display text-3xl leading-none tracking-tight text-ink-950">
-                  {plan.priceLaunch === null ? 'Offert' : money(plan.priceLaunch)}
-                </p>
-                {plan.priceLaunch !== null ? (
-                  <span className="text-xs text-ink-400 line-through">{money(plan.priceNormal)}</span>
-                ) : null}
+              <div className="mt-3">
+                <p className="text-xs text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p>
+                <p className="mt-1 font-display text-3xl leading-none tracking-tight text-ink-950">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
+                <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700">Prix de lancement</p>
               </div>
               <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-600">{plan.tagline}</p>
               <ul className="mt-5 space-y-2">

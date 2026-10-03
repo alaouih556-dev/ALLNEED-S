@@ -2,15 +2,13 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { Building2, CalendarDays, FileText, LockKeyhole, Mail, MapPin, Phone, PlusCircle, ShieldCheck, Tags, UsersRound } from 'lucide-react'
 import { Badge, Button, Card, SectionHeading } from '@/components/ui'
 import { SECTOR_LABEL } from '@/data/catalog'
-import { useDemo } from '@/store/store'
+import { conciergeScope, useDemo } from '@/store/store'
 
 export const Route = createFileRoute('/concierge/' as any)({ component: ConciergeDashboard })
 
 function ConciergeDashboard() {
   const { state } = useDemo()
-  const concierge = state.concierges[0]
-  const allowedIds = new Set([...(concierge?.assignedOrgIds ?? []), ...(concierge?.createdOrgIds ?? [])])
-  const orgs = state.orgs.filter((org) => allowedIds.has(org.id) && (concierge?.sectors.includes(org.sector) ?? false))
+  const { concierge, orgs } = conciergeScope(state)
 
   return (
     <div className="container-app py-8">
@@ -40,7 +38,7 @@ function ConciergeDashboard() {
                   <p className="mt-1 text-sm text-ink-500">{org.kind}</p>
                   <p className="mt-2 flex items-center gap-1 text-sm text-ink-600"><MapPin className="h-4 w-4" /> {org.city} · {org.size}</p>
                 </div>
-                <div className="rounded-xl bg-brand-50 px-4 py-3 text-right"><p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Suivi concierge</p><p className="mt-1 text-sm font-semibold text-ink-950">Dossier complet visible</p></div>
+                <div className="flex flex-col items-end gap-3"><div className="rounded-xl bg-brand-50 px-4 py-3 text-right"><p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Suivi concierge</p><p className="mt-1 text-sm font-semibold text-ink-950">Dossier complet visible</p></div><Link to={'/concierge/entreprises/$id' as any} params={{ id: org.id } as any}><Button size="sm">Ouvrir le dossier complet</Button></Link></div>
               </div>
 
               <div className="grid gap-6 p-6 xl:grid-cols-[1.05fr_1fr]">

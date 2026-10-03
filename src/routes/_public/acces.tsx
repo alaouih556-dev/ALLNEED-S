@@ -368,12 +368,9 @@ function AccesPage() {
                 <p className="text-sm font-bold text-ink-950">{plan.name}</p>
                 <Badge tone="brand">{plan.verb}</Badge>
               </div>
-              <p className="mt-3 font-display text-2xl text-ink-950">
-                {plan.priceLaunch === null ? 'Offert' : money(plan.priceLaunch)}
-              </p>
-              <p className="mt-2 text-xs text-ink-500">
-                {plan.priceLaunch === null ? plan.priceNote : `${money(plan.priceNormal)} HT au prix normal`}
-              </p>
+              <p className="mt-3 text-xs text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p>
+              <p className="mt-1 font-display text-2xl text-ink-950">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
+              <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700">Prix de lancement</p>
               <Link
                 to="/missions/$code"
                 params={{ code: plan.code.toLowerCase() }}

@@ -41,12 +41,39 @@ export function AbonnementPage() {
   const [tier, setTier] = useState<string>(state.subscription.tier)
   const [payment, setPayment] = useState<string>(state.subscription.payment)
   const current = ACCESS_OFFERS.find((o) => o.tier === state.subscription.tier) as AccessOffer | undefined
+  const hasAccessSubscription = state.registrationProfile === null || Boolean(state.registrationProfile.tier)
 
   const sub = state.subscription
   const needsLimit = tierLimit(sub.tier, 'needsPerYear')
   const concurrentLimit = tierLimit(sub.tier, 'concurrentNeeds')
   const usedPct = percentage(sub.consumed, needsLimit)
   const status = STATUS[sub.status] ?? STATUS.actif
+
+  if (!hasAccessSubscription) {
+    return (
+      <>
+        <PageHeader eyebrow="ALLNEEDS ACCÈS" title="Choisir mon abonnement" description="L’abonnement se choisit après la création du compte. Les limites ci-dessous reprennent la fiche ALLNEEDS ACCÈS." />
+        <div className="grid gap-5 lg:grid-cols-3">
+          {ACCESS_OFFERS.map((offer) => (
+            <Card key={offer.tier} className={offer.featured ? 'border-brand-300 p-6 shadow-lift' : 'p-6'}>
+              <div className="flex items-center justify-between"><p className="text-base font-bold text-ink-950">{offer.name}</p>{offer.featured ? <Badge tone="brand">PLUS</Badge> : null}</div>
+              <p className="mt-3 text-sm text-ink-600">{offer.tagline}</p>
+              <p className="mt-5 font-display text-3xl text-ink-950">{money(offer.priceYear)} <span className="text-sm text-ink-400">HT / an</span></p>
+              <p className="mt-1 text-xs text-ink-500">{money(offer.priceMonth)} HT / mois</p>
+              <ul className="mt-5 space-y-2 text-sm text-ink-700">
+                <li>{offer.needsPerYear} besoins/an</li><li>{offer.concurrentNeeds} besoins traités en même temps</li><li>{offer.providersPerNeed} prestataires proposés par besoin</li><li>Première proposition : {offer.firstProposal}</li>
+              </ul>
+              <Button className="mt-6" fullWidth onClick={() => {
+                dispatch({ type: 'SUBSCRIPTION_PATCH', patch: { tier: offer.tier, payment: 'annuel', status: 'actif', consumed: 0 } })
+                if (state.registrationProfile) dispatch({ type: 'REGISTRATION_SET', profile: { ...state.registrationProfile, tier: offer.tier, payment: 'annuel' } })
+                dispatch({ type: 'TOAST_ADD', toast: { title: `Formule ${offer.name} activée`, description: `${offer.needsPerYear} besoins/an selon la fiche ALLNEEDS ACCÈS.`, tone: 'success' } })
+              }}>Choisir {offer.name}</Button>
+            </Card>
+          ))}
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
@@ -247,6 +274,9 @@ export function AbonnementPage() {
                   type: 'SUBSCRIPTION_PATCH',
                   patch: { tier: tier as typeof sub.tier, payment: payment as typeof sub.payment },
                 })
+                if (state.registrationProfile) {
+                  dispatch({ type: 'REGISTRATION_SET', profile: { ...state.registrationProfile, tier, payment } })
+                }
                 dispatch({
                   type: 'TOAST_ADD',
                   toast: {

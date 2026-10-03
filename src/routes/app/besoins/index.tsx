@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Inbox, Plus } from 'lucide-react'
-import { useDemo, makeNeed } from '@/store/store'
+import { ArrowRight, Inbox, LockKeyhole, Plus } from 'lucide-react'
+import { useDemo, makeNeed, tierLimit } from '@/store/store'
 import { PageHeader } from '@/components/layouts'
 import {
   Badge,
@@ -42,6 +42,7 @@ export function BesoinsPage() {
   const { state, dispatch, orgId } = useDemo()
   const [filter, setFilter] = useState<'actifs' | 'tous' | 'clos'>('actifs')
   const [open, setOpen] = useState(false)
+  const [limitOpen, setLimitOpen] = useState(false)
   const [form, setForm] = useState({
     title: '',
     category: 'logiciel',
@@ -53,6 +54,13 @@ export function BesoinsPage() {
   })
 
   const needs = state.needs.filter((n) => n.orgId === orgId)
+  const hasAccessSubscription = state.registrationProfile === null || Boolean(state.registrationProfile.tier)
+  const annualLimit = tierLimit(state.subscription.tier, 'needsPerYear')
+  const concurrentLimit = tierLimit(state.subscription.tier, 'concurrentNeeds')
+  const activeCount = needs.filter((n) => n.status !== 'clos' && n.status !== 'signe').length
+  const annualUsed = state.registrationProfile ? needs.length : state.subscription.consumed
+  const blockedReason = !hasAccessSubscription ? 'subscription' : annualUsed >= annualLimit ? 'annual' : activeCount >= concurrentLimit ? 'concurrent' : null
+  const openNeedForm = () => blockedReason ? setLimitOpen(true) : setOpen(true)
   const filtered = needs.filter((n) => {
     if (filter === 'tous') return true
     if (filter === 'clos') return n.status === 'clos' || n.status === 'signe'
@@ -92,12 +100,16 @@ export function BesoinsPage() {
         title="Mes besoins"
         description="Un besoin = une catégorie de prestation. Les besoins non consommés restent dans votre pool ACCÈS."
         actions={
-          <Button size="sm" onClick={() => setOpen(true)}>
+          <Button size="sm" onClick={openNeedForm}>
             <Plus className="h-3.5 w-3.5" />
             Déposer un besoin
           </Button>
         }
       />
+
+      <div className="mb-5 rounded-xl border border-ink-100 bg-white p-4 text-sm text-ink-600">
+        {hasAccessSubscription ? <>Formule <strong>{state.subscription.tier}</strong> · {annualUsed}/{annualLimit} besoins utilisés cette année · {activeCount}/{concurrentLimit} traités en même temps.</> : <>Aucun abonnement ALLNEEDS ACCÈS actif. Vous pouvez consulter votre espace, mais un abonnement est nécessaire pour déposer un besoin.</>}
+      </div>
 
       <div className="mb-5">
         <Tabs
@@ -116,7 +128,7 @@ export function BesoinsPage() {
           icon={<Inbox className="h-5 w-5" />}
           title="Aucun besoin dans cette vue"
           description="Déposez un besoin : nous recherchons, vérifions les prestataires et comparons les devis."
-          action={<Button size="sm" onClick={() => setOpen(true)}>Déposer un besoin</Button>}
+          action={<Button size="sm" onClick={openNeedForm}>Déposer un besoin</Button>}
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -173,6 +185,13 @@ export function BesoinsPage() {
           })}
         </div>
       )}
+
+      <Modal open={limitOpen} onClose={() => setLimitOpen(false)} title={blockedReason === 'subscription' ? 'ALLNEEDS ACCÈS requis' : 'Limite de votre formule atteinte'} description={blockedReason === 'annual' ? `Votre formule ${state.subscription.tier} prévoit ${annualLimit} besoins par an.` : blockedReason === 'concurrent' ? `Votre formule ${state.subscription.tier} permet ${concurrentLimit} besoins traités en même temps.` : 'Choisissez CONNECT, PLUS ou PRIORITÉ selon vos besoins.'}>
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-xl bg-ink-50 p-4"><LockKeyhole className="mt-0.5 h-5 w-5 text-brand-700"/><p className="text-sm leading-relaxed text-ink-600">Les quotas appliqués sont ceux de la fiche ALLNEEDS ACCÈS : CONNECT 6 besoins/an et 2 simultanés, PLUS 15 et 3, PRIORITÉ 30 et 5.</p></div>
+          <div className="flex flex-wrap justify-end gap-2"><Button variant="ghost" onClick={()=>setLimitOpen(false)}>Fermer</Button><Link to="/app/abonnement"><Button>Voir les abonnements</Button></Link></div>
+        </div>
+      </Modal>
 
       <Modal
         open={open}

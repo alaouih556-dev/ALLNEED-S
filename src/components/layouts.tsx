@@ -22,7 +22,7 @@ import {
   ShieldCheck,
   UserRoundCog,
 } from 'lucide-react'
-import { useDemo, type Role } from '@/store/store'
+import { orgHasSaasAccess, useDemo, type Role } from '@/store/store'
 import { cn } from '@/lib/utils'
 import { Avatar, Button } from '@/components/ui'
 
@@ -70,11 +70,13 @@ interface NavItem {
   to: LinkProps['to']
   icon: ReactNode
   badge?: number
+  disabled?: boolean
+  disabledHint?: string
 }
 
-function buildClientNav(unreadMessages: number, pendingDocs: number): NavItem[] {
+function buildClientNav(unreadMessages: number, pendingDocs: number, saasEnabled: boolean): NavItem[] {
   return [
-    { label: 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" /> },
+    { label: 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" />, disabled: !saasEnabled, disabledHint: 'En attente de validation ALLNEEDS' },
     { label: 'Diagnostic automatique', to: '/app/diagnostic-auto', icon: <Gauge className="h-4 w-4" /> },
     { label: 'Tableau de bord', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'Besoins', to: '/app/besoins', icon: <Inbox className="h-4 w-4" /> },
@@ -95,6 +97,14 @@ function buildConciergeNav(): NavItem[] {
   return [
     { label: 'Mon portefeuille', to: '/concierge' as any, icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'Entreprises suivies', to: '/concierge/entreprises' as any, icon: <Building2 className="h-4 w-4" /> },
+    { label: 'Besoins', to: '/concierge/besoins' as any, icon: <Inbox className="h-4 w-4" /> },
+    { label: 'Diagnostics', to: '/concierge/diagnostics' as any, icon: <Gauge className="h-4 w-4" /> },
+    { label: 'Missions', to: '/concierge/missions' as any, icon: <Briefcase className="h-4 w-4" /> },
+    { label: 'Suivi commercial', to: '/concierge/suivi-commercial' as any, icon: <BarChart3 className="h-4 w-4" /> },
+    { label: 'Prestataires', to: '/concierge/prestataires' as any, icon: <Network className="h-4 w-4" /> },
+    { label: 'Rendez-vous', to: '/concierge/rendez-vous' as any, icon: <CalendarDays className="h-4 w-4" /> },
+    { label: 'Documents', to: '/concierge/documents' as any, icon: <FileText className="h-4 w-4" /> },
+    { label: 'Messages', to: '/concierge/messages' as any, icon: <MessageSquare className="h-4 w-4" /> },
   ]
 }
 
@@ -132,8 +142,10 @@ export function AppShell({
 
   const unread = state.threads.reduce((acc, t) => acc + t.unread, 0)
   const pendingDocs = state.documents.filter((d) => d.status !== 'valide').length
+  const clientOrg = state.orgs.find((org) => org.id === user.orgId)
+  const clientSaasEnabled = clientOrg ? orgHasSaasAccess(state, clientOrg.id, clientOrg.sector) : false
 
-  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(unread, pendingDocs)
+  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(unread, pendingDocs, clientSaasEnabled)
 
   function switchRole(next: Role) {
     dispatch({ type: 'SET_ROLE', role: next })
@@ -158,20 +170,20 @@ export function AppShell({
         </div>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-          {nav.map((item) => (
+          {nav.map((item) => item.disabled ? (
+            <div key={String(item.to)} title={item.disabledHint} className="flex cursor-not-allowed items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-300">
+              <span className="flex items-center gap-2.5">{item.icon}{item.label}</span>
+              <span className="text-[0.62rem] font-bold uppercase tracking-wider text-ink-300">Verrouillé</span>
+            </div>
+          ) : (
             <Link
               key={item.to}
               to={item.to}
               className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-950"
               activeProps={{ className: 'bg-brand-50 text-brand-800 hover:bg-brand-50' }}
             >
-              <span className="flex items-center gap-2.5">
-                {item.icon}
-                {item.label}
-              </span>
-              {item.badge ? (
-                <span className="rounded-full bg-ink-950 px-1.5 py-0.5 text-[0.62rem] font-bold text-white">{item.badge}</span>
-              ) : null}
+              <span className="flex items-center gap-2.5">{item.icon}{item.label}</span>
+              {item.badge ? <span className="rounded-full bg-ink-950 px-1.5 py-0.5 text-[0.62rem] font-bold text-white">{item.badge}</span> : null}
             </Link>
           ))}
         </nav>
@@ -206,10 +218,10 @@ export function AppShell({
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink-950">
-                {variant === 'admin' ? 'Administration ALLNEEDS' : variant === 'concierge' ? 'Portefeuille concierge' : 'École Al Amal'}
+                {variant === 'admin' ? 'Administration ALLNEEDS' : variant === 'concierge' ? 'Portefeuille concierge' : (clientOrg?.name ?? 'Espace client')}
               </p>
               <p className="truncate text-xs text-ink-500">
-                {variant === 'admin' ? 'Vue interne · gestion des accès' : variant === 'concierge' ? 'Accès limité aux entreprises attribuées' : 'École privée · Casablanca · 240 élèves'}
+                {variant === 'admin' ? 'Vue interne · gestion des accès' : variant === 'concierge' ? 'Pilotage complet des entreprises attribuées' : clientOrg ? `${clientOrg.kind} · ${clientOrg.city}` : 'Votre espace ALLNEEDS'}
               </p>
             </div>
           </div>

@@ -34,12 +34,12 @@ function AdminConcierges() {
       </Card>
 
       <Card className="p-6">
-        <div className="flex items-center gap-3"><KeyRound className="h-5 w-5 text-brand-700" /><div><h2 className="font-semibold text-ink-950">Accès SaaS du client démo</h2><p className="text-xs text-ink-500">Visible pour le client, mais non cliquable tant que l’accès n’est pas ouvert.</p></div></div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {SECTOR_ORDER.map((sector) => <label key={sector} className="rounded-xl border border-ink-200 p-4">
-            <div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold text-ink-900">{SECTOR_LABEL[sector]}</span><Badge tone={state.saasAccess[sector] ? 'success' : 'neutral'}>{state.saasAccess[sector] ? 'Ouvert' : 'Verrouillé'}</Badge></div>
-            <div className="mt-4"><Checkbox checked={state.saasAccess[sector]} onChange={(e) => dispatch({ type: 'SAAS_SET_ACCESS', sector, value: e.target.checked })} label="Autoriser l’accès" /></div>
-          </label>)}
+        <div className="flex items-center gap-3"><KeyRound className="h-5 w-5 text-brand-700" /><div><h2 className="font-semibold text-ink-950">Activation SaaS par entreprise</h2><p className="text-xs text-ink-500">Le client voit uniquement son secteur. Son espace métier reste grisé et non cliquable jusqu’à activation ici.</p></div></div>
+        <div className="mt-5 space-y-3">
+          {state.orgs.map((org) => { const open = state.saasAccessByOrg[org.id] ?? false; return <label key={org.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ink-200 p-4">
+            <div><div className="flex items-center gap-2"><span className="text-sm font-semibold text-ink-900">{org.name}</span><Badge tone="neutral">{SECTOR_LABEL[org.sector]}</Badge><Badge tone={open ? 'success' : 'neutral'}>{open ? 'Ouvert' : 'Verrouillé'}</Badge></div><p className="mt-1 text-xs text-ink-500">{org.kind} · {org.city}</p></div>
+            <Checkbox checked={open} onChange={(e) => dispatch({ type: 'SAAS_SET_ORG_ACCESS', orgId: org.id, value: e.target.checked })} label="Autoriser le SaaS" />
+          </label> })}
         </div>
       </Card>
     </div>
