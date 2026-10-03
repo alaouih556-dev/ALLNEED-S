@@ -5,7 +5,7 @@ import { Button, Card, Field, Input, Select, SectionHeading } from '@/components
 import { useDemo } from '@/store/store'
 import type { Sector } from '@/types'
 
-export const Route = createFileRoute('/concierge/entreprises' as any)({ component: ConciergeCompanies })
+export const Route = createFileRoute('/concierge/entreprises')({ component: ConciergeCompanies })
 
 function ConciergeCompanies() {
   const { state, dispatch } = useDemo()
