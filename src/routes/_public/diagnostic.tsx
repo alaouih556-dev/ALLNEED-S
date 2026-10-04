@@ -11,7 +11,7 @@ export const Route = createFileRoute('/_public/diagnostic')({
   component: DiagnosticPage,
   head: () => ({
     meta: [
-      { title: 'Réserver un diagnostic STARTER offert — ALLNEEDS' },
+      { title: 'Réserver un diagnostic STARTER — ALLNEEDS' },
       {
         name: 'description',
         content:
@@ -169,7 +169,7 @@ export function DiagnosticPage() {
             <div>
               <Badge tone="warning">{LAUNCH_OFFER.label} · {LAUNCH_OFFER.deadline}</Badge>
               <h1 className="mt-5 font-display text-4xl leading-[1.08] tracking-tight sm:text-5xl">
-                Commencez par le diagnostic OFFERT.
+                Commencez par le diagnostic.
               </h1>
               <p className="mt-5 max-w-xl leading-relaxed text-ink-200">
                 1h30 pour identifier vos 3 priorités, sans engagement. Vous repartez avec un état des lieux, vos
@@ -352,10 +352,7 @@ export function DiagnosticPage() {
               </ul>
             </Card>
 
-            <Alert tone="warning" title="Offre de lancement">
-              Le diagnostic STARTER est offert jusqu’au {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition}. En dehors de
-              cette période, il est facturé au tarif normal du secteur.
-            </Alert>
+            <Alert tone="info" title="Votre diagnostic">Après analyse et validation, votre diagnostic est publié dans votre espace client avec vos priorités et le comparatif des formules.</Alert>
 
             <Card className="p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Et ensuite ?</p>

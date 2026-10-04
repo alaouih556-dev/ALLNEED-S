@@ -31,7 +31,7 @@ export function LaunchBanner() {
           jusqu’au {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition}
         </span>
         <span className="hidden h-3 w-px bg-white/25 sm:block" />
-        <span className="text-white">Diagnostic STARTER offert</span>
+        <span className="text-white">Diagnostic STARTER</span>
       </div>
     </div>
   )
@@ -44,7 +44,7 @@ export function LaunchBanner() {
 const BASE_PUBLIC_LINKS = [
   { label: 'Missions', to: '/missions' },
   { label: 'Accès', to: '/acces' },
-  { label: 'Tarifs', to: '/tarifs' },
+  { label: 'Nos offres', to: '/tarifs' },
   { label: 'FAQ', to: '/faq' },
 ] as const
 
@@ -92,7 +92,7 @@ export function PublicHeader() {
           </Link>
           <Link to="/diagnostic">
             <Button size="sm">
-              Diagnostic offert
+              Diagnostic
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
@@ -125,7 +125,7 @@ export function PublicHeader() {
             <div className="grid gap-2 pt-3">
               <Link to="/diagnostic" onClick={() => setOpen(false)}>
                 <Button fullWidth size="sm">
-                  Diagnostic offert
+                  Diagnostic
                 </Button>
               </Link>
               <Link to="/connexion" onClick={() => setOpen(false)}>
@@ -163,7 +163,7 @@ export function PublicFooter() {
               catalogue.
             </p>
             <p className="mt-4 text-xs text-ink-500">
-              Prix hors taxes, TVA 20 % en sus. Abonnement d’un an.
+              Des contenus et des limites précisés pour chaque formule.
             </p>
           </div>
 
@@ -211,7 +211,7 @@ export function PublicFooter() {
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
                 <Link to="/tarifs" className="text-ink-600 transition hover:text-ink-950">
-                  Tarifs
+                  Nos offres
                 </Link>
               </li>
               <li>
@@ -369,7 +369,7 @@ export function ComparisonTable({ rows, caption }: { rows: FeatureRow[]; caption
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {rows.filter((row) => !/^prix/i.test(row.label)).map((row) => (
               <tr key={row.label} className="transition hover:bg-ink-50/60">
                 <td className="border-b border-ink-50 px-5 py-3 text-ink-700">{row.label}</td>
                 <td className="border-b border-ink-50 px-5 py-3 text-center">
@@ -496,7 +496,7 @@ export function OneLiners({ lines, links }: { lines: Record<MissionCode, string>
 export function CtaBand({
   title,
   description,
-  primary = { label: 'Commencer par le diagnostic offert', to: '/diagnostic' },
+  primary = { label: 'Commencer par le diagnostic', to: '/diagnostic' },
   secondary = { label: 'Déposer un besoin', to: '/demande' },
 }: {
   title: string

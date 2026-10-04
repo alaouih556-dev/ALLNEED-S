@@ -74,7 +74,7 @@ function ConditionsPage() {
                   Offre de lancement valable jusqu’au <strong>{LAUNCH_OFFER.deadline}</strong> ou jusqu’aux{' '}
                   <strong>5 premiers clients</strong> Enseignement PRO ou PERFORMANCE, selon la première échéance.
                 </li>
-                <li>Le diagnostic STARTER est offert pendant cette période.</li>
+                <li>Le diagnostic STARTER identifie vos priorités.</li>
                 <li>Les tarifs de l’abonnement ACCÈS ne sont pas concernés par l’offre de lancement.</li>
               </ul>
             </Section>
@@ -121,7 +121,7 @@ function ConditionsPage() {
 
             <Section title="Budget publicitaire">
               <p>
-                Budget publicitaire non inclus : 3 000 DH par mois minimum conseillé pour obtenir des résultats
+                Budget publicitaire non inclus : budget à définir après analyse pour obtenir des résultats
                 mesurables. ALLNEEDS ne promet pas de résultat chiffré avant analyse : nous mesurons, ajustons et
                 rendons compte.
               </p>
@@ -147,7 +147,7 @@ function ConditionsPage() {
                 </li>
                 <li>Les besoins non utilisés restent valables pendant toute la durée de l’abonnement.</li>
                 <li>
-                  Remise de 10 % (PLUS) ou 15 % (PRIORITÉ) sur les missions PRO et PERFORMANCE au prix normal, non
+                  Avantage abonné (PLUS ou PRIORITÉ) sur les missions PRO et PERFORMANCE au prix normal, non
                   cumulable avec l’offre de lancement.
                 </li>
               </ul>

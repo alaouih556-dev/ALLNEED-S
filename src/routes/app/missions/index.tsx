@@ -132,7 +132,7 @@ export function MissionsPage() {
                           <Clock className="h-3.5 w-3.5" />
                           {mission.owner}
                         </span>
-                        <span className="text-sm font-semibold text-ink-900">{money(mission.price)}</span>
+                        <span className="text-sm text-ink-500">Périmètre convenu</span>
                       </div>
 
                       <Link to="/app/missions/$id" params={{ id: mission.id }} className="block">

@@ -363,7 +363,8 @@ export function InternalGrid({ sector }: { sector: Sector }) {
             </TableWrap>
           </div>
 
-          <Alert tone="warning" title={`Garde-fous ${SECTOR_LABEL[sector]}`} icon={<ShieldCheck className="h-4 w-4" />}>
+          <Alert tone="warning" title={sector === 'sante' ? 'Notre engagement pour votre structure' : `Garde-fous ${SECTOR_LABEL[sector]}`} icon={<ShieldCheck className="h-4 w-4" />}>
+            {sector === 'sante' ? <p className="mb-3">Notre analyse porte sur l’organisation, la gestion et la performance de votre structure — jamais sur la prise en charge médicale de vos patients.</p> : null}
             <ul className="mt-1 list-disc space-y-1 pl-4">
               {grid.guardrails.map((rule) => (
                 <li key={rule}>{rule}</li>

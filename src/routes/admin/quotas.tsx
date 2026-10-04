@@ -60,7 +60,7 @@ export function AdminQuotas() {
       />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Formule active" value={offer?.name ?? sub.tier} hint={`${money(offer?.priceYear ?? 0)} HT / an`} tone="brand" />
+        <Stat label="Formule active" value={offer?.name ?? sub.tier} hint="Contenu de la formule active" tone="brand" />
         <Stat label="Besoins consommés" value={`${sub.consumed}/${needsLimit}`} hint={`${pct(usedPct)} du quota`} tone={usedPct > 85 ? 'warning' : 'success'} />
         <Stat
           label="Simultanés"
@@ -152,7 +152,7 @@ export function AdminQuotas() {
                 <Th>Simultanés</Th>
                 <Th>Prestataires</Th>
                 <Th>1re proposition</Th>
-                <Th>Prix HT</Th>
+                
               </tr>
             </thead>
             <tbody>
@@ -170,7 +170,7 @@ export function AdminQuotas() {
                   <Td>{o.concurrentNeeds}</Td>
                   <Td>{o.providersPerNeed}</Td>
                   <Td>{o.firstProposal}</Td>
-                  <Td className="font-semibold text-ink-950">{money(o.priceYear)}</Td>
+                  
                 </Tr>
               ))}
             </tbody>

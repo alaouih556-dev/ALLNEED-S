@@ -279,9 +279,9 @@ export const DIAGNOSTIC_GRIDS: Record<Sector, DiagnosticGrid> = {
     ],
     steps: STEPS,
     guardrails: [
-      'Ne donner aucun avis médical, clinique ou réglementaire.',
-      'Ne collecter aucune donnée nominative de patient (masquer les noms dans les captures d’agenda).',
-      'Ne promettre aucun résultat chiffré avant analyse.',
+      'Confidentialité : seules les informations nécessaires à l’analyse sont demandées. Les données permettant d’identifier un patient doivent être anonymisées.',
+      'Neutralité : ALLNEEDS ne délivre aucun avis médical, clinique ou réglementaire',
+      'Objectivité : les constats, recommandations et estimations sont formulés après analyse des données disponibles, sans promesse de résultat préalable',
     ],
     levers: SANTE_LEVERS,
     chargeIntro:

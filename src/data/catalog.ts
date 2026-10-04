@@ -42,7 +42,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
       priceNormal: 495,
       priceLaunch: null,
       priceNote: 'au lieu de 495 DH · Diagnostic Performance',
-      payment: 'Offert',
+      payment: 'Inclus',
       delay: '1h30',
       idealFor:
         "les demandes d'inscription stagnent, l'organisation repose sur trop peu de personnes ou les charges augmentent, sans que vous sachiez par où commencer.",
@@ -100,7 +100,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
       ],
       highlights: ['1 diagnostic', '1h30 maximum', '3 priorités', 'Aucun engagement'],
       commitment: 'STARTER permet de comprendre. Il ne réalise pas la mission.',
-      launchLabel: 'PRIX DE LANCEMENT · OFFERT',
+      launchLabel: 'DIAGNOSTIC STARTER',
     },
     {
       code: 'PRO',
@@ -241,7 +241,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
             'Préparation d’une campagne sponsorisée d’inscription',
             'Paramétrage, suivi, analyse et ajustements simples',
           ],
-          limit: 'Limite : budget publicitaire non inclus : 3 000 DH par mois minimum conseillé',
+          limit: 'Limite : budget publicitaire non inclus : budget à définir après analyse',
         },
         {
           title: 'Suivi des collaborateurs (jusqu’à 3)',
@@ -277,7 +277,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
         'Bilan final',
       ],
       notIncluded: [
-        'Budget publicitaire (3 000 DH/mois minimum conseillé)',
+        'Budget publicitaire (budget à définir après analyse)',
         'Community management au quotidien',
         'Recrutement, inscriptions réalisées pour le client',
         'Conseil pédagogique, réglementaire ou juridique',
@@ -306,7 +306,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
       priceNormal: 495,
       priceLaunch: null,
       priceNote: 'au lieu de 495 DH · Diagnostic Performance',
-      payment: 'Offert',
+      payment: 'Inclus',
       delay: '1h30',
       idealFor:
         "votre agenda se remplit mal, l'accueil est débordé ou les charges augmentent, sans que vous sachiez par où commencer.",
@@ -358,7 +358,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
       ],
       highlights: ['1 diagnostic', '1h30 maximum'],
       commitment: 'STARTER permet de comprendre. Il ne réalise pas la mission.',
-      launchLabel: 'PRIX DE LANCEMENT · OFFERT',
+      launchLabel: 'DIAGNOSTIC STARTER',
     },
     {
       code: 'PRO',
@@ -555,7 +555,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
       priceNormal: 495,
       priceLaunch: null,
       priceNote: 'au lieu de 495 DH · Diagnostic Performance',
-      payment: 'Offert',
+      payment: 'Inclus',
       delay: '1h30',
       idealFor:
         'vos réservations dépendent trop des plateformes, la saison creuse pèse ou les charges augmentent, sans que vous sachiez par où commencer.',
@@ -607,7 +607,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
       ],
       highlights: ['1 diagnostic', '1h30 maximum'],
       commitment: 'STARTER permet de comprendre. Il ne réalise pas la mission.',
-      launchLabel: 'PRIX DE LANCEMENT · OFFERT',
+      launchLabel: 'DIAGNOSTIC STARTER',
     },
     {
       code: 'PRO',
@@ -744,7 +744,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
             'Préparation d’une campagne sponsorisée de réservation directe',
             'Paramétrage, suivi, analyse et ajustements simples',
           ],
-          limit: 'Limite : budget publicitaire non inclus : 3 000 DH par mois minimum conseillé',
+          limit: 'Limite : budget publicitaire non inclus : budget à définir après analyse',
         },
         {
           title: 'Suivi des collaborateurs (jusqu’à 3)',
@@ -778,7 +778,7 @@ export const PLANS: Record<Sector, MissionOffer[]> = {
         'Bilan final',
       ],
       notIncluded: [
-        'Budget publicitaire (3 000 DH/mois minimum conseillé)',
+        'Budget publicitaire (budget à définir après analyse)',
         'Community management au quotidien',
         'Réservations réalisées pour le client, moteur de réservation sur mesure',
         'Conseil réglementaire (classement, autorisations) ou juridique',
@@ -863,8 +863,8 @@ export const ACCESS_OFFERS: AccessOffer[] = [
 ]
 
 export const ACCESS_COMPARISON: { label: string; key: keyof AccessOffer }[] = [
-  { label: 'Prix annuel HT', key: 'priceYear' },
-  { label: 'Prix mensuel HT', key: 'priceMonth' },
+
+
   { label: 'Besoins par an (pool reportable sur 12 mois)', key: 'needsPerYear' },
   { label: 'Besoins traités en même temps', key: 'concurrentNeeds' },
   { label: 'Utilisateurs', key: 'users' },
@@ -982,7 +982,7 @@ const COMPARAISON_COMMUNE: { label: string; values: [string | null, string | nul
   { label: 'Bilan final', values: ['—', '—', '✓'] },
   { label: 'Délai', values: ['1h30', '4 à 6 semaines', '9 à 11 semaines'] },
   { label: 'Engagement', values: ['Aucun', 'Mission ponctuelle', 'Structuration + 30 jours'] },
-  { label: 'Paiement', values: ['Offert', 'Unique', 'Unique'] },
+  { label: 'Paiement', values: ['Inclus', 'Unique', 'Unique'] },
 ]
 
 export const SECTORS: Record<Sector, SectorContent> = {
@@ -1075,7 +1075,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       {
         title: 'Budget publicitaire',
         detail:
-          'Non inclus dans les missions. 3 000 DH par mois minimum conseillé pour obtenir des résultats mesurables.',
+          'Non inclus dans les missions. budget à définir après analyse pour obtenir des résultats mesurables.',
       },
       {
         title: 'Retouches',
@@ -1101,7 +1101,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       },
       {
         q: 'La remise abonnés est-elle cumulable avec l’offre de lancement ?',
-        a: 'Non. La remise de 10 % (PLUS) ou 15 % (PRIORITÉ) s’applique au prix normal des missions PRO et PERFORMANCE, et n’est pas cumulable avec l’offre de lancement.',
+        a: 'Non. L’avantage abonné (PLUS ou PRIORITÉ) s’applique au prix normal des missions PRO et PERFORMANCE, et n’est pas cumulable avec l’offre de lancement.',
       },
     ],
   },
@@ -1190,8 +1190,8 @@ export const SECTORS: Record<Sector, SectorContent> = {
       },
     ],
     comparison: [
-      { label: 'Prix normal HT', values: ['495 DH', '8 495 DH', '13 945 DH'] },
-      { label: 'Prix de lancement HT', values: ['Offert', '6 495 DH', '10 945 DH'] },
+
+
       { label: 'Positionnement', values: ['Comprendre', 'Structurer', 'Agir'] },
       { label: 'Diagnostic 4 leviers', values: ['✓', '✓', '✓'] },
       { label: '3 priorités', values: ['✓', '✓', '✓'] },
@@ -1214,7 +1214,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       { label: 'Bilan final', values: ['—', '—', '✓'] },
       { label: 'Délai', values: ['1h30', '4 à 6 semaines', '9 à 11 semaines'] },
       { label: 'Engagement', values: ['Aucun', 'Mission ponctuelle', 'Structuration + 30 jours'] },
-      { label: 'Paiement', values: ['Offert', 'Unique', 'Unique'] },
+      { label: 'Paiement', values: ['Inclus', 'Unique', 'Unique'] },
     ],
     oneLiner: {
       STARTER: '« Je comprends votre structure de santé et j’identifie vos priorités. »',
@@ -1265,7 +1265,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       },
       {
         q: 'Puis-je combiner avec ALLNEEDS ACCÈS ?',
-        a: 'Oui. La remise de 10 % (PLUS) ou 15 % (PRIORITÉ) s’applique sur les missions PRO et PERFORMANCE au prix normal, et n’est pas cumulable avec l’offre de lancement.',
+        a: 'Oui. L’avantage abonné (PLUS ou PRIORITÉ) s’applique sur les missions PRO et PERFORMANCE au prix normal, et n’est pas cumulable avec l’offre de lancement.',
       },
     ],
   },
@@ -1352,8 +1352,8 @@ export const SECTORS: Record<Sector, SectorContent> = {
       },
     ],
     comparison: [
-      { label: 'Prix normal HT', values: ['495 DH', '8 495 DH', '13 945 DH'] },
-      { label: 'Prix de lancement HT', values: ['Offert', '6 495 DH', '10 945 DH'] },
+
+
       { label: 'Positionnement', values: ['Comprendre', 'Structurer', 'Agir'] },
       { label: 'Diagnostic 4 leviers', values: ['✓', '✓', '✓'] },
       { label: '3 priorités', values: ['✓', '✓', '✓'] },
@@ -1377,7 +1377,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       { label: 'Bilan final', values: ['—', '—', '✓'] },
       { label: 'Délai', values: ['1h30', '4 à 6 semaines', '9 à 11 semaines'] },
       { label: 'Engagement', values: ['Aucun', 'Mission ponctuelle', 'Structuration + 30 jours'] },
-      { label: 'Paiement', values: ['Offert', 'Unique', 'Unique'] },
+      { label: 'Paiement', values: ['Inclus', 'Unique', 'Unique'] },
     ],
     oneLiner: {
       STARTER: '« Je comprends votre établissement et j’identifie vos priorités. »',
@@ -1401,7 +1401,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       {
         title: 'Budget publicitaire',
         detail:
-          'Non inclus : 3 000 DH par mois minimum conseillé pour obtenir des résultats mesurables.',
+          'Non inclus : budget à définir après analyse pour obtenir des résultats mesurables.',
       },
       {
         title: 'Retouches',
@@ -1428,7 +1428,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
       },
       {
         q: 'Puis-je combiner avec ALLNEEDS ACCÈS ?',
-        a: 'Oui. La remise de 10 % (PLUS) ou 15 % (PRIORITÉ) s’applique sur les missions PRO et PERFORMANCE au prix normal, et n’est pas cumulable avec l’offre de lancement.',
+        a: 'Oui. L’avantage abonné (PLUS ou PRIORITÉ) s’applique sur les missions PRO et PERFORMANCE au prix normal, et n’est pas cumulable avec l’offre de lancement.',
       },
     ],
   },

@@ -51,20 +51,14 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
 
             <Card className="overflow-hidden p-0">
               <div className="bg-ink-950 px-6 py-6 text-white">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sand-300">
-                  {plan.priceLaunch === null ? 'PRIX DE LANCEMENT' : 'PRIX DE LANCEMENT'}
-                </p>
-                <div className="mt-3">
-                  <p className="text-sm text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p>
-                  <p className="mt-1 font-display text-5xl leading-none tracking-tight">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
-                </div>
-                <p className="mt-3 text-sm text-ink-300">{plan.priceNote}</p>
-                <p className="mt-1 text-xs text-ink-400">{plan.payment}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-sand-300">Contenu de la formule</p>
+                <p className="mt-3 font-display text-3xl">{plan.name}</p>
+                <p className="mt-3 text-sm text-ink-200">{plan.tagline}</p>
               </div>
               <div className="px-6 py-4">
                 <KeyValue label="Délai">{plan.delay}</KeyValue>
                 <KeyValue label="Engagement">{plan.commitment}</KeyValue>
-                <KeyValue label="TVA">20 % en sus</KeyValue>
+                
               </div>
             </Card>
           </div>
@@ -170,7 +164,7 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
       <section className="container-page py-16">
         <h2 className="display-2">Comparer avec les autres formules</h2>
         <div className="mt-8">
-          <ComparisonTable rows={content.comparison} />
+          <p className="text-sm text-ink-600">Le comparatif des formules sera disponible dans votre espace après publication de votre diagnostic.</p>
         </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-2">
@@ -182,7 +176,7 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
               </div>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-600">{other.tagline}</p>
               <div className="mt-5 flex items-center justify-between">
-                <div><p className="text-[0.68rem] text-ink-400 line-through">{money(other.priceNormal)}{other.code !== 'STARTER' ? ' HT' : ''}</p><p className="font-display text-2xl text-ink-950">{other.priceLaunch === null ? 'OFFERT' : money(other.priceLaunch)}</p></div>
+                <div></div>
                 <Link to="/missions/$code" params={{ code: other.code.toLowerCase() }} search={{ secteur: sector }}>
                   <Button size="sm" variant="outline">
                     Voir {other.name}
@@ -240,7 +234,7 @@ export function MissionIndex({ sector }: { sector: Sector }) {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/diagnostic">
               <Button size="lg">
-                Diagnostic offert
+                Diagnostic
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -263,9 +257,9 @@ export function MissionIndex({ sector }: { sector: Sector }) {
               </div>
               <h2 className="mt-3 font-display text-2xl tracking-tight text-ink-950">{plan.name}</h2>
               <div className="mt-3">
-                <p className="text-xs text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p>
-                <p className="mt-1 font-display text-3xl leading-none tracking-tight text-ink-950">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
-                <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700">Prix de lancement</p>
+                
+                
+                
               </div>
               <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-600">{plan.tagline}</p>
               <ul className="mt-5 space-y-2">
@@ -295,14 +289,14 @@ export function MissionIndex({ sector }: { sector: Sector }) {
         <div className="container-page">
           <h2 className="display-2">Comparatif des formules</h2>
           <div className="mt-8">
-            <ComparisonTable rows={content.comparison} />
+            <p className="text-sm text-ink-600">Le comparatif des formules sera disponible dans votre espace après publication de votre diagnostic.</p>
           </div>
         </div>
       </section>
 
       <CtaBand
         title="Vous hésitez entre deux formules ?"
-        description="Le diagnostic STARTER sert exactement à ça : il vous dit laquelle choisir, et pourquoi. Offert, sans engagement."
+        description="Le diagnostic STARTER sert exactement à ça : il vous dit laquelle choisir, et pourquoi. Priorités définies après analyse."
       />
     </>
   )

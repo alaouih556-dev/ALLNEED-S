@@ -180,7 +180,7 @@ export function ContactPage() {
               <ul className="mt-4 space-y-3 text-sm">
                 <li>
                   <Link to="/diagnostic" className="inline-flex items-center gap-1.5 font-semibold text-brand-700">
-                    Réserver le diagnostic offert
+                    Réserver le diagnostic
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </li>

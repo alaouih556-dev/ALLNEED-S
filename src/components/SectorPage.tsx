@@ -84,8 +84,9 @@ function SectorDiagnosticDetail({ sector }: { sector: Sector }) {
           <Card className="border-amber-200 bg-amber-50 p-6">
             <div className="flex items-center gap-2">
               <LockKeyhole className="h-5 w-5 text-amber-700" />
-              <h3 className="font-semibold text-amber-950">Garde-fous {sectorName}</h3>
+              <h3 className="font-semibold text-amber-950">{sector === 'sante' ? 'Notre engagement pour votre structure' : `Garde-fous ${sectorName}`}</h3>
             </div>
+            {sector === 'sante' ? <p className="mt-4 text-sm leading-relaxed text-amber-900">Notre analyse porte sur l’organisation, la gestion et la performance de votre structure — jamais sur la prise en charge médicale de vos patients.</p> : null}
             <ul className="mt-4 space-y-3 text-sm leading-relaxed text-amber-900">
               {grid.guardrails.map((item) => <li key={item}>• {item}</li>)}
             </ul>
@@ -136,7 +137,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/diagnostic">
                   <Button size="lg">
-                    Diagnostic STARTER offert
+                    Diagnostic STARTER
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -161,10 +162,8 @@ export function SectorPage({ sector }: { sector: Sector }) {
                       <p className="mt-1 text-xs text-ink-500">{plan.delay}</p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-[0.65rem] text-ink-400 line-through">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p><p className="font-display text-xl text-ink-950">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
-                      <p className="text-[0.65rem] text-ink-400">
-                        {plan.priceLaunch === null ? plan.payment : `${plan.payment} · HT`}
-                      </p>
+                      
+                      
                     </div>
                   </div>
                 ))}
@@ -219,7 +218,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
                 <Badge tone="brand">{plan.verb}</Badge>
               </div>
               <h3 className="mt-3 font-display text-2xl tracking-tight text-ink-950">{plan.name}</h3>
-              <div className="mt-3"><p className="text-xs text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p><p className="mt-1 font-display text-3xl leading-none tracking-tight text-ink-950">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p><p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700">Prix de lancement</p></div>
+              <div className="mt-3"></div>
               <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-600">{plan.tagline}</p>
               <ul className="mt-5 space-y-2">
                 {plan.highlights.map((h) => (
@@ -248,7 +247,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
         <div className="container-page">
           <SectionHeading eyebrow="Comparatif" title="Formule par formule, ligne par ligne" />
           <div className="mt-12">
-            <ComparisonTable rows={content.comparison} />
+            <p className="text-sm text-ink-600">Le comparatif des formules sera disponible dans votre espace après publication de votre diagnostic.</p>
           </div>
         </div>
       </section>
@@ -292,7 +291,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
       </section>
 
       <CtaBand
-        title="Commencez par le diagnostic OFFERT"
+        title="Commencez par le diagnostic"
         description="1h30 pour identifier vos 3 priorités, sans engagement. Vous repartez avec un livrable écrit, même si vous ne travaillez pas avec nous ensuite."
       />
     </>

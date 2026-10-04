@@ -253,7 +253,7 @@ export function AdminOverview() {
                   <div key={offer.tier}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-ink-800">{offer.name}</span>
-                      <span className="text-ink-500">{money(offer.priceYear)} / an</span>
+                      
                     </div>
                     <Progress
                       className="mt-1.5"

@@ -58,8 +58,8 @@ export function AbonnementPage() {
             <Card key={offer.tier} className={offer.featured ? 'border-brand-300 p-6 shadow-lift' : 'p-6'}>
               <div className="flex items-center justify-between"><p className="text-base font-bold text-ink-950">{offer.name}</p>{offer.featured ? <Badge tone="brand">PLUS</Badge> : null}</div>
               <p className="mt-3 text-sm text-ink-600">{offer.tagline}</p>
-              <p className="mt-5 font-display text-3xl text-ink-950">{money(offer.priceYear)} <span className="text-sm text-ink-400">HT / an</span></p>
-              <p className="mt-1 text-xs text-ink-500">{money(offer.priceMonth)} HT / mois</p>
+              
+              
               <ul className="mt-5 space-y-2 text-sm text-ink-700">
                 <li>{offer.needsPerYear} besoins/an</li><li>{offer.concurrentNeeds} besoins traités en même temps</li><li>{offer.providersPerNeed} prestataires proposés par besoin</li><li>Première proposition : {offer.firstProposal}</li>
               </ul>
@@ -93,7 +93,7 @@ export function AbonnementPage() {
             />
             <CardBody>
               <div className="flex flex-wrap items-end justify-between gap-4">
-                <PriceTag amount={current?.priceYear ?? 0} note={`ou ${money(current?.priceMonth ?? 0)}/mois · HT`} />
+                
                 <div className="text-right text-xs text-ink-500">
                   <p>Prélèvement {sub.payment === 'annuel' ? 'annuel' : 'trimestriel'}</p>
                   <p className="mt-0.5">Reconduction automatique : {sub.autoRenew ? 'oui' : 'non'}</p>
@@ -140,7 +140,7 @@ export function AbonnementPage() {
                   `Comparaison chiffrée des devis : ${current?.quoteComparison}`,
                   `Suivi : ${current?.followUp}`,
                   `Réponse sous ${current?.responseTime}`,
-                  current?.starterDiagnostic === 'offert' ? 'Diagnostic STARTER offert' : 'Diagnostic STARTER en option',
+                  current?.starterDiagnostic === 'inclus' ? 'Diagnostic STARTER inclus' : 'Diagnostic STARTER en option',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-ink-700">
                     <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
@@ -164,9 +164,9 @@ export function AbonnementPage() {
               <KeyValue label="Besoins déposés">{sub.consumed}</KeyValue>
               <KeyValue label="Pool non utilisé">{pct(Math.max(0, needsLimit - sub.consumed))} du quota</KeyValue>
               <KeyValue label="Report au 1er janvier">{sub.poolCarriedOver}</KeyValue>
-              <KeyValue label="Diagnostics STARTER offerts utilisés">{sub.starterUsed}</KeyValue>
+              <KeyValue label="Diagnostics STARTER inclus utilisés">{sub.starterUsed}</KeyValue>
               <KeyValue label="Réductions missions incluses">
-                {current?.missionDiscount ? `-${current.missionDiscount} % sur PRO et PERFORMANCE` : '—'}
+                {current?.missionDiscount ? 'Avantage abonné sur PRO et PERFORMANCE' : '—'}
               </KeyValue>
             </CardBody>
           </Card>
@@ -251,7 +251,7 @@ export function AbonnementPage() {
                     {offer.needsPerYear} besoin(s)/an · {offer.providersPerNeed} prestataire(s)/besoin
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-ink-900">{money(offer.priceYear)} / an</span>
+                
               </button>
             ))}
           </div>
@@ -259,7 +259,7 @@ export function AbonnementPage() {
           <div>
             <p className="mb-1.5 text-xs font-semibold text-ink-700">Périodicité</p>
             <Select value={payment} onChange={(e) => setPayment(e.target.value)}>
-              <option value="annuel">Annuel — 10 % équivalent</option>
+              <option value="annuel">Annuel</option>
               <option value="trimestriel">Trimestriel</option>
             </Select>
           </div>

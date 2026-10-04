@@ -90,11 +90,11 @@ const ACCES_FAQ = [
   },
   {
     q: 'La remise sur les missions est-elle cumulable avec l’offre de lancement ?',
-    a: 'Non. La remise de 10 % (PLUS) ou 15 % (PRIORITÉ) s’applique au prix normal des missions PRO et PERFORMANCE et n’est pas cumulable avec l’offre de lancement.',
+    a: 'Non. L’avantage abonné (PLUS ou PRIORITÉ) s’applique au prix normal des missions PRO et PERFORMANCE et n’est pas cumulable avec l’offre de lancement.',
   },
   {
     q: 'Le budget publicitaire est-il inclus ?',
-    a: 'Non. Il n’est pas inclus dans les missions. 3 000 DH par mois minimum est conseillé pour obtenir des résultats mesurables sur une campagne sponsorisée.',
+    a: 'Non. Il n’est pas inclus dans les missions. Un budget adapté est défini après analyse pour obtenir des résultats mesurables sur une campagne sponsorisée.',
   },
 ]
 

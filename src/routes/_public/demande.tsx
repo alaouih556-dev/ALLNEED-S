@@ -137,7 +137,7 @@ export function DemandePage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/diagnostic">
               <Button>
-                Réserver le diagnostic offert
+                Réserver le diagnostic
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -182,7 +182,7 @@ export function DemandePage() {
                     {[
                       { value: 'besoin', label: 'Rechercher un prestataire', hint: 'via l’abonnement ACCÈS' },
                       { value: 'mission', label: 'Demander une mission', hint: 'PRO ou PERFORMANCE' },
-                      { value: 'diagnostic', label: 'Demander un diagnostic', hint: 'STARTER, offert en période de lancement' },
+                      { value: 'diagnostic', label: 'Demander un diagnostic', hint: 'STARTER, analyse de votre structure' },
                       { value: 'contact', label: 'Poser une question', hint: 'Avant de vous engager' },
                     ].map((option) => (
                       <button
@@ -306,7 +306,7 @@ export function DemandePage() {
                     <Input
                       value={form.budget}
                       onChange={(e) => set('budget', e.target.value)}
-                      placeholder="15 000 – 25 000 DH"
+                      placeholder="Budget à préciser, si connu"
                     />
                   </Field>
                   <Field label="Urgence">
@@ -405,7 +405,7 @@ export function DemandePage() {
             <Card className="p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Vous préférez commencer par un diagnostic ?</p>
               <p className="mt-3 text-sm leading-relaxed text-ink-600">
-                1h30 pour savoir où votre établissement doit agir en priorité. Offert en période de lancement.
+                1h30 pour savoir où votre établissement doit agir en priorité. Priorités définies après analyse.
               </p>
               <Link to="/diagnostic" className="mt-5 block">
                 <Button size="sm" fullWidth variant="outline">

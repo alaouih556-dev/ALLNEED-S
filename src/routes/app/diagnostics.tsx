@@ -6,6 +6,9 @@ import { Alert, Badge, Button, Card, CardHeader, CardBody, EmptyState, Meter } f
 import { LEVER_LABEL } from '@/lib/status'
 import { minutesToHours } from '@/lib/metrics'
 import { longDate } from '@/lib/format'
+import { SECTORS } from '@/data/catalog'
+import { ComparisonTable } from '@/components/marketing'
+import { hasPublishedDiagnostic } from '@/lib/offer-visibility'
 
 export const Route = createFileRoute('/app/diagnostics')({
   component: DiagnosticsPage,
@@ -18,6 +21,8 @@ export function DiagnosticsPage() {
   const diagnostics = state.diagnostics
     .filter((d) => d.orgId === orgId && d.status === 'publie')
     .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''))
+
+  const sector = state.orgs.find((org) => org.id === orgId)?.sector
 
   return (
     <>
@@ -122,6 +127,14 @@ export function DiagnosticsPage() {
           })}
         </div>
       )}
+
+      {hasPublishedDiagnostic(state.diagnostics, orgId) && sector ? (
+        <section className="mt-8 space-y-4">
+          <h2 className="font-display text-2xl text-ink-950">Comparatif des formules après votre diagnostic</h2>
+          <p className="text-sm text-ink-600">Comparez les contenus et les livrables des formules adaptées à votre secteur.</p>
+          <ComparisonTable rows={SECTORS[sector].comparison} />
+        </section>
+      ) : null}
 
       <Alert tone="info" className="mt-6" title="Ce que le diagnostic ne fait pas">
         STARTER permet de comprendre. Il ne réalise pas la mission : ni création, ni production, ni accompagnement

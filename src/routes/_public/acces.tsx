@@ -32,7 +32,7 @@ export const Route = createFileRoute('/_public/acces')({
       {
         name: 'description',
         content:
-          'Un abonnement annuel qui trouve, vérifie et suit les prestataires dont votre établissement a besoin. Pool de besoins reportable sur 12 mois, à partir de 1 490 DH HT.',
+          'Un abonnement annuel qui trouve, vérifie et suit les prestataires dont votre établissement a besoin. Pool de besoins reportable sur 12 mois.',
       },
     ],
   }),
@@ -59,7 +59,7 @@ function AccesPage() {
                 l’utilisez au rythme de votre activité, sans perdre ce que vous n’avez pas encore consommé.
               </p>
               <p className="mt-4 text-sm font-semibold text-sand-300">
-                À partir de {money(ACCESS_OFFERS[0].priceYear)} HT par an · Pool de besoins annuel, reportable sur les
+                Pool de besoins annuel, reportable sur les
                 12 mois
               </p>
 
@@ -79,21 +79,8 @@ function AccesPage() {
             </div>
 
             <Card className="border-white/10 bg-white/[0.04] p-6 text-white">
-              <p className="text-xs font-semibold uppercase tracking-wider text-sand-300">Tarification</p>
-              <p className="mt-4 text-sm leading-relaxed text-ink-200">
-                Prix hors taxes, TVA 20 % en sus. Abonnement d’un an, payable d’avance en une fois ou en 4 échéances
-                trimestrielles. Délais en jours ouvrés, à compter de la réception d’une demande complète.
-              </p>
-              <div className="mt-6 rounded-xl bg-white/5 p-4">
-                <p className="text-sm font-semibold">L’offre de lancement ne concerne pas l’abonnement.</p>
-                <p className="mt-1.5 text-xs text-ink-300">
-                  Les tarifs ACCÈS s’appliquent {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition} compris.
-                </p>
-              </div>
-              <p className="mt-6 text-sm leading-relaxed text-ink-200">
-                <strong className="text-white">Après une mission PRO ou PERFORMANCE</strong>, la première année
-                d’abonnement PLUS bénéficie d’un mois offert.
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-sand-300">Votre accompagnement</p>
+              <p className="mt-4 text-sm leading-relaxed text-ink-200">Recherche, vérification, comparaison et suivi des prestataires. Chaque formule précise le nombre de besoins, les délais de réponse et les livrables inclus.</p>
             </Card>
           </div>
         </div>
@@ -135,12 +122,8 @@ function AccesPage() {
               <p className="mt-4 text-sm leading-relaxed text-ink-600">{offer.tagline}</p>
 
               <div className="mt-6 border-t border-ink-100 pt-6">
-                <p className="font-display text-4xl leading-none tracking-tight text-ink-950">
-                  {money(offer.priceYear)}
-                </p>
-                <p className="mt-1.5 text-xs text-ink-500">
-                  HT / an · ou {money(offer.priceMonth)} HT par mois
-                </p>
+                
+                
               </div>
 
               <ul className="mt-6 flex-1 space-y-3">
@@ -176,7 +159,7 @@ function AccesPage() {
                   <li className="flex items-start gap-2.5 text-sm text-ink-800">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                     <span>
-                      Remise de <strong>{offer.missionDiscount} %</strong> sur les missions PRO et PERFORMANCE
+                      Accompagnement complémentaire sur les missions PRO et PERFORMANCE
                     </span>
                   </li>
                 ) : null}
@@ -247,7 +230,7 @@ function AccesPage() {
                 </tr>
               </thead>
               <tbody>
-                {ACCESS_COMPARISON.map((row) => (
+                {ACCESS_COMPARISON.filter((row) => !row.key.startsWith('price') && row.key !== 'missionDiscount').map((row) => (
                   <tr key={row.label} className="transition hover:bg-ink-50/60">
                     <td className="border-b border-ink-50 px-5 py-3 text-ink-700">{row.label}</td>
                     {ACCESS_OFFERS.map((offer) => {
@@ -322,8 +305,8 @@ function AccesPage() {
             <h2 className="display-2 mt-3">Ce que l’abonnement change pour vous.</h2>
             <ul className="mt-8 space-y-3">
               {[
-                `Remise de 10 % (PLUS) ou 15 % (PRIORITÉ) sur les missions PRO et PERFORMANCE au prix normal. Non cumulable avec l’offre de lancement.`,
-                'Après une mission PRO ou PERFORMANCE, la première année d’abonnement PLUS bénéficie d’un mois offert.',
+                `Avantage abonné (PLUS ou PRIORITÉ) sur les missions PRO et PERFORMANCE au prix normal. Non cumulable avec l’offre de lancement.`,
+                'Après une mission PRO ou PERFORMANCE, la première année d’abonnement PLUS bénéficie d’un accompagnement complémentaire.',
                 'Le niveau PRIORITÉ inclut 1 diagnostic STARTER par an.',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2.5 rounded-xl border border-ink-100 bg-white p-4 text-sm text-ink-700">
@@ -368,9 +351,9 @@ function AccesPage() {
                 <p className="text-sm font-bold text-ink-950">{plan.name}</p>
                 <Badge tone="brand">{plan.verb}</Badge>
               </div>
-              <p className="mt-3 text-xs text-ink-400 line-through decoration-1">{money(plan.priceNormal)}{plan.code !== 'STARTER' ? ' HT' : ''}</p>
-              <p className="mt-1 font-display text-2xl text-ink-950">{plan.priceLaunch === null ? 'OFFERT' : money(plan.priceLaunch)}</p>
-              <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700">Prix de lancement</p>
+              
+              
+              
               <Link
                 to="/missions/$code"
                 params={{ code: plan.code.toLowerCase() }}
@@ -387,7 +370,7 @@ function AccesPage() {
 
       <CtaBand
         title="Souscrivez ACCÈS, ou commencez par le diagnostic"
-        description="Le diagnostic STARTER est offert. L’abonnement est sans reconduction tacite, et vous ne payez jamais un prestataire par notre intermédiaire."
+        description="Le diagnostic STARTER identifie vos priorités. L’abonnement est sans reconduction tacite, et vous ne payez jamais un prestataire par notre intermédiaire."
         secondary={{ label: 'Réserver le diagnostic', to: '/diagnostic' }}
       />
     </>

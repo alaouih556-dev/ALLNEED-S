@@ -268,7 +268,7 @@ export function MissionDetail() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-ink-500">Montant de la mission</span>
-                <span className="font-semibold text-ink-950">{money(mission.price)} HT</span>
+                <span className="text-sm text-ink-500">Périmètre convenu</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-ink-500">Avancement déclaré</span>
