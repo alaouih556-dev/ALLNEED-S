@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
@@ -114,3 +115,31 @@
     box-shadow: none;
   }
 }
+
+/* ALLNEEDS V12 — unified visual identity */
+
+body {font-family:'DM Sans',Arial,sans-serif;background:#f4f8fe;color:#122846;}
+h1,h2,h3,.font-display {font-family:'Manrope',Arial,sans-serif;letter-spacing:-.045em;}
+header {backdrop-filter:blur(18px);box-shadow:0 8px 35px #071b3807;}
+.display-1 {font-weight:700;line-height:1.08;}
+.display-2 {font-weight:650;}
+.eyebrow {letter-spacing:.18em;color:#087bfa;}
+.bg-ink-950 {background:radial-gradient(ellipse at 100% 10%,#125590 0%,#071b38 75%);}
+.bg-ink-50 {background:linear-gradient(130deg,#eef5ff,#f4fcff);}
+.bg-white {background-color:#ffffff;}
+.rounded-xl {border-radius:18px;}
+.rounded-2xl {border-radius:23px;}
+.rounded-3xl {border-radius:30px;}
+.shadow-card,.shadow-lift {box-shadow:0 14px 45px #0b40800c;}
+.border-ink-100,.border-ink-200 {border-color:#dfe9f5;}
+button {transition:background-color .2s,box-shadow .2s,transform .2s;}
+button:hover {box-shadow:0 6px 22px #0767d810;}
+.bg-brand-600,.bg-brand-700 {background:linear-gradient(120deg,#087bfa,#099ee9);}
+.bg-sand-400 {background:#11bde9;color:#071b38;}
+.text-sand-300,.text-sand-400 {color:#73dcff;}
+input,textarea,select {border-radius:12px!important;}
+main {background-image:radial-gradient(ellipse at top right,#eaf5ff60,transparent 60%);}
+a {text-underline-offset:4px;}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important;}}
+
+.allneeds-card{border-radius:24px;box-shadow:0 12px 45px #0b40800b;overflow:hidden;}

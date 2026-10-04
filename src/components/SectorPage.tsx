@@ -141,11 +141,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link to="/missions" search={{ secteur: sector }}>
-                  <Button size="lg" variant="outline">
-                    Comparer les formules
-                  </Button>
-                </Link>
+
               </div>
             </div>
 
@@ -162,8 +158,8 @@ export function SectorPage({ sector }: { sector: Sector }) {
                       <p className="mt-1 text-xs text-ink-500">{plan.delay}</p>
                     </div>
                     <div className="shrink-0 text-right">
-                      
-                      
+
+
                     </div>
                   </div>
                 ))}

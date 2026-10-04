@@ -70,11 +70,7 @@ function AccesPage() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link to="/demande">
-                  <Button size="lg" variant="outline" className="border-white/25 bg-white/5 text-white hover:bg-white/10">
-                    Déposer un besoin
-                  </Button>
-                </Link>
+
               </div>
             </div>
 
@@ -122,8 +118,8 @@ function AccesPage() {
               <p className="mt-4 text-sm leading-relaxed text-ink-600">{offer.tagline}</p>
 
               <div className="mt-6 border-t border-ink-100 pt-6">
-                
-                
+
+
               </div>
 
               <ul className="mt-6 flex-1 space-y-3">
@@ -351,9 +347,9 @@ function AccesPage() {
                 <p className="text-sm font-bold text-ink-950">{plan.name}</p>
                 <Badge tone="brand">{plan.verb}</Badge>
               </div>
-              
-              
-              
+
+
+
               <Link
                 to="/missions/$code"
                 params={{ code: plan.code.toLowerCase() }}

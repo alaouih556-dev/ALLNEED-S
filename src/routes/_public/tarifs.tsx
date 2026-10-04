@@ -6,7 +6,7 @@ import { useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/tarifs')({
   component: OffresPage,
-  head: () => ({ meta: [{ title: 'Nos offres — ALLNEEDS' }, { name: 'description', content: 'Découvrez les contenus, livrables et périmètres des missions et des abonnements ALLNEEDS.' }] }),
+  head: () => ({ meta: [{ title: 'Missions — ALLNEEDS' }, { name: 'description', content: 'Découvrez les contenus, livrables et périmètres des missions et des abonnements ALLNEEDS.' }] }),
 })
 
 export function OffresPage() {
@@ -14,7 +14,7 @@ export function OffresPage() {
   const sectors = sector ? [sector] : SECTOR_ORDER
   return <>
     <section className="border-b border-ink-100 bg-ink-50"><div className="container-page py-16">
-      <p className="eyebrow">Nos offres</p><h1 className="display-1 mt-4">Un contenu clair pour chaque étape.</h1>
+      <p className="eyebrow">Missions</p><h1 className="display-1 mt-4">Un contenu clair pour chaque étape.</h1>
       <p className="lede mt-5 max-w-2xl">Découvrez ce que chaque formule comprend. Votre diagnostic permet ensuite d’identifier l’accompagnement adapté à votre structure.</p>
     </div></section>
     <section className="container-page py-16"><SectionHeading eyebrow="Missions" title="Comprendre · Structurer · Agir" />

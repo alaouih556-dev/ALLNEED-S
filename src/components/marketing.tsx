@@ -42,9 +42,8 @@ export function LaunchBanner() {
 /* ------------------------------------------------------------------ */
 
 const BASE_PUBLIC_LINKS = [
-  { label: 'Missions', to: '/missions' },
   { label: 'Accès', to: '/acces' },
-  { label: 'Nos offres', to: '/tarifs' },
+  { label: 'Missions', to: '/tarifs' },
   { label: 'FAQ', to: '/faq' },
 ] as const
 
@@ -59,9 +58,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur">
       <div className="container-page flex h-16 items-center justify-between gap-6">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink-950 font-display text-lg text-sand-300">
-            A
-          </span>
+          <img src="/logo-allneeds.jpeg" alt="" className="h-12 w-16 object-contain" />
           <span className="leading-none">
             <span className="block text-[0.95rem] font-extrabold tracking-tight text-ink-950">ALLNEEDS</span>
             <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-ink-400">
@@ -153,9 +150,7 @@ export function PublicFooter() {
         <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <div>
             <Link to="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink-950 font-display text-lg text-sand-300">
-                A
-              </span>
+              <img src="/logo-allneeds.jpeg" alt="" className="h-12 w-16 object-contain" />
               <span className="text-[0.95rem] font-extrabold tracking-tight text-ink-950">ALLNEEDS</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-600">
@@ -211,7 +206,7 @@ export function PublicFooter() {
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
                 <Link to="/tarifs" className="text-ink-600 transition hover:text-ink-950">
-                  Nos offres
+                  Missions
                 </Link>
               </li>
               <li>
@@ -219,11 +214,7 @@ export function PublicFooter() {
                   FAQ
                 </Link>
               </li>
-              <li>
-                <Link to="/demande" className="text-ink-600 transition hover:text-ink-950">
-                  Déposer un besoin
-                </Link>
-              </li>
+
               <li>
                 <Link to="/diagnostic" className="text-ink-600 transition hover:text-ink-950">
                   Réserver un diagnostic
@@ -497,7 +488,7 @@ export function CtaBand({
   title,
   description,
   primary = { label: 'Commencer par le diagnostic', to: '/diagnostic' },
-  secondary = { label: 'Déposer un besoin', to: '/demande' },
+  secondary = { label: 'Contacter notre équipe', to: '/contact' },
 }: {
   title: string
   description: string

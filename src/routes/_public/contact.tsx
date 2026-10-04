@@ -185,10 +185,7 @@ export function ContactPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/demande" className="inline-flex items-center gap-1.5 font-semibold text-brand-700">
-                    Déposer un besoin
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
+
                 </li>
                 <li>
                   <Link to="/tarifs" className="inline-flex items-center gap-1.5 font-semibold text-brand-700">

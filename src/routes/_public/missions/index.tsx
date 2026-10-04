@@ -1,10 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { MissionIndex } from '@/components/MissionPage'
 import type { Sector } from '@/types'
 
 const SECTORS: Sector[] = ['enseignement', 'sante', 'tourisme']
 
 export const Route = createFileRoute('/_public/missions/')({
+  beforeLoad: () => { throw redirect({ to: '/tarifs' }) },
   validateSearch: (search: Record<string, unknown>): { secteur?: Sector } => {
     const value = String(search.secteur ?? 'enseignement')
     return { secteur: (SECTORS.includes(value as Sector) ? value : 'enseignement') as Sector }
