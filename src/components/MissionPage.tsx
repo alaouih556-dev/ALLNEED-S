@@ -34,6 +34,12 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
               <p className="lede mt-5 max-w-xl">{plan.tagline}</p>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-700">{plan.intro}</p>
 
+              <div className="mt-6 flex items-end gap-3">
+                <span className="text-sm text-ink-400 line-through">{money(plan.priceNormal)} HT</span>
+                <strong className="font-display text-3xl text-ink-950">{plan.priceLaunch == null ? 'OFFERT' : `${money(plan.priceLaunch)} HT`}</strong>
+                <Badge tone="warning">Prix de lancement</Badge>
+              </div>
+
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/diagnostic">
                   <Button size="lg">

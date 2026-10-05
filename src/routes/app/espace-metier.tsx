@@ -1,7 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Workspace } from '@/features/saas/Workspace'
+import { ExternalLink, HeartPulse } from 'lucide-react'
+
 export const Route = createFileRoute('/app/espace-metier')({ component: Metier })
+
 function Metier() {
   const url = (import.meta as ImportMeta & { env: { VITE_HEALTH_URL?: string } }).env.VITE_HEALTH_URL
-  return <><section className="container-page pt-8"><div className="rounded-3xl bg-ink-950 p-8 text-white"><p className="text-xs uppercase tracking-widest text-brand-200">ALLNEEDS SANTÉ · PLATEFORME INDÉPENDANTE</p><h2 className="mt-3 text-2xl font-bold">Votre équipe. Votre espace de gestion.</h2><p className="mt-3 max-w-2xl text-sm text-ink-200">La démo Santé dispose d’une connexion séparée pour la direction, la réception et la comptabilité.</p>{url ? <a href={url} target="_blank" rel="noreferrer" className="mt-5 inline-flex rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold">Ouvrir ALLNEEDS Santé ↗</a> : <p className="mt-5 text-xs text-brand-200">Le lien sera disponible après publication de la plateforme Santé.</p>}</div></section><Workspace /></>
+  return (
+    <section className="container-page py-10">
+      <div className="health-external-card">
+        <div className="health-external-icon"><HeartPulse size={28}/></div>
+        <div>
+          <span className="eyebrow">ALLNEEDS SANTÉ · ESPACE SÉPARÉ</span>
+          <h1>La gestion Santé vit dans sa propre plateforme.</h1>
+          <p>Le portail principal conserve votre parcours ALLNEEDS. L’espace opérationnel Santé est maintenant séparé pour garder une expérience plus simple et plus claire.</p>
+        </div>
+        {url ? <a href={url} target="_blank" rel="noreferrer" className="health-external-action">Ouvrir ALLNEEDS Santé <ExternalLink size={16}/></a> : <div className="health-external-action disabled">Lien disponible après publication</div>}
+      </div>
+    </section>
+  )
 }

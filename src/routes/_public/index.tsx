@@ -3,12 +3,10 @@ import {
   ArrowRight,
   ArrowUpRight,
   Check,
-  CircleCheckBig,
   Compass,
   GraduationCap,
   HeartPulse,
   LayoutDashboard,
-  MessageSquareText,
   ShieldCheck,
   Sparkles,
   UsersRound,
@@ -17,219 +15,115 @@ import { selectSector, useSelectedSector } from '@/lib/sector-filter'
 
 export const Route = createFileRoute('/_public/')({
   component: Home,
-  head: () => ({ meta: [{ title: 'ALLNEEDS — Du besoin à l’action' }] }),
+  head: () => ({ meta: [{ title: 'ALLNEEDS — Du besoin à la solution' }] }),
 })
 
 const sectors = [
-  {
-    id: 'sante' as const,
-    name: 'Santé',
-    icon: HeartPulse,
-    desc: 'Structurez vos priorités sans toucher à l’acte médical.',
-    intent: 'Patients · organisation · charges',
-    tags: 'Cabinets · Centres · Laboratoires',
-    color: '#087bfa',
-  },
-  {
-    id: 'enseignement' as const,
-    name: 'Enseignement',
-    icon: GraduationCap,
-    desc: 'Clarifiez vos inscriptions, votre image et votre organisation.',
-    intent: 'Inscriptions · équipe · prestataires',
-    tags: 'Écoles · Crèches · Formation',
-    color: '#8979da',
-  },
-  {
-    id: 'tourisme' as const,
-    name: 'Tourisme',
-    icon: Compass,
-    desc: 'Pilotez réservations, visibilité, exploitation et fournisseurs.',
-    intent: 'Réservations · visibilité · exploitation',
-    tags: 'Hébergement · Restauration · Activités',
-    color: '#0cae9d',
-  },
+  { id: 'sante' as const, name: 'Santé', icon: HeartPulse, desc: 'Patients, organisation, charges et priorités.', tags: 'Cabinets · Centres · Laboratoires', color: '#0ea5e9' },
+  { id: 'enseignement' as const, name: 'Enseignement', icon: GraduationCap, desc: 'Inscriptions, équipe, image et prestataires.', tags: 'Écoles · Crèches · Formation', color: '#8b5cf6' },
+  { id: 'tourisme' as const, name: 'Tourisme', icon: Compass, desc: 'Réservations, visibilité, exploitation et fournisseurs.', tags: 'Hébergement · Restauration · Activités', color: '#14b8a6' },
 ]
 
 const spaces = [
-  {
-    label: 'Espace Client',
-    title: 'Votre besoin reste au centre.',
-    copy: 'Suivez vos demandes, vos missions, vos rendez-vous et les prochaines actions dans un espace limité à votre secteur.',
-    image: '/previews/client-sante.png',
-    caption: 'Aperçu de votre espace Client Santé',
-    icon: LayoutDashboard,
-  },
-  {
-    label: 'Espace Concierge',
-    title: 'Traiter vite, sans se disperser.',
-    copy: 'Une file de travail centrée uniquement sur les entreprises attribuées, avec statuts visibles, relances et actions contextuelles.',
-    image: '/previews/concierge.png',
-    caption: 'Interface Concierge — portefeuille attribué',
-    icon: UsersRound,
-  },
-  {
-    label: 'Administration',
-    title: 'Piloter l’ensemble avec contrôle.',
-    copy: 'Une vue globale pour suivre les comptes, affectations, besoins, missions et accès sans mélanger les expériences utilisateurs.',
-    image: '/previews/admin.png',
-    caption: 'Interface Administrateur — pilotage global',
-    icon: ShieldCheck,
-  },
+  { label: 'Client', title: 'Suivre sans se perdre', copy: 'Vos besoins, vos missions et les prochaines actions dans un espace limité à votre secteur.', image: '/previews/client-sante.png', caption: 'Aperçu de l’espace Client', icon: LayoutDashboard },
+  { label: 'Concierge', title: 'Traiter avec contexte', copy: 'Une vue de travail limitée aux entreprises attribuées, avec statuts, relances et actions utiles.', image: '/previews/concierge.png', caption: 'Aperçu de l’espace Concierge', icon: UsersRound },
+  { label: 'Administrateur', title: 'Piloter avec contrôle', copy: 'Comptes, affectations, besoins, missions et accès regroupés dans une vue de pilotage globale.', image: '/previews/admin.png', caption: 'Aperçu de l’espace Administrateur', icon: ShieldCheck },
 ]
 
 function Home() {
   const selected = useSelectedSector()
-
   return (
-    <div className="v14-home">
-      <section className="v14-hero container-page">
-        <div className="v14-hero-copy">
-          <span className="v14-kicker"><Sparkles size={13} /> BESOIN → SOLUTION → ACTION</span>
-          <h1>
-            Dites-nous ce qui bloque.
-            <span> ALLNEEDS vous aide à avancer.</span>
-          </h1>
-          <p>
-            Un point d’entrée simple pour comprendre votre situation, choisir les bonnes priorités et suivre les actions utiles à votre activité.
-          </p>
-          <div className="v14-hero-actions">
-            <a href="#secteurs" className="v14-btn-primary">Commencer par mon besoin <ArrowRight size={18} /></a>
-            <Link to="/connexion" className="v14-btn-secondary">Accéder à mon espace</Link>
+    <div className="v15-home">
+      <section className="v15-hero-wrap">
+        <div className="container-page v15-hero">
+          <div className="v15-hero-copy">
+            <span className="v15-kicker"><Sparkles size={14}/> ALLNEEDS · UN BESOIN, UN CHEMIN CLAIR</span>
+            <h1>Votre besoin n’a pas besoin d’être compliqué.</h1>
+            <p>ALLNEEDS vous aide à comprendre ce qui bloque, choisir la bonne priorité et passer à l’action avec un parcours simple.</p>
+            <div className="v15-hero-actions">
+              <a className="v15-primary" href="#secteurs">Choisir mon secteur <ArrowRight size={18}/></a>
+              <Link className="v15-secondary" to="/connexion">Accéder à mon espace</Link>
+            </div>
+            <div className="v15-proof">
+              <span><Check size={14}/> Un seul secteur à la fois</span>
+              <span><Check size={14}/> Des étapes lisibles</span>
+              <span><Check size={14}/> Des actions visibles</span>
+            </div>
           </div>
-          <div className="v14-trust-row" aria-label="Principes ALLNEEDS">
-            <span><Check size={15} /> Un secteur à la fois</span>
-            <span><Check size={15} /> Des priorités claires</span>
-            <span><Check size={15} /> Un suivi visible</span>
+          <div className="v15-command-card">
+            <div className="v15-command-top"><span>Comment ça avance</span><strong>01 → 04</strong></div>
+            <article className="is-main"><small>01 · BESOIN</small><h3>Je veux savoir où agir.</h3><p>Vous partez de votre situation, pas d’un catalogue.</p></article>
+            <div className="v15-mini-steps">
+              <article><span>02</span><div><small>COMPRENDRE</small><strong>Faire le point</strong></div></article>
+              <article><span>03</span><div><small>STRUCTURER</small><strong>Clarifier la solution</strong></div></article>
+              <article><span>04</span><div><small>AGIR</small><strong>Suivre la suite</strong></div></article>
+            </div>
           </div>
-        </div>
-
-        <div className="v14-solution-panel" aria-label="Exemple de parcours ALLNEEDS">
-          <div className="v14-panel-head">
-            <span>Votre parcours</span>
-            <span className="v14-live-dot">● prêt à démarrer</span>
-          </div>
-          <div className="v14-intent-card">
-            <small>1 · VOTRE BESOIN</small>
-            <strong>« Je veux savoir où agir en priorité. »</strong>
-            <span>Diagnostic · secteur adapté · 3 priorités</span>
-          </div>
-          <div className="v14-flow-line" />
-          <div className="v14-solution-grid">
-            <article><span>2</span><div><small>COMPRENDRE</small><strong>Faire le point</strong></div><CircleCheckBig size={18} /></article>
-            <article><span>3</span><div><small>STRUCTURER</small><strong>Transformer les priorités</strong></div><CircleCheckBig size={18} /></article>
-            <article><span>4</span><div><small>AGIR</small><strong>Suivre les prochaines actions</strong></div><CircleCheckBig size={18} /></article>
-          </div>
-          <div className="v14-panel-note"><MessageSquareText size={18} /><span><strong>Une seule question à la fois.</strong><br />La suite s’adapte à votre secteur et à votre situation.</span></div>
         </div>
       </section>
 
-      <section className="v14-intent-strip">
-        <div className="container-page v14-intent-strip-inner">
-          <span>Vous avez plusieurs sujets ?</span>
-          <strong>Commencez par le plus important.</strong>
-          <p>ALLNEEDS garde le fil de vos besoins, sans vous demander de tout traiter en même temps.</p>
+      <section className="container-page v15-sector-section" id="secteurs">
+        <div className="v15-section-intro">
+          <span className="v15-kicker dark">COMMENCEZ ICI</span>
+          <h2>Choisissez votre secteur. Le reste du site s’adapte.</h2>
+          <p>Une fois le secteur choisi, les autres univers disparaissent du parcours pour garder une expérience simple.</p>
         </div>
-      </section>
-
-      <section id="secteurs" className="container-page v14-sectors">
-        <div className="v14-section-head">
-          <div>
-            <span className="v14-kicker">CHOISISSEZ VOTRE CONTEXTE</span>
-            <h2>Dans quel univers se situe votre besoin ?</h2>
-          </div>
-          <p>Un choix suffit. Les autres secteurs disparaissent ensuite du parcours pour garder une expérience simple et cohérente.</p>
-        </div>
-        <div className="v14-sector-grid">
-          {sectors.map((sector) => {
+        <div className="v15-sector-grid">
+          {sectors.map((sector, index) => {
             const Icon = sector.icon
             const isSelected = selected === sector.id
             return (
-              <Link
-                key={sector.id}
-                to="/secteurs/$sector"
-                params={{ sector: sector.id }}
-                onClick={() => selectSector(sector.id)}
-                className={`v14-sector-card ${isSelected ? 'is-selected' : ''}`}
-                style={{ '--sector-accent': sector.color } as React.CSSProperties}
-              >
-                <div className="v14-sector-top">
-                  <span className="v14-sector-icon"><Icon size={26} /></span>
-                  {isSelected ? <span className="v14-current">Secteur actuel</span> : <ArrowUpRight size={20} />}
+              <Link key={sector.id} to="/secteurs/$sector" params={{sector: sector.id}} onClick={() => selectSector(sector.id)} className={`v15-sector ${isSelected ? 'selected' : ''}`} style={{'--accent': sector.color} as React.CSSProperties}>
+                <div className="v15-sector-index">0{index + 1}</div>
+                <div className="v15-sector-icon"><Icon size={25}/></div>
+                <div className="v15-sector-body">
+                  <div className="v15-sector-title"><h3>{sector.name}</h3>{isSelected && <span>Secteur actuel</span>}</div>
+                  <p>{sector.desc}</p>
+                  <small>{sector.tags}</small>
                 </div>
-                <small>{sector.intent}</small>
-                <h3>{sector.name}</h3>
-                <p>{sector.desc}</p>
-                <div className="v14-sector-bottom"><span>{sector.tags}</span><strong>Voir mon parcours <ArrowRight size={15} /></strong></div>
+                <ArrowUpRight className="v15-sector-arrow" size={21}/>
               </Link>
             )
           })}
         </div>
       </section>
 
-      <section className="v14-journey">
+      <section className="v15-journey">
         <div className="container-page">
-          <div className="v14-section-head v14-section-head-light">
-            <div>
-              <span className="v14-kicker">UN PARCOURS PROGRESSIF</span>
-              <h2>Comprendre d’abord. Décider ensuite.</h2>
-            </div>
-            <p>Chaque étape répond à une intention claire. Vous ne voyez que ce qui est utile au moment où vous en avez besoin.</p>
+          <div className="v15-section-intro light">
+            <span className="v15-kicker">UN PARCOURS QUI NE VOUS NOIE PAS</span>
+            <h2>Trois étapes. Une décision à la fois.</h2>
           </div>
-          <div className="v14-journey-grid">
+          <div className="v15-journey-grid">
             {[
-              ['01', 'Comprendre', 'Identifier les faits, les difficultés et les 3 priorités de votre structure.'],
-              ['02', 'Structurer', 'Transformer les priorités retenues en méthodes, supports et outils concrets.'],
-              ['03', 'Agir', 'Mettre en œuvre, suivre les résultats et ajuster selon la mission choisie.'],
-            ].map(([number, title, copy]) => (
-              <article key={number}>
-                <span>{number}</span>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </article>
-            ))}
+              ['01','Comprendre','Identifier les faits, les difficultés et les priorités.'],
+              ['02','Structurer','Transformer les priorités retenues en méthodes et outils concrets.'],
+              ['03','Agir','Mettre en œuvre, suivre les résultats et ajuster.'],
+            ].map(([n,t,c]) => <article key={n}><span>{n}</span><div><h3>{t}</h3><p>{c}</p></div></article>)}
           </div>
         </div>
       </section>
 
-      <section className="container-page v14-spaces">
-        <div className="v14-section-head">
-          <div>
-            <span className="v14-kicker">DÉCOUVREZ VOS ESPACES</span>
-            <h2>Voyez ce que vous obtenez après connexion.</h2>
-          </div>
-          <p>Des aperçus volontairement limités : assez pour comprendre la valeur, sans exposer les données ni les fonctions sensibles.</p>
+      <section className="container-page v15-spaces">
+        <div className="v15-section-intro split">
+          <div><span className="v15-kicker dark">APRÈS CONNEXION</span><h2>Des espaces différents. Le même langage visuel.</h2></div>
+          <p>Chaque profil voit ce dont il a besoin, sans exposer toute la complexité du produit.</p>
         </div>
-        <div className="v14-space-list">
-          {spaces.map((space, index) => {
+        <div className="v15-space-stack">
+          {spaces.map((space, idx) => {
             const Icon = space.icon
-            return (
-              <article className={`v14-space-row ${index % 2 ? 'is-reverse' : ''}`} key={space.label}>
-                <div className="v14-space-copy">
-                  <span className="v14-space-label"><Icon size={16} /> {space.label}</span>
-                  <h3>{space.title}</h3>
-                  <p>{space.copy}</p>
-                  <div className="v14-space-proof"><Check size={15} /> Statuts visibles · prochaines actions · charge cognitive réduite</div>
-                </div>
-                <figure className="v14-space-preview">
-                  <img src={space.image} alt={space.caption} loading="lazy" />
-                  <figcaption>{space.caption}<span>Aperçu de démonstration</span></figcaption>
-                </figure>
-              </article>
-            )
+            return <article className="v15-space" key={space.label}>
+              <div className="v15-space-copy"><span><Icon size={16}/>{space.label}</span><h3>{space.title}</h3><p>{space.copy}</p><small>Statuts visibles · prochaines actions · vue simplifiée</small></div>
+              <figure><img src={space.image} alt={space.caption}/><figcaption>{space.caption}<em>Démo</em></figcaption></figure>
+              <div className="v15-space-number">0{idx+1}</div>
+            </article>
           })}
         </div>
       </section>
 
-      <section className="container-page v14-final-cta">
-        <div>
-          <span className="v14-kicker">PRÊT À FAIRE LE POINT ?</span>
-          <h2>Commencez par votre besoin le plus important.</h2>
-          <p>Choisissez votre secteur, puis avancez étape par étape dans le parcours ALLNEEDS existant.</p>
-        </div>
-        <div className="v14-final-actions">
-          <a href="#secteurs" className="v14-btn-primary">Choisir mon secteur <ArrowRight size={18} /></a>
-          <Link to="/diagnostic" className="v14-btn-secondary">Diagnostic STARTER</Link>
-        </div>
+      <section className="container-page v15-bottom-cta">
+        <div><span className="v15-kicker dark">PRÊT À COMMENCER ?</span><h2>Choisissez votre secteur et avancez étape par étape.</h2></div>
+        <a className="v15-primary" href="#secteurs">Commencer maintenant <ArrowRight size={18}/></a>
       </section>
     </div>
   )
