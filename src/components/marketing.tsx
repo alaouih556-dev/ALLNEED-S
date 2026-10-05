@@ -50,9 +50,10 @@ const BASE_PUBLIC_LINKS = [
 export function PublicHeader() {
   const [open, setOpen] = useState(false)
   const selectedSector = useSelectedSector()
-  const publicLinks = selectedSector
-    ? [{ label: SECTOR_LABEL[selectedSector], to: `/secteurs/${selectedSector}` }, ...BASE_PUBLIC_LINKS]
-    : [{ label: 'Secteurs', to: '/secteurs' }, ...BASE_PUBLIC_LINKS]
+  const publicLinks = [
+    { label: 'Accueil', to: '/' },
+    ...BASE_PUBLIC_LINKS,
+  ]
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur">
