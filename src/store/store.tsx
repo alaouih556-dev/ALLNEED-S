@@ -88,6 +88,7 @@ export interface PublicBooking {
 }
 
 export type Role = 'client' | 'admin' | 'concierge'
+export type ClientWorkspaceRole = 'dirigeant' | 'manager' | 'collaborateur'
 
 export interface ConciergeAccount {
   id: string
@@ -129,7 +130,8 @@ export interface DemoState {
   concierges: ConciergeAccount[]
   saasAccess: Record<Sector, boolean>
   saasAccessByOrg: Record<string, boolean>
-  registrationProfile: { sector: Sector; workspaceProfile: string; tier: string | null; payment: string | null } | null
+  registrationProfile: { sector: Sector; workspaceProfile: string; situation?: 'entreprise_existante' | 'creation' | 'investisseur'; tier: string | null; payment: string | null } | null
+  clientWorkspaceRole: ClientWorkspaceRole
   toasts: Toast[]
   now: string
 }
@@ -216,6 +218,7 @@ const initialState: DemoState = {
   saasAccess: { enseignement: false, sante: true, tourisme: false },
   saasAccessByOrg: { 'org-amal': false, 'org-nour': true, 'org-riad': false },
   registrationProfile: null,
+  clientWorkspaceRole: 'dirigeant',
   bookings: [
     {
       id: 'bk-001',
@@ -282,6 +285,7 @@ export type DemoAction =
   | { type: 'SAAS_SET_ACCESS'; sector: Sector; value: boolean }
   | { type: 'SAAS_SET_ORG_ACCESS'; orgId: string; value: boolean }
   | { type: 'REGISTRATION_SET'; profile: NonNullable<DemoState['registrationProfile']> }
+  | { type: 'CLIENT_WORKSPACE_ROLE_SET'; role: ClientWorkspaceRole }
   | { type: 'CONCIERGE_CREATE'; account: ConciergeAccount }
   | { type: 'CONCIERGE_TOGGLE'; id: string }
   | { type: 'CONCIERGE_ASSIGN_ORG'; id: string; orgId: string; value: boolean }
@@ -353,6 +357,9 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case 'REGISTRATION_SET':
       return { ...state, registrationProfile: action.profile }
+
+    case 'CLIENT_WORKSPACE_ROLE_SET':
+      return { ...state, clientWorkspaceRole: action.role }
 
     case 'CONCIERGE_CREATE':
       return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge créé', action.account.email)

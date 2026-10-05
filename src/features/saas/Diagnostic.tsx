@@ -4,6 +4,7 @@ import { DIAGNOSTIC_GRIDS } from '@/data/grid'
 import { useDemo } from '@/store/store'
 import { titles, type Industry } from './model'
 import './workspace.css'
+import { Diagnostic360 } from '@/features/health360/Diagnostic360'
 type Answers=Record<string,number>
 export function Diagnostic(){
  const {user,state}=useDemo()
@@ -11,6 +12,7 @@ export function Diagnostic(){
    const org=state.orgs.find(item=>item.id===user.orgId)
    return (org?.sector as Industry|undefined) ?? 'enseignement'
  },[state.orgs,user.orgId])
+ if(sector==='sante') return <Diagnostic360/>
  return <div className="saas"><header className="saas-hero"><span className="saas-kicker">ALLNEEDS · DIAGNOSTIC AUTOMATIQUE</span><h1>Comprendre aujourd’hui.<br/>Mieux agir demain.</h1><p>Évaluez vos pratiques, repérez vos priorités et construisez votre prochain plan d’action.</p><div className="saas-sector"><span aria-label={`Secteur actif : ${titles[sector]}`}>{titles[sector]}</span></div></header><p className="saas-notice">Autoévaluation organisationnelle dédiée à votre secteur. Aucune donnée de patient, d’élève ou de voyageur n’est nécessaire. Résultat automatique à confirmer avec ALLNEEDS.</p><Questionnaire key={sector+String(user.orgId)} sector={sector} org={String(user.orgId||'demo')}/></div>
 }
 function Questionnaire({sector,org}:{sector:Industry;org:string}){

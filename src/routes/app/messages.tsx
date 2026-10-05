@@ -37,7 +37,7 @@ export function MessagesPage() {
       <PageHeader
         eyebrow="Communication"
         title="Messagerie"
-        description="Un canal unique par sujet. ALLNEEDS et vos prestataires mobilisés répondent ici."
+        description="Chaque conversation reste rattachée à un sujet, un dossier ou une mission : la messagerie fait partie du workflow, elle ne remplace pas WhatsApp."
       />
 
       <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr] xl:grid-cols-[0.7fr_1.3fr]">
@@ -89,7 +89,7 @@ export function MessagesPage() {
                     {threads.find((t) => t.id === selected)?.subject}
                   </p>
                   <p className="text-xs text-ink-500">
-                    {threads.find((t) => t.id === selected)?.topic} · dernière activité{' '}
+                    Contexte : {threads.find((t) => t.id === selected)?.topic} · dernière activité{' '}
                     {relative(threads.find((t) => t.id === selected)?.lastAt ?? state.now, new Date(state.now).getTime())}
                   </p>
                 </div>

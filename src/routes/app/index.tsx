@@ -1,351 +1,101 @@
-import { ActivityBoard } from '@/components/ActivityBoard'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import {
-  ArrowRight,
-  Bell,
-  CalendarDays,
-  Clock,
-  FileText,
-  Inbox,
-  MessageSquare,
-  Network,
-  Receipt,
-  ShieldCheck,
-  TrendingUp,
-} from 'lucide-react'
-import { useDemo } from '@/store/store'
+import { ArrowRight, Bell, Briefcase, FileCheck2, Inbox, Target, UsersRound } from 'lucide-react'
 import { PageHeader } from '@/components/layouts'
-import { Badge, Button, Card, CardHeader, CardBody, EmptyState, Progress, Stat } from '@/components/ui'
-import {
-  DELIVERABLE_STATUS,
-  DOC_STATUS,
-  MEETING_STATUS,
-  MISSION_STATUS,
-  NEED_STATUS,
-} from '@/lib/status'
-import { ACCESS_OFFERS } from '@/data/catalog'
-import { dateTime, daysUntil, longDate, money, relative } from '@/lib/format'
-import { byId, percentage } from '@/lib/utils'
+import { WorkflowStrip, NextActionCard, EmptyNextAction } from '@/components/OperationalUX'
+import { useDemo } from '@/store/store'
+import { buildNextActions, buildObjectives, resolveSituation, situationLabel, missionProgress } from '@/lib/operational'
+import { Badge, Progress } from '@/components/ui'
 
 export const Route = createFileRoute('/app/')({
-  component: ClientDashboard,
-  head: () => ({ meta: [{ title: 'Mon espace — ALLNEEDS' }] }),
+  component: ClientCockpit,
+  head: () => ({ meta: [{ title: 'Cockpit — ALLNEEDS' }] }),
 })
 
-export function ClientDashboard() {
+function ClientCockpit() {
   const { state, orgId, user } = useDemo()
   const org = state.orgs.find((o) => o.id === orgId)
-  const hasAccessSubscription = state.registrationProfile === null || Boolean(state.registrationProfile.tier)
-
-  const orgNeeds = state.needs.filter((n) => n.orgId === orgId)
-  const activeNeeds = orgNeeds.filter((n) => !['clos', 'signe'].includes(n.status))
-  const openMissions = state.missions.filter((m) => m.orgId === orgId && m.status !== 'terminee')
-  const pendingDocs = state.documents.filter((d) => d.status !== 'valide')
-  const unread = state.threads.reduce((acc, t) => acc + t.unread, 0)
-  const nextMeetings = state.meetings
-    .filter((m) => m.orgId === orgId && (m.status === 'confirme' || m.status === 'propose'))
-    .sort((a, b) => a.at.localeCompare(b.at))
-
-  const tier = ACCESS_OFFERS.find((o) => o.tier === state.subscription.tier) ?? ACCESS_OFFERS[0]
-  const poolUsed = state.subscription.consumed
-  const poolRemaining = Math.max(0, tier.needsPerYear - poolUsed)
-  const monthsLeft = Math.max(0, Math.round(daysUntil(state.subscription.renewsAt) / 30))
-  const daysLeft = daysUntil(state.subscription.renewsAt)
-
-  const pendingDeliverables = state.deliverables.filter((d) => d.status !== 'valide')
+  const nextActions = buildNextActions(state, orgId)
+  const objectives = buildObjectives(state, orgId)
+  const situation = resolveSituation(state)
+  const activeNeeds = state.needs.filter((n) => n.orgId === orgId && !['clos', 'signe'].includes(n.status))
+  const activeMissions = state.missions.filter((m) => m.orgId === orgId && m.status !== 'terminee')
+  const pendingDocs = state.documents.filter((d) => d.orgId === orgId && d.required && d.status !== 'valide')
+  const unreadNotifs = state.notifications.filter((n) => !n.read).length
 
   return (
-    <>
-<ActivityBoard title={`${org?.sector === 'sante' ? 'Santé' : org?.sector === 'tourisme' ? 'Tourisme' : 'Enseignement'} · Votre tableau de bord`} items={[{label:'Besoins en cours',value:activeNeeds.length},{label:'Missions actives',value:openMissions.length},{label:'Rendez-vous prévus',value:nextMeetings.length},{label:'Diagnostics publiés',value:state.diagnostics.filter(d=>d.orgId===orgId&&d.status==='publie').length}]} />
-
+    <div className="operational-cockpit">
       <PageHeader
-        eyebrow="Espace client"
-        title={`Bonjour ${user.name.split(' ')[0]}, voici où vous en êtes.`}
-        description={`${org?.name ?? 'Votre établissement'} · ${org?.city ?? ''} · ${org?.kind ?? ''}`}
-        actions={
-          <>
-            <Link to="/app/besoins">
-              <Button variant="outline" size="sm">
-                <Inbox className="h-3.5 w-3.5" />
-                Nouveau besoin
-              </Button>
-            </Link>
-            <Link to="/diagnostic">
-              <Button size="sm">
-                <CalendarDays className="h-3.5 w-3.5" />
-                Diagnostic offert
-              </Button>
-            </Link>
-          </>
-        }
+        eyebrow={`${situationLabel(situation)} · ${org?.sector ?? ''}`}
+        title={`Bonjour ${user.name.split(' ')[0]}. Voici ce qui mérite votre attention.`}
+        description={`${org?.name ?? 'Votre entreprise'} · ${org?.city ?? ''} · ${org?.kind ?? ''} · Vue ${state.clientWorkspaceRole}`}
+        actions={<Link to="/app/notifications" className="cockpit-notif-link"><Bell size={16}/>{unreadNotifs ? `${unreadNotifs} notification${unreadNotifs > 1 ? 's' : ''}` : 'Notifications'}</Link>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat
-          label="Besoins actifs"
-          value={activeNeeds.length}
-          hint={`${orgNeeds.length} besoins consommés au total`}
-          tone="brand"
-          icon={<Inbox className="h-3.5 w-3.5" />}
-        />
-        {hasAccessSubscription ? <Stat
-          label="Pool ACCÈS restant" value={poolRemaining}
-          hint={`${tier.needsPerYear} besoins/an · ${percentage(poolUsed, tier.needsPerYear)} % consommés`}
-          tone={poolRemaining <= 3 ? 'warning' : 'success'} icon={<Network className="h-3.5 w-3.5" />}
-        /> : <Stat label="ALLNEEDS ACCÈS" value="Non souscrit" hint="CONNECT · PLUS · PRIORITÉ disponibles dans votre compte" tone="brand" icon={<Network className="h-3.5 w-3.5" />} />}
-        <Stat
-          label="Missions en cours"
-          value={openMissions.length}
-          hint={openMissions.map((m) => m.code).join(' · ') || 'Aucune'}
-          tone="violet"
-          icon={<TrendingUp className="h-3.5 w-3.5" />}
-        />
-        <Stat
-          label="Points en attente"
-          value={pendingDocs.length + pendingDeliverables.length + unread}
-          hint={`${pendingDocs.length} documents · ${pendingDeliverables.length} livrables · ${unread} messages`}
-          tone="warning"
-          icon={<Bell className="h-3.5 w-3.5" />}
-        />
-      </div>
-
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-        <div className="space-y-6">
-          {/* Besoins actifs */}
-          <Card>
-            <CardHeader
-              title="Besoins en cours"
-              description="Chaque besoin est suivi jusqu’à la signature chez le prestataire."
-              action={
-                <Link to="/app/besoins" className="text-xs font-semibold text-brand-700">
-                  Tout voir
-                </Link>
-              }
-            />
-            <div className="divide-y divide-ink-50">
-              {activeNeeds.length === 0 ? (
-                <div className="px-5 py-6">
-                  <EmptyState
-                    icon={<Inbox className="h-5 w-5" />}
-                    title="Aucun besoin en cours"
-                    description="Déposez un besoin : nous recherchons, vérifions et comparons pour vous."
-                    action={
-                      <Link to="/demande">
-                        <Button size="sm">Déposer un besoin</Button>
-                      </Link>
-                    }
-                  />
-                </div>
-              ) : null}
-
-              {activeNeeds.slice(0, 5).map((need) => {
-                const providers = need.candidateIds.map((id) => byId(state.providers, id)).filter(Boolean)
-                const quotes = need.quoteIds.map((id) => byId(state.quotes, id)).filter(Boolean)
-                const status = NEED_STATUS[need.status]
-                return (
-                  <Link
-                    key={need.id}
-                    to="/app/besoins/$id"
-                    params={{ id: need.id }}
-                    className="flex flex-wrap items-center gap-4 px-5 py-4 transition hover:bg-ink-50/60"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-semibold text-ink-950">{need.title}</p>
-                        <Badge tone={status.tone}>{status.label}</Badge>
-                      </div>
-                      <p className="mt-1 text-xs text-ink-500">
-                        {need.categoryLabel} · {providers.length} prestataire{providers.length > 1 ? 's' : ''} ·{' '}
-                        {quotes.length} devis · déposé {relative(need.submittedAt)}
-                      </p>
-                    </div>
-                    <div className="w-28 shrink-0">
-                      <Progress
-                        value={Math.round(((['recu', 'analyse', 'recherche', 'propositions', 'devis', 'negociation', 'signe'] as string[]).indexOf(need.status) / 6) * 100)}
-                        tone={need.status === 'signe' ? 'emerald' : 'brand'}
-                      />
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-ink-300" />
-                  </Link>
-                )
-              })}
-            </div>
-          </Card>
-
-          {/* Prochains rendez-vous */}
-          <Card>
-            <CardHeader
-              title="Prochains rendez-vous"
-              action={
-                <Link to="/app/rendez-vous" className="text-xs font-semibold text-brand-700">
-                  Tout voir
-                </Link>
-              }
-            />
-            <div className="divide-y divide-ink-50">
-              {nextMeetings.length === 0 ? (
-                <div className="px-5 py-6">
-                  <EmptyState title="Aucun rendez-vous à venir" description="Proposez un créneau à votre interlocuteur." />
-                </div>
-              ) : null}
-              {nextMeetings.map((meeting) => (
-                <div key={meeting.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
-                  <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-brand-50">
-                    <span className="text-[0.6rem] font-semibold uppercase text-brand-700">
-                      {new Date(meeting.at).toLocaleDateString('fr-FR', { month: 'short' })}
-                    </span>
-                    <span className="text-sm font-bold leading-none text-brand-900">
-                      {new Date(meeting.at).getDate()}
-                    </span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-ink-950">{meeting.title}</p>
-                    <p className="mt-0.5 text-xs text-ink-500">
-                      {dateTime(meeting.at)} · {meeting.durationMin} min · {meeting.location}
-                    </p>
-                  </div>
-                  <Badge tone={MEETING_STATUS[meeting.status].tone}>{MEETING_STATUS[meeting.status].label}</Badge>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Livrables */}
-          <Card>
-            <CardHeader
-              title="Livrables en attente de votre validation"
-              description="2 tours de retouches inclus par livrable."
-              action={
-                <Link to="/app/livrables" className="text-xs font-semibold text-brand-700">
-                  Tous les livrables
-                </Link>
-              }
-            />
-            <div className="divide-y divide-ink-50">
-              {pendingDeliverables.length === 0 ? (
-                <div className="px-5 py-6">
-                  <EmptyState title="Rien à valider" description="Tous vos livrables sont validés." />
-                </div>
-              ) : null}
-              {pendingDeliverables.map((deliverable) => {
-                const mission = byId(state.missions, deliverable.missionId)
-                const status = DELIVERABLE_STATUS[deliverable.status]
-                return (
-                  <div key={deliverable.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
-                    <FileText className="h-4 w-4 shrink-0 text-ink-400" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-ink-950">{deliverable.title}</p>
-                      <p className="mt-0.5 text-xs text-ink-500">
-                        {mission?.code} · {deliverable.type} · v{deliverable.version}/{deliverable.maxVersions} ·{' '}
-                        {relative(deliverable.updatedAt)}
-                      </p>
-                    </div>
-                    <Badge tone={status.tone}>{status.label}</Badge>
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
+      <section className="cockpit-hero-grid">
+        <div>
+          <p className="cockpit-label">ONE NEXT ACTION</p>
+          {nextActions[0] ? <NextActionCard action={nextActions[0]} featured /> : <EmptyNextAction />}
         </div>
-
-        <aside className="space-y-6">
-          {/* Abonnement */}
-          {hasAccessSubscription ? (
-            <Card>
-              <CardHeader title={`Abonnement ${tier.name}`} description={tier.tagline} />
-              <CardBody>
-                <div className="flex items-end justify-between"><p className="font-display text-3xl leading-none text-ink-950">{poolRemaining}<span className="ml-1 text-base text-ink-400">/ {tier.needsPerYear}</span></p><p className="text-xs text-ink-500">besoins restants</p></div>
-                <Progress className="mt-4" value={percentage(poolUsed, tier.needsPerYear)} tone={poolRemaining <= 3 ? 'amber' : 'brand'} />
-                <ul className="mt-5 space-y-2.5 text-sm text-ink-600"><li className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-ink-400"/>Première proposition sous {tier.firstProposal}</li><li className="flex items-center gap-2"><MessageSquare className="h-3.5 w-3.5 text-ink-400"/>Réponse sous {tier.responseTime}</li><li className="flex items-center gap-2"><Receipt className="h-3.5 w-3.5 text-ink-400"/>{tier.quoteComparison}</li></ul>
-                <div className="mt-5 rounded-lg bg-ink-50 p-3"><p className="text-xs text-ink-500">Renouvellement le {longDate(state.subscription.renewsAt)} ({monthsLeft} mois)</p>{daysLeft <= 45 ? <p className="mt-1 text-xs font-semibold text-amber-700">Préavis de non-reconduction à donner avant le {longDate(addDaysSafe(30))}</p> : null}</div>
-                <Link to="/app/abonnement" className="mt-5 block"><Button size="sm" fullWidth variant="outline">Gérer mon abonnement</Button></Link>
-              </CardBody>
-            </Card>
-          ) : (
-            <Card className="border-brand-200 bg-brand-50/40">
-              <CardHeader title="Découvrez ALLNEEDS ACCÈS" description="Un abonnement séparé, à choisir uniquement si vous souhaitez nous confier vos besoins de prestataires." />
-              <CardBody>
-                <div className="grid gap-2 text-xs text-ink-600"><p><strong>CONNECT</strong> · 6 besoins/an</p><p><strong>PLUS</strong> · 15 besoins/an</p><p><strong>PRIORITÉ</strong> · 30 besoins/an</p></div>
-                <Link to="/app/abonnement" className="mt-5 block"><Button size="sm" fullWidth>Découvrir les abonnements</Button></Link>
-              </CardBody>
-            </Card>
-          )}
-
-          {/* Conformité */}
-          <Card>
-            <CardHeader title="Conformité et autorisations" />
-            <CardBody>
-              <ul className="space-y-3">
-                {state.documents
-                  .filter((d) => d.kind === 'autorisation')
-                  .map((doc) => (
-                    <li key={doc.id} className="flex items-start gap-3">
-                      <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-ink-400" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-ink-900">{doc.name}</p>
-                        <p className="mt-0.5 text-xs text-ink-500">{doc.comment}</p>
-                      </div>
-                      <Badge tone={DOC_STATUS[doc.status].tone} className="ml-auto">
-                        {DOC_STATUS[doc.status].label}
-                      </Badge>
-                    </li>
-                  ))}
-              </ul>
-              <AlertInline />
-              <Link to="/app/documents" className="mt-4 block">
-                <Button size="sm" fullWidth variant="outline">
-                  Gérer mes documents
-                </Button>
-              </Link>
-            </CardBody>
-          </Card>
-
-          {/* Missions */}
-          <Card>
-            <CardHeader title="Missions" />
-            <CardBody className="space-y-4">
-              {openMissions.map((mission) => (
-                <div key={mission.id}>
-                  <div className="flex items-center justify-between">
-                    <Link
-                      to="/app/missions/$id"
-                      params={{ id: mission.id }}
-                      className="text-sm font-semibold text-ink-950 hover:text-brand-700"
-                    >
-                      {mission.code}
-                    </Link>
-                    <Badge tone={MISSION_STATUS[mission.status].tone}>{MISSION_STATUS[mission.status].label}</Badge>
-                  </div>
-                  <Progress className="mt-2" value={mission.onboardingProgress} label="Avancement" />
-                  <p className="mt-2 text-xs text-ink-500">
-                    Livraison prévue le {longDate(mission.targetEnd)} · {money(mission.price)}
-                  </p>
-                </div>
-              ))}
-              <Link to="/app/missions" className="block">
-                <Button size="sm" fullWidth variant="outline">
-                  Voir mes missions
-                </Button>
-              </Link>
-            </CardBody>
-          </Card>
+        <aside className="cockpit-context-card">
+          <span>Votre contexte</span>
+          <h2>{situationLabel(situation)}</h2>
+          <p>ALLNEEDS adapte la lecture aux besoins, aux actions en cours et aux résultats réellement présents dans votre espace.</p>
+          <div className="cockpit-context-stats">
+            <div><strong>{activeNeeds.length}</strong><small>besoins actifs</small></div>
+            <div><strong>{activeMissions.length}</strong><small>missions actives</small></div>
+            <div><strong>{pendingDocs.length}</strong><small>documents requis</small></div>
+          </div>
         </aside>
-      </div>
-    </>
-  )
-}
+      </section>
 
-function AlertInline() {
-  return (
-    <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-      Aucune image d’élève n’est publiée sans autorisation écrite complète. Tant que la couverture est incomplète, les
-      visuels sont remplacés.
-    </p>
-  )
-}
+      <section className="cockpit-section">
+        <div className="cockpit-section-heading"><div><span>BOUCLE PRODUIT</span><h2>Du besoin à l’optimisation</h2></div><p>La plateforme organise la complexité derrière une chaîne de décision simple.</p></div>
+        <WorkflowStrip />
+      </section>
 
-function addDaysSafe(days: number) {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
-  return d.toISOString()
+      <section className="cockpit-section">
+        <div className="cockpit-section-heading"><div><span>VOS PRIORITÉS</span><h2>Objectifs plutôt que modules</h2></div><Link to="/app/objectifs">Voir tous les objectifs <ArrowRight size={14}/></Link></div>
+        <div className="objective-grid">
+          {objectives.map((objective) => (
+            <Link to="/app/objectifs" key={objective.id} className="objective-card">
+              <span>{objective.engine}</span>
+              <h3>{objective.title}</h3>
+              <p>{objective.description}</p>
+              <div><strong>{objective.activeNeeds + objective.activeMissions}</strong><small>élément{objective.activeNeeds + objective.activeMissions > 1 ? 's' : ''} actif{objective.activeNeeds + objective.activeMissions > 1 ? 's' : ''} lié{objective.activeNeeds + objective.activeMissions > 1 ? 's' : ''}</small></div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="cockpit-section cockpit-two-columns">
+        <div>
+          <div className="cockpit-section-heading compact"><div><span>ACTIONS</span><h2>Les 3 prochaines</h2></div><Link to="/app/actions">Tout voir</Link></div>
+          <div className="next-action-stack">
+            {nextActions.slice(1, 4).map((action) => <NextActionCard key={action.id} action={action} />)}
+            {nextActions.length <= 1 ? <EmptyNextAction /> : null}
+          </div>
+        </div>
+        <div>
+          <div className="cockpit-section-heading compact"><div><span>PROJETS</span><h2>Missions en cours</h2></div><Link to="/app/projets">Tout voir</Link></div>
+          <div className="mission-snapshot-list">
+            {activeMissions.slice(0, 4).map((mission) => (
+              <Link to={`/app/missions/${mission.id}` as any} className="mission-snapshot" key={mission.id}>
+                <div className="mission-snapshot-top"><div><Badge tone="brand">{mission.code}</Badge><strong>{mission.title}</strong></div><span>{missionProgress(mission)}%</span></div>
+                <Progress value={missionProgress(mission)} />
+                <small>{mission.owner} · {mission.milestones.filter((m) => m.status === 'fait').length}/{mission.milestones.length} jalons terminés</small>
+              </Link>
+            ))}
+            {!activeMissions.length ? <div className="simple-empty"><Briefcase size={20}/><span>Aucune mission active.</span></div> : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="cockpit-quick-nav">
+        <Link to="/app/besoins"><Inbox/><span><strong>Exprimer un besoin</strong><small>Qualifier le problème avant la solution.</small></span></Link>
+        <Link to="/app/equipe"><UsersRound/><span><strong>Équipe & responsabilités</strong><small>Voir qui intervient dans votre parcours.</small></span></Link>
+        <Link to="/app/ecosysteme"><Target/><span><strong>Écosystème</strong><small>Experts et partenaires reliés à vos besoins.</small></span></Link>
+        <Link to="/app/performance"><FileCheck2/><span><strong>Performance</strong><small>Mesures issues de vos données réelles.</small></span></Link>
+      </section>
+    </div>
+  )
 }

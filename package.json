@@ -16,7 +16,8 @@
     "test:questionnaires": "node scripts/test-questionnaires.mjs",
     "test:access": "node scripts/test-access-v9.mjs",
     "test:v10": "node scripts/test-v10-rules.mjs",
-    "prebuild": "npm run routes:generate"
+    "prebuild": "npm run routes:generate",
+    "test:v16": "node scripts/test-v16-strategy.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.39",

@@ -13,6 +13,11 @@ import {
   Gauge,
   Inbox,
   LayoutDashboard,
+  ListChecks,
+  Target,
+  UsersRound,
+  LineChart,
+  FolderKanban,
   LogOut,
   MessageSquare,
   Network,
@@ -74,22 +79,28 @@ interface NavItem {
   disabledHint?: string
 }
 
-function buildClientNav(unreadMessages: number, pendingDocs: number, saasEnabled: boolean): NavItem[] {
-  return [
-    { label: 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" />, disabled: !saasEnabled, disabledHint: 'En attente de validation ALLNEEDS' },
-    { label: 'Diagnostic automatique', to: '/app/diagnostic-auto', icon: <Gauge className="h-4 w-4" /> },
-    { label: 'Tableau de bord', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
-    { label: 'Besoins', to: '/app/besoins', icon: <Inbox className="h-4 w-4" /> },
-    { label: 'Prestataires', to: '/app/prestataires', icon: <Network className="h-4 w-4" /> },
-    { label: 'Devis', to: '/app/devis', icon: <Receipt className="h-4 w-4" /> },
-    { label: 'Diagnostics', to: '/app/diagnostics', icon: <ClipboardList className="h-4 w-4" /> },
-    { label: 'Missions', to: '/app/missions', icon: <Briefcase className="h-4 w-4" /> },
-    { label: 'Livrables', to: '/app/livrables', icon: <FileText className="h-4 w-4" /> },
-    { label: 'Rendez-vous', to: '/app/rendez-vous', icon: <CalendarDays className="h-4 w-4" /> },
-    { label: 'Messages', to: '/app/messages', icon: <MessageSquare className="h-4 w-4" />, badge: unreadMessages },
+function buildClientNav(unreadMessages: number, pendingDocs: number, saasEnabled: boolean, workspaceRole: 'dirigeant'|'manager'|'collaborateur', sector?: string): NavItem[] {
+  const items: NavItem[] = [
+    { label: 'Accueil · Cockpit', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { label: 'Objectifs', to: '/app/objectifs' as any, icon: <Target className="h-4 w-4" /> },
+    { label: 'Actions', to: '/app/actions' as any, icon: <ListChecks className="h-4 w-4" /> },
+    ...(sector === 'sante' ? [{ label: 'Diagnostic 360° Santé', to: '/app/diagnostic-auto' as any, icon: <Gauge className="h-4 w-4" /> }] : []),
+    { label: 'Équipe', to: '/app/equipe' as any, icon: <UsersRound className="h-4 w-4" /> },
+    { label: 'Écosystème', to: '/app/ecosysteme' as any, icon: <Network className="h-4 w-4" /> },
+    { label: 'Performance', to: '/app/performance' as any, icon: <LineChart className="h-4 w-4" /> },
+    { label: 'Projets', to: '/app/projets' as any, icon: <FolderKanban className="h-4 w-4" /> },
     { label: 'Documents', to: '/app/documents', icon: <ShieldCheck className="h-4 w-4" />, badge: pendingDocs },
-    { label: 'Abonnement', to: '/app/abonnement', icon: <Settings2 className="h-4 w-4" /> },
+    { label: 'Notifications', to: '/app/notifications' as any, icon: <Bell className="h-4 w-4" /> },
+    { label: 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" />, disabled: !saasEnabled, disabledHint: 'En attente de validation ALLNEEDS' },
+    { label: 'Plus · Besoins', to: '/app/besoins', icon: <Inbox className="h-4 w-4" /> },
+    { label: 'Plus · Diagnostics', to: '/app/diagnostics', icon: <Gauge className="h-4 w-4" /> },
+    { label: 'Plus · Missions', to: '/app/missions', icon: <Briefcase className="h-4 w-4" /> },
+    { label: 'Plus · Messages', to: '/app/messages', icon: <MessageSquare className="h-4 w-4" />, badge: unreadMessages },
+    { label: 'Paramètres', to: '/app/parametres' as any, icon: <Settings2 className="h-4 w-4" /> },
   ]
+  if (workspaceRole === 'collaborateur') return items.filter((item) => ['Accueil · Cockpit','Actions','Projets','Documents','Notifications','Plus · Messages','Paramètres'].includes(item.label))
+  if (workspaceRole === 'manager') return items.filter((item) => !['Espace métier SaaS','Plus · Diagnostics','Diagnostic 360° Santé'].includes(item.label))
+  return items
 }
 
 
@@ -145,7 +156,7 @@ export function AppShell({
   const clientOrg = state.orgs.find((org) => org.id === user.orgId)
   const clientSaasEnabled = clientOrg ? orgHasSaasAccess(state, clientOrg.id, clientOrg.sector) : false
 
-  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(unread, pendingDocs, clientSaasEnabled)
+  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(unread, pendingDocs, clientSaasEnabled, state.clientWorkspaceRole, clientOrg?.sector)
 
   function switchRole(next: Role) {
     dispatch({ type: 'SET_ROLE', role: next })

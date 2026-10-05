@@ -51,7 +51,7 @@ export function InscriptionPage() {
   const { dispatch } = useDemo()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
-    org: '', kind: '', sector: 'enseignement' as Sector, workspaceProfile: 'ecole', city: '', size: '',
+    situation: 'entreprise_existante' as 'entreprise_existante'|'creation'|'investisseur', org: '', kind: '', sector: 'enseignement' as Sector, workspaceProfile: 'ecole', city: '', size: '',
     name: '', role: '', email: '', phone: '', accept: false,
   })
   const [error, setError] = useState('')
@@ -67,7 +67,7 @@ export function InscriptionPage() {
   function next() { const m=validate(step); if(m){setError(m);return}; setError(''); setStep((v)=>Math.min(v+1, STEP_LABELS.length-1)) }
   function submit() {
     const m=validate(2); if(m){setError(m);return}
-    dispatch({ type: 'REGISTRATION_SET', profile: { sector: form.sector, workspaceProfile: form.workspaceProfile, tier: null, payment: null } })
+    dispatch({ type: 'REGISTRATION_SET', profile: { sector: form.sector, workspaceProfile: form.workspaceProfile, situation: form.situation, tier: null, payment: null } })
     dispatch({ type: 'SET_ONBOARDED', value: false })
     navigate({ to: '/onboarding' })
   }
@@ -80,6 +80,7 @@ export function InscriptionPage() {
     <Steps steps={STEP_LABELS} current={step} className="mb-8" />
     <div className="space-y-5">
       {step===0 ? <>
+        <div><p className="mb-2 text-sm font-semibold text-ink-900">Votre situation</p><p className="mb-3 text-xs text-ink-500">Le contexte pilote l’expérience sans créer des dizaines de parcours séparés.</p><div className="grid gap-3 sm:grid-cols-3">{[{value:'entreprise_existante',label:'Entreprise existante',desc:'Améliorer, résoudre, développer.'},{value:'creation',label:'Entreprise en création',desc:'Avancer étape par étape.'},{value:'investisseur',label:'Investisseur',desc:'Opportunités, maturité, partenaires.'}].map((item)=><button key={item.value} type="button" onClick={()=>set('situation',item.value as typeof form.situation)} className={cn('rounded-xl border p-4 text-left transition',form.situation===item.value?'border-brand-600 bg-brand-50':'border-ink-200 hover:border-ink-400')}><p className="text-sm font-semibold text-ink-950">{item.label}</p><p className="mt-1 text-xs text-ink-500">{item.desc}</p></button>)}</div></div>
         <Field label="Nom de l’établissement" required><Input value={form.org} onChange={(e)=>set('org',e.target.value)} placeholder="École Al Amal" /></Field>
         <Field label="Type de structure" hint="École privée, crèche, clinique, hôtel…"><Input value={form.kind} onChange={(e)=>set('kind',e.target.value)} placeholder="École privée" /></Field>
         <div className="grid gap-5 sm:grid-cols-3">
@@ -102,7 +103,7 @@ export function InscriptionPage() {
       </> : null}
       {step===2 ? <>
         <Card className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Récapitulatif</p><dl className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between gap-4"><dt className="text-ink-500">Établissement</dt><dd className="font-medium text-ink-900">{form.org}</dd></div>
+          <div className="flex justify-between gap-4"><dt className="text-ink-500">Situation</dt><dd className="font-medium text-ink-900">{form.situation==='creation'?'Entreprise en création':form.situation==='investisseur'?'Investisseur':'Entreprise existante'}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">Établissement</dt><dd className="font-medium text-ink-900">{form.org}</dd></div>
           <div className="flex justify-between gap-4"><dt className="text-ink-500">Secteur</dt><dd className="font-medium text-ink-900">{SECTOR_LABEL[form.sector]}</dd></div>
           <div className="flex justify-between gap-4"><dt className="text-ink-500">Espace métier</dt><dd className="text-right font-medium text-ink-900">{WORKSPACE_PROFILES[form.sector].find((x)=>x.value===form.workspaceProfile)?.label}</dd></div>
           <div className="flex justify-between gap-4"><dt className="text-ink-500">Contact</dt><dd className="text-right font-medium text-ink-900">{form.name}</dd></div>

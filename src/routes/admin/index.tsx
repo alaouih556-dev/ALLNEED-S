@@ -44,8 +44,8 @@ export function AdminOverview() {
   return (
     <>
       <PageHeader
-        eyebrow="Administration"
-        title="Vue d’ensemble"
+        eyebrow="Administration · Écosystème"
+        title="Control Tower"
         description={`Situation au ${longDate(state.now)} · ${state.orgs.length} établissements suivis · données de démonstration partagées avec l’espace client`}
         actions={
           <>
