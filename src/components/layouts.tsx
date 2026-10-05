@@ -153,7 +153,7 @@ export function AppShell({
   }
 
   return (
-    <div className="workspace-redesign flex min-h-screen bg-ink-50">
+    <div className={`workspace-redesign workspace-${variant} flex min-h-screen bg-ink-50`}>
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-ink-100 bg-white lg:flex">
         <div className="flex h-16 items-center gap-2.5 border-b border-ink-100 px-5">
           <Link to="/" className="flex items-center gap-2.5">

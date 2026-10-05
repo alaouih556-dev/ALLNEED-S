@@ -50,10 +50,9 @@ const BASE_PUBLIC_LINKS = [
 export function PublicHeader() {
   const [open, setOpen] = useState(false)
   const selectedSector = useSelectedSector()
-  const publicLinks = [
-    { label: 'Accueil', to: '/' },
-    ...BASE_PUBLIC_LINKS,
-  ]
+  const publicLinks = selectedSector
+    ? [{ label: SECTOR_LABEL[selectedSector], to: `/secteurs/${selectedSector}` }, ...BASE_PUBLIC_LINKS]
+    : [{ label: 'Secteurs', to: '/secteurs' }, ...BASE_PUBLIC_LINKS]
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur">
@@ -90,7 +89,7 @@ export function PublicHeader() {
           </Link>
           <Link to="/diagnostic">
             <Button size="sm">
-              Diagnostic
+              Commencer
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
@@ -123,7 +122,7 @@ export function PublicHeader() {
             <div className="grid gap-2 pt-3">
               <Link to="/diagnostic" onClick={() => setOpen(false)}>
                 <Button fullWidth size="sm">
-                  Diagnostic
+                  Commencer
                 </Button>
               </Link>
               <Link to="/connexion" onClick={() => setOpen(false)}>

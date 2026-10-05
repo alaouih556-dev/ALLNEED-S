@@ -29,8 +29,8 @@ function SectorDiagnosticDetail({ sector }: { sector: Sector }) {
       <div className="container-page">
         <SectionHeading
           eyebrow={`${sectorName} · diagnostic STARTER`}
-          title={`Le diagnostic ${sectorName} suit exactement la grille dédiée à ce secteur`}
-          description="Chaque secteur dispose de ses propres questions, documents à préparer, garde-fous, charges récurrentes et synthèse. Les questions affichées ci-dessous proviennent directement de la grille STARTER du secteur sélectionné."
+          title="Un diagnostic guidé, sans surcharge"
+          description={`En 1h30, le diagnostic ${sectorName} avance en quatre temps. Les questions sont propres à votre secteur et restent disponibles ci-dessous si vous souhaitez voir le détail.`}
         />
 
         <div className="mt-10 grid gap-4 md:grid-cols-4">
@@ -47,31 +47,36 @@ function SectorDiagnosticDetail({ sector }: { sector: Sector }) {
           })}
         </div>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+        <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {grid.levers.map((lever, index) => (
-            <Card key={lever.id} className="p-6">
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-sm font-bold text-brand-700">{index + 1}</span>
-                <h3 className="font-display text-2xl text-ink-950">{lever.name}</h3>
+            <details key={lever.id} className="sector-diagnostic-detail group rounded-2xl border border-ink-100 bg-white p-0">
+              <summary className="flex cursor-pointer list-none items-center gap-3 p-5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-bold text-brand-700">{index + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Levier {index + 1}</p>
+                  <h3 className="mt-1 font-semibold text-ink-950">{lever.name}</h3>
+                </div>
+                <span className="text-xs font-semibold text-brand-700">Voir les {lever.questions.length} questions</span>
+              </summary>
+              <div className="border-t border-ink-100 px-5 pb-5 pt-4">
+                <ol className="space-y-2.5">
+                  {lever.questions.map((question, questionIndex) => (
+                    <li key={question.id} className="flex items-start gap-2 text-sm leading-relaxed text-ink-600">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[0.65rem] font-bold text-emerald-700">{questionIndex + 1}</span>
+                      {question.text}
+                    </li>
+                  ))}
+                </ol>
+                <div className="mt-5 rounded-xl bg-ink-50 p-3 text-xs text-ink-500">{lever.scoreNote} · Maximum : {lever.questions.length * 5} points.</div>
               </div>
-              <ol className="mt-5 space-y-2.5">
-                {lever.questions.map((question, questionIndex) => (
-                  <li key={question.id} className="flex items-start gap-2 text-sm leading-relaxed text-ink-600">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[0.65rem] font-bold text-emerald-700">{questionIndex + 1}</span>
-                    {question.text}
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-5 rounded-xl bg-ink-50 p-3 text-xs text-ink-500">
-                {lever.scoreNote} · Maximum : {lever.questions.length * 5} points.
-              </div>
-            </Card>
+            </details>
           ))}
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
           <Card className="p-6">
-            <h3 className="font-semibold text-ink-950">Documents à demander avant le rendez-vous</h3>
+            <h3 className="font-semibold text-ink-950">À préparer avant le rendez-vous</h3>
+            <p className="mt-2 text-sm text-ink-500">Quelques éléments suffisent pour partir de faits concrets.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {grid.documents.map((item) => (
                 <div key={item} className="flex gap-2 rounded-lg border border-ink-100 p-3 text-xs text-ink-600">
@@ -84,7 +89,7 @@ function SectorDiagnosticDetail({ sector }: { sector: Sector }) {
           <Card className="border-amber-200 bg-amber-50 p-6">
             <div className="flex items-center gap-2">
               <LockKeyhole className="h-5 w-5 text-amber-700" />
-              <h3 className="font-semibold text-amber-950">{sector === 'sante' ? 'Notre engagement pour votre structure' : `Garde-fous ${sectorName}`}</h3>
+              <h3 className="font-semibold text-amber-950">Un cadre clair dès le départ</h3>
             </div>
             {sector === 'sante' ? <p className="mt-4 text-sm leading-relaxed text-amber-900">Notre analyse porte sur l’organisation, la gestion et la performance de votre structure — jamais sur la prise en charge médicale de vos patients.</p> : null}
             <ul className="mt-4 space-y-3 text-sm leading-relaxed text-amber-900">
@@ -95,14 +100,14 @@ function SectorDiagnosticDetail({ sector }: { sector: Sector }) {
 
         <div className="mt-10 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
           <Card className="p-6">
-            <h3 className="font-semibold text-ink-950">Charges récurrentes à relever</h3>
+            <h3 className="font-semibold text-ink-950">Charges récurrentes observées</h3>
             <p className="mt-2 text-sm leading-relaxed text-ink-500">{grid.chargeIntro}</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {grid.chargeRows.map((row) => <div key={row.id} className="rounded-lg bg-ink-50 px-3 py-2 text-xs font-medium text-ink-700">{row.poste}</div>)}
             </div>
           </Card>
           <Card className="p-6">
-            <h3 className="font-semibold text-ink-950">Sortie du diagnostic</h3>
+            <h3 className="font-semibold text-ink-950">Ce que vous obtenez à la fin</h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {grid.synthRows.map((row) => (
                 <div key={row.id} className="flex items-start gap-2 rounded-lg border border-ink-100 p-3 text-xs text-ink-600">
@@ -166,6 +171,25 @@ export function SectorPage({ sector }: { sector: Sector }) {
               </div>
             </Card>
           </div>
+        </div>
+      </section>
+
+      <section className="container-page py-16">
+        <div className="sector-private-preview">
+          <div>
+            <p className="eyebrow">Après connexion</p>
+            <h2 className="mt-3 font-display text-3xl tracking-tight text-ink-950">Votre espace {content.name}, sans les autres secteurs</h2>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-600">Le tableau de bord reste centré sur vos besoins, vos missions, vos rendez-vous et les prochaines actions utiles à votre activité.</p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs text-ink-600">
+              <span className="rounded-full bg-ink-50 px-3 py-2">Statuts visibles</span>
+              <span className="rounded-full bg-ink-50 px-3 py-2">Suivi sectoriel</span>
+              <span className="rounded-full bg-ink-50 px-3 py-2">Actions prioritaires</span>
+            </div>
+          </div>
+          <figure>
+            <img src={`/previews/client-${sector}.png`} alt={`Aperçu de l’espace Client ${content.name}`} loading="lazy" />
+            <figcaption>Aperçu de l’espace Client {content.name} · données de démonstration</figcaption>
+          </figure>
         </div>
       </section>
 
