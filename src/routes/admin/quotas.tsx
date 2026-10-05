@@ -152,7 +152,7 @@ export function AdminQuotas() {
                 <Th>Simultanés</Th>
                 <Th>Prestataires</Th>
                 <Th>1re proposition</Th>
-                
+
               </tr>
             </thead>
             <tbody>
@@ -170,7 +170,7 @@ export function AdminQuotas() {
                   <Td>{o.concurrentNeeds}</Td>
                   <Td>{o.providersPerNeed}</Td>
                   <Td>{o.firstProposal}</Td>
-                  
+
                 </Tr>
               ))}
             </tbody>

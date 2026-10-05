@@ -58,8 +58,8 @@ export function AbonnementPage() {
             <Card key={offer.tier} className={offer.featured ? 'border-brand-300 p-6 shadow-lift' : 'p-6'}>
               <div className="flex items-center justify-between"><p className="text-base font-bold text-ink-950">{offer.name}</p>{offer.featured ? <Badge tone="brand">PLUS</Badge> : null}</div>
               <p className="mt-3 text-sm text-ink-600">{offer.tagline}</p>
-              
-              
+
+
               <ul className="mt-5 space-y-2 text-sm text-ink-700">
                 <li>{offer.needsPerYear} besoins/an</li><li>{offer.concurrentNeeds} besoins traités en même temps</li><li>{offer.providersPerNeed} prestataires proposés par besoin</li><li>Première proposition : {offer.firstProposal}</li>
               </ul>
@@ -93,7 +93,7 @@ export function AbonnementPage() {
             />
             <CardBody>
               <div className="flex flex-wrap items-end justify-between gap-4">
-                
+
                 <div className="text-right text-xs text-ink-500">
                   <p>Prélèvement {sub.payment === 'annuel' ? 'annuel' : 'trimestriel'}</p>
                   <p className="mt-0.5">Reconduction automatique : {sub.autoRenew ? 'oui' : 'non'}</p>
@@ -251,7 +251,7 @@ export function AbonnementPage() {
                     {offer.needsPerYear} besoin(s)/an · {offer.providersPerNeed} prestataire(s)/besoin
                   </p>
                 </div>
-                
+
               </button>
             ))}
           </div>

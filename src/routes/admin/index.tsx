@@ -253,7 +253,7 @@ export function AdminOverview() {
                   <div key={offer.tier}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-ink-800">{offer.name}</span>
-                      
+
                     </div>
                     <Progress
                       className="mt-1.5"

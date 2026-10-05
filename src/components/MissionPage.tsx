@@ -58,7 +58,7 @@ export function MissionPage({ code, sector }: { code: MissionCode; sector: Secto
               <div className="px-6 py-4">
                 <KeyValue label="Délai">{plan.delay}</KeyValue>
                 <KeyValue label="Engagement">{plan.commitment}</KeyValue>
-                
+
               </div>
             </Card>
           </div>
@@ -257,9 +257,9 @@ export function MissionIndex({ sector }: { sector: Sector }) {
               </div>
               <h2 className="mt-3 font-display text-2xl tracking-tight text-ink-950">{plan.name}</h2>
               <div className="mt-3">
-                
-                
-                
+
+
+
               </div>
               <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-600">{plan.tagline}</p>
               <ul className="mt-5 space-y-2">

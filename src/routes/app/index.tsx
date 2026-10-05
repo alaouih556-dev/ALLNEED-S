@@ -1,3 +1,4 @@
+import { ActivityBoard } from '@/components/ActivityBoard'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   ArrowRight,
@@ -55,6 +56,8 @@ export function ClientDashboard() {
 
   return (
     <>
+<ActivityBoard title={`${org?.sector === 'sante' ? 'Santé' : org?.sector === 'tourisme' ? 'Tourisme' : 'Enseignement'} · Votre tableau de bord`} items={[{label:'Besoins en cours',value:activeNeeds.length},{label:'Missions actives',value:openMissions.length},{label:'Rendez-vous prévus',value:nextMeetings.length},{label:'Diagnostics publiés',value:state.diagnostics.filter(d=>d.orgId===orgId&&d.status==='publie').length}]} />
+
       <PageHeader
         eyebrow="Espace client"
         title={`Bonjour ${user.name.split(' ')[0]}, voici où vous en êtes.`}
