@@ -81,25 +81,22 @@ interface NavItem {
 
 function buildClientNav(unreadMessages: number, pendingDocs: number, saasEnabled: boolean, workspaceRole: 'dirigeant'|'manager'|'collaborateur', sector?: string): NavItem[] {
   const items: NavItem[] = [
-    { label: 'Accueil · Cockpit', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { label: 'Accueil', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
     { label: 'Objectifs', to: '/app/objectifs' as any, icon: <Target className="h-4 w-4" /> },
-    { label: 'Actions', to: '/app/actions' as any, icon: <ListChecks className="h-4 w-4" /> },
+    { label: 'Plan d’action', to: '/app/actions' as any, icon: <ListChecks className="h-4 w-4" /> },
     ...(sector === 'sante' ? [{ label: 'Diagnostic 360° Santé', to: '/app/diagnostic-auto' as any, icon: <Gauge className="h-4 w-4" /> }] : []),
     { label: 'Équipe', to: '/app/equipe' as any, icon: <UsersRound className="h-4 w-4" /> },
     { label: 'Écosystème', to: '/app/ecosysteme' as any, icon: <Network className="h-4 w-4" /> },
-    { label: 'Performance', to: '/app/performance' as any, icon: <LineChart className="h-4 w-4" /> },
+    { label: 'Résultats', to: '/app/performance' as any, icon: <LineChart className="h-4 w-4" /> },
     { label: 'Projets', to: '/app/projets' as any, icon: <FolderKanban className="h-4 w-4" /> },
     { label: 'Documents', to: '/app/documents', icon: <ShieldCheck className="h-4 w-4" />, badge: pendingDocs },
+    { label: 'Messages', to: '/app/messages', icon: <MessageSquare className="h-4 w-4" />, badge: unreadMessages },
     { label: 'Notifications', to: '/app/notifications' as any, icon: <Bell className="h-4 w-4" /> },
-    { label: 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" />, disabled: !saasEnabled, disabledHint: 'En attente de validation ALLNEEDS' },
-    { label: 'Plus · Besoins', to: '/app/besoins', icon: <Inbox className="h-4 w-4" /> },
-    { label: 'Plus · Diagnostics', to: '/app/diagnostics', icon: <Gauge className="h-4 w-4" /> },
-    { label: 'Plus · Missions', to: '/app/missions', icon: <Briefcase className="h-4 w-4" /> },
-    { label: 'Plus · Messages', to: '/app/messages', icon: <MessageSquare className="h-4 w-4" />, badge: unreadMessages },
+    { label: sector === 'sante' ? 'Espace métier Santé' : 'Espace métier SaaS', to: '/app/espace-metier', icon: <Building2 className="h-4 w-4" />, disabled: !saasEnabled, disabledHint: 'En attente de validation ALLNEEDS' },
     { label: 'Paramètres', to: '/app/parametres' as any, icon: <Settings2 className="h-4 w-4" /> },
   ]
-  if (workspaceRole === 'collaborateur') return items.filter((item) => ['Accueil · Cockpit','Actions','Projets','Documents','Notifications','Plus · Messages','Paramètres'].includes(item.label))
-  if (workspaceRole === 'manager') return items.filter((item) => !['Espace métier SaaS','Plus · Diagnostics','Diagnostic 360° Santé'].includes(item.label))
+  if (workspaceRole === 'collaborateur') return items.filter((item) => ['Accueil','Plan d’action','Projets','Documents','Messages','Notifications','Paramètres'].includes(item.label))
+  if (workspaceRole === 'manager') return items.filter((item) => !['Espace métier Santé', 'Espace métier SaaS'].includes(item.label))
   return items
 }
 

@@ -1,4 +1,4 @@
-import React,{useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useState} from 'react';
 import {CheckCircle2,ChevronDown,ClipboardCheck,FileText,ShieldAlert,Stethoscope,Target,TrendingUp,UsersRound} from 'lucide-react';
 import {ADEQUATION_CRITERIA,CHARGES_POSTES,DEROULE,DOCUMENTS,FORMATS,GARDE_FOUS,NOTATION,QUESTIONS,REGLES,TRANSPARENCE,VERSIONS,VOLETS,type DiagnosticQuestion} from './diagnosticData';
 
@@ -7,7 +7,7 @@ type Charge={supplier:string;annual:string;renewal:string;notice:string;compared
 type Follow={deadline:string;action:string;indicator:string;owner:string;status:string;date:string};
 type Adequation={score:number;comment:string};
 type DiagnosticState={
- meta:{structure:string;date:string;contact:string;animator:string;decider:string;citySize:string;accepted:boolean;format:'Complet'|'Express ★'};
+ meta:{structure:string;date:string;contact:string;animator:string;decider:string;citySize:string;accepted:boolean;started:boolean;format:'Complet'|'Express ★'};
  answers:Record<string,Answer>;
  charges:Record<string,Charge>;
  roots:string[]; solutions:string[]; checks:string[]; decisions:string; reportDate:string; nextMeeting:string;
@@ -17,7 +17,7 @@ type DiagnosticState={
 
 const KEY='allneeds.health.diagnostic.360.v5.1';
 const empty=():DiagnosticState=>({
- meta:{structure:'Centre Atlas Santé',date:new Date().toISOString().slice(0,10),contact:'',animator:'',decider:'',citySize:'Casablanca · ',accepted:false,format:'Complet'},
+ meta:{structure:'Centre Atlas Santé',date:new Date().toISOString().slice(0,10),contact:'',animator:'',decider:'',citySize:'Casablanca · ',accepted:false,started:false,format:'Complet'},
  answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,{score:0,comment:''}])),
  charges:Object.fromEntries(CHARGES_POSTES.map(x=>[x,{supplier:'',annual:'',renewal:'',notice:'',compared:'',saving:''}])),
  roots:['','',''],solutions:['','',''],checks:['','',''],decisions:'',reportDate:'',nextMeeting:'',
@@ -34,6 +34,14 @@ export function Diagnostic360(){
  const updateMeta=(k:keyof DiagnosticState['meta'],v:any)=>persist({...data,meta:{...data.meta,[k]:v}});
  const setAnswer=(id:string,k:keyof Answer,v:string|number)=>persist({...data,answers:{...data.answers,[id]:{...data.answers[id],[k]:v}}});
  const visibleQuestions=data.meta.format==='Express ★'?QUESTIONS.filter(q=>q.starred):QUESTIONS;
+ const answeredCount=visibleQuestions.filter(q=>(data.answers[q.id]?.score||0)>0).length;
+ const questionsTotal=visibleQuestions.length;
+ const questionsComplete=questionsTotal>0&&answeredCount===questionsTotal;
+ const startDiagnostic=()=>{if(!data.meta.accepted)return;persist({...data,meta:{...data.meta,started:true}});setTab('questions')};
+ useEffect(()=>{
+  if(!data.meta.started&&tab!=='cadre') setTab('cadre');
+  if(data.meta.started&&!questionsComplete&&['synthese','suivi','adequation'].includes(tab)) setTab('questions');
+ },[data.meta.started,questionsComplete,tab]);
  const stats=useMemo(()=>{
   const byVolet=VOLETS.map(v=>{
    const qs=QUESTIONS.filter(q=>Number(q.id[0])===v.id),internal=qs.filter(q=>q.internal),external=qs.filter(q=>!q.internal);
@@ -51,10 +59,11 @@ export function Diagnostic360(){
  },[data.answers]);
  const adequationScore=ADEQUATION_CRITERIA.reduce((a,c)=>a+(data.adequation[c]?.score||0),0);
  const recommendation=adequationScore>=9?'PERFORMANCE ou PRO.':adequationScore>=6?'PRO, ou PRO puis Accès.':adequationScore>=3?'Accès CONNECT ou PLUS pour les besoins détectés.':'Restituer le diagnostic, garder le contact, aucune offre proposée.';
- const tabs=[['cadre','Cadre & méthode'],['questions','40 questions'],['synthese','Synthèse'],['suivi','J+30 / 60 / 90'],['adequation','Adéquation ALLNEEDS']] as const;
+ const tabs=[['cadre','Cadre lu'],['questions',`${questionsTotal} questions`],['synthese','Synthèse'],['suivi','Suivi J+30 / 60 / 90'],['adequation','Adéquation ALLNEEDS']] as const;
+ const visibleTabs=!data.meta.started?tabs.filter(([id])=>id==='cadre'):questionsComplete?tabs:tabs.filter(([id])=>id==='cadre'||id==='questions');
  return <section className="diag360">
-  <div className="diag-hero"><div><span className="eyebrow">GRILLE DE DIAGNOSTIC 360° · SANTÉ · v5.1</span><h2>Du constat à la prochaine action, sans raccourci.</h2><p>4 volets · 40 questions (28 internes, 12 externes) · notation de 0 à 5 · commentaire par question · relances · synthèse forces, faiblesses, opportunités, menaces.</p></div><div className="diag-summary"><strong>{QUESTIONS.filter(q=>(data.answers[q.id]?.score||0)>0).length}/40</strong><span>questions notées</span><small>{data.meta.format}</small></div></div>
-  <div className="diag-tabs">{tabs.map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{label}</button>)}</div>
+  <div className="diag-hero"><div><span className="eyebrow">GRILLE DE DIAGNOSTIC 360° · SANTÉ · v5.1</span><h2>Un parcours plus simple : lire, lancer, répondre, puis restituer.</h2><p>Le cadre est lu d’abord. Le questionnaire s’ouvre ensuite, puis la synthèse, le suivi et l’adéquation apparaissent au bon moment.</p></div><div className="diag-summary"><strong>{answeredCount}/{questionsTotal}</strong><span>{data.meta.started?'questions renseignées':'prêt à démarrer'}</span><small>{data.meta.format}</small></div></div>
+  {!data.meta.started?<div className="diag-launch"><div><small>ÉTAPE 1 · LIRE LE CADRE</small><strong>Validez le cadre de diagnostic, puis lancez le questionnaire.</strong><span>Le client ne voit pas toute la mécanique d’un coup. Il découvre d’abord le cadre, puis il commence le diagnostic.</span></div><button className={!data.meta.accepted?'disabled':''} disabled={!data.meta.accepted} onClick={startDiagnostic}>Commencer le diagnostic</button></div>:<><div className="diag-progress-head"><strong>{questionsComplete?'Diagnostic prêt pour la synthèse':`Diagnostic en cours · ${answeredCount}/${questionsTotal} questions`}</strong><span>{questionsComplete?'Vous pouvez désormais ouvrir la synthèse, le suivi et l’adéquation.':'La synthèse et les étapes suivantes s’ouvrent dès que toutes les questions sont renseignées.'}</span></div><div className="diag-tabs">{visibleTabs.map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{label}</button>)}</div></>}
 
   {tab==='cadre'&&<div className="diag-stack">
    <section className="diag-card"><div className="diag-card-title"><FileText/><div><h3>Identification du diagnostic</h3><p>Cadre de travail à compléter avant l’ouverture.</p></div></div><div className="diag-form-grid">
@@ -66,6 +75,7 @@ export function Diagnostic360(){
    <section className="diag-card"><div className="diag-card-title"><Stethoscope/><div><h3>Déroulé : 1 volet = 1 module de 90 minutes</h3><p>Format complet.</p></div></div><div className="diag-table-wrap"><table className="diag-table"><thead><tr><th>Durée</th><th>Bloc</th><th>Objectif</th></tr></thead><tbody>{DEROULE.map(r=><tr key={r[0]}>{r.map(c=><td key={c}>{c}</td>)}</tr>)}</tbody></table></div></section>
    <section className="diag-card"><div className="diag-card-title"><ShieldAlert/><div><h3>Garde-fous Santé</h3><p>Non négociables pendant le diagnostic.</p></div></div><ul className="diag-list">{GARDE_FOUS.map(x=><li key={x}>{x}</li>)}</ul></section>
    <section className="diag-card"><div className="diag-card-title"><TrendingUp/><div><h3>Règles de notation</h3><p>0 est exclu du calcul de moyenne.</p></div></div><div className="score-grid">{NOTATION.map(n=><div key={n.note}><b>{n.note}</b><strong>{n.niveau}</strong><span>{n.type}</span></div>)}</div><h4>Règles communes pour tous les animateurs</h4><ul className="diag-list">{REGLES.map(x=><li key={x}>{x}</li>)}</ul><div className="reading-grid"><div><b>Interne (A, 7 par volet)</b><p>Niveau de maîtrise constaté de ce que la structure contrôle elle-même.</p><small>Note 4–5 : forces. Note 1–2 : faiblesses. Type = (5 − note) × poids : difficultés prioritaires.</small></div><div><b>Externe · Opportunité (B)</b><p>Niveau d’exploitation d’un potentiel réel de l’environnement.</p><small>Note 1–3 : opportunité détectée, classée par écart (5 − note) × enjeu.</small></div><div><b>Externe · Menace (B)</b><p>Niveau de protection face à un risque externe.</p><small>Note 1–2 : menace forte. Note 3 : à surveiller. Classement par écart (5 − note) × enjeu.</small></div></div></section>
+   <section className="diag-card diag-next-step"><div><small>ACCÈS AUX QUESTIONS</small><strong>Quand le cadre est lu, vous pouvez lancer le questionnaire.</strong><p>Le bouton reste verrouillé tant que le décideur n’a pas validé le cadre et la transparence.</p></div><button className={!data.meta.accepted?'disabled':''} disabled={!data.meta.accepted} onClick={startDiagnostic}>Commencer le diagnostic</button></section>
   </div>}
 
   {tab==='questions'&&<div className="diag-stack"><section className="diag-card compact"><div className="question-toolbar"><div><strong>{data.meta.format}</strong><span>{visibleQuestions.length} questions affichées</span></div><small>★ = question du format Express. Poids : 3 = impact &gt; 5 % du CA ou des charges, 2 = de 2 à 5 %, 1 = &lt; 2 %. Type = (5 − note) × poids. Note 0 = non évalué, exclu de la moyenne. Relance = question de creusement à poser si la réponse reste vague.</small></div></section>
