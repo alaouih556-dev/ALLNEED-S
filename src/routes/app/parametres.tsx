@@ -6,7 +6,7 @@ import { buildNextActions, buildObjectives, resolveSituation, situationLabel } f
 export const Route = createFileRoute('/app/parametres')({ component: SettingsPage })
 
 function SettingsPage(){
-  const {state,orgId,user,dispatch}=useDemo()
+  const {state,orgId,user}=useDemo()
   const org=state.orgs.find(o=>o.id===orgId)
   const objectives=buildObjectives(state,orgId)
   const actions=buildNextActions(state,orgId)
@@ -37,6 +37,5 @@ function SettingsPage(){
       <section><small>ALERTES</small><h2>{alerts.length}</h2><p>Alertes non lues nécessitant une vérification.</p></section>
       <section><small>HISTORIQUE</small><h2>{threads.length} conversations</h2><p>{state.meetings.filter(m=>m.orgId===orgId).length} rendez-vous enregistrés</p></section>
     </div>
-    <section className="workspace-role-selector"><small>EXPÉRIENCE PAR RÔLE · DÉMONSTRATION</small><h2>Afficher uniquement ce qui est utile.</h2><p>Le rôle filtre la navigation et la densité d’information, sans dupliquer tout le produit.</p><div>{(['dirigeant','manager','collaborateur'] as const).map((role)=><button key={role} className={state.clientWorkspaceRole===role?'active':''} onClick={()=>dispatch({type:'CLIENT_WORKSPACE_ROLE_SET',role})}>{role==='dirigeant'?'Dirigeant':role==='manager'?'Manager / responsable':'Collaborateur'}</button>)}</div></section>
   </>
 }

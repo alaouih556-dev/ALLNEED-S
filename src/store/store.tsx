@@ -89,6 +89,7 @@ export interface PublicBooking {
 
 export type Role = 'client' | 'admin' | 'concierge'
 export type ClientWorkspaceRole = 'dirigeant' | 'manager' | 'collaborateur'
+export type SanteSaasRole = 'directeur' | 'reception' | 'comptabilite'
 
 export interface ConciergeAccount {
   id: string
@@ -130,6 +131,8 @@ export interface DemoState {
   concierges: ConciergeAccount[]
   saasAccess: Record<Sector, boolean>
   saasAccessByOrg: Record<string, boolean>
+  saasRolesByOrg: Record<string, SanteSaasRole[]>
+  saasActivatedAtByOrg: Record<string, string | null>
   registrationProfile: { sector: Sector; workspaceProfile: string; situation?: 'entreprise_existante' | 'creation' | 'investisseur'; tier: string | null; payment: string | null } | null
   clientWorkspaceRole: ClientWorkspaceRole
   toasts: Toast[]
@@ -217,6 +220,8 @@ const initialState: DemoState = {
   ],
   saasAccess: { enseignement: false, sante: true, tourisme: false },
   saasAccessByOrg: { 'org-amal': false, 'org-nour': true, 'org-riad': false },
+  saasRolesByOrg: { 'org-amal': [], 'org-nour': ['directeur', 'reception', 'comptabilite'], 'org-riad': [] },
+  saasActivatedAtByOrg: { 'org-amal': null, 'org-nour': DEMO_NOW, 'org-riad': null },
   registrationProfile: null,
   clientWorkspaceRole: 'dirigeant',
   bookings: [
@@ -284,6 +289,7 @@ export type DemoAction =
   | { type: 'SET_ROLE'; role: Role }
   | { type: 'SAAS_SET_ACCESS'; sector: Sector; value: boolean }
   | { type: 'SAAS_SET_ORG_ACCESS'; orgId: string; value: boolean }
+  | { type: 'SAAS_SET_ORG_ROLE'; orgId: string; role: SanteSaasRole; value: boolean }
   | { type: 'REGISTRATION_SET'; profile: NonNullable<DemoState['registrationProfile']> }
   | { type: 'CLIENT_WORKSPACE_ROLE_SET'; role: ClientWorkspaceRole }
   | { type: 'CONCIERGE_CREATE'; account: ConciergeAccount }
@@ -353,7 +359,17 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
       return { ...state, saasAccess: { ...state.saasAccess, [action.sector]: action.value } }
 
     case 'SAAS_SET_ORG_ACCESS':
-      return { ...state, saasAccessByOrg: { ...state.saasAccessByOrg, [action.orgId]: action.value } }
+      return {
+        ...state,
+        saasAccessByOrg: { ...state.saasAccessByOrg, [action.orgId]: action.value },
+        saasActivatedAtByOrg: { ...state.saasActivatedAtByOrg, [action.orgId]: action.value ? (state.saasActivatedAtByOrg[action.orgId] ?? state.now) : null },
+      }
+
+    case 'SAAS_SET_ORG_ROLE': {
+      const current = state.saasRolesByOrg[action.orgId] ?? []
+      const next = action.value ? Array.from(new Set([...current, action.role])) : current.filter((role) => role !== action.role)
+      return { ...state, saasRolesByOrg: { ...state.saasRolesByOrg, [action.orgId]: next } }
+    }
 
     case 'REGISTRATION_SET':
       return { ...state, registrationProfile: action.profile }

@@ -493,7 +493,7 @@ export function CtaBand({
   title: string
   description: string
   primary?: { label: string; to: LinkProps['to'] }
-  secondary?: { label: string; to: LinkProps['to'] }
+  secondary?: { label: string; to: LinkProps['to'] } | null
 }) {
   return (
     <section className="container-page py-6">
@@ -512,11 +512,11 @@ export function CtaBand({
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to={secondary.to}>
+            {secondary ? <Link to={secondary.to}>
               <Button size="lg" variant="outline" className="border-white/25 bg-white/5 text-white hover:bg-white/10">
                 {secondary.label}
               </Button>
-            </Link>
+            </Link> : null}
           </div>
           <p className="mt-5 text-xs text-ink-400">
             Offre de lancement jusqu’au {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition}, selon la première échéance.

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { KeyRound, PlusCircle, ShieldCheck, UserRoundCog } from 'lucide-react'
+import { KeyRound, PlusCircle, ShieldCheck, UserRoundCog, HeartPulse } from 'lucide-react'
 import { Badge, Button, Card, Checkbox, Field, Input, SectionHeading } from '@/components/ui'
 import { SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { useDemo } from '@/store/store'
@@ -34,12 +34,30 @@ function AdminConcierges() {
       </Card>
 
       <Card className="p-6">
-        <div className="flex items-center gap-3"><KeyRound className="h-5 w-5 text-brand-700" /><div><h2 className="font-semibold text-ink-950">Activation SaaS par entreprise</h2><p className="text-xs text-ink-500">Le client voit uniquement son secteur. Son espace métier reste grisé et non cliquable jusqu’à activation ici.</p></div></div>
-        <div className="mt-5 space-y-3">
-          {state.orgs.map((org) => { const open = state.saasAccessByOrg[org.id] ?? false; return <label key={org.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ink-200 p-4">
-            <div><div className="flex items-center gap-2"><span className="text-sm font-semibold text-ink-900">{org.name}</span><Badge tone="neutral">{SECTOR_LABEL[org.sector]}</Badge><Badge tone={open ? 'success' : 'neutral'}>{open ? 'Ouvert' : 'Verrouillé'}</Badge></div><p className="mt-1 text-xs text-ink-500">{org.kind} · {org.city}</p></div>
-            <Checkbox checked={open} onChange={(e) => dispatch({ type: 'SAAS_SET_ORG_ACCESS', orgId: org.id, value: e.target.checked })} label="Autoriser le SaaS" />
-          </label> })}
+        <div className="flex items-start gap-3"><KeyRound className="mt-0.5 h-5 w-5 text-brand-700" /><div><h2 className="font-semibold text-ink-950">Accès aux espaces métier</h2><p className="mt-1 text-xs leading-relaxed text-ink-500">L’administrateur décide, entreprise par entreprise, si l’espace métier peut être ouvert. Pour Santé, il choisit aussi les rôles autorisés dans le SaaS séparé.</p></div></div>
+        <div className="mt-5 space-y-4">
+          {state.orgs.map((org) => {
+            const open = state.saasAccessByOrg[org.id] ?? false
+            const roles = state.saasRolesByOrg[org.id] ?? []
+            const activatedAt = state.saasActivatedAtByOrg[org.id]
+            return <div key={org.id} className="rounded-2xl border border-ink-200 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-semibold text-ink-900">{org.name}</span><Badge tone="neutral">{SECTOR_LABEL[org.sector]}</Badge><Badge tone={open ? 'success' : 'neutral'}>{open ? 'Accès activé' : 'Verrouillé'}</Badge></div>
+                  <p className="mt-1 text-xs text-ink-500">{org.kind} · {org.city}</p>
+                  {open && activatedAt ? <p className="mt-1 text-[11px] text-ink-400">Activé le {new Date(activatedAt).toLocaleDateString('fr-FR')}</p> : null}
+                </div>
+                <Checkbox checked={open} onChange={(e) => dispatch({ type: 'SAAS_SET_ORG_ACCESS', orgId: org.id, value: e.target.checked })} label={open ? 'Accès autorisé' : 'Autoriser l’accès'} />
+              </div>
+              {org.sector === 'sante' ? <div className={`mt-4 rounded-xl border p-4 ${open ? 'border-sky-100 bg-sky-50/60' : 'border-ink-100 bg-ink-50 opacity-60'}`}>
+                <div className="flex items-center gap-2"><HeartPulse className="h-4 w-4 text-brand-700"/><p className="text-xs font-semibold text-ink-900">Rôles autorisés dans ALLNEEDS Santé</p></div>
+                <p className="mt-1 text-[11px] leading-relaxed text-ink-500">Ces droits concernent uniquement le SaaS Santé séparé. Ils ne changent pas les rôles du portail principal.</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {([['directeur','Directeur'],['reception','Réception'],['comptabilite','Comptabilité']] as const).map(([role,label]) => <Checkbox key={role} disabled={!open} checked={roles.includes(role)} onChange={(e) => dispatch({ type: 'SAAS_SET_ORG_ROLE', orgId: org.id, role, value: e.target.checked })} label={label} />)}
+                </div>
+              </div> : <p className="mt-3 rounded-lg bg-ink-50 px-3 py-2 text-[11px] text-ink-500">La gestion détaillée des rôles métier sera configurée lors de la mise en place du SaaS {SECTOR_LABEL[org.sector]}.</p>}
+            </div>
+          })}
         </div>
       </Card>
     </div>

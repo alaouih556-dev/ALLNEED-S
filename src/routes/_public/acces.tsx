@@ -367,7 +367,7 @@ function AccesPage() {
       <CtaBand
         title="Souscrivez ACCÈS, ou commencez par le diagnostic"
         description="Le diagnostic STARTER identifie vos priorités. L’abonnement est sans reconduction tacite, et vous ne payez jamais un prestataire par notre intermédiaire."
-        secondary={{ label: 'Réserver le diagnostic', to: '/diagnostic' }}
+        secondary={null}
       />
     </>
   )

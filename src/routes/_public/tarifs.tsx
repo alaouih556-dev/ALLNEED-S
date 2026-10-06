@@ -33,6 +33,6 @@ export function OffresPage() {
         <Link to="/inscription" search={{ offre: offer.tier }} className="mt-6"><Button fullWidth>Choisir {offer.name}</Button></Link>
       </Card>)}</div>
     </div></section>
-    <CtaBand title="Commençons par votre diagnostic" description="Identifiez vos priorités et choisissez un accompagnement adapté à votre établissement." />
+    <CtaBand title="Commençons par votre diagnostic" description="Identifiez vos priorités et choisissez un accompagnement adapté à votre établissement." secondary={null} />
   </>
 }

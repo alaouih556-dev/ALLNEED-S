@@ -30,7 +30,7 @@ const expert = readFileSync('src/components/ExpertWorkspace.tsx', 'utf8')
 const assertions = [
   ['One Next Action cockpit', dashboard.includes('ONE NEXT ACTION') && dashboard.includes('buildNextActions')],
   ['Operational loop', operational.includes('buildNextActions') && dashboard.includes('WorkflowStrip')],
-  ['Objective-first navigation', layouts.includes("label: 'Objectifs'") && layouts.includes("label: 'Actions'") && !layouts.includes("label: 'Commercial'" )],
+  ['Objective-first navigation', layouts.includes("label: 'Objectifs'") && (layouts.includes("label: 'Actions'") || layouts.includes("label: 'Plan d’action'")) && !layouts.includes("label: 'Commercial'" )],
   ['Three user situations', signup.includes('entreprise_existante') && signup.includes('creation') && signup.includes('investisseur')],
   ['Progressive onboarding', onboarding.includes('Onboarding progressif') && onboarding.includes('principale difficulté')],
   ['Role-sensitive client navigation', layouts.includes('clientWorkspaceRole') && layouts.includes("workspaceRole === 'collaborateur'")],
