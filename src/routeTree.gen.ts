@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as ConciergeRouteImport } from './routes/concierge'
 import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as ExpertRouteImport } from './routes/expert'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
@@ -35,24 +36,42 @@ import { Route as AdminQuotasRouteImport } from './routes/admin/quotas'
 import { Route as AdminRelancesRouteImport } from './routes/admin/relances'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppAbonnementRouteImport } from './routes/app/abonnement'
+import { Route as AppActionsRouteImport } from './routes/app/actions'
 import { Route as AppDevisRouteImport } from './routes/app/devis'
 import { Route as AppDiagnosticAutoRouteImport } from './routes/app/diagnostic-auto'
 import { Route as AppDiagnosticsRouteImport } from './routes/app/diagnostics'
 import { Route as AppDocumentsRouteImport } from './routes/app/documents'
+import { Route as AppEcosystemeRouteImport } from './routes/app/ecosysteme'
+import { Route as AppEquipeRouteImport } from './routes/app/equipe'
 import { Route as AppEspaceMetierRouteImport } from './routes/app/espace-metier'
 import { Route as AppLivrablesRouteImport } from './routes/app/livrables'
 import { Route as AppMessagesRouteImport } from './routes/app/messages'
+import { Route as AppNotificationsRouteImport } from './routes/app/notifications'
+import { Route as AppObjectifsRouteImport } from './routes/app/objectifs'
+import { Route as AppParametresRouteImport } from './routes/app/parametres'
+import { Route as AppPerformanceRouteImport } from './routes/app/performance'
 import { Route as AppPrestatairesRouteImport } from './routes/app/prestataires'
+import { Route as AppProjetsRouteImport } from './routes/app/projets'
 import { Route as AppRendezVousRouteImport } from './routes/app/rendez-vous'
 import { Route as ConciergeIndexRouteImport } from './routes/concierge/index'
 import { Route as ConciergeBesoinsRouteImport } from './routes/concierge/besoins'
 import { Route as ConciergeDiagnosticsRouteImport } from './routes/concierge/diagnostics'
 import { Route as ConciergeDocumentsRouteImport } from './routes/concierge/documents'
+import { Route as ConciergeEntreprisesRouteImport } from './routes/concierge/entreprises'
 import { Route as ConciergeMessagesRouteImport } from './routes/concierge/messages'
 import { Route as ConciergeMissionsRouteImport } from './routes/concierge/missions'
 import { Route as ConciergePrestatairesRouteImport } from './routes/concierge/prestataires'
 import { Route as ConciergeRendezVousRouteImport } from './routes/concierge/rendez-vous'
 import { Route as ConciergeSuiviCommercialRouteImport } from './routes/concierge/suivi-commercial'
+import { Route as ExpertIndexRouteImport } from './routes/expert/index'
+import { Route as ExpertAgendaRouteImport } from './routes/expert/agenda'
+import { Route as ExpertClientsRouteImport } from './routes/expert/clients'
+import { Route as ExpertDemandesRouteImport } from './routes/expert/demandes'
+import { Route as ExpertDocumentsRouteImport } from './routes/expert/documents'
+import { Route as ExpertMissionsRouteImport } from './routes/expert/missions'
+import { Route as ExpertPerformanceRouteImport } from './routes/expert/performance'
+import { Route as ExpertProfilRouteImport } from './routes/expert/profil'
+import { Route as ExpertPropositionsRouteImport } from './routes/expert/propositions'
 import { Route as PublicMissionsIndexRouteImport } from './routes/_public/missions/index'
 import { Route as PublicMissionsCodeRouteImport } from './routes/_public/missions/$code'
 import { Route as PublicSecteursIndexRouteImport } from './routes/_public/secteurs/index'
@@ -96,6 +115,11 @@ const ConciergeRoute = ConciergeRouteImport.update({
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpertRoute = ExpertRouteImport.update({
+  id: '/expert',
+  path: '/expert',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InscriptionRoute = InscriptionRouteImport.update({
@@ -203,6 +227,11 @@ const AppAbonnementRoute = AppAbonnementRouteImport.update({
   path: '/abonnement',
   getParentRoute: () => AppRoute,
 } as any)
+const AppActionsRoute = AppActionsRouteImport.update({
+  id: '/actions',
+  path: '/actions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDevisRoute = AppDevisRouteImport.update({
   id: '/devis',
   path: '/devis',
@@ -223,6 +252,16 @@ const AppDocumentsRoute = AppDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEcosystemeRoute = AppEcosystemeRouteImport.update({
+  id: '/ecosysteme',
+  path: '/ecosysteme',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEquipeRoute = AppEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEspaceMetierRoute = AppEspaceMetierRouteImport.update({
   id: '/espace-metier',
   path: '/espace-metier',
@@ -238,9 +277,34 @@ const AppMessagesRoute = AppMessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppObjectifsRoute = AppObjectifsRouteImport.update({
+  id: '/objectifs',
+  path: '/objectifs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppParametresRoute = AppParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPerformanceRoute = AppPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPrestatairesRoute = AppPrestatairesRouteImport.update({
   id: '/prestataires',
   path: '/prestataires',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjetsRoute = AppProjetsRouteImport.update({
+  id: '/projets',
+  path: '/projets',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRendezVousRoute = AppRendezVousRouteImport.update({
@@ -266,6 +330,11 @@ const ConciergeDiagnosticsRoute = ConciergeDiagnosticsRouteImport.update({
 const ConciergeDocumentsRoute = ConciergeDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
+  getParentRoute: () => ConciergeRoute,
+} as any)
+const ConciergeEntreprisesRoute = ConciergeEntreprisesRouteImport.update({
+  id: '/entreprises',
+  path: '/entreprises',
   getParentRoute: () => ConciergeRoute,
 } as any)
 const ConciergeMessagesRoute = ConciergeMessagesRouteImport.update({
@@ -294,6 +363,51 @@ const ConciergeSuiviCommercialRoute =
     path: '/suivi-commercial',
     getParentRoute: () => ConciergeRoute,
   } as any)
+const ExpertIndexRoute = ExpertIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertAgendaRoute = ExpertAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertClientsRoute = ExpertClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertDemandesRoute = ExpertDemandesRouteImport.update({
+  id: '/demandes',
+  path: '/demandes',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertDocumentsRoute = ExpertDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertMissionsRoute = ExpertMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertPerformanceRoute = ExpertPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertProfilRoute = ExpertProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => ExpertRoute,
+} as any)
+const ExpertPropositionsRoute = ExpertPropositionsRouteImport.update({
+  id: '/propositions',
+  path: '/propositions',
+  getParentRoute: () => ExpertRoute,
+} as any)
 const PublicMissionsIndexRoute = PublicMissionsIndexRouteImport.update({
   id: '/missions/',
   path: '/missions/',
@@ -387,14 +501,14 @@ const AppTourismeBranchRoute = AppTourismeBranchRouteImport.update({
 } as any)
 const ConciergeEntreprisesIndexRoute =
   ConciergeEntreprisesIndexRouteImport.update({
-    id: '/entreprises/',
-    path: '/entreprises/',
-    getParentRoute: () => ConciergeRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => ConciergeEntreprisesRoute,
   } as any)
 const ConciergeEntreprisesIdRoute = ConciergeEntreprisesIdRouteImport.update({
-  id: '/entreprises/$id',
-  path: '/entreprises/$id',
-  getParentRoute: () => ConciergeRoute,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ConciergeEntreprisesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -403,6 +517,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/concierge': typeof ConciergeRouteWithChildren
   '/connexion': typeof ConnexionRoute
+  '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
   '/a-propos': typeof PublicAProposRoute
@@ -421,26 +536,44 @@ export interface FileRoutesByFullPath {
   '/admin/quotas': typeof AdminQuotasRoute
   '/admin/relances': typeof AdminRelancesRoute
   '/app/abonnement': typeof AppAbonnementRoute
+  '/app/actions': typeof AppActionsRoute
   '/app/devis': typeof AppDevisRoute
   '/app/diagnostic-auto': typeof AppDiagnosticAutoRoute
   '/app/diagnostics': typeof AppDiagnosticsRoute
   '/app/documents': typeof AppDocumentsRoute
+  '/app/ecosysteme': typeof AppEcosystemeRoute
+  '/app/equipe': typeof AppEquipeRoute
   '/app/espace-metier': typeof AppEspaceMetierRoute
   '/app/livrables': typeof AppLivrablesRoute
   '/app/messages': typeof AppMessagesRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/objectifs': typeof AppObjectifsRoute
+  '/app/parametres': typeof AppParametresRoute
+  '/app/performance': typeof AppPerformanceRoute
   '/app/prestataires': typeof AppPrestatairesRoute
+  '/app/projets': typeof AppProjetsRoute
   '/app/rendez-vous': typeof AppRendezVousRoute
   '/concierge/besoins': typeof ConciergeBesoinsRoute
   '/concierge/diagnostics': typeof ConciergeDiagnosticsRoute
   '/concierge/documents': typeof ConciergeDocumentsRoute
+  '/concierge/entreprises': typeof ConciergeEntreprisesRouteWithChildren
   '/concierge/messages': typeof ConciergeMessagesRoute
   '/concierge/missions': typeof ConciergeMissionsRoute
   '/concierge/prestataires': typeof ConciergePrestatairesRoute
   '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
   '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
+  '/expert/agenda': typeof ExpertAgendaRoute
+  '/expert/clients': typeof ExpertClientsRoute
+  '/expert/demandes': typeof ExpertDemandesRoute
+  '/expert/documents': typeof ExpertDocumentsRoute
+  '/expert/missions': typeof ExpertMissionsRoute
+  '/expert/performance': typeof ExpertPerformanceRoute
+  '/expert/profil': typeof ExpertProfilRoute
+  '/expert/propositions': typeof ExpertPropositionsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/concierge/': typeof ConciergeIndexRoute
+  '/expert/': typeof ExpertIndexRoute
   '/missions/$code': typeof PublicMissionsCodeRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -482,14 +615,22 @@ export interface FileRoutesByTo {
   '/admin/quotas': typeof AdminQuotasRoute
   '/admin/relances': typeof AdminRelancesRoute
   '/app/abonnement': typeof AppAbonnementRoute
+  '/app/actions': typeof AppActionsRoute
   '/app/devis': typeof AppDevisRoute
   '/app/diagnostic-auto': typeof AppDiagnosticAutoRoute
   '/app/diagnostics': typeof AppDiagnosticsRoute
   '/app/documents': typeof AppDocumentsRoute
+  '/app/ecosysteme': typeof AppEcosystemeRoute
+  '/app/equipe': typeof AppEquipeRoute
   '/app/espace-metier': typeof AppEspaceMetierRoute
   '/app/livrables': typeof AppLivrablesRoute
   '/app/messages': typeof AppMessagesRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/objectifs': typeof AppObjectifsRoute
+  '/app/parametres': typeof AppParametresRoute
+  '/app/performance': typeof AppPerformanceRoute
   '/app/prestataires': typeof AppPrestatairesRoute
+  '/app/projets': typeof AppProjetsRoute
   '/app/rendez-vous': typeof AppRendezVousRoute
   '/concierge/besoins': typeof ConciergeBesoinsRoute
   '/concierge/diagnostics': typeof ConciergeDiagnosticsRoute
@@ -499,10 +640,19 @@ export interface FileRoutesByTo {
   '/concierge/prestataires': typeof ConciergePrestatairesRoute
   '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
   '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
+  '/expert/agenda': typeof ExpertAgendaRoute
+  '/expert/clients': typeof ExpertClientsRoute
+  '/expert/demandes': typeof ExpertDemandesRoute
+  '/expert/documents': typeof ExpertDocumentsRoute
+  '/expert/missions': typeof ExpertMissionsRoute
+  '/expert/performance': typeof ExpertPerformanceRoute
+  '/expert/profil': typeof ExpertProfilRoute
+  '/expert/propositions': typeof ExpertPropositionsRoute
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/concierge': typeof ConciergeIndexRoute
+  '/expert': typeof ExpertIndexRoute
   '/missions/$code': typeof PublicMissionsCodeRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -531,6 +681,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/concierge': typeof ConciergeRouteWithChildren
   '/connexion': typeof ConnexionRoute
+  '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
   '/_public/a-propos': typeof PublicAProposRoute
@@ -549,27 +700,45 @@ export interface FileRoutesById {
   '/admin/quotas': typeof AdminQuotasRoute
   '/admin/relances': typeof AdminRelancesRoute
   '/app/abonnement': typeof AppAbonnementRoute
+  '/app/actions': typeof AppActionsRoute
   '/app/devis': typeof AppDevisRoute
   '/app/diagnostic-auto': typeof AppDiagnosticAutoRoute
   '/app/diagnostics': typeof AppDiagnosticsRoute
   '/app/documents': typeof AppDocumentsRoute
+  '/app/ecosysteme': typeof AppEcosystemeRoute
+  '/app/equipe': typeof AppEquipeRoute
   '/app/espace-metier': typeof AppEspaceMetierRoute
   '/app/livrables': typeof AppLivrablesRoute
   '/app/messages': typeof AppMessagesRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/objectifs': typeof AppObjectifsRoute
+  '/app/parametres': typeof AppParametresRoute
+  '/app/performance': typeof AppPerformanceRoute
   '/app/prestataires': typeof AppPrestatairesRoute
+  '/app/projets': typeof AppProjetsRoute
   '/app/rendez-vous': typeof AppRendezVousRoute
   '/concierge/besoins': typeof ConciergeBesoinsRoute
   '/concierge/diagnostics': typeof ConciergeDiagnosticsRoute
   '/concierge/documents': typeof ConciergeDocumentsRoute
+  '/concierge/entreprises': typeof ConciergeEntreprisesRouteWithChildren
   '/concierge/messages': typeof ConciergeMessagesRoute
   '/concierge/missions': typeof ConciergeMissionsRoute
   '/concierge/prestataires': typeof ConciergePrestatairesRoute
   '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
   '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
+  '/expert/agenda': typeof ExpertAgendaRoute
+  '/expert/clients': typeof ExpertClientsRoute
+  '/expert/demandes': typeof ExpertDemandesRoute
+  '/expert/documents': typeof ExpertDocumentsRoute
+  '/expert/missions': typeof ExpertMissionsRoute
+  '/expert/performance': typeof ExpertPerformanceRoute
+  '/expert/profil': typeof ExpertProfilRoute
+  '/expert/propositions': typeof ExpertPropositionsRoute
   '/_public/': typeof PublicIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/concierge/': typeof ConciergeIndexRoute
+  '/expert/': typeof ExpertIndexRoute
   '/_public/missions/$code': typeof PublicMissionsCodeRoute
   '/_public/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/_public/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -599,6 +768,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/concierge'
     | '/connexion'
+    | '/expert'
     | '/inscription'
     | '/onboarding'
     | '/a-propos'
@@ -617,26 +787,44 @@ export interface FileRouteTypes {
     | '/admin/quotas'
     | '/admin/relances'
     | '/app/abonnement'
+    | '/app/actions'
     | '/app/devis'
     | '/app/diagnostic-auto'
     | '/app/diagnostics'
     | '/app/documents'
+    | '/app/ecosysteme'
+    | '/app/equipe'
     | '/app/espace-metier'
     | '/app/livrables'
     | '/app/messages'
+    | '/app/notifications'
+    | '/app/objectifs'
+    | '/app/parametres'
+    | '/app/performance'
     | '/app/prestataires'
+    | '/app/projets'
     | '/app/rendez-vous'
     | '/concierge/besoins'
     | '/concierge/diagnostics'
     | '/concierge/documents'
+    | '/concierge/entreprises'
     | '/concierge/messages'
     | '/concierge/missions'
     | '/concierge/prestataires'
     | '/concierge/rendez-vous'
     | '/concierge/suivi-commercial'
+    | '/expert/agenda'
+    | '/expert/clients'
+    | '/expert/demandes'
+    | '/expert/documents'
+    | '/expert/missions'
+    | '/expert/performance'
+    | '/expert/profil'
+    | '/expert/propositions'
     | '/admin/'
     | '/app/'
     | '/concierge/'
+    | '/expert/'
     | '/missions/$code'
     | '/secteurs/$sector'
     | '/secteurs/enseignement'
@@ -678,14 +866,22 @@ export interface FileRouteTypes {
     | '/admin/quotas'
     | '/admin/relances'
     | '/app/abonnement'
+    | '/app/actions'
     | '/app/devis'
     | '/app/diagnostic-auto'
     | '/app/diagnostics'
     | '/app/documents'
+    | '/app/ecosysteme'
+    | '/app/equipe'
     | '/app/espace-metier'
     | '/app/livrables'
     | '/app/messages'
+    | '/app/notifications'
+    | '/app/objectifs'
+    | '/app/parametres'
+    | '/app/performance'
     | '/app/prestataires'
+    | '/app/projets'
     | '/app/rendez-vous'
     | '/concierge/besoins'
     | '/concierge/diagnostics'
@@ -695,10 +891,19 @@ export interface FileRouteTypes {
     | '/concierge/prestataires'
     | '/concierge/rendez-vous'
     | '/concierge/suivi-commercial'
+    | '/expert/agenda'
+    | '/expert/clients'
+    | '/expert/demandes'
+    | '/expert/documents'
+    | '/expert/missions'
+    | '/expert/performance'
+    | '/expert/profil'
+    | '/expert/propositions'
     | '/'
     | '/admin'
     | '/app'
     | '/concierge'
+    | '/expert'
     | '/missions/$code'
     | '/secteurs/$sector'
     | '/secteurs/enseignement'
@@ -726,6 +931,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/concierge'
     | '/connexion'
+    | '/expert'
     | '/inscription'
     | '/onboarding'
     | '/_public/a-propos'
@@ -744,27 +950,45 @@ export interface FileRouteTypes {
     | '/admin/quotas'
     | '/admin/relances'
     | '/app/abonnement'
+    | '/app/actions'
     | '/app/devis'
     | '/app/diagnostic-auto'
     | '/app/diagnostics'
     | '/app/documents'
+    | '/app/ecosysteme'
+    | '/app/equipe'
     | '/app/espace-metier'
     | '/app/livrables'
     | '/app/messages'
+    | '/app/notifications'
+    | '/app/objectifs'
+    | '/app/parametres'
+    | '/app/performance'
     | '/app/prestataires'
+    | '/app/projets'
     | '/app/rendez-vous'
     | '/concierge/besoins'
     | '/concierge/diagnostics'
     | '/concierge/documents'
+    | '/concierge/entreprises'
     | '/concierge/messages'
     | '/concierge/missions'
     | '/concierge/prestataires'
     | '/concierge/rendez-vous'
     | '/concierge/suivi-commercial'
+    | '/expert/agenda'
+    | '/expert/clients'
+    | '/expert/demandes'
+    | '/expert/documents'
+    | '/expert/missions'
+    | '/expert/performance'
+    | '/expert/profil'
+    | '/expert/propositions'
     | '/_public/'
     | '/admin/'
     | '/app/'
     | '/concierge/'
+    | '/expert/'
     | '/_public/missions/$code'
     | '/_public/secteurs/$sector'
     | '/_public/secteurs/enseignement'
@@ -793,6 +1017,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ConciergeRoute: typeof ConciergeRouteWithChildren
   ConnexionRoute: typeof ConnexionRoute
+  ExpertRoute: typeof ExpertRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
   OnboardingRoute: typeof OnboardingRoute
 }
@@ -832,6 +1057,13 @@ declare module '@tanstack/react-router' {
       path: '/connexion'
       fullPath: '/connexion'
       preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expert': {
+      id: '/expert'
+      path: '/expert'
+      fullPath: '/expert'
+      preLoaderRoute: typeof ExpertRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inscription': {
@@ -981,6 +1213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAbonnementRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/actions': {
+      id: '/app/actions'
+      path: '/actions'
+      fullPath: '/app/actions'
+      preLoaderRoute: typeof AppActionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/devis': {
       id: '/app/devis'
       path: '/devis'
@@ -1009,6 +1248,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDocumentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/ecosysteme': {
+      id: '/app/ecosysteme'
+      path: '/ecosysteme'
+      fullPath: '/app/ecosysteme'
+      preLoaderRoute: typeof AppEcosystemeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/equipe': {
+      id: '/app/equipe'
+      path: '/equipe'
+      fullPath: '/app/equipe'
+      preLoaderRoute: typeof AppEquipeRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/espace-metier': {
       id: '/app/espace-metier'
       path: '/espace-metier'
@@ -1030,11 +1283,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMessagesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/objectifs': {
+      id: '/app/objectifs'
+      path: '/objectifs'
+      fullPath: '/app/objectifs'
+      preLoaderRoute: typeof AppObjectifsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/parametres': {
+      id: '/app/parametres'
+      path: '/parametres'
+      fullPath: '/app/parametres'
+      preLoaderRoute: typeof AppParametresRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/performance': {
+      id: '/app/performance'
+      path: '/performance'
+      fullPath: '/app/performance'
+      preLoaderRoute: typeof AppPerformanceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/prestataires': {
       id: '/app/prestataires'
       path: '/prestataires'
       fullPath: '/app/prestataires'
       preLoaderRoute: typeof AppPrestatairesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/projets': {
+      id: '/app/projets'
+      path: '/projets'
+      fullPath: '/app/projets'
+      preLoaderRoute: typeof AppProjetsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/rendez-vous': {
@@ -1072,6 +1360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConciergeDocumentsRouteImport
       parentRoute: typeof ConciergeRoute
     }
+    '/concierge/entreprises': {
+      id: '/concierge/entreprises'
+      path: '/entreprises'
+      fullPath: '/concierge/entreprises'
+      preLoaderRoute: typeof ConciergeEntreprisesRouteImport
+      parentRoute: typeof ConciergeRoute
+    }
     '/concierge/messages': {
       id: '/concierge/messages'
       path: '/messages'
@@ -1106,6 +1401,69 @@ declare module '@tanstack/react-router' {
       fullPath: '/concierge/suivi-commercial'
       preLoaderRoute: typeof ConciergeSuiviCommercialRouteImport
       parentRoute: typeof ConciergeRoute
+    }
+    '/expert/': {
+      id: '/expert/'
+      path: '/'
+      fullPath: '/expert/'
+      preLoaderRoute: typeof ExpertIndexRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/agenda': {
+      id: '/expert/agenda'
+      path: '/agenda'
+      fullPath: '/expert/agenda'
+      preLoaderRoute: typeof ExpertAgendaRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/clients': {
+      id: '/expert/clients'
+      path: '/clients'
+      fullPath: '/expert/clients'
+      preLoaderRoute: typeof ExpertClientsRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/demandes': {
+      id: '/expert/demandes'
+      path: '/demandes'
+      fullPath: '/expert/demandes'
+      preLoaderRoute: typeof ExpertDemandesRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/documents': {
+      id: '/expert/documents'
+      path: '/documents'
+      fullPath: '/expert/documents'
+      preLoaderRoute: typeof ExpertDocumentsRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/missions': {
+      id: '/expert/missions'
+      path: '/missions'
+      fullPath: '/expert/missions'
+      preLoaderRoute: typeof ExpertMissionsRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/performance': {
+      id: '/expert/performance'
+      path: '/performance'
+      fullPath: '/expert/performance'
+      preLoaderRoute: typeof ExpertPerformanceRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/profil': {
+      id: '/expert/profil'
+      path: '/profil'
+      fullPath: '/expert/profil'
+      preLoaderRoute: typeof ExpertProfilRouteImport
+      parentRoute: typeof ExpertRoute
+    }
+    '/expert/propositions': {
+      id: '/expert/propositions'
+      path: '/propositions'
+      fullPath: '/expert/propositions'
+      preLoaderRoute: typeof ExpertPropositionsRouteImport
+      parentRoute: typeof ExpertRoute
     }
     '/_public/missions/': {
       id: '/_public/missions/'
@@ -1235,17 +1593,17 @@ declare module '@tanstack/react-router' {
     }
     '/concierge/entreprises/': {
       id: '/concierge/entreprises/'
-      path: '/entreprises'
+      path: '/'
       fullPath: '/concierge/entreprises/'
       preLoaderRoute: typeof ConciergeEntreprisesIndexRouteImport
-      parentRoute: typeof ConciergeRoute
+      parentRoute: typeof ConciergeEntreprisesRoute
     }
     '/concierge/entreprises/$id': {
       id: '/concierge/entreprises/$id'
-      path: '/entreprises/$id'
+      path: '/$id'
       fullPath: '/concierge/entreprises/$id'
       preLoaderRoute: typeof ConciergeEntreprisesIdRouteImport
-      parentRoute: typeof ConciergeRoute
+      parentRoute: typeof ConciergeEntreprisesRoute
     }
   }
 }
@@ -1329,14 +1687,22 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppAbonnementRoute: typeof AppAbonnementRoute
+  AppActionsRoute: typeof AppActionsRoute
   AppDevisRoute: typeof AppDevisRoute
   AppDiagnosticAutoRoute: typeof AppDiagnosticAutoRoute
   AppDiagnosticsRoute: typeof AppDiagnosticsRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
+  AppEcosystemeRoute: typeof AppEcosystemeRoute
+  AppEquipeRoute: typeof AppEquipeRoute
   AppEspaceMetierRoute: typeof AppEspaceMetierRoute
   AppLivrablesRoute: typeof AppLivrablesRoute
   AppMessagesRoute: typeof AppMessagesRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppObjectifsRoute: typeof AppObjectifsRoute
+  AppParametresRoute: typeof AppParametresRoute
+  AppPerformanceRoute: typeof AppPerformanceRoute
   AppPrestatairesRoute: typeof AppPrestatairesRoute
+  AppProjetsRoute: typeof AppProjetsRoute
   AppRendezVousRoute: typeof AppRendezVousRoute
   AppIndexRoute: typeof AppIndexRoute
   AppBesoinsIdRoute: typeof AppBesoinsIdRoute
@@ -1348,14 +1714,22 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAbonnementRoute: AppAbonnementRoute,
+  AppActionsRoute: AppActionsRoute,
   AppDevisRoute: AppDevisRoute,
   AppDiagnosticAutoRoute: AppDiagnosticAutoRoute,
   AppDiagnosticsRoute: AppDiagnosticsRoute,
   AppDocumentsRoute: AppDocumentsRoute,
+  AppEcosystemeRoute: AppEcosystemeRoute,
+  AppEquipeRoute: AppEquipeRoute,
   AppEspaceMetierRoute: AppEspaceMetierRoute,
   AppLivrablesRoute: AppLivrablesRoute,
   AppMessagesRoute: AppMessagesRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppObjectifsRoute: AppObjectifsRoute,
+  AppParametresRoute: AppParametresRoute,
+  AppPerformanceRoute: AppPerformanceRoute,
   AppPrestatairesRoute: AppPrestatairesRoute,
+  AppProjetsRoute: AppProjetsRoute,
   AppRendezVousRoute: AppRendezVousRoute,
   AppIndexRoute: AppIndexRoute,
   AppBesoinsIdRoute: AppBesoinsIdRoute,
@@ -1367,37 +1741,75 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ConciergeEntreprisesRouteChildren {
+  ConciergeEntreprisesIdRoute: typeof ConciergeEntreprisesIdRoute
+  ConciergeEntreprisesIndexRoute: typeof ConciergeEntreprisesIndexRoute
+}
+
+const ConciergeEntreprisesRouteChildren: ConciergeEntreprisesRouteChildren = {
+  ConciergeEntreprisesIdRoute: ConciergeEntreprisesIdRoute,
+  ConciergeEntreprisesIndexRoute: ConciergeEntreprisesIndexRoute,
+}
+
+const ConciergeEntreprisesRouteWithChildren =
+  ConciergeEntreprisesRoute._addFileChildren(ConciergeEntreprisesRouteChildren)
+
 interface ConciergeRouteChildren {
   ConciergeBesoinsRoute: typeof ConciergeBesoinsRoute
   ConciergeDiagnosticsRoute: typeof ConciergeDiagnosticsRoute
   ConciergeDocumentsRoute: typeof ConciergeDocumentsRoute
+  ConciergeEntreprisesRoute: typeof ConciergeEntreprisesRouteWithChildren
   ConciergeMessagesRoute: typeof ConciergeMessagesRoute
   ConciergeMissionsRoute: typeof ConciergeMissionsRoute
   ConciergePrestatairesRoute: typeof ConciergePrestatairesRoute
   ConciergeRendezVousRoute: typeof ConciergeRendezVousRoute
   ConciergeSuiviCommercialRoute: typeof ConciergeSuiviCommercialRoute
   ConciergeIndexRoute: typeof ConciergeIndexRoute
-  ConciergeEntreprisesIdRoute: typeof ConciergeEntreprisesIdRoute
-  ConciergeEntreprisesIndexRoute: typeof ConciergeEntreprisesIndexRoute
 }
 
 const ConciergeRouteChildren: ConciergeRouteChildren = {
   ConciergeBesoinsRoute: ConciergeBesoinsRoute,
   ConciergeDiagnosticsRoute: ConciergeDiagnosticsRoute,
   ConciergeDocumentsRoute: ConciergeDocumentsRoute,
+  ConciergeEntreprisesRoute: ConciergeEntreprisesRouteWithChildren,
   ConciergeMessagesRoute: ConciergeMessagesRoute,
   ConciergeMissionsRoute: ConciergeMissionsRoute,
   ConciergePrestatairesRoute: ConciergePrestatairesRoute,
   ConciergeRendezVousRoute: ConciergeRendezVousRoute,
   ConciergeSuiviCommercialRoute: ConciergeSuiviCommercialRoute,
   ConciergeIndexRoute: ConciergeIndexRoute,
-  ConciergeEntreprisesIdRoute: ConciergeEntreprisesIdRoute,
-  ConciergeEntreprisesIndexRoute: ConciergeEntreprisesIndexRoute,
 }
 
 const ConciergeRouteWithChildren = ConciergeRoute._addFileChildren(
   ConciergeRouteChildren,
 )
+
+interface ExpertRouteChildren {
+  ExpertAgendaRoute: typeof ExpertAgendaRoute
+  ExpertClientsRoute: typeof ExpertClientsRoute
+  ExpertDemandesRoute: typeof ExpertDemandesRoute
+  ExpertDocumentsRoute: typeof ExpertDocumentsRoute
+  ExpertMissionsRoute: typeof ExpertMissionsRoute
+  ExpertPerformanceRoute: typeof ExpertPerformanceRoute
+  ExpertProfilRoute: typeof ExpertProfilRoute
+  ExpertPropositionsRoute: typeof ExpertPropositionsRoute
+  ExpertIndexRoute: typeof ExpertIndexRoute
+}
+
+const ExpertRouteChildren: ExpertRouteChildren = {
+  ExpertAgendaRoute: ExpertAgendaRoute,
+  ExpertClientsRoute: ExpertClientsRoute,
+  ExpertDemandesRoute: ExpertDemandesRoute,
+  ExpertDocumentsRoute: ExpertDocumentsRoute,
+  ExpertMissionsRoute: ExpertMissionsRoute,
+  ExpertPerformanceRoute: ExpertPerformanceRoute,
+  ExpertProfilRoute: ExpertProfilRoute,
+  ExpertPropositionsRoute: ExpertPropositionsRoute,
+  ExpertIndexRoute: ExpertIndexRoute,
+}
+
+const ExpertRouteWithChildren =
+  ExpertRoute._addFileChildren(ExpertRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   PublicRoute: PublicRouteWithChildren,
@@ -1405,6 +1817,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ConciergeRoute: ConciergeRouteWithChildren,
   ConnexionRoute: ConnexionRoute,
+  ExpertRoute: ExpertRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
   OnboardingRoute: OnboardingRoute,
 }

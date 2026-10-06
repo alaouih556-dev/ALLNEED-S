@@ -5,3 +5,4 @@ dist/
 !.env.example
 *.bak
 backup*/
+server/data/

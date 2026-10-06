@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import { ACCESS_OFFERS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { useDemo } from '@/store/store'
+import { api, isApiError } from '@/lib/api'
 import { AuthLayout } from '@/components/AuthLayout'
 import { Alert, Button, Card, Checkbox, Field, Input, Select, Steps } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -17,8 +18,8 @@ export const Route = createFileRoute('/inscription')({
   component: InscriptionPage,
   head: () => ({
     meta: [
-      { title: 'Créer un compte — ALLNEEDS' },
-      { name: 'description', content: 'Créez votre compte ALLNEEDS, choisissez votre secteur et votre espace métier.' },
+      { title: 'Demander un compte — ALLNEEDS' },
+      { name: 'description', content: 'Décrivez votre établissement, votre secteur et votre espace métier : ALLNEEDS ouvre ensuite votre compte.' },
     ],
   }),
 })
@@ -47,7 +48,6 @@ const WORKSPACE_PROFILES: Record<Sector, { value: string; label: string; descrip
 
 export function InscriptionPage() {
   const { offre: offreFromUrl } = Route.useSearch()
-  const navigate = useNavigate()
   const { dispatch } = useDemo()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
@@ -55,6 +55,8 @@ export function InscriptionPage() {
     name: '', role: '', email: '', phone: '', accept: false,
   })
   const [error, setError] = useState('')
+  const [pending, setPending] = useState(false)
+  const [reference, setReference] = useState('')
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) { setForm((v) => ({ ...v, [key]: value })) }
   function setSector(sector: Sector) { setForm((v) => ({ ...v, sector, workspaceProfile: WORKSPACE_PROFILES[sector][0].value })) }
@@ -65,16 +67,64 @@ export function InscriptionPage() {
     return ''
   }
   function next() { const m=validate(step); if(m){setError(m);return}; setError(''); setStep((v)=>Math.min(v+1, STEP_LABELS.length-1)) }
-  function submit() {
+  async function submit() {
     const m=validate(2); if(m){setError(m);return}
-    dispatch({ type: 'REGISTRATION_SET', profile: { sector: form.sector, workspaceProfile: form.workspaceProfile, situation: form.situation, tier: null, payment: null } })
-    dispatch({ type: 'SET_ONBOARDED', value: false })
-    navigate({ to: '/onboarding' })
+    if (pending) return
+    setError('')
+    setPending(true)
+    try {
+      dispatch({ type: 'REGISTRATION_SET', profile: { sector: form.sector, workspaceProfile: form.workspaceProfile, situation: form.situation, tier: null, payment: null } })
+      dispatch({ type: 'SET_ONBOARDED', value: false })
+      const data = await api<{ reference: string }>('/api/registrations', {
+        method: 'POST',
+        json: {
+          org: form.org.trim(),
+          kind: form.kind.trim(),
+          sector: form.sector,
+          workspaceProfile: form.workspaceProfile,
+          situation: form.situation,
+          city: form.city.trim(),
+          size: form.size.trim(),
+          name: form.name.trim(),
+          role: form.role.trim(),
+          email: form.email.trim().toLowerCase(),
+          phone: form.phone.trim(),
+          accept: form.accept,
+        },
+      })
+      setReference(data.reference)
+    } catch (err) {
+      if (isApiError(err)) setError(err.message)
+      else setError('Envoi impossible pour le moment. Réessayez dans un instant.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  if (reference) {
+    return <AuthLayout
+      title="Votre demande est enregistrée"
+      subtitle="Aucun compte n’est encore ouvert : un concierge ALLNEEDS vérifie votre demande et provisionne votre espace."
+      footer={<>Déjà client ? <Link to="/connexion" className="font-semibold text-brand-700">Se connecter</Link></>}
+    >
+      <Card className="p-5">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Référence de demande</p>
+        <p className="mt-2 font-mono text-lg font-bold text-ink-950">{reference}</p>
+        <dl className="mt-4 space-y-2 text-sm">
+          <div className="flex justify-between gap-4"><dt className="text-ink-500">Établissement</dt><dd className="text-right font-medium text-ink-900">{form.org}</dd></div>
+          <div className="flex justify-between gap-4"><dt className="text-ink-500">Secteur</dt><dd className="text-right font-medium text-ink-900">{SECTOR_LABEL[form.sector]}</dd></div>
+          <div className="flex justify-between gap-4"><dt className="text-ink-500">Contact</dt><dd className="text-right font-medium text-ink-900">{form.name} · {form.email.trim().toLowerCase()}</dd></div>
+          <div className="flex justify-between gap-4"><dt className="text-ink-500">ALLNEEDS ACCÈS</dt><dd className="text-right font-medium text-ink-900">À choisir après activation</dd></div>
+        </dl>
+      </Card>
+      <Alert tone="info">Conservez cette référence. Vous recevrez vos identifiants de connexion après validation par ALLNEEDS ; aucun mot de passe n’est défini à cette étape.</Alert>
+      <div className="pt-2"><Button size="lg" fullWidth onClick={() => { setReference(''); setStep(0) }}>Faire une autre demande</Button></div>
+    </AuthLayout>
   }
 
   return <AuthLayout
-    title="Créer votre compte ALLNEEDS"
-    subtitle="Choisissez votre secteur et votre espace métier. L’abonnement ALLNEEDS ACCÈS se choisit ensuite depuis votre compte."
+    title="Demander un compte ALLNEEDS"
+    subtitle="Décrivez votre établissement et choisissez votre espace métier. Le compte est ouvert après vérification par ALLNEEDS : aucun mot de passe n’est défini à cette étape."
     footer={<>Déjà client ? <Link to="/connexion" className="font-semibold text-brand-700">Se connecter</Link></>}
   >
     <Steps steps={STEP_LABELS} current={step} className="mb-8" />
@@ -113,7 +163,7 @@ export function InscriptionPage() {
         <Checkbox checked={form.accept} onChange={(e)=>set('accept',e.target.checked)} label="J’accepte les conditions et la politique de confidentialité." />
       </> : null}
       {error ? <Alert tone="danger">{error}</Alert> : null}
-      <div className="flex items-center justify-between gap-3 pt-2"><Button variant="ghost" onClick={()=>setStep((v)=>Math.max(0,v-1))} disabled={step===0}>Retour</Button>{step<STEP_LABELS.length-1?<Button onClick={next}>Continuer <ArrowRight className="h-4 w-4" /></Button>:<Button onClick={submit}>Créer mon compte <ArrowRight className="h-4 w-4" /></Button>}</div>
+      <div className="flex items-center justify-between gap-3 pt-2"><Button variant="ghost" onClick={()=>setStep((v)=>Math.max(0,v-1))} disabled={step===0}>Retour</Button>{step<STEP_LABELS.length-1?<Button onClick={next}>Continuer <ArrowRight className="h-4 w-4" /></Button>:<Button onClick={submit} disabled={pending}>{pending?<><Loader2 className="h-4 w-4 animate-spin" /> Envoi…</>:<>Envoyer ma demande <ArrowRight className="h-4 w-4" /></>}</Button>}</div>
     </div>
   </AuthLayout>
 }

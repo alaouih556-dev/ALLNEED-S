@@ -87,7 +87,7 @@ export interface PublicBooking {
   status: 'confirme' | 'propose' | 'realise' | 'annule'
 }
 
-export type Role = 'client' | 'admin' | 'concierge'
+export type Role = 'client' | 'admin' | 'concierge' | 'expert' | 'commercial'
 export type ClientWorkspaceRole = 'dirigeant' | 'manager' | 'collaborateur'
 export type SanteSaasRole = 'directeur' | 'reception' | 'comptabilite'
 
@@ -105,6 +105,8 @@ export const DEMO_CLIENT_PROFILES = {
   'usr-amina': { orgId: 'org-amal', name: 'Amina Bennani', email: 'a.bennani@al-amal.ma', roleLabel: 'Direction · Enseignement', initials: 'AB' },
   'usr-youssef': { orgId: 'org-nour', name: 'Dr Youssef Idrissi', email: 'direction@clinique-nour.ma', roleLabel: 'Direction · Santé', initials: 'YI' },
   'usr-salma': { orgId: 'org-riad', name: 'Salma Ouazzani', email: 'salma@riad-lumen.ma', roleLabel: 'Direction · Tourisme', initials: 'SO' },
+  'mgr-nour': { orgId: 'org-nour', name: 'Karim Senhaji', email: 'responsable@clinique-nour.ma', roleLabel: 'Responsable · Santé', initials: 'KS' },
+  'col-nour': { orgId: 'org-nour', name: 'Leïla Amrani', email: 'accueil@clinique-nour.ma', roleLabel: 'Collaborateur · Santé', initials: 'LA' },
 } as const
 
 
@@ -135,6 +137,11 @@ export interface DemoState {
   saasActivatedAtByOrg: Record<string, string | null>
   registrationProfile: { sector: Sector; workspaceProfile: string; situation?: 'entreprise_existante' | 'creation' | 'investisseur'; tier: string | null; payment: string | null } | null
   clientWorkspaceRole: ClientWorkspaceRole
+  /** Entreprise portée par la session serveur (source de vérité pour l'isolation). */
+  orgIdSync: string
+  /** Identité portée par la session serveur (nom et adresse vérifiés par l'API). */
+  userNameSync: string
+  userEmailSync: string
   toasts: Toast[]
   now: string
 }
@@ -224,6 +231,9 @@ const initialState: DemoState = {
   saasActivatedAtByOrg: { 'org-amal': null, 'org-nour': DEMO_NOW, 'org-riad': null },
   registrationProfile: null,
   clientWorkspaceRole: 'dirigeant',
+  orgIdSync: '',
+  userNameSync: '',
+  userEmailSync: '',
   bookings: [
     {
       id: 'bk-001',
@@ -298,6 +308,15 @@ export type DemoAction =
   | { type: 'CONCIERGE_ASSIGN_SECTOR'; id: string; sector: Sector; value: boolean }
   | { type: 'CONCIERGE_ADD_ORG'; conciergeId: string; org: ClientOrg }
   | { type: 'SWITCH_USER'; userId: string }
+  | {
+      type: 'IDENTITY_SYNC'
+      userId: string
+      role: Role
+      orgId: string
+      clientRole: ClientWorkspaceRole | null
+      name?: string
+      email?: string
+    }
   | { type: 'SET_ONBOARDED'; value: boolean }
   | { type: 'TOAST_ADD'; toast: Omit<Toast, 'id'> }
   | { type: 'TOAST_REMOVE'; id: string }
@@ -394,6 +413,17 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case 'SWITCH_USER':
       return { ...state, userId: action.userId }
+
+    case 'IDENTITY_SYNC':
+      return {
+        ...state,
+        userId: action.userId,
+        role: action.role,
+        orgIdSync: action.orgId,
+        clientWorkspaceRole: action.clientRole ?? state.clientWorkspaceRole,
+        userNameSync: action.name ?? '',
+        userEmailSync: action.email ?? '',
+      }
 
     case 'SET_ONBOARDED':
       return { ...state, onboarded: action.value }
@@ -667,6 +697,18 @@ interface StoreValue {
 
 const DemoContext = createContext<StoreValue | null>(null)
 
+/**
+ * Passerelle pour les contrôles de route hors React : aligne l'identité du store
+ * local sur la session serveur vérifiée, sans attendre le prochain rendu.
+ */
+let externalDispatch: ((action: DemoAction) => void) | null = null
+const pendingActions: DemoAction[] = []
+
+export function dispatchDemo(action: DemoAction): void {
+  if (externalDispatch) externalDispatch(action)
+  else pendingActions.push(action)
+}
+
 function load(): DemoState {
   if (typeof window === 'undefined') return initialState
   try {
@@ -683,6 +725,14 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, load)
 
   useEffect(() => {
+    externalDispatch = dispatch
+    while (pendingActions.length > 0) dispatch(pendingActions.shift() as DemoAction)
+    return () => {
+      if (externalDispatch === dispatch) externalDispatch = null
+    }
+  }, [dispatch])
+
+  useEffect(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, toasts: [] }))
     } catch {
@@ -694,12 +744,24 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<StoreValue>(() => {
     const concierge = state.concierges.find((item) => item.id === state.userId) ?? state.concierges[0]
-    const clientProfile = DEMO_CLIENT_PROFILES[state.userId as keyof typeof DEMO_CLIENT_PROFILES] ?? DEMO_CLIENT_PROFILES['usr-amina']
+    const known = DEMO_CLIENT_PROFILES[state.userId as keyof typeof DEMO_CLIENT_PROFILES]
+    // L'entreprise affichée vient de la session serveur. Un compte dont
+    // l'entreprise n'est pas provisionnée n'accède à aucune donnée existante :
+    // il obtient des listes vides plutôt que les données d'une autre société.
+    const orgId = state.role === 'client' ? known?.orgId || state.orgIdSync : ''
+    const org = state.orgs.find((item) => item.id === orgId)
+    const clientProfile = {
+      orgId,
+      name: known?.name ?? org?.name ?? (state.role === 'client' ? 'Compte client' : ''),
+      email: known?.email ?? '',
+      roleLabel: known?.roleLabel ?? (org ? `Entreprise · ${org.name}` : 'Compte client'),
+      initials: known?.initials ?? (org ? org.name.replace(/[^A-Za-zÀ-ÿ]/g, '').slice(0, 2).toUpperCase() : '—'),
+    }
     const user: AppUser = {
       id: state.userId,
-      orgId: state.role === 'client' ? clientProfile.orgId : '',
-      name: state.role === 'admin' ? 'Nada Bennani' : state.role === 'concierge' ? (concierge?.name ?? 'Concierge ALLNEEDS') : clientProfile.name,
-      email: state.role === 'admin' ? 'nada@allneeds.ma' : state.role === 'concierge' ? (concierge?.email ?? 'concierge@allneeds.ma') : clientProfile.email,
+      orgId: clientProfile.orgId,
+      name: state.userNameSync || (state.role === 'admin' ? 'Nada Bennani' : state.role === 'concierge' ? (concierge?.name ?? 'Concierge ALLNEEDS') : clientProfile.name),
+      email: state.userEmailSync || (state.role === 'admin' ? 'nada@allneeds.ma' : state.role === 'concierge' ? (concierge?.email ?? 'concierge@allneeds.ma') : clientProfile.email),
       role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction',
       roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Concierge' : clientProfile.roleLabel,
       initials: state.role === 'admin' ? 'NB' : state.role === 'concierge' ? 'YM' : clientProfile.initials,
@@ -710,7 +772,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
       user,
       role: state.role,
       setRole,
-      orgId: state.role === 'client' ? clientProfile.orgId : '',
+      orgId: clientProfile.orgId,
     }
   }, [state, setRole])
 

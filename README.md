@@ -8,12 +8,46 @@ Node.js >=22.12 (ou 24), puis dans le dossier extrait :
 
 ```powershell
 npm install
-npm run typecheck
-npm run test:saas
-npm run test:tourisme
-npm run build
-npm run dev
+npm run server        # API locale : http://127.0.0.1:8787
+npm run dev           # interface : http://localhost:5173
 ```
+
+L’interface appelle l’API sur le même origine (`/api`, proxy Vite configuré dans
+`vite.config.ts`). Pour viser une autre origine, définissez `VITE_API_BASE`.
+Toutes les variables sont décrites dans `.env.example`.
+
+Le serveur stocke ses données en JSON dans `server/data/` (variable `DATA_DIR`),
+démarre sur un jeu de démonstration (voir l’avertissement en console) et n’expose
+aucune donnée sans session. Pour repartir de zéro : supprimer `server/data/`.
+
+```powershell
+npm run test:mvp       # règles Diagnostic 360 + habilitations + API + rendu
+npm run typecheck
+npm run build
+```
+
+### Comptes de démonstration
+
+Un mot de passe commun est utilisé par tous les comptes de démonstration ;
+il est affiché dans la console du serveur et sur la page de connexion lorsque
+l’API signale l’environnement de démonstration. Ne pas réutiliser ces comptes
+avec des données réelles.
+
+| Rôle | Adresse |
+|---|---|
+| Administrateur | `nada@allneeds.ma` |
+| Concierge | `concierge.sante@allneeds.ma` |
+| Expert | `expert.sante@allneeds.ma` |
+| Commercial (CRM uniquement) | `commercial@allneeds.ma` |
+| Dirigeant client | `a.bennani@al-amal.ma` |
+| Dirigeant client | `direction@clinique-nour.ma` |
+| Dirigeant client | `salma@riad-lumen.ma` |
+| Responsable client | `responsable@clinique-nour.ma` |
+| Collaborateur client | `accueil@clinique-nour.ma` |
+
+La session est délivrée par l’API dans un cookie `HttpOnly` ; le stockage local
+ne sert qu’à afficher l’identité entre deux requêtes et est revalidé sur chaque
+chargement de zone protégée (`GET /api/auth/me`).
 
 Le menu client « Espace métier SaaS » ouvre l’espace métier. Les branches disposent aussi de liens directs :
 
@@ -80,7 +114,14 @@ Fonctions de la version précédente conservées : fiches patients fictives et s
 
 ## Limites explicites
 
-Frontend de démonstration uniquement. Pas de serveur, authentification métier réelle, contrôle d’accès sécurisé, isolation entre entreprises au niveau serveur, collaboration entre navigateurs, paiement bancaire, email/SMS, intégration OTA/POS, facturation fiscale certifiée ou stockage de dossiers médicaux. Ne saisissez pas de données réelles sensibles.
+L’API locale (`npm run server`) applique réellement l’authentification, la matrice
+d’habilitation et l’isolation multi-tenant, mais elle persiste en fichiers JSON
+sans serveur hébergé : il n’existe **aucune mise en production de l’API** dans ce
+dépôt, aucun e-mail/SMS, aucun paiement bancaire, aucune facturation fiscale
+certifiée, aucun stockage de dossiers médicaux, aucune intégration OTA/POS.
+Ne saisissez pas de données réelles sensibles. En environnement de démonstration,
+tous les comptes partagent le même mot de passe : c’est un choix de démonstration,
+pas un fonctionnement de production.
 
 Les documents sont des index, pas des fichiers archivés. Pas de gestion complète de lots/péremption ou FIFO, de tournées multi-jours, d’optimisation d’itinéraires, de plan de salle graphique, de prix dynamiques, de synchronisation Channel Manager, de vouchers contractuels signés ou de remboursement bancaire. Les validations se basent sur les informations déclarées dans la démo.
 

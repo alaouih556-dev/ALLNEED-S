@@ -4,6 +4,8 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { RouterContextProvider, createMemoryHistory } from '@tanstack/react-router'
 const server=await createServer({server:{middlewareMode:true},appType:'custom'})
+const memory=new Map([['allneeds.session.v1',JSON.stringify({role:'client',userId:'usr-amina',orgId:'org-amal',email:'a.bennani@al-amal.ma',createdAt:new Date().toISOString()})]])
+Object.defineProperty(globalThis,'localStorage',{configurable:true,writable:true,value:{getItem:(key)=>memory.has(key)?memory.get(key):null,setItem:(key,value)=>{memory.set(key,String(value))},removeItem:(key)=>{memory.delete(key)},clear:()=>{memory.clear()},key:()=>null,length:0}})
 try{
  const {router}=await server.ssrLoadModule('/src/router.tsx');router.update({history:createMemoryHistory({initialEntries:['/app/tourisme/agence']})});await router.load()
  const {DemoStoreProvider}=await server.ssrLoadModule('/src/store/store.tsx')

@@ -17,7 +17,15 @@
     "test:access": "node scripts/test-access-v9.mjs",
     "test:v10": "node scripts/test-v10-rules.mjs",
     "prebuild": "npm run routes:generate",
-    "test:v16": "node scripts/test-v16-strategy.mjs"
+    "test:v16": "node scripts/test-v16-strategy.mjs",
+    "test:v19": "node scripts/test-v19-master-strategy.mjs",
+    "test:v22": "node scripts/test-v22-admin-access.mjs",
+    "test:offers": "node scripts/test-offers-v11.mjs",
+    "test:permissions": "node scripts/test-permissions.mjs",
+    "test:diag360": "node scripts/test-diagnostic360.mjs",
+    "test:server": "node --test server/",
+    "test:mvp": "node scripts/test-diagnostic360.mjs && node scripts/test-permissions.mjs && node --test server/ && node scripts/test-render.mjs",
+    "server": "node server/index.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.39",

@@ -27,7 +27,8 @@ import {
   ShieldCheck,
   UserRoundCog,
 } from 'lucide-react'
-import { orgHasSaasAccess, useDemo, type Role } from '@/store/store'
+import { orgHasSaasAccess, useDemo } from '@/store/store'
+import { clearSession, logout } from '@/lib/session'
 import { cn } from '@/lib/utils'
 import { Avatar, Button } from '@/components/ui'
 
@@ -155,11 +156,6 @@ export function AppShell({
 
   const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(unread, pendingDocs, clientSaasEnabled, state.clientWorkspaceRole, clientOrg?.sector)
 
-  function switchRole(next: Role) {
-    dispatch({ type: 'SET_ROLE', role: next })
-    navigate({ to: next === 'admin' ? '/admin' : next === 'concierge' ? ('/concierge' as any) : '/app' })
-  }
-
   return (
     <div className={`workspace-redesign workspace-${variant} flex min-h-screen bg-ink-50`}>
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-ink-100 bg-white lg:flex">
@@ -200,7 +196,7 @@ export function AppShell({
           <div className="rounded-xl bg-ink-50 p-3">
             <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-ink-400">Jeu de démonstration</p>
             <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-500">
-              Les données sont partagées entre l’espace client et l’admin, stockées dans votre navigateur.
+              Les données de démonstration métier restent dans ce navigateur. L’identité, le rôle et le périmètre sont vérifiés par l’API.
             </p>
             <Button
               variant="outline"
@@ -208,7 +204,7 @@ export function AppShell({
               className="mt-3 w-full"
               onClick={() => {
                 dispatch({ type: 'RESET' })
-                dispatch({ type: 'TOAST_ADD', toast: { title: 'Démonstration réinitialisée', tone: 'info' } })
+                window.location.reload()
               }}
             >
               <RefreshCcw className="h-3.5 w-3.5" />
@@ -260,9 +256,13 @@ export function AppShell({
 
             <button
               type="button"
-              onClick={() => navigate({ to: '/' })}
+              onClick={async () => {
+                await logout()
+                clearSession()
+                navigate({ to: '/' })
+              }}
               className="rounded-lg p-2 text-ink-400 transition hover:bg-ink-100 hover:text-ink-800"
-              title="Retour au site public"
+              title="Se déconnecter"
             >
               <LogOut className="h-4 w-4" />
             </button>
