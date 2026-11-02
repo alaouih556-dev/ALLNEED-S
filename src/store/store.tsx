@@ -1,0 +1,788 @@
+﻿import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  type ReactNode,
+} from 'react'
+import {
+  DELIVERABLES,
+  DEMO_NOW,
+  DIAGNOSTICS,
+  LEADS,
+  MEETINGS,
+  MESSAGES,
+  MISSIONS,
+  NEEDS,
+  NOTIFICATIONS,
+  ORGS,
+  PROVIDERS,
+  QUOTES,
+  SUBSCRIPTION,
+  THREADS,
+  DOCUMENTS,
+} from '@/data/demo'
+import { ACCESS_OFFERS } from '@/data/catalog'
+import type {
+  AppUser,
+  ClientOrg,
+  DeliverableStatus,
+  DocStatus,
+  Lead,
+  LeadStage,
+  Meeting,
+  MeetingStatus,
+  MessageAuthor,
+  MilestoneStatus,
+  Mission,
+  MissionStatus,
+  Need,
+  NeedStatus,
+  NotificationItem,
+  Provider,
+  Quote,
+  Sector,
+  Toast,
+} from '@/types'
+
+/* ------------------------------------------------------------------ */
+/* Types publics                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface PublicRequest {
+  id: string
+  at: string
+  kind: 'besoin' | 'mission' | 'diagnostic' | 'contact' | 'newsletter'
+  name: string
+  org: string
+  email: string
+  phone: string
+  sector: Sector
+  city: string
+  message: string
+  budget: string
+  status: 'nouveau' | 'contacte' | 'planifie' | 'clos'
+  assignedTo: string
+  notes: string
+}
+
+export interface PublicBooking {
+  id: string
+  at: string
+  createdAt: string
+  org: string
+  name: string
+  role: string
+  email: string
+  phone: string
+  sector: Sector
+  city: string
+  headcount: string
+  date: string
+  slot: string
+  format: 'sur_site' | 'visio' | 'telephone'
+  topic: string
+  status: 'confirme' | 'propose' | 'realise' | 'annule'
+}
+
+export type Role = 'client' | 'admin' | 'concierge'
+export type ClientWorkspaceRole = 'dirigeant' | 'manager' | 'collaborateur'
+export type SanteSaasRole = 'directeur' | 'reception' | 'comptabilite'
+
+export interface ConciergeAccount {
+  id: string
+  name: string
+  email: string
+  active: boolean
+  sectors: Sector[]
+  assignedOrgIds: string[]
+  createdOrgIds: string[]
+}
+
+export interface ClientTeamMember {
+  id: string
+  orgId: string
+  name: string
+  email: string
+  jobTitle: string
+  role: 'manager' | 'collaborateur'
+  access: string[]
+  status: 'invitation_en_attente' | 'actif'
+  createdAt: string
+}
+
+export interface CommercialOpportunity {
+  id: string
+  orgId: string
+  offerCode: 'PRO' | 'PERFORMANCE'
+  offerName: string
+  signal: string
+  status: 'a_qualifier' | 'a_preparer' | 'proposee' | 'interessee' | 'acceptee' | 'refusee'
+  createdAt: string
+}
+
+export interface DemoActivity {
+  id: string
+  at: string
+  actor: string
+  role: string
+  orgId: string
+  organization: string
+  type: 'analyse' | 'action' | 'progression' | 'decision'
+  text: string
+}
+
+export const DEMO_CLIENT_PROFILES = {
+  'usr-amina': { orgId: 'org-amal', name: 'Amina Bennani', email: 'a.bennani@al-amal.ma', roleLabel: 'Direction Â· Enseignement', initials: 'AB' },
+  'usr-youssef': { orgId: 'org-nour', name: 'Dr Youssef Idrissi', email: 'direction@clinique-nour.ma', roleLabel: 'Direction Â· SantÃ©', initials: 'YI' },
+  'usr-salma': { orgId: 'org-riad', name: 'Salma Ouazzani', email: 'salma@riad-lumen.ma', roleLabel: 'Direction Â· Tourisme', initials: 'SO' },
+  'usr-manager': { orgId: 'org-amal', name: 'Responsable Al Amal', email: 'manager@al-amal.ma', roleLabel: 'Responsable Â· Enseignement', initials: 'RA' },
+  'usr-collab': { orgId: 'org-amal', name: 'Collaborateur Al Amal', email: 'collaborateur@al-amal.ma', roleLabel: 'Collaborateur Â· Enseignement', initials: 'CA' },
+} as const
+
+
+export interface DemoState {
+  role: Role
+  userId: string
+  onboarded: boolean
+  subscription: typeof SUBSCRIPTION
+  orgs: ClientOrg[]
+  providers: Provider[]
+  needs: Need[]
+  quotes: Quote[]
+  missions: Mission[]
+  deliverables: typeof DELIVERABLES
+  meetings: typeof MEETINGS
+  documents: typeof DOCUMENTS
+  threads: typeof THREADS
+  messages: typeof MESSAGES
+  diagnostics: typeof DIAGNOSTICS
+  leads: Lead[]
+  notifications: NotificationItem[]
+  requests: PublicRequest[]
+  bookings: PublicBooking[]
+  concierges: ConciergeAccount[]
+  teamMembers: ClientTeamMember[]
+  commercialOpportunities: CommercialOpportunity[]
+  activities: DemoActivity[]
+  saasAccess: Record<Sector, boolean>
+  saasAccessByOrg: Record<string, boolean>
+  saasRolesByOrg: Record<string, SanteSaasRole[]>
+  saasActivatedAtByOrg: Record<string, string | null>
+  registrationProfile: { sector: Sector; workspaceProfile: string; situation?: 'entreprise_existante' | 'creation' | 'investisseur'; tier: string | null; payment: string | null; activated: boolean; orgName?: string; contactName?: string; appointmentDate?: string; appointmentSlot?: string } | null
+  clientWorkspaceRole: ClientWorkspaceRole
+  toasts: Toast[]
+  now: string
+}
+
+const initialState: DemoState = {
+  role: 'client',
+  userId: '',
+  onboarded: true,
+  subscription: SUBSCRIPTION,
+  orgs: [],
+  providers: [],
+  needs: [],
+  quotes: [],
+  missions: [],
+  deliverables: [],
+  meetings: [],
+  documents: [],
+  threads: [],
+  messages: [],
+  diagnostics: [],
+  leads: [],
+  notifications: [],
+  requests: [],
+  concierges: [],
+  teamMembers: [],
+  commercialOpportunities: [],
+  activities: [],
+  saasAccess: { enseignement: false, sante: false, tourisme: false },
+  saasAccessByOrg: {},
+  saasRolesByOrg: {},
+  saasActivatedAtByOrg: {},
+  registrationProfile: null,
+  clientWorkspaceRole: 'dirigeant',
+  bookings: [],
+  toasts: [],
+  now: new Date().toISOString(),
+}
+
+function d2(offsetDays: number) {
+  const base = new Date(DEMO_NOW)
+  base.setDate(base.getDate() + offsetDays)
+  return base.toISOString()
+}
+
+function uid(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function stamp(base: string, offsetMinutes = 0) {
+  return new Date(new Date(base).getTime() + offsetMinutes * 60000).toISOString()
+}
+
+/* ------------------------------------------------------------------ */
+/* Actions                                                             */
+/* ------------------------------------------------------------------ */
+
+export type DemoAction =
+  | { type: 'RESET' }
+  | { type: 'SET_ROLE'; role: Role }
+  | { type: 'SAAS_SET_ACCESS'; sector: Sector; value: boolean }
+  | { type: 'SAAS_SET_ORG_ACCESS'; orgId: string; value: boolean }
+  | { type: 'SAAS_SET_ORG_ROLE'; orgId: string; role: SanteSaasRole; value: boolean }
+  | { type: 'REGISTRATION_SET'; profile: NonNullable<DemoState['registrationProfile']> }
+  | { type: 'REGISTRATION_ACTIVATION_SET'; value: boolean }
+  | { type: 'CLIENT_WORKSPACE_ROLE_SET'; role: ClientWorkspaceRole }
+  | { type: 'TEAM_MEMBER_CREATE'; member: Omit<ClientTeamMember, 'id' | 'createdAt' | 'status'> }
+  | { type: 'TEAM_MEMBER_REVOKE'; id: string }
+  | { type: 'TEAM_MEMBER_ROLE_SET'; id: string; role: ClientTeamMember['role'] }
+  | { type: 'PROVIDER_PATCH'; id: string; patch: Partial<Provider> }
+  | { type: 'COMMERCIAL_OPPORTUNITY_CREATE'; opportunity: Omit<CommercialOpportunity, 'id' | 'createdAt' | 'status'> }
+  | { type: 'COMMERCIAL_OPPORTUNITY_STATUS_SET'; id: string; status: CommercialOpportunity['status'] }
+  | { type: 'CONCIERGE_CREATE'; account: ConciergeAccount }
+  | { type: 'CONCIERGE_TOGGLE'; id: string }
+  | { type: 'CONCIERGE_ASSIGN_ORG'; id: string; orgId: string; value: boolean }
+  | { type: 'CONCIERGE_ASSIGN_SECTOR'; id: string; sector: Sector; value: boolean }
+  | { type: 'CONCIERGE_ADD_ORG'; conciergeId: string; org: ClientOrg }
+  | { type: 'SWITCH_USER'; userId: string }
+  | { type: 'SET_ONBOARDED'; value: boolean }
+  | { type: 'TOAST_ADD'; toast: Omit<Toast, 'id'> }
+  | { type: 'TOAST_REMOVE'; id: string }
+  | { type: 'REQUEST_CREATE'; request: Omit<PublicRequest, 'id' | 'at' | 'status' | 'assignedTo' | 'notes'> }
+  | { type: 'REQUEST_SET_STATUS'; id: string; status: PublicRequest['status'] }
+  | { type: 'REQUEST_ASSIGN'; id: string; assignedTo: string }
+  | { type: 'BOOKING_CREATE'; booking: Omit<PublicBooking, 'id' | 'createdAt' | 'status'> }
+  | { type: 'BOOKING_SET_STATUS'; id: string; status: PublicBooking['status'] }
+  | { type: 'NEED_CREATE'; need: Need }
+  | { type: 'NEED_SET_STATUS'; id: string; status: NeedStatus; label?: string }
+  | { type: 'NEED_ADD_PROVIDER'; needId: string; providerId: string }
+  | { type: 'QUOTE_ADD'; quote: Quote }
+  | { type: 'QUOTE_SET_STATUS'; id: string; status: Quote['status'] }
+  | { type: 'MEETING_SET_STATUS'; id: string; status: MeetingStatus }
+  | { type: 'MEETING_CREATE'; meeting: Omit<Meeting, 'id' | 'status'> }
+  | { type: 'THREAD_CREATE'; thread: Omit<(typeof THREADS)[number], 'id' | 'lastAt' | 'unread'> }
+  | {
+      type: 'MESSAGE_SEND'
+      threadId: string
+      body: string
+      author: MessageAuthor
+      authorName: string
+      orgId?: string
+    }
+  | { type: 'DOC_SET_STATUS'; id: string; status: DocStatus; comment?: string }
+  | { type: 'DELIVERABLE_SET_STATUS'; id: string; status: DeliverableStatus }
+  | { type: 'MISSION_SET_STATUS'; id: string; status: MissionStatus }
+  | { type: 'MILESTONE_SET_STATUS'; missionId: string; milestoneId: string; status: MilestoneStatus }
+  | { type: 'DIAGNOSTIC_PUBLISH'; id: string }
+  | { type: 'DIAGNOSTIC_BACK_TO_REVIEW'; id: string }
+  | { type: 'DIAGNOSTIC_SAVE'; diagnostic: typeof DIAGNOSTICS[number] }
+  | { type: 'LEAD_SET_STAGE'; id: string; stage: LeadStage }
+  | { type: 'LEAD_PATCH'; id: string; patch: Partial<Lead> }
+  | { type: 'LEAD_CREATE'; lead: Lead }
+  | { type: 'LEADS_DEMO_SET'; leads: Lead[] }
+  | { type: 'LEADS_DEMO_RESET' }
+  | { type: 'NOTIF_READ'; id: string }
+  | { type: 'NOTIF_READ_ALL' }
+  | { type: 'SUBSCRIPTION_PATCH'; patch: Partial<DemoState['subscription']> }
+  | { type: 'SUBSCRIPTION_CONSUME'; count: number }
+  | { type: 'SUBSCRIPTION_CANCEL' }
+
+/* ------------------------------------------------------------------ */
+/* Reducer                                                             */
+/* ------------------------------------------------------------------ */
+
+function withToast(state: DemoState, title: string, description: string, tone: Toast['tone'] = 'success'): DemoState {
+  const toast: Toast = { id: uid('toast'), title, description, tone }
+  return { ...state, toasts: [...state.toasts, toast] }
+}
+
+function withActivity(state: DemoState, activity: Omit<DemoActivity, 'id' | 'at'>): DemoState {
+  return { ...state, activities: [{ ...activity, id: uid('activity'), at: state.now }, ...(state.activities ?? [])].slice(0, 80) }
+}
+
+function activityActor(state: DemoState) {
+  if (state.role === 'admin') return { actor: 'Administrateur ALLNEEDS', role: 'Pilotage ALLNEEDS' }
+  if (state.role === 'concierge') return { actor: 'Concierge ALLNEEDS', role: 'Concierge' }
+  if (state.role === 'client') return { actor: 'Ã‰quipe de lâ€™Ã©tablissement', role: 'Espace client' }
+  return { actor: state.providers[0]?.name ?? 'Partenaire', role: 'Partenaire' }
+}
+
+function reducer(state: DemoState, action: DemoAction): DemoState {
+  switch (action.type) {
+    case 'RESET':
+      return { ...initialState, toasts: [] }
+
+    case 'SET_ROLE':
+      return { ...state, role: action.role }
+
+    case 'SAAS_SET_ACCESS':
+      return { ...state, saasAccess: { ...state.saasAccess, [action.sector]: action.value } }
+
+    case 'SAAS_SET_ORG_ACCESS':
+      return {
+        ...state,
+        saasAccessByOrg: { ...state.saasAccessByOrg, [action.orgId]: action.value },
+        saasActivatedAtByOrg: { ...state.saasActivatedAtByOrg, [action.orgId]: action.value ? (state.saasActivatedAtByOrg[action.orgId] ?? state.now) : null },
+      }
+
+    case 'SAAS_SET_ORG_ROLE': {
+      const current = state.saasRolesByOrg[action.orgId] ?? []
+      const next = action.value ? Array.from(new Set([...current, action.role])) : current.filter((role) => role !== action.role)
+      return { ...state, saasRolesByOrg: { ...state.saasRolesByOrg, [action.orgId]: next } }
+    }
+
+    case 'REGISTRATION_SET':
+      return { ...state, registrationProfile: action.profile }
+
+    case 'REGISTRATION_ACTIVATION_SET':
+      return state.registrationProfile ? { ...state, registrationProfile: { ...state.registrationProfile, activated: action.value } } : state
+
+    case 'CLIENT_WORKSPACE_ROLE_SET':
+      return { ...state, clientWorkspaceRole: action.role }
+
+    case 'TEAM_MEMBER_CREATE': {
+      const exists = state.teamMembers.some((member) => member.orgId === action.member.orgId && member.email.toLowerCase() === action.member.email.toLowerCase())
+      if (exists) return withToast(state, 'AccÃ¨s dÃ©jÃ  enregistrÃ©', 'Cette adresse e-mail possÃ¨de dÃ©jÃ  un accÃ¨s pour cet Ã©tablissement.', 'warning')
+      const member: ClientTeamMember = { ...action.member, id: uid('team'), createdAt: state.now, status: 'invitation_en_attente' }
+      const org = state.orgs.find((item) => item.id === member.orgId)
+      return withToast(withActivity({ ...state, teamMembers: [member, ...state.teamMembers] }, { ...activityActor(state), orgId: member.orgId, organization: org?.name ?? 'Ã‰tablissement', type: 'action', text: `A prÃ©parÃ© un accÃ¨s ${member.role === 'manager' ? 'responsable' : 'collaborateur'} pour ${member.name}.` }), 'AccÃ¨s prÃ©parÃ©', 'Invitation enregistrÃ©e.', 'info')
+    }
+
+    case 'TEAM_MEMBER_REVOKE':
+      return withToast(withActivity({ ...state, teamMembers: state.teamMembers.filter((member) => member.id !== action.id) }, { ...activityActor(state), orgId: state.teamMembers.find((member) => member.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.teamMembers.find((member) => member.id === action.id)?.orgId)?.name ?? 'Ã‰tablissement', type: 'decision', text: `A retirÃ© lâ€™accÃ¨s de ${state.teamMembers.find((member) => member.id === action.id)?.name ?? 'un membre'}.` }), 'AccÃ¨s retirÃ©', 'Le membre a Ã©tÃ© retirÃ©.')
+
+    case 'TEAM_MEMBER_ROLE_SET':
+      return withActivity({ ...state, teamMembers: state.teamMembers.map((member) => member.id === action.id ? { ...member, role: action.role, access: action.role === 'manager' ? ['actions', 'missions', 'documents', 'messages', 'results', 'team'] : ['actions', 'missions', 'documents', 'messages'] } : member) }, { ...activityActor(state), orgId: state.teamMembers.find((member) => member.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.teamMembers.find((member) => member.id === action.id)?.orgId)?.name ?? 'Ã‰tablissement', type: 'decision', text: `A ajustÃ© le rÃ´le de ${state.teamMembers.find((member) => member.id === action.id)?.name ?? 'un membre'} en Â« ${action.role === 'manager' ? 'responsable' : 'collaborateur'} Â».` })
+
+    case 'PROVIDER_PATCH':
+      return withActivity({ ...state, providers: state.providers.map((provider) => provider.id === action.id ? { ...provider, ...action.patch } : provider) }, { ...activityActor(state), orgId: '', organization: state.providers.find((provider) => provider.id === action.id)?.name ?? 'Profil partenaire', type: 'progression', text: 'A actualisÃ© ses informations et ses disponibilitÃ©s de prestation.' })
+
+    case 'COMMERCIAL_OPPORTUNITY_CREATE': {
+      const exists = state.commercialOpportunities.some((item) => item.orgId === action.opportunity.orgId && item.offerCode === action.opportunity.offerCode && !['acceptee', 'refusee'].includes(item.status))
+      if (exists) return withToast(state, 'Piste dÃ©jÃ  ouverte', 'Cette offre complÃ©mentaire est dÃ©jÃ  suivie pour cette entreprise.', 'warning')
+      const opportunity: CommercialOpportunity = { ...action.opportunity, id: uid('opportunity'), createdAt: state.now, status: 'a_qualifier' }
+      return withToast({ ...state, commercialOpportunities: [opportunity, ...state.commercialOpportunities] }, 'Piste commerciale crÃ©Ã©e', 'Qualifiez le besoin avec le dirigeant avant de prÃ©parer une proposition.', 'success')
+    }
+
+    case 'COMMERCIAL_OPPORTUNITY_STATUS_SET':
+      return { ...state, commercialOpportunities: state.commercialOpportunities.map((item) => item.id === action.id ? { ...item, status: action.status } : item) }
+
+    case 'CONCIERGE_CREATE':
+      return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge crÃ©Ã©', action.account.email)
+
+    case 'CONCIERGE_TOGGLE':
+      return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, active: !c.active } : c) }
+
+    case 'CONCIERGE_ASSIGN_ORG':
+      return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, assignedOrgIds: action.value ? Array.from(new Set([...c.assignedOrgIds, action.orgId])) : c.assignedOrgIds.filter((x) => x !== action.orgId) } : c) }
+
+    case 'CONCIERGE_ASSIGN_SECTOR':
+      return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, sectors: action.value ? Array.from(new Set([...c.sectors, action.sector])) : c.sectors.filter((x) => x !== action.sector) } : c) }
+
+    case 'CONCIERGE_ADD_ORG':
+      return withToast({ ...state, orgs: [action.org, ...state.orgs], concierges: state.concierges.map((c) => c.id === action.conciergeId ? { ...c, createdOrgIds: [action.org.id, ...c.createdOrgIds] } : c) }, 'Entreprise ajoutÃ©e', action.org.name)
+
+    case 'SWITCH_USER':
+      return { ...state, userId: action.userId }
+
+    case 'SET_ONBOARDED':
+      return { ...state, onboarded: action.value }
+
+    case 'TOAST_ADD':
+      return withToast(state, action.toast.title, action.toast.description ?? '', action.toast.tone)
+
+    case 'TOAST_REMOVE':
+      return { ...state, toasts: state.toasts.filter((t) => t.id !== action.id) }
+
+    case 'REQUEST_CREATE':
+      return withToast(
+        {
+          ...state,
+          requests: [
+            {
+              ...action.request,
+              id: uid('req'),
+              at: state.now,
+              status: 'nouveau',
+              assignedTo: 'Non assignÃ©',
+              notes: '',
+            },
+            ...state.requests,
+          ],
+        },
+        'Demande enregistrÃ©e dans la dÃ©mo',
+        'Cette version conserve les donnÃ©es dans ce navigateur ; aucune demande nâ€™est transmise Ã  lâ€™Ã©quipe.',
+        'success',
+      )
+
+    case 'REQUEST_SET_STATUS':
+      return { ...state, requests: state.requests.map((r) => (r.id === action.id ? { ...r, status: action.status } : r)) }
+
+    case 'REQUEST_ASSIGN':
+      return { ...state, requests: state.requests.map((r) => (r.id === action.id ? { ...r, assignedTo: action.assignedTo } : r)) }
+
+    case 'BOOKING_CREATE':
+      return withToast(
+        {
+          ...state,
+          bookings: [
+            { ...action.booking, id: uid('bk'), createdAt: state.now, status: 'confirme' },
+            ...state.bookings,
+          ],
+        },
+        'CrÃ©neau enregistrÃ© dans la dÃ©mo',
+        'Action enregistrÃ©e.',
+        'success',
+      )
+
+    case 'BOOKING_SET_STATUS':
+      return { ...state, bookings: state.bookings.map((b) => (b.id === action.id ? { ...b, status: action.status } : b)) }
+
+    case 'NEED_CREATE':
+      return withToast(
+        {
+          ...state,
+          needs: [action.need, ...state.needs],
+          subscription: {
+            ...state.subscription,
+            consumed: state.subscription.consumed + 1,
+          },
+        },
+        'Besoin enregistrÃ©',
+        'Votre recherche de prestataires est lancÃ©e.',
+        'success',
+      )
+
+    case 'NEED_SET_STATUS':
+      return withActivity({
+        ...state,
+        needs: state.needs.map((need) =>
+          need.id === action.id
+            ? {
+                ...need,
+                status: action.status,
+                timeline: action.label
+                  ? [...need.timeline, { at: state.now, label: action.label }]
+                  : need.timeline,
+              }
+            : need,
+        ),
+      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === action.id)?.orgId)?.name ?? 'Demande client', type: 'progression', text: action.label ?? `A fait avancer la demande vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+
+    case 'NEED_ADD_PROVIDER': {
+      const need = state.needs.find((n) => n.id === action.needId)
+      if (!need || need.candidateIds.includes(action.providerId)) return state
+      return {
+        ...state,
+        needs: state.needs.map((n) =>
+          n.id === action.needId
+            ? {
+                ...n,
+                candidateIds: [...n.candidateIds, action.providerId],
+                status: n.status === 'recherche' || n.status === 'recu' || n.status === 'analyse' ? 'propositions' : n.status,
+                timeline: [...n.timeline, { at: state.now, label: 'Prestataire proposÃ©' }],
+              }
+            : n,
+        ),
+      }
+    }
+
+    case 'QUOTE_ADD':
+      return withActivity({
+        ...state,
+        quotes: [action.quote, ...state.quotes],
+        needs: state.needs.map((n) =>
+          n.id === action.quote.needId ? { ...n, quoteIds: [...n.quoteIds, action.quote.id], status: 'devis' } : n,
+        ),
+      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === action.quote.needId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === action.quote.needId)?.orgId)?.name ?? 'Demande client', type: 'action', text: `A transmis une proposition de ${action.quote.amount.toLocaleString('fr-FR')} MAD, avec dÃ©lai et pÃ©rimÃ¨tre.` })
+
+    case 'QUOTE_SET_STATUS':
+      return withActivity({
+        ...state,
+        quotes: state.quotes.map((q) => (q.id === action.id ? { ...q, status: action.status } : q)),
+      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === state.quotes.find((quote) => quote.id === action.id)?.needId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === state.quotes.find((quote) => quote.id === action.id)?.needId)?.orgId)?.name ?? 'Proposition partenaire', type: action.status === 'accepte' || action.status === 'refuse' ? 'decision' : 'progression', text: `La proposition est maintenant Â« ${action.status.replaceAll('_', ' ')} Â».` })
+
+    case 'MEETING_SET_STATUS':
+      return { ...state, meetings: state.meetings.map((m) => (m.id === action.id ? { ...m, status: action.status } : m)) }
+
+    case 'MEETING_CREATE':
+      return withToast(
+        { ...state, meetings: [{ ...action.meeting, id: uid('meet'), status: 'confirme' }, ...state.meetings] },
+        'Rendez-vous confirmÃ©',
+        action.meeting.title,
+        'success',
+      )
+
+    case 'THREAD_CREATE':
+      return {
+        ...state,
+        threads: [{ ...action.thread, id: uid('th'), lastAt: state.now, unread: 0 }, ...state.threads],
+      }
+
+    case 'MESSAGE_SEND': {
+      const thread = state.threads.find((t) => t.id === action.threadId)
+      const orgId = action.orgId ?? thread?.orgId ?? 'org-amal'
+      const readerIsClient = state.role !== 'admin'
+      const isOwn = action.author === 'client' ? readerIsClient : !readerIsClient
+      const orgName = state.orgs.find((org) => org.id === orgId)?.name ?? 'Dossier client'
+      return withActivity({
+        ...state,
+        messages: [
+          ...state.messages,
+          {
+            id: uid('msg'),
+            orgId,
+            threadId: action.threadId,
+            author: action.author,
+            authorName: action.authorName,
+            at: state.now,
+            body: action.body,
+            read: isOwn,
+          },
+        ],
+        threads: state.threads.map((t) =>
+          t.id === action.threadId
+            ? { ...t, lastAt: state.now, unread: isOwn ? t.unread : t.unread + 1 }
+            : t,
+        ),
+      }, { actor: action.authorName, role: action.author === 'client' ? 'Ã‰quipe cliente' : 'Ã‰quipe ALLNEEDS', orgId, organization: orgName, type: 'action', text: `A partagÃ© une mise Ã  jour dans la conversation : Â« ${action.body.slice(0, 110)}${action.body.length > 110 ? 'â€¦' : ''} Â»` })
+    }
+
+    case 'DOC_SET_STATUS':
+      return withActivity({
+        ...state,
+        documents: state.documents.map((doc) =>
+          doc.id === action.id ? { ...doc, status: action.status, comment: action.comment ?? doc.comment, updatedAt: state.now } : doc,
+        ),
+      }, { ...activityActor(state), orgId: state.documents.find((doc) => doc.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.documents.find((doc) => doc.id === action.id)?.orgId)?.name ?? 'Dossier client', type: action.status === 'valide' ? 'progression' : 'action', text: `${state.documents.find((doc) => doc.id === action.id)?.name ?? 'Document'} : statut mis Ã  jour vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+
+    case 'DELIVERABLE_SET_STATUS':
+      return withActivity({
+        ...state,
+        deliverables: state.deliverables.map((d) => (d.id === action.id ? { ...d, status: action.status, updatedAt: state.now } : d)),
+      }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === state.deliverables.find((item) => item.id === action.id)?.missionId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === state.deliverables.find((item) => item.id === action.id)?.missionId)?.orgId)?.name ?? 'Livrable de mission', type: action.status === 'valide' ? 'progression' : 'action', text: `${state.deliverables.find((item) => item.id === action.id)?.title ?? 'Un livrable'} a Ã©tÃ© mis Ã  jour : Â« ${action.status.replaceAll('_', ' ')} Â».` })
+
+    case 'MISSION_SET_STATUS':
+      return withActivity({ ...state, missions: state.missions.map((m) => (m.id === action.id ? { ...m, status: action.status } : m)) }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === action.id)?.orgId)?.name ?? 'Mission', type: action.status === 'terminee' ? 'decision' : 'progression', text: `La mission a Ã©voluÃ© vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+
+    case 'MILESTONE_SET_STATUS':
+      return withActivity({
+        ...state,
+        missions: state.missions.map((m) =>
+          m.id === action.missionId
+            ? { ...m, milestones: m.milestones.map((ms) => (ms.id === action.milestoneId ? { ...ms, status: action.status } : ms)) }
+            : m,
+        ),
+      }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === action.missionId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === action.missionId)?.orgId)?.name ?? 'Mission', type: action.status === 'fait' ? 'progression' : 'action', text: `Un jalon de mission a Ã©voluÃ© vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+
+    case 'DIAGNOSTIC_PUBLISH': {
+      const diag = state.diagnostics.find((x) => x.id === action.id)
+      const published = { ...state, diagnostics: state.diagnostics.map((x) => (x.id === action.id ? { ...x, status: 'publie' as const, publishedAt: state.now } : x)) }
+      const org = state.orgs.find((item) => item.id === diag?.orgId)
+      return withToast(withActivity(published, { ...activityActor(state), orgId: diag?.orgId ?? '', organization: org?.name ?? 'Dossier client', type: 'progression', text: `A publiÃ© le diagnostic ${diag?.ref ?? ''} avec les prioritÃ©s Ã  suivre.` }), 'Diagnostic publiÃ©', `RÃ©f. ${diag?.ref ?? ''} â€” visible dans lâ€™espace client.`)
+    }
+
+    case 'DIAGNOSTIC_BACK_TO_REVIEW':
+      return {
+        ...state,
+        diagnostics: state.diagnostics.map((x) =>
+          x.id === action.id ? { ...x, status: 'en_revue' as const, publishedAt: null } : x,
+        ),
+      }
+
+    case 'DIAGNOSTIC_SAVE': {
+      const exists = state.diagnostics.some((x) => x.id === action.diagnostic.id)
+      return {
+        ...state,
+        diagnostics: exists
+          ? state.diagnostics.map((x) => (x.id === action.diagnostic.id ? action.diagnostic : x))
+          : [action.diagnostic, ...state.diagnostics],
+      }
+    }
+
+    case 'LEAD_SET_STAGE':
+      return withActivity({
+        ...state,
+        leads: state.leads.map((l) =>
+          l.id === action.id ? { ...l, stage: action.stage, lastContactAt: state.now } : l,
+        ),
+      }, { ...activityActor(state), orgId: '', organization: state.leads.find((lead) => lead.id === action.id)?.orgName ?? 'Prospect', type: action.stage === 'gagne' || action.stage === 'perdu' ? 'decision' : 'progression', text: `A fait Ã©voluer le dossier vers lâ€™Ã©tape Â« ${action.stage.replaceAll('_', ' ')} Â».` })
+
+    case 'LEAD_PATCH':
+      return withActivity({ ...state, leads: state.leads.map((l) => (l.id === action.id ? { ...l, ...action.patch } : l)) }, { ...activityActor(state), orgId: '', organization: state.leads.find((lead) => lead.id === action.id)?.orgName ?? 'Prospect', type: 'action', text: action.patch.nextAction ? `Action consignÃ©e Â· ${action.patch.nextAction}` : 'Le dossier prospect a Ã©tÃ© actualisÃ©.' })
+
+    case 'LEAD_CREATE':
+      return withToast({ ...state, leads: [action.lead, ...state.leads] }, 'Lead crÃ©Ã©', action.lead.orgName)
+
+    case 'LEADS_DEMO_SET':
+      return withToast(withActivity({ ...state, leads: action.leads }, { ...activityActor(state), orgId: '', organization: 'Portefeuille de prospection', type: 'action', text: 'A prÃ©parÃ© une journÃ©e de prospection simulÃ©e : 30 Ã©tablissements rÃ©partis entre santÃ©, enseignement et tourisme.' }), 'JournÃ©e de prospection prÃªte', 'Prospection prÃ©parÃ©e.', 'info')
+
+    case 'LEADS_DEMO_RESET':
+      return withToast({ ...state, leads: LEADS }, 'Pipeline initial restaurÃ©', 'Les donnÃ©es ont Ã©tÃ© rÃ©initialisÃ©es.', 'info')
+
+    case 'NOTIF_READ':
+      return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, read: true } : n)) }
+
+    case 'NOTIF_READ_ALL':
+      return { ...state, notifications: state.notifications.map((n) => ({ ...n, read: true })) }
+
+    case 'SUBSCRIPTION_PATCH':
+      return { ...state, subscription: { ...state.subscription, ...action.patch } }
+
+    case 'SUBSCRIPTION_CONSUME':
+      return {
+        ...state,
+        subscription: { ...state.subscription, consumed: state.subscription.consumed + action.count },
+      }
+
+    case 'SUBSCRIPTION_CANCEL':
+      return withToast(
+        { ...state, subscription: { ...state.subscription, status: 'expire', autoRenew: false } },
+        'RÃ©siliation enregistrÃ©e',
+        'PrÃ©avis de 30 jours avant lâ€™Ã©chÃ©ance.',
+        'info',
+      )
+
+    default:
+      return state
+  }
+}
+
+
+export interface StoreValue {
+  state: DemoState
+  dispatch: (action: DemoAction) => void
+  user: AppUser
+  role: Role
+  setRole: (role: Role) => void
+  orgId: string
+}
+
+const DemoContext = createContext<StoreValue | null>(null)
+/* ------------------------------------------------------------------ */
+/* Context                                                             */
+/* ------------------------------------------------------------------ */
+
+export function DemoStoreProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  const setRole = useCallback((role: Role) => dispatch({ type: 'SET_ROLE', role }), [])
+
+  const value = useMemo<StoreValue>(() => {
+    const concierge = state.concierges.find((item) => item.id === state.userId)
+    const orgId = state.role === 'client' ? (state.orgs.find((org) => org.id === state.userId)?.id ?? '') : ''
+    const user: AppUser = { id: state.userId, orgId, name: concierge?.name ?? 'Utilisateur ALLNEEDS', email: concierge?.email ?? '', role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction', roleLabel: state.role === 'admin' ? 'ALLNEEDS Â· Administrateur' : state.role === 'concierge' ? 'ALLNEEDS Â· Concierge' : 'Compte entreprise', initials: 'AN' }
+    return { state, dispatch, user, role: state.role, setRole, orgId }
+  }, [state, setRole])
+
+  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>
+}
+
+export function useDemo(): StoreValue {
+  const ctx = useContext(DemoContext)
+  if (!ctx) throw new Error('useDemo doit Ãªtre utilisÃ© dans DemoStoreProvider')
+  return ctx
+}
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
+
+
+export function conciergeScope(state: DemoState, conciergeId = state.userId) {
+  const concierge = state.concierges.find((item) => item.id === conciergeId) ?? state.concierges[0]
+  const orgIds = new Set([...(concierge?.assignedOrgIds ?? []), ...(concierge?.createdOrgIds ?? [])])
+  const orgs = state.orgs.filter((org) => orgIds.has(org.id) && (concierge?.sectors.includes(org.sector) ?? false))
+  return { concierge, orgIds: new Set(orgs.map((org) => org.id)), orgs }
+}
+
+export function orgHasSaasAccess(state: DemoState, orgId: string, sector: Sector) {
+  return state.saasAccessByOrg[orgId] ?? state.saasAccess[sector] ?? false
+}
+
+export function makeNeed(input: {
+  orgId: string
+  title: string
+  category: Need['category']
+  categoryLabel: string
+  description: string
+  location: string
+  budgetMax: number | null
+  urgency: Need['urgency']
+  deadline: string | null
+}): Need {
+  return {
+    id: uid('need'),
+    orgId: input.orgId,
+    title: input.title,
+    category: input.category,
+    categoryLabel: input.categoryLabel,
+    status: 'recu',
+    urgency: input.urgency,
+    budgetMax: input.budgetMax,
+    submittedAt: DEMO_NOW,
+    deadline: input.deadline,
+    description: input.description,
+    location: input.location,
+    candidateIds: [],
+    quoteIds: [],
+    assignedTo: 'Nada (ALLNEEDS)',
+    timeline: [{ at: DEMO_NOW, label: 'Demande reÃ§ue' }],
+  }
+}
+
+export function makeQuote(input: {
+  needId: string
+  providerId: string
+  amount: number
+  delayWeeks: number
+  validUntil: string
+  detail: string
+  breakdown: { label: string; amount: number }[]
+}): Quote {
+  return {
+    id: uid('quote'),
+    needId: input.needId,
+    providerId: input.providerId,
+    amount: input.amount,
+    currency: 'MAD',
+    delayWeeks: input.delayWeeks,
+    validUntil: input.validUntil,
+    status: 'recu',
+    receivedAt: DEMO_NOW,
+    detail: input.detail,
+    breakdown: input.breakdown,
+  }
+}
+
+export function makeBookingDate(days: number) {
+  const base = new Date(DEMO_NOW)
+  base.setDate(base.getDate() + days)
+  return base.toISOString()
+}
+
+export function tierLimit(tier: DemoState['subscription']['tier'], key: 'needsPerYear' | 'concurrentNeeds') {
+  const offer = ACCESS_OFFERS.find((o) => o.tier === tier)
+  return offer ? offer[key] : 0
+}
+
+export function providerById(providers: Provider[], id: string) {
+  return providers.find((p) => p.id === id)
+}
+
+export function missionById(missions: Mission[], id: string | null) {
+  if (!id) return undefined
+  return missions.find((m) => m.id === id)
+}
+
+export function statusLabel<T extends string>(value: T, map: Partial<Record<T, string>>) {
+  return map[value] ?? value
+}
+
+export { stamp }
+

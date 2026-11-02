@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ALLNEEDS Santé – Accès public</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F7FA;--card:#fff;--ink:#10244C;--mut:#4b5b73;--line:#d9e0ea;--teal:#075FD5;--deep:#10244C;--soft:#edf4ff;--h1:#fff;--h2:#edf4ff;--g1:#F5F7FA;--g2:#F5F7FA;--sand:#eaf7fb;--sandink:#10244C;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101a2c;--card:#19263b;--ink:#edf3ff;--mut:#b1bfd4;--line:#35445c;--teal:#63a1ff;--deep:#10244C;--soft:#202f47;--h1:#19263b;--h2:#202f47;--g1:#101a2c;--g2:#101a2c;--sand:#26374c;--sandink:#e5f1ff}}
+:root[data-theme="dark"]{--bg:#101a2c;--card:#19263b;--ink:#edf3ff;--mut:#b1bfd4;--line:#35445c;--teal:#63a1ff;--deep:#10244C;--soft:#202f47;--h1:#19263b;--h2:#202f47;--g1:#101a2c;--g2:#101a2c;--sand:#26374c;--sandink:#e5f1ff}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:400 16px/1.55 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif}
+.w{max-width:960px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:Fraunces,Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,5.4vw,3.2rem);line-height:1.1;margin:0 0 16px}
+h2{font-size:clamp(1.5rem,3.6vw,2.1rem);line-height:1.18;margin:0 0 12px}
+h3{font-size:1.12rem;margin:0 0 4px}
+p{margin:0 0 10px;max-width:62ch}
+.mut{color:var(--mut)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.hero{background:var(--card);padding:56px 0 48px;border-bottom:1px solid var(--line)}
+.hg{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center}
+@media(max-width:760px){.hg{grid-template-columns:1fr}}
+.lead{font-size:1.15rem;color:var(--mut);max-width:46ch}
+.cta{display:inline-block;background:var(--teal);color:#fff;font-weight:700;text-decoration:none;padding:14px 22px;border-radius:8px;font-size:1rem;margin-top:8px}
+.sub{font-size:.88rem;color:var(--mut);margin-top:14px}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(30,111,88,.12)}
+.ex small{color:var(--mut)}
+.ex ol{margin:12px 0 10px;padding:0;list-style:none}
+.ex li{display:flex;gap:10px;align-items:center;padding:12px;margin-bottom:8px;background:var(--soft);border-radius:10px;border-left:4px solid var(--teal)}
+.ex li b{flex:none}
+.lock{filter:blur(5px);user-select:none;color:var(--ink)}
+.band{background:var(--deep);color:#fff;padding:14px 0;text-align:center;font-weight:600}
+.band b{color:#ffe3a3}
+section{padding:46px 0}
+.pace p{font-size:1.08rem}
+.pace .em{font-family:Fraunces,Georgia,serif;font-size:1.35rem;line-height:1.35;color:var(--deep);max-width:30ch}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.teaser{border-top:3px solid var(--teal)}
+.teaser span{display:inline-block;font-size:.82rem;font-weight:700;color:var(--teal);margin-top:6px}
+.test{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
+.q{padding:12px 0;border-bottom:1px solid var(--line)}
+.q span{display:block;margin-bottom:8px}
+.q button{font:600 .92rem Figtree,system-ui,sans-serif;padding:8px 18px;border-radius:999px;border:2px solid var(--teal);background:transparent;color:var(--ink);cursor:pointer;margin-right:8px}
+.q button[aria-pressed="true"]{background:var(--teal);color:#fff}
+#res{margin-top:16px;display:none}
+.steps{counter-reset:s;display:grid;gap:12px}
+.steps .c{position:relative;padding-left:62px}
+.steps .c::before{counter-increment:s;content:counter(s);position:absolute;left:16px;top:16px;width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;display:grid;place-items:center}
+.fine{font-size:.86rem;color:var(--mut)}
+.c ul{margin:10px 0 0;padding-left:18px;color:var(--mut)}.c ul li{margin-bottom:4px}
+.pr{font-family:Fraunces,Georgia,serif;font-size:1.6rem;font-weight:700;color:var(--teal);line-height:1.1;margin:8px 0 2px}
+.old{color:var(--mut);font-size:.9rem}
+.badge{display:inline-block;background:var(--sand);color:var(--sandink);font-weight:700;font-size:.8rem;padding:3px 10px;border-radius:999px;margin-bottom:6px}
+.launch{background:var(--soft);border-left:4px solid var(--teal);padding:16px 18px;margin-top:18px;border-radius:0 8px 8px 0}
+.launch b{display:block;margin-bottom:4px}
+.trust{border-left:4px solid var(--teal);background:var(--soft);padding:16px 18px;border-radius:0 12px 12px 0}
+.paths{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center}
+.paths h2{max-width:24ch;margin:0 auto 10px}
+.paths p{margin:0 auto 10px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+summary{font-weight:700;cursor:pointer}
+details p{margin:10px 0 0;color:var(--mut)}
+.fin{background:var(--deep);color:#fff;text-align:center;padding:48px 20px 56px}
+.fin h2{max-width:22ch;margin:0 auto 12px}
+.fin p{margin:0 auto 16px;color:#e6f5ee}
+.fin .cta{background:#fff;color:#1e6f58}
+</style>
+</head>
+<body>
+<header class="hero"><div class="w hg">
+<div>
+<h1>Votre structure de santé peut mieux fonctionner. Identifions vos priorités.</h1>
+<p class="lead">Un diagnostic gratuit de 1 h 30 pour comprendre votre organisation et définir vos prochaines priorités, lors d’un rendez-vous dédié.</p>
+<a class="cta" href="https://allneed-s.vercel.app" target="_blank" rel="noopener">Découvrir le diagnostic et demander un rendez-vous</a>
+<div class="sub">Gratuit · 1 h 30 · Sur rendez-vous · Sans engagement</div>
+</div>
+<aside class="ex" aria-label="Aperçu de votre compte-rendu">
+<small>Votre compte-rendu</small>
+<h3>Vos 3 priorités</h3>
+<ol>
+<li><b>1</b><span class="lock" aria-hidden="true">Une priorité visible pour vous</span></li>
+<li><b>2</b><span class="lock" aria-hidden="true">Un levier discret mais décisif</span></li>
+<li><b>3</b><span class="lock" aria-hidden="true">Ce que votre équipe attend</span></li>
+</ol>
+<small>Elles se dévoilent à l’issue du diagnostic complet de 1 h 30.</small>
+</aside>
+</div></header>
+<main class="w">
+<section>
+<div class="test">
+<h2>Vous préférez commencer en ligne ?</h2>
+<p class="mut">Répondez à cinq questions pour obtenir une première indication. Ce mini-questionnaire ne remplace pas le diagnostic complet de 1 h 30.</p>
+<div id="qs"></div>
+<div id="res" class="c" aria-live="polite"></div>
+</div>
+</section>
+
+<section>
+<h2>Cinq leviers pour votre structure</h2>
+<div class="g">
+<div class="c teaser"><h3>Patients et développement</h3><p class="mut">Parcours patient, rendez-vous, relance, suivi.</p></div>
+<div class="c teaser"><h3>Visibilité et confiance</h3><p class="mut">Présence en ligne informative, avis, image de la structure.</p></div>
+<div class="c teaser"><h3>Équipe et organisation</h3><p class="mut">Rôles, accueil, protocoles, outils de suivi.</p></div>
+<div class="c teaser"><h3>Charges et équipements</h3><p class="mut">Matériel, maintenance, assurances, contrats, fournisseurs.</p></div>
+<div class="c teaser"><h3>Accompagnement et financement</h3><p class="mut">Accès aux programmes de financement auxquels votre structure peut prétendre.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Comment ça se passe</h2>
+<div class="steps">
+<div class="c"><h3>Prendre rendez-vous</h3><p class="mut">Choisissez un créneau pour votre diagnostic gratuit.</p></div>
+<div class="c"><h3>Faire le diagnostic</h3><p class="mut">Pendant 1 h 30, nous analysons les enjeux d’organisation de votre structure.</p></div>
+<div class="c"><h3>Recevoir vos priorités</h3><p class="mut">Vous repartez avec trois priorités et des pistes d’action adaptées.</p></div>
+</div>
+</section>
+
+<section class="offer">
+<h2>Un accompagnement adapté à vos priorités</h2>
+<p class="mut">Après le diagnostic, vous choisissez librement de poursuivre ou non.</p>
+<div class="g">
+<div class="c"><h3>Starter · Comprendre</h3><div class="pr">Offert</div><ul><li>Cartographier votre structure</li><li>Révéler vos 3 priorités</li></ul></div>
+<div class="c"><h3>Pro · Structurer</h3><div class="old">Conditions communiquées lors de votre échange</div><ul><li>Construire vos parcours et protocoles</li><li>Renforcer votre visibilité</li><li>Installer vos outils de pilotage</li></ul></div>
+<div class="c"><h3>Performance · Agir</h3><div class="old">Conditions communiquées lors de votre échange</div><ul><li>Mettre en œuvre votre plan d’action</li><li>Piloter et ajuster avec vous</li><li>Optimiser vos charges</li></ul></div>
+</div>
+<div class="launch"><b>Offre de lancement</b><p>20 % de remise pour les dix premiers clients qui achètent Pro ou Performance. Les abonnements Accès Santé sont exclus.</p></div>
+</section>
+
+<section>
+<h2>ALLNEEDS Accès Santé : l’abonnement qui trouve, vérifie et suit vos prestataires</h2>
+<div class="g">
+<div class="c"><h3>Connect</h3><div class="old">Accès au réseau</div><ul><li>Accéder au réseau</li></ul></div>
+<div class="c"><h3>Plus</h3><div class="old">Comparaison et suivi</div><ul><li>Comparer et suivre</li></ul></div>
+<div class="c"><h3>Priorité</h3><div class="old">Un accompagnement prioritaire</div><ul><li>Un interlocuteur attitré, des réponses rapides</li></ul></div>
+</div>
+<p class="fine" style="margin-top:12px">Les détails des formules et des abonnements sont communiqués lors d’un échange.</p>
+</section>
+
+<section>
+<h2>Un cadre qui respecte votre profession</h2>
+<div class="trust"><p><b>Nous n’intervenons jamais sur l’acte médical.</b></p>
+<p class="mut">Aucun accès aux dossiers patients : seulement des données d’organisation. Une communication informative, sans promesse médicale. Un seul interlocuteur, un périmètre clair dès le départ.</p></div>
+</section>
+
+<section>
+<h2>Questions fréquentes</h2>
+<details><summary>Le diagnostic est-il vraiment gratuit ?</summary><p>Oui. Le diagnostic complet est gratuit et se déroule sur rendez-vous pendant 1 h 30. Il est sans engagement. Votre compte-rendu est utilisable même si vous ne donnez aucune suite. Le mini-questionnaire en ligne est une première indication et ne remplace pas ce rendez-vous.</p></details>
+<details><summary>Le diagnostic m’engage-t-il à acheter une formule ?</summary><p>Non. Le diagnostic est gratuit et sans engagement. Vous décidez librement si vous souhaitez poursuivre après avoir découvert vos priorités et les modalités d’accompagnement.</p></details>
+<details><summary>Promettez-vous des résultats chiffrés ?</summary><p>Non, pas avant analyse. Nous identifions, mesurons, ajustons et rendons compte.</p></details>
+<details><summary>Quelles informations dois-je fournir ?</summary><p>Uniquement des informations d’organisation : agenda, accueil, équipe, charges. Aucun dossier patient. Vos documents sont conservés 90 jours si aucune suite n’est donnée.</p></details>
+</section>
+</main>
+
+<footer class="fin">
+<h2>Faisons le point sur votre structure de santé.</h2>
+<p>Diagnostic gratuit de 1 h 30, sur rendez-vous et sans engagement.</p>
+<a class="cta" href="https://allneed-s.vercel.app" target="_blank" rel="noopener">Découvrir le diagnostic et demander un rendez-vous</a>
+</footer>
+
+<script>
+(function(){
+var Q=[["Mon agenda est rempli comme je le souhaite.","Patients et développement"],
+["Mes patients me trouvent facilement en ligne et me font confiance.","Visibilité et confiance"],
+["Chacun connaît son rôle à l’accueil, sans me solliciter.","Équipe et organisation"],
+["Je connais mes charges (matériel, assurances, logiciels) et je les ai comparées.","Charges et équipements"],
+["Je connais les programmes de financement auxquels ma structure peut prétendre.","Accompagnement et financement"]];
+var A=[null,null,null,null,null],box=document.getElementById("qs"),res=document.getElementById("res");
+Q.forEach(function(q,i){
+var d=document.createElement("div");d.className="q";
+var s=document.createElement("span");s.textContent=q[0];d.appendChild(s);
+["Oui","Pas vraiment"].forEach(function(t,k){
+var b=document.createElement("button");b.type="button";b.textContent=t;b.setAttribute("aria-pressed","false");
+b.addEventListener("click",function(){A[i]=(k===0);
+d.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});show()});
+d.appendChild(b)});
+box.appendChild(d)});
+function show(){
+if(A.indexOf(null)>-1)return;
+var gaps=Q.filter(function(q,i){return !A[i]}).map(function(q){return q[1]});
+res.style.display="block";
+var h=gaps.length?"<h3>Vos réponses font déjà apparaître "+gaps.length+" zone"+(gaps.length>1?"s":"")+" d’attention</h3><p>"+gaps.join(", ")+".</p>":"<h3>Les 5 leviers vous semblent en place</h3><p>Le diagnostic complet vous dira où se cache encore un potentiel.</p>";
+res.innerHTML=h+"<p>Cette indication en ligne ne remplace pas le diagnostic complet gratuit de 1 h 30 sur rendez-vous.</p><a class=\"cta\" href=\"https://allneed-s.vercel.app\" target=\"_blank\" rel=\"noopener\">Demander un rendez-vous pour le diagnostic</a><p class=\"fine\" style=\"margin-top:10px\">Mini-questionnaire indicatif, pas un score ni un diagnostic.</p>"}
+})();
+</script>
+</body>
+</html>

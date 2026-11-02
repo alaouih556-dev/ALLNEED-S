@@ -1,0 +1,223 @@
+﻿import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { spawn } from 'node:child_process'
+import { randomBytes, scrypt as scryptCb } from 'node:crypto'
+import { promisify } from 'node:util'
+
+const scrypt = promisify(scryptCb)
+const dir = mkdtempSync(join(tmpdir(), 'allneeds-rbac-workflow-'))
+const origin = 'http://127.0.0.1:5176'
+const port = 8804
+const base = `http://127.0.0.1:${port}`
+
+async function passwordHash(password) {
+  const salt = randomBytes(16).toString('hex')
+  const hash = await scrypt(password, salt, 64)
+  return `scrypt$${salt}$${hash.toString('hex')}`
+}
+
+const adminPassword = 'AdminPassword!2026'
+const ownerPassword = 'OwnerPassword!2026'
+const ownerBPassword = 'OwnerBPassword!2026'
+const conciergePassword = 'ConciergePassword!2026'
+const outsiderPassword = 'OutsiderPassword!2026'
+const orgA = 'org-rbac-a'
+const orgB = 'org-rbac-b'
+
+const modules = { diagnostic: true, besoins: false, missions: false, rendezVous: false, documents: false, messages: false, devis: false, prestataires: false, abonnement: false, notifications: false, equipe: false, results: false }
+const orgRow = (id, name) => ({ id, name, sector: 'sante', active: true, modules: { ...modules }, saas: { subscriptionActive: false, enabled: false, startDate: null, endDate: null, plan: null }, slug: id })
+
+const db = {
+  users: [
+    { id: 'admin', email: 'admin@test.ma', role: 'admin', orgIds: ['*'], name: 'Admin', active: true, passwordConfigured: true, passwordHash: await passwordHash(adminPassword), permissions: [] },
+    { id: 'ownerA', email: 'ownerA@test.ma', role: 'dirigeant', orgIds: [orgA], name: 'Dirigeant A', active: true, passwordConfigured: true, passwordHash: await passwordHash(ownerPassword), permissions: [] },
+    { id: 'ownerB', email: 'ownerB@test.ma', role: 'dirigeant', orgIds: [orgB], name: 'Dirigeant B', active: true, passwordConfigured: true, passwordHash: await passwordHash(ownerBPassword), permissions: [] },
+    { id: 'conciergeA', email: 'conciergeA@test.ma', role: 'concierge', orgIds: [orgA], name: 'Concierge A', active: true, passwordConfigured: true, passwordHash: await passwordHash(conciergePassword), permissions: [] },
+    { id: 'conciergeB', email: 'conciergeB@test.ma', role: 'concierge', orgIds: [orgB], name: 'Concierge B', active: true, passwordConfigured: true, passwordHash: await passwordHash(conciergePassword), permissions: [] },
+  ],
+  orgs: [orgRow(orgA, 'Clinique RBAC A'), orgRow(orgB, 'Clinique RBAC B')],
+  diagnostics: [],
+  needs: [],
+  consents: [],
+  registrations: [
+    { id: 'reg-a', orgId: orgA, status: 'actif', conciergeId: 'conciergeA', events: [], appointmentStatus: 'valide' },
+    { id: 'reg-b', orgId: orgB, status: 'actif', conciergeId: 'conciergeB', events: [], appointmentStatus: 'valide' },
+  ],
+  invitations: [],
+  notifications: [],
+  offers: [],
+  missions: [],
+  quotes: [],
+  needsSubscriptions: [],
+  saasSubscriptions: [],
+  documents: [],
+}
+
+writeFileSync(join(dir, 'db.json'), JSON.stringify(db, null, 2))
+
+const child = spawn(process.execPath, ['backend/server.mjs'], {
+  cwd: process.cwd(),
+  env: { ...process.env, PORT: String(port), ALLNEEDS_DATA_DIR: dir, ALLNEEDS_FRONTEND_ORIGIN: origin, ALLNEEDS_PUBLIC_URL: origin, ALLNEEDS_SESSION_SECRET: '0123456789abcdefghijklmnopqrstuvwxyz-TEST-secret' },
+  stdio: ['ignore', 'pipe', 'pipe'],
+})
+let stderr = ''
+child.stderr.on('data', (d) => { stderr += d })
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+async function wait() {
+  for (let i = 0; i < 50; i++) {
+    try { const r = await fetch(`${base}/api/health`); if (r.ok) return } catch {}
+    await sleep(100)
+  }
+  throw new Error(`backend indisponible: ${stderr}`)
+}
+function assert(x, msg) { if (!x) throw new Error(msg) }
+async function req(path, { method = 'GET', body, cookie } = {}) {
+  const r = await fetch(base + path, {
+    method,
+    headers: { Origin: origin, ...(body ? { 'content-type': 'application/json' } : {}), ...(cookie ? { Cookie: cookie } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  let data = {}
+  try { data = await r.json() } catch {}
+  return { r, data, cookie: r.headers.get('set-cookie')?.split(';')[0] }
+}
+async function login(email, password) {
+  const x = await req('/api/auth/login', { method: 'POST', body: { email, password } })
+  assert(x.r.status === 200, `login ${email}`)
+  return x.cookie
+}
+
+const complete = {
+  priorityLevel: 'Importante', internalNotes: 'Interne.',
+  strengths: ['Fort 1', 'Fort 2', 'Fort 3'], weaknesses: ['Faible 1', 'Faible 2', 'Faible 3'],
+  priorities: ['PrioritÃ© 1', 'PrioritÃ© 2', 'PrioritÃ© 3'], opportunities: ['OpportunitÃ© 1'],
+  risks: ['Risque 1'], actionPlan: ['Ã‰tape 1'], recommendations: ['Reco 1'],
+}
+
+async function setupOrg(ownerCookie, conciergeCookie, orgId) {
+  let x = await req('/api/diagnostics', { method: 'POST', cookie: ownerCookie, body: { orgId, format: 'Complet', sector: 'sante', answers: { '11': { score: 4, comment: 'Bien' } } } })
+  assert(x.r.status === 201, `setup: diagnostic ${orgId}`)
+  const diagId = x.data.id
+  x = await req(`/api/diagnostics/${diagId}`, { method: 'PATCH', cookie: conciergeCookie, body: { status: 'en_analyse' } })
+  assert(x.r.status === 200, `setup: en_analyse ${orgId}`)
+  x = await req(`/api/diagnostics/${diagId}`, { method: 'PATCH', cookie: conciergeCookie, body: { notes: 'Restitution.', analysis: complete, publishRestitution: true } })
+  assert(x.r.status === 200 && x.data.status === 'restitue', `setup: publication ${orgId}`)
+  x = await req('/api/offers/accept', { method: 'POST', cookie: ownerCookie, body: { offerCode: 'BASIQUE' } })
+  assert(x.r.status === 202 && x.data.offer.status === 'en_attente_validation', `setup: demande offre ${orgId}`)
+  return { diagId, offerId: x.data.offer.id }
+}
+
+try {
+  await wait()
+  const adminCookie = await login('admin@test.ma', adminPassword)
+  const ownerACookie = await login('ownerA@test.ma', ownerPassword)
+  const ownerBCookie = await login('ownerB@test.ma', ownerBPassword)
+  const conciergeACookie = await login('conciergeA@test.ma', conciergePassword)
+  const conciergeBCookie = await login('conciergeB@test.ma', conciergePassword)
+  assert(adminCookie && ownerACookie && ownerBCookie && conciergeACookie && conciergeBCookie, 'cookies')
+
+  // A. Client choisit offre => en_attente_validation (pas d'activation).
+  const setupA = await setupOrg(ownerACookie, conciergeACookie, orgA)
+  assert(setupA.offerId, 'A: offre demandÃ©e')
+  let x = await req(`/api/offers?orgId=${orgA}`, { cookie: ownerACookie })
+  const pendingOffer = x.data.pending.find((o) => o.id === setupA.offerId)
+  assert(pendingOffer && pendingOffer.status === 'en_attente_validation', 'A: offre en attente de validation')
+
+  // B. Missions non activÃ©es avant approval.
+  x = await req('/api/missions', { cookie: ownerACookie })
+  assert(x.r.status === 403 && x.data.code === 'OFFER_REQUIRED', 'B: missions bloquÃ©es avant activation')
+
+  // C. Concierge affectÃ© approuve => actif + missions crÃ©Ã©es.
+  x = await req(`/api/staff/requests/offer/${setupA.offerId}`, { method: 'PATCH', cookie: conciergeACookie, body: { decision: 'approve' } })
+  assert(x.r.status === 200 && x.data.request.status === 'actif', 'C: concierge affectÃ© approuve => actif')
+  assert(Array.isArray(x.data.missions) && x.data.missions.length === 2, 'C: missions crÃ©Ã©es Ã  l\'approbation')
+  const missionId = x.data.missions[0].id
+  // Le concierge fait avancer la mission jusqu'Ã  l'attente de validation client.
+  x = await req(`/api/missions/${missionId}`, { method: 'PATCH', cookie: conciergeACookie, body: { status: 'en_cours' } })
+  assert(x.r.status === 200 && x.data.status === 'en_cours', 'C: mission en_cours')
+  x = await req(`/api/missions/${missionId}`, { method: 'PATCH', cookie: conciergeACookie, body: { status: 'a_valider_client' } })
+  assert(x.r.status === 200 && x.data.status === 'a_valider_client', 'C: mission a_valider_client')
+
+  // D. Concierge NON affectÃ© (conciergeB sur orgB) tente d'approuver l'offre de orgA => 403.
+  x = await req(`/api/staff/requests/offer/${setupA.offerId}`, { method: 'PATCH', cookie: conciergeBCookie, body: { decision: 'approve' } })
+  assert(x.r.status === 403, 'D: concierge non affectÃ© => 403')
+
+  // E. Admin approuve => actif (sur orgB).
+  const setupB = await setupOrg(ownerBCookie, conciergeBCookie, orgB)
+  x = await req(`/api/staff/requests/offer/${setupB.offerId}`, { method: 'PATCH', cookie: adminCookie, body: { decision: 'approve' } })
+  assert(x.r.status === 200 && x.data.request.status === 'actif', 'E: admin approuve => actif')
+
+  // F. Le client ne peut pas approuver sa propre offre.
+  x = await req(`/api/staff/requests/offer/${setupA.offerId}`, { method: 'PATCH', cookie: ownerACookie, body: { decision: 'approve' } })
+  assert(x.r.status === 403, 'F: client ne peut pas approuver => 403')
+
+  // G. Refus d'une demande en attente (admin sur orgA offre dÃ©jÃ  activÃ©e -> on teste sur un refus via offre de orgB dÃ©jÃ  active ?).
+  // On teste plutÃ´t le refus d'une demande d'abonnement Besoins en attente.
+
+  // H. Abonnement Besoins client => pending, quotas non actifs.
+  x = await req('/api/needs/subscription/activate', { method: 'POST', cookie: ownerACookie, body: { planCode: 'ESSENTIEL' } })
+  assert(x.r.status === 202 && x.data.subscription.status === 'pending', 'G: abonnement Besoins client => pending')
+  const subId = x.data.subscription.id
+  x = await req('/api/needs', { cookie: ownerACookie })
+  assert(x.r.status === 403 && x.data.code === 'ACCESS_DISABLED', 'H: quotas non actifs avant approbation')
+
+  // I. Concierge affectÃ© approuve l'abonnement => active.
+  x = await req(`/api/staff/requests/needs/${subId}`, { method: 'PATCH', cookie: conciergeACookie, body: { decision: 'approve' } })
+  assert(x.r.status === 200 && x.data.request.status === 'active', 'I: concierge approuve abonnement => active')
+
+  // J. SaaS client => pending.
+  x = await req('/api/saas/subscription/request', { method: 'POST', cookie: ownerACookie, body: {} })
+  assert(x.r.status === 202 && x.data.subscription.status === 'pending', 'J: SaaS client => pending')
+  const saasId = x.data.subscription.id
+  x = await req('/api/saas/subscription', { cookie: ownerACookie })
+  const saasPending = x.data.pending
+  assert(saasPending && saasPending.status === 'pending' && !saasPending.enabled, 'J: SaaS pas activÃ© cÃ´tÃ© organisation')
+
+  // K. SaaS actif uniquement aprÃ¨s staff approval.
+  x = await req(`/api/staff/requests/saas/${saasId}`, { method: 'PATCH', cookie: conciergeACookie, body: { decision: 'approve' } })
+  assert(x.r.status === 200 && x.data.request.status === 'active', 'K: concierge approuve SaaS => active')
+  x = await req('/api/me', { cookie: ownerACookie })
+  const saas = x.data.organization.saas
+  assert(saas.subscriptionActive === true && saas.enabled === true && saas.plan === 'SAAS_445', 'K: SaaS activÃ© (subscriptionActive, enabled, plan SAAS_445)')
+
+  // L. Staff refuse une demande (offre de orgB dÃ©jÃ  active, on crÃ©e une nouvelle demande puis refuse).
+  // orgB a une offre active, on ne peut pas en redemander. On teste le refus sur l'abonnement Besoins de orgB (pas encore demandÃ©).
+  x = await req('/api/needs/subscription/activate', { method: 'POST', cookie: ownerBCookie, body: { planCode: 'AVANCE' } })
+  assert(x.r.status === 202 && x.data.subscription.status === 'pending', 'L: demande abonnement orgB => pending')
+  const subBId = x.data.subscription.id
+  x = await req(`/api/staff/requests/needs/${subBId}`, { method: 'PATCH', cookie: adminCookie, body: { decision: 'refuse', reason: 'Justificatif insuffisant' } })
+  assert(x.r.status === 200 && x.data.request.status === 'refused', 'L: refus abonnement => refused')
+  x = await req('/api/needs/subscription', { cookie: ownerBCookie })
+  assert(x.data.current === null && x.data.pending === null, 'L: aprÃ¨s refus, aucun abonnement actif ni pending')
+
+  // M. Client valide mission => validee_client.
+  x = await req(`/api/missions/${missionId}`, { method: 'PATCH', cookie: ownerACookie, body: { clientDecision: 'validate', clientFeedback: 'Conforme' } })
+  assert(x.r.status === 200 && x.data.status === 'validee_client', 'M: client valide => validee_client')
+
+  // N. Autre client/org ne peut pas valider la mission.
+  x = await req(`/api/missions/${missionId}`, { method: 'PATCH', cookie: ownerBCookie, body: { clientDecision: 'validate', clientFeedback: 'x' } })
+  assert(x.r.status === 403, 'N: autre client ne peut pas valider => 403')
+
+  // O. Correction client fonctionne (sur une nouvelle mission en a_valider_client).
+  // CrÃ©er une deuxiÃ¨me mission via l'offre active de orgA (dÃ©jÃ  2 missions, la premiÃ¨re est validee_client).
+  x = await req('/api/missions', { cookie: ownerACookie })
+  const secondMission = x.data.missions.find((m) => m.id !== missionId)
+  assert(secondMission, 'O: deuxiÃ¨me mission trouvÃ©e')
+  x = await req(`/api/missions/${secondMission.id}`, { method: 'PATCH', cookie: conciergeACookie, body: { status: 'a_valider_client' } })
+  assert(x.r.status === 200 && x.data.status === 'a_valider_client', 'O: concierge met en a_valider_client')
+  x = await req(`/api/missions/${secondMission.id}`, { method: 'PATCH', cookie: ownerACookie, body: { clientDecision: 'request_correction', clientFeedback: 'Ã€ revoir' } })
+  assert(x.r.status === 200 && x.data.status === 'en_cours' && x.data.clientFeedback === 'Ã€ revoir', 'O: correction client => en_cours, pas validÃ©e')
+
+  // P. AccÃ¨s direct : le personnel ne peut pas forcer validee_client sur une mission en a_valider_client.
+  x = await req(`/api/missions/${secondMission.id}`, { method: 'PATCH', cookie: adminCookie, body: { status: 'validee_client' } })
+  assert(x.r.status === 403, 'P: admin ne peut pas forcer validee_client => 403')
+  x = await req(`/api/missions/${secondMission.id}`, { method: 'PATCH', cookie: conciergeACookie, body: { status: 'validee_client' } })
+  assert(x.r.status === 403, 'P: concierge ne peut pas forcer validee_client => 403')
+
+  console.log('OK rbac workflow: A offre demandee Â· B missions bloquees Â· C concierge approuve Â· D concierge etranger 403 Â· E admin approuve Â· F client pas approuver Â· G/H abonnement pending quotas inactifs Â· I abonnement active Â· J/K SaaS pending=>active Â· L refus Â· M client valide Â· N etranger 403 Â· O correction Â· P pas de faux validee_client')
+} finally {
+  child.kill('SIGTERM')
+  rmSync(dir, { recursive: true, force: true })
+}
+

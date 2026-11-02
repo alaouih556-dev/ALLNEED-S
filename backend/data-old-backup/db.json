@@ -1,0 +1,69 @@
+{
+  "users": [
+    {
+      "id": "admin-4261b1401003318b",
+      "email": "alaouih556@gmail.com",
+      "role": "admin",
+      "orgIds": [
+        "*"
+      ],
+      "name": "Administrateur ALLNEEDS",
+      "active": true,
+      "passwordHash": "scrypt$78bf7239e2030ea46a3342aaf62e8d0f$9a58dbcda313c6445aef5a8b5b7830c04ffeaa5ac9b97828be667ace5a29a2ecd0ead19571cc8f5ae0abb0ed66c28d43032835db173aabca673e5f95df0920cc",
+      "passwordConfigured": true,
+      "permissions": [
+        "*"
+      ]
+    },
+    {
+      "id": "usr-847f22e23ec8d710837d",
+      "email": "abdelhamid.alaoui9@gmail.com",
+      "role": "concierge",
+      "orgIds": [],
+      "sectors": [
+        "sante",
+        "enseignement",
+        "tourisme"
+      ],
+      "name": "alaoui",
+      "active": true,
+      "passwordHash": "scrypt$2991fe5887a11f9859c842c55b8ef880$3ab00997f3f3f87189c183cfe3b624beb142e85c4ea64d67368fdf587ae3a4290cab6b28400f72921aaf1e887ab3618a1ee04675554729a624f729bb00921c69",
+      "passwordConfigured": true,
+      "permissions": []
+    }
+  ],
+  "orgs": [],
+  "diagnostics": [],
+  "needs": [],
+  "consents": [],
+  "registrations": [],
+  "invitations": [
+    {
+      "id": "inv-e4ada4571fd5e5c76ff3",
+      "orgId": null,
+      "email": "abdelhamid.alaoui9@gmail.com",
+      "name": "alaoui",
+      "role": "concierge",
+      "permissions": [],
+      "kind": "concierge",
+      "metadata": {
+        "sectors": [],
+        "assignedOrgIds": []
+      },
+      "tokenHash": "b6dc96af83d53514441dd21e9a4eb5e9d63c8f86d552ea4686d87bfd88845f39",
+      "createdBy": "admin-4261b1401003318b",
+      "createdAt": "2026-10-08T16:46:43.632Z",
+      "expiresAt": "2026-10-10T16:46:43.632Z",
+      "usedAt": "2026-10-08T16:47:23.296Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-10-08T16:46:44.806Z",
+      "lastEmailStatus": "sent"
+    }
+  ],
+  "missions": [],
+  "documents": [],
+  "messages": [],
+  "meetings": [],
+  "quotes": [],
+  "notifications": []
+}

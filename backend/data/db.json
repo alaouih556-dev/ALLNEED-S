@@ -1,0 +1,35 @@
+{
+  "users": [
+    {
+      "id": "admin-3e37a3d391225635",
+      "email": "admin@allneeds.local",
+      "role": "admin",
+      "orgIds": [
+        "*"
+      ],
+      "name": "Administrateur ALLNEEDS",
+      "active": true,
+      "passwordHash": "scrypt$9df7510778f3e6d32a6e80aacbaddeff$d878a6770f6238c2f063e55f6d773b008a7e3b5793e5a457c043c5fc7caebc1cf1d979240deff6aadab4750f3dd874545ae10507b1057c036646ec2840bb40f3",
+      "passwordConfigured": true,
+      "permissions": [
+        "*"
+      ]
+    }
+  ],
+  "orgs": [],
+  "diagnostics": [],
+  "needs": [],
+  "consents": [],
+  "registrations": [],
+  "invitations": [],
+  "missions": [],
+  "offers": [],
+  "documents": [],
+  "messages": [],
+  "meetings": [],
+  "quotes": [],
+  "notifications": [],
+  "needsSubscriptions": [],
+  "saasSubscriptions": [],
+  "conversations": []
+}

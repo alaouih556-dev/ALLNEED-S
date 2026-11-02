@@ -1,0 +1,22 @@
+
+const OFFER_STATUS_META: Record<
+  OfferStatus,
+  {
+    label: string
+    tone: 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info' | 'violet'
+  }
+> = {
+  disponible: { label: 'Disponible', tone: 'neutral' },
+  selectionnee: { label: 'Sélectionnée', tone: 'info' },
+  en_attente_validation: { label: 'En attente de validation', tone: 'warning' },
+  acceptee: { label: 'Acceptée', tone: 'success' },
+  annulee: { label: 'Annulée', tone: 'danger' },
+  refusee: { label: 'Refusée', tone: 'danger' },
+
+  // Nouveaux statuts
+  actif: { label: 'Active', tone: 'success' },
+  expire: { label: 'Expirée', tone: 'neutral' },
+  suspendu: { label: 'Suspendue', tone: 'warning' },
+  refuse: { label: 'Refusée', tone: 'danger' },
+  draft: { label: 'Brouillon', tone: 'neutral' },
+}
