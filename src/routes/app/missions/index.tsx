@@ -17,7 +17,7 @@ function progressOf(missions: Array<{ status: Mission['status'] }>): number {
   return Math.round((done / missions.length) * 100)
 }
 
-export function MissionsPage() {
+function MissionsPage() {
   const { data, loading, error, code } = useApiResource<{ offer: OfferRecord; missions: Mission[] }>('/api/missions')
 
   if (loading) return <PageHeader eyebrow="Missions" title="Chargement de vos missions…" />

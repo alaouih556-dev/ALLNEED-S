@@ -755,7 +755,7 @@ h1,h2,h3,h4,.font-display{font-family:'Manrope','DM Sans',system-ui,sans-serif;l
 .owner-results-empty{padding:1.5rem!important;text-align:center;color:#7a8b9b!important}
 @media(max-width:700px){.owner-results-toolbar{grid-template-columns:1fr}.owner-results-toolbar select{width:100%}}
 
- /* ALLNEEDS SANTÉ — hero background (approved image) */
+ /* ALLNEEDS — hero background (approved image) */
  .allneeds-hero-bg {
    position: absolute;
    inset: 0;

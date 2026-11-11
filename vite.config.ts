@@ -5,7 +5,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { fileURLToPath } from 'node:url'
 
 export default defineConfig({
-  plugins: [tanstackRouter({ autoCodeSplitting: false }), react(), tailwindcss()],
+  plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), react(), tailwindcss()],
 server: {
   host: '0.0.0.0',
   allowedHosts: true,

@@ -19,8 +19,8 @@ Cette version part de V15 et applique le document de référence `ALLNEEDS — R
 - Messagerie existante conservée ; les nouvelles surfaces renvoient vers les dossiers existants au lieu de créer une messagerie parallèle.
 - Notifications orientées intention : action requise, attention, information, résultat.
 - Responsive : les nouveaux cockpits se réorganisent pour mobile sans simplement compresser les grilles desktop.
-- Le lien ALLNEEDS Santé reste direct vers `https://allneed-s-sante.vercel.app`.
-- ALLNEEDS Santé conserve son workflow métier existant et reçoit une priorité `One Next Action` sur le dashboard.
+- Le lien ALLNEEDS reste direct vers `https://allneed-s-sante.vercel.app`.
+- ALLNEEDS conserve son workflow métier existant et reçoit une priorité `One Next Action` sur le dashboard.
 
 ## Ce qui reste volontairement "démo frontend"
 

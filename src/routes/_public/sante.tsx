@@ -5,7 +5,7 @@ export const Route = createFileRoute('/_public/sante')({
   component: SanteLandingPage,
   head: () => ({
     meta: [
-      { title: 'ALLNEEDS Santé — Diagnostic gratuit 30 min' },
+      { title: 'ALLNEEDS — Diagnostic gratuit 30 min' },
       {
         name: 'description',
         content:

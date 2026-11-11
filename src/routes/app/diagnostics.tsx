@@ -18,7 +18,7 @@ export const Route = createFileRoute('/app/diagnostics')({
   head: () => ({ meta: [{ title: 'Ma restitution — ALLNEEDS' }] }),
 })
 
-export function DiagnosticsPage() {
+function DiagnosticsPage() {
   const { orgId } = useOrgContext()
   const { primary, patchRecord, loading, error: recordError } = useDiagnosticRecord(orgId || null)
   const [restitution, setRestitution] = useState<DiagnosticRestitution | null>(null)

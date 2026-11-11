@@ -44,7 +44,7 @@ function categoryLabel(value: string) {
 
 const CLOSED = ['cloture', 'valide', 'annule']
 
-export function BesoinsPage() {
+function BesoinsPage() {
   const { state, dispatch, orgId } = useDemo()
   const auth = useAuth()
   const currentOrgId = auth.user?.organization?.id || orgId

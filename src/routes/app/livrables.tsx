@@ -13,7 +13,7 @@ export const Route = createFileRoute('/app/livrables')({
   head: () => ({ meta: [{ title: 'Mes livrables — ALLNEEDS' }] }),
 })
 
-export function LivrablesPage() {
+function LivrablesPage() {
   const { state, dispatch, orgId } = useDemo()
   const [filter, setFilter] = useState('tous')
 

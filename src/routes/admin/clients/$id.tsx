@@ -27,7 +27,7 @@ export const Route = createFileRoute('/admin/clients/$id')({
   head: ({ params }) => ({ meta: [{ title: `Client ${params.id ?? ''} — ALLNEEDS` }] }),
 })
 
-export function AdminClientDetail() {
+function AdminClientDetail() {
   const { id } = Route.useParams()
   const { state, dispatch } = useDemo()
   const now = new Date(DEMO_NOW).getTime()

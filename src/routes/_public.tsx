@@ -40,20 +40,22 @@ function PublicLayout() {
     <>
       <LaunchBanner />
       <PublicHeader />
-      <div className="border-b border-ink-100 bg-white">
-        <nav className="container-page flex flex-wrap items-center gap-1.5 py-2 text-xs text-ink-500" aria-label="Fil d'Ariane">
-          {crumbs.map((c, i) => (
-            <span key={c.to} className="inline-flex items-center gap-1.5">
-              {i > 0 ? <span className="text-ink-300">/</span> : null}
-              {i === crumbs.length - 1 ? (
-                <span className="font-semibold text-ink-900">{c.label}</span>
-              ) : (
-                <Link to={c.to as any} className="hover:text-ink-950 hover:underline">{c.label}</Link>
-              )}
-            </span>
-          ))}
-        </nav>
-      </div>
+      {crumbs.length > 1 ? (
+        <div className="mk mk-crumbs">
+          <nav className="mk-wrap" aria-label="Fil d'Ariane">
+            {crumbs.map((c, i) => (
+              <span key={c.to} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                {i > 0 ? <span aria-hidden="true">/</span> : null}
+                {i === crumbs.length - 1 ? (
+                  <span className="current" aria-current="page">{c.label}</span>
+                ) : (
+                  <Link to={c.to as any}>{c.label}</Link>
+                )}
+              </span>
+            ))}
+          </nav>
+        </div>
+      ) : null}
       <main className="flex-1">
         <Outlet />
       </main>

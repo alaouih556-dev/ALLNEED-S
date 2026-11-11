@@ -14,7 +14,7 @@ const rules = [
   { title: 'Les prestataires restent responsables', detail: 'Pour les prestations externalisées, le contrat est conclu directement entre votre établissement et le prestataire. Toute commission éventuelle est signalée.' },
 ]
 
-export function ConditionsPage() {
+function ConditionsPage() {
   return <>
     <section className="border-b border-ink-100 bg-ink-50"><div className="container-page py-16"><p className="eyebrow">Transparence & confiance</p><h1 className="display-1 mt-4 max-w-3xl">Un cadre clair avant chaque décision.</h1><p className="lede mt-5 max-w-2xl">Le diagnostic commence par votre réalité. Si vous souhaitez aller plus loin, vous connaissez le contenu, le prix et les limites avant de vous engager.</p></div></section>
     <section className="container-page grid gap-8 py-14 lg:grid-cols-[0.8fr_1.2fr] lg:py-16">

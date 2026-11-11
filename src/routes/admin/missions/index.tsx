@@ -12,7 +12,7 @@ export const Route = createFileRoute('/admin/missions/')({
   head: () => ({ meta: [{ title: 'Missions — ALLNEEDS' }] }),
 })
 
-export function AdminMissions() {
+function AdminMissions() {
   const { data, loading, error, refresh } = useApiResource<Mission[]>('/api/admin/missions')
   const [filter, setFilter] = useState('ouvertes')
   const [busy, setBusy] = useState<string | null>(null)

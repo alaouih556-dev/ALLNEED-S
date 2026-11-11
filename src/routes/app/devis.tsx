@@ -20,7 +20,7 @@ const STATUS: Record<Quote['status'], { label: string; tone: 'neutral' | 'info' 
   refuse: { label: 'Refusé', tone: 'danger' },
 }
 
-export function DevisPage() {
+function DevisPage() {
   const { state, dispatch, orgId } = useDemo()
   const [filter, setFilter] = useState('tous')
 

@@ -10,7 +10,7 @@ export const Route = createFileRoute('/app/prestataires')({
   head: () => ({ meta: [{ title: 'Réseau de prestataires — ALLNEEDS' }] }),
 })
 
-export function PrestatairesPage() {
+function PrestatairesPage() {
   const { state } = useDemo()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('tous')

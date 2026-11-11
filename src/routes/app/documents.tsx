@@ -17,7 +17,7 @@ export const Route = createFileRoute('/app/documents')({
   head: () => ({ meta: [{ title: 'Mes documents — ALLNEEDS' }] }),
 })
 
-export function DocumentsPage() {
+function DocumentsPage() {
   const { state, orgId: fallbackOrgId } = useDemo()
   const { orgId, orgName, email, sector } = useOrgContext()
   const effectiveOrgId = orgId || fallbackOrgId

@@ -13,7 +13,7 @@ export const Route = createFileRoute('/app/messages')({
   head: () => ({ meta: [{ title: 'Messagerie — ALLNEEDS' }] }),
 })
 
-export function MessagesPage() {
+function MessagesPage() {
   const { state, dispatch, orgId, user } = useDemo()
   const [selected, setSelected] = useState(state.threads.find((t) => t.orgId === orgId)?.id ?? '')
   const [text, setText] = useState('')

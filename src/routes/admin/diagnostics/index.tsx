@@ -39,7 +39,7 @@ const LEVERS: Levers[] = [
   'experience',
 ]
 
-export function AdminDiagnostics() {
+function AdminDiagnostics() {
   const { state, dispatch } = useDemo()
   const [filter, setFilter] = useState('tous')
   const [checks, setChecks] = useState<Record<string, boolean[]>>({})

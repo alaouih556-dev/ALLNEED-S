@@ -27,7 +27,7 @@ export const Route = createFileRoute('/app/besoins/$id')({
   head: ({ params }) => ({ meta: [{ title: `Besoin ${params.id ?? ''} — ALLNEEDS` }] }),
 })
 
-export function BesoinDetail() {
+function BesoinDetail() {
   const { id } = Route.useParams()
   const { state, orgId } = useDemo()
   const auth = useAuth()

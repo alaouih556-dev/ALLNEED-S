@@ -8,7 +8,7 @@ Le portail principal porte la qualification, le diagnostic, la priorisation, la 
 
 ## SaaS Santé séparé
 
-Le SaaS ALLNEEDS Santé reste une application distincte. Il n’est pas fusionné dans le portail principal. Le portail principal contient le diagnostic Santé 360° et peut ouvrir le SaaS métier séparé quand l’accès est activé. Le dossier `ALLNEEDS-SANTE` est restauré à l’état antérieur à l’intégration erronée V17.
+Le SaaS ALLNEEDS reste une application distincte. Il n’est pas fusionné dans le portail principal. Le portail principal contient le diagnostic Santé 360° et peut ouvrir le SaaS métier séparé quand l’accès est activé. Le dossier `ALLNEEDS-SANTE` est restauré à l’état antérieur à l’intégration erronée V17.
 
 ## Principes appliqués dans tout le portail principal
 

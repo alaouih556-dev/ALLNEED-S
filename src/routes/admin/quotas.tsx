@@ -29,7 +29,7 @@ export const Route = createFileRoute('/admin/quotas')({
   head: () => ({ meta: [{ title: 'Quotas & abonnements — ALLNEEDS' }] }),
 })
 
-export function AdminQuotas() {
+function AdminQuotas() {
   const { state, dispatch } = useDemo()
   const [tier, setTier] = useState<AccessTier>(state.subscription.tier)
 

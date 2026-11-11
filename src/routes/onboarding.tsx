@@ -9,7 +9,7 @@ import { SECTOR_LABEL } from '@/data/catalog'
 const STEP_LABELS = ['Contexte', 'Pièces utiles', 'Accès']
 export const Route = createFileRoute('/onboarding')({ component: OnboardingPage, head:()=>({meta:[{title:'Onboarding — ALLNEEDS'}]}) })
 
-export function OnboardingPage(){
+function OnboardingPage(){
  const navigate=useNavigate(); const {state,dispatch}=useDemo(); const [step,setStep]=useState(0); const [priority,setPriority]=useState(''); const [difficulty,setDifficulty]=useState(''); const [documents,setDocuments]=useState<string[]>([])
  const profile=state.registrationProfile
  const docs=['Organigramme et répartition des rôles','Grille tarifaire en vigueur','Historique des demandes (Excel, mail, cahier)','Contrats de charges et assurances','Comptes des réseaux sociaux']

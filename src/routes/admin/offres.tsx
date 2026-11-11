@@ -43,7 +43,7 @@ const OFFER_STATUS_META: Record<
   draft: { label: 'Brouillon', tone: 'neutral' },
 }
 
-export function AdminOffers() {
+function AdminOffers() {
   const { data, loading, error, refresh } = useApiResource<{
     offers: OfferRecord[]
     catalog: OfferCatalogItem[]

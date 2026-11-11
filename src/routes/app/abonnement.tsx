@@ -90,7 +90,7 @@ function AccessOffersSection() {
   )
 }
 
-export function AbonnementPage() {
+function AbonnementPage() {
   const { state, dispatch, orgId: fallbackOrgId } = useDemo()
   const auth = useAuth()
   const { orgId: liveOrgId, sector: accountSector } = useOrgContext()

@@ -53,7 +53,7 @@ const SECTOR_FAQ = {
   tourisme: [{ q: 'Faut-il remplacer nos outils de réservation ?', a: 'Non. Le premier échange part de vos outils, canaux et habitudes actuels.' }],
 }
 
-export function FaqPage() {
+function FaqPage() {
   const [query, setQuery] = useState('')
   const selectedSector = useSelectedSector()
 

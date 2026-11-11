@@ -38,7 +38,7 @@ export const Route = createFileRoute('/admin/qualification')({
   head: () => ({ meta: [{ title: 'Qualification — ALLNEEDS' }] }),
 })
 
-export function QualificationPage() {
+function QualificationPage() {
   const { state, dispatch } = useDemo()
   const [filter, setFilter] = useState('tous')
   const [assignee, setAssignee] = useState('tous')

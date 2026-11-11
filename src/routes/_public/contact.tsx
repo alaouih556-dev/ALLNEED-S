@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_public/contact')({
   }),
 })
 
-export function ContactPage() {
+function ContactPage() {
   const { dispatch } = useDemo()
   const [sent, setSent] = useState(false)
   const [form, setForm] = useState({

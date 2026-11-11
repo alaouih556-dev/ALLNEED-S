@@ -37,7 +37,7 @@ const KIND_LABEL: Record<Meeting['kind'], string> = {
   appel: 'Appel',
 }
 
-export function RendezVousPage() {
+function RendezVousPage() {
   const { state, dispatch, orgId, user } = useDemo()
   const [filter, setFilter] = useState('a_venir')
   const modal = useDisclosure()

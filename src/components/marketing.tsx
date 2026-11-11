@@ -3,12 +3,11 @@ import { Link, type LinkProps } from '@tanstack/react-router'
 import {
   ArrowRight,
   Check,
-  ChevronDown,
   GraduationCap,
   HeartPulse,
   Menu,
-  Minus,
   Plane,
+  Plus,
   X,
 } from 'lucide-react'
 import { LAUNCH_OFFER, SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
@@ -23,13 +22,12 @@ import type { FeatureRow, MissionCode, Sector } from '@/types'
 
 export function LaunchBanner() {
   return (
-    <div className="bg-ink-950 text-white">
-      <div className="container-page flex min-h-10 flex-wrap items-center justify-center gap-x-2 gap-y-1 py-2 text-center text-xs">
-        <span className="font-semibold text-sand-300">Premier échange offert</span>
-        <span className="text-ink-300">·</span>
-        <span className="text-ink-200">2h15 pour clarifier vos priorités, sans engagement</span>
-        <Link to="/inscription" className="ml-1 inline-flex items-center gap-1 font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
-          Choisir un créneau <ArrowRight className="h-3 w-3" />
+    <div className="mk mk-announce">
+      <div className="mk-wrap">
+        <strong>Premier échange offert</strong>
+        <span>2h15 pour clarifier vos priorités, sans engagement</span>
+        <Link to="/inscription">
+          Choisir un créneau <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     </div>
@@ -55,74 +53,66 @@ export function PublicHeader() {
   ]
 
   return (
-    <header className="public-sticky top-0 z-40 border-b border-ink-100 bg-white/90 backdrop-blur">
-      <div className="container-page flex h-[4.5rem] items-center justify-between gap-6">
-        <Link to="/" className="flex items-center gap-2.5">
-          <img src="/allneeds-logo.svg" alt="allneeds — Find it. Get it. Fast." className="h-10 w-auto" />
+    <header className="mk mk-header public-sticky top-0 z-40">
+      <div className="mk-wrap mk-header-row">
+        <Link to="/" className="mk-header-logo" aria-label="ALLNEEDS — accueil">
+          <img src="/allneeds-logo.svg" alt="allneeds — Find it. Get it. Fast." />
         </Link>
 
-        <nav className="hidden items-center gap-1.5 lg:flex">
+        <nav className="mk-nav" aria-label="Navigation principale">
           {publicLinks.map((link) => (
             <PublicNavigationLink
               key={link.to}
-              to={link.to} sector={selectedSector}
-
-              className="rounded-full px-3.5 py-2.5 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-950"
-              activeProps={{ className: 'bg-ink-50 text-ink-950' }}
+              to={link.to}
+              sector={selectedSector}
+              activeProps={{ className: 'active' }}
             >
               {link.label}
             </PublicNavigationLink>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <Link to="/connexion">
-            <Button variant="ghost" size="sm">
-              Se connecter
-            </Button>
+        <div className="mk-header-actions">
+          <Link to="/connexion" className="mk-signin">
+            Se connecter
           </Link>
-          <Link to="/inscription">
-            <Button size="sm">
-              Faire le point gratuitement
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
+          <Link to="/inscription" className="mk-btn mk-btn-dark mk-btn-sm">
+            Faire le point gratuitement
+            <ArrowRight />
           </Link>
         </div>
 
         <button
           type="button"
-          className="rounded-lg p-2 text-ink-700 transition hover:bg-ink-100 lg:hidden"
+          className="mk-burger"
           onClick={() => setOpen((v) => !v)}
-          aria-label="Menu"
+          aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={open}
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
       {open ? (
-        <div className="border-t border-ink-100 bg-white lg:hidden">
-          <div className="container-page space-y-1 py-4">
+        <div className="mk-mobile lg:hidden">
+          <div className="mk-wrap">
             {publicLinks.map((link) => (
               <PublicNavigationLink
                 key={link.to}
-                to={link.to} sector={selectedSector}
-
+                to={link.to}
+                sector={selectedSector}
                 onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-50"
+                className="mk-mobile-link"
               >
                 {link.label}
               </PublicNavigationLink>
             ))}
-            <div className="grid gap-2 pt-3">
-              <Link to="/connexion" onClick={() => setOpen(false)}>
-                <Button fullWidth size="sm" variant="outline">
-                  Se connecter
-                </Button>
+            <div className="mk-mobile-actions">
+              <Link to="/inscription" onClick={() => setOpen(false)} className="mk-btn mk-btn-dark">
+                Faire le point gratuitement <ArrowRight />
               </Link>
-              <Link to="/inscription" onClick={() => setOpen(false)}>
-                <Button fullWidth size="sm">
-                  Faire le point gratuitement
-                </Button>
+              <Link to="/connexion" onClick={() => setOpen(false)} className="mk-btn mk-btn-line">
+                Se connecter
               </Link>
             </div>
           </div>
@@ -139,28 +129,37 @@ export function PublicHeader() {
 export function PublicFooter() {
   const selectedSector = useSelectedSector()
   return (
-    <footer className="mt-24 border-t border-ink-100 bg-ink-50">
-      <div className="container-page py-14">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
-          <div>
-            <Link to="/" className="flex items-center gap-2.5">
-              <img src="/allneeds-logo.svg" alt="allneeds — Find it. Get it. Fast." className="h-10 w-auto" />
+    <footer className="mk mk-footer">
+      <div className="mk-wrap">
+        <div className="mk-footer-top">
+          <h2>Un premier échange pour clarifier vos priorités et décider de la suite.</h2>
+          <div className="mk-cta-row">
+            <Link to="/inscription" className="mk-btn mk-btn-cyan">
+              Faire le point gratuitement <ArrowRight />
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-600">
+            <Link to="/contact" className="mk-btn mk-btn-line-light">
+              Contacter l’équipe
+            </Link>
+          </div>
+        </div>
+
+        <div className="mk-footer-cols">
+          <div className="mk-footer-brand">
+            <Link to="/" className="mk-footer-logo" aria-label="ALLNEEDS — accueil">
+              <img src="/allneeds-logo.svg" alt="allneeds — Find it. Get it. Fast." />
+            </Link>
+            <p className="mk-small" style={{ marginTop: 20, maxWidth: 300, color: '#a9bbd2' }}>
               Votre réseau de solutions pour entreprises et établissements. Nous partons de votre situation, pas d’un
               catalogue.
-            </p>
-            <p className="mt-4 text-xs text-ink-500">
-              Un premier échange pour clarifier vos priorités et décider de la suite.
             </p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Secteurs</p>
-            <ul className="mt-4 space-y-2.5 text-sm">
+            <h3>Secteurs</h3>
+            <ul>
               {(selectedSector ? [selectedSector] : SECTOR_ORDER).map((sector) => (
                 <li key={sector}>
-                  <Link to="/secteurs/$sector" params={{ sector }} className="text-ink-600 transition hover:text-ink-950">
+                  <Link to="/secteurs/$sector" params={{ sector }}>
                     {SECTOR_LABEL[sector]}
                   </Link>
                 </li>
@@ -169,84 +168,38 @@ export function PublicFooter() {
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Diagnostic offert</p>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Diagnostic offert
-                </Link>
-              </li>
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Comprendre votre situation
-                </Link>
-              </li>
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Définir les prochaines étapes
-                </Link>
-              </li>
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Réserver un échange
-                </Link>
-              </li>
+            <h3>Diagnostic offert</h3>
+            <ul>
+              <li><Link to="/diagnostic">Comment ça se déroule</Link></li>
+              <li><Link to="/inscription">Comprendre votre situation</Link></li>
+              <li><Link to="/inscription">Définir les prochaines étapes</Link></li>
+              <li><Link to="/inscription">Réserver un échange</Link></li>
             </ul>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Ressources</p>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Diagnostic offert
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="text-ink-600 transition hover:text-ink-950">
-                  FAQ
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Réserver un diagnostic
-                </Link>
-              </li>
+            <h3>Ressources</h3>
+            <ul>
+              <li><Link to="/faq">FAQ</Link></li>
+              <li><Link to="/conditions">Conditions de l’offre</Link></li>
+              <li><Link to="/connexion">Se connecter</Link></li>
             </ul>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">ALLNEEDS</p>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              <li>
-                <Link to="/a-propos" className="text-ink-600 transition hover:text-ink-950">
-                  Qui sommes-nous
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-ink-600 transition hover:text-ink-950">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/conditions" className="text-ink-600 transition hover:text-ink-950">
-                  Conditions de l’offre
-                </Link>
-              </li>
-              <li>
-                <Link to="/inscription" className="text-ink-600 transition hover:text-ink-950">
-                  Créer un compte
-                </Link>
-              </li>
+            <h3>ALLNEEDS</h3>
+            <ul>
+              <li><Link to="/a-propos">Qui sommes-nous</Link></li>
+              <li><Link to="/contact">Contact</Link></li>
+              <li><Link to="/inscription">Créer un compte</Link></li>
             </ul>
-            <div className="mt-5 space-y-1 text-xs text-ink-500">
-              <p>Contact et informations légales disponibles avant toute souscription.</p>
-            </div>
+            <p className="mk-small" style={{ marginTop: 18, fontSize: '.78rem', color: '#8ea2bd' }}>
+              Contact et informations légales disponibles avant toute souscription.
+            </p>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-ink-200 pt-6 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mk-footer-bottom">
           <p>© {new Date().getFullYear()} ALLNEEDS · Santé · Enseignement · Tourisme</p>
           <p>
             ALLNEEDS ne fournit pas de conseil juridique, fiscal ou comptable et ne négocie pas pour le compte du
@@ -377,20 +330,23 @@ export function FaqList({ items, className }: { items: { q: string; a: string }[
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <div className={cn('divide-y divide-ink-100 overflow-hidden rounded-2xl border border-ink-100 bg-white', className)}>
+    <div className={cn('mk mk-faq', className)}>
       {items.map((item, i) => {
         const isOpen = open === i
+        const id = `faq-${i}-${item.q.length}`
         return (
-          <div key={item.q}>
-            <button
-              type="button"
-              onClick={() => setOpen(isOpen ? null : i)}
-              className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left transition hover:bg-ink-50/60"
-            >
-              <span className="text-sm font-semibold text-ink-900">{item.q}</span>
-              {isOpen ? <Minus className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" /> : <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-ink-400" />}
+          <div key={item.q} className={cn('mk-faq-item', isOpen && 'open')}>
+            <button type="button" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen} aria-controls={id}>
+              <span>{item.q}</span>
+              <i className="pm" aria-hidden="true">
+                <Plus />
+              </i>
             </button>
-            {isOpen ? <p className="animate-fade-in px-5 pb-5 text-sm leading-relaxed text-ink-600">{item.a}</p> : null}
+            {isOpen ? (
+              <p id={id} className="mk-fade">
+                {item.a}
+              </p>
+            ) : null}
           </div>
         )
       })}
@@ -484,31 +440,28 @@ export function CtaBand({
   secondary?: { label: string; to: LinkProps['to'] } | null
 }) {
   return (
-    <section className="container-page py-6">
-      <div className="relative overflow-hidden rounded-3xl bg-ink-950 px-6 py-14 text-white sm:px-12">
-        <div className="grid-fade pointer-events-none absolute inset-0 opacity-20" />
-        <div className="relative max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sand-300">
+    <section className="mk mk-wrap" style={{ padding: '56px 24px' }}>
+      <div className="mk-cta">
+        <div style={{ display: 'grid', gap: 18 }}>
+          <p className="mk-eyebrow" style={{ color: 'var(--mk-cyan-l)' }}>
             {LAUNCH_OFFER.label} · {LAUNCH_OFFER.deadline}
           </p>
-          <h2 className="mt-4 font-display text-3xl leading-tight tracking-tight sm:text-4xl">{title}</h2>
-          <p className="mt-4 text-base leading-relaxed text-ink-200">{description}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to={primary.to}>
-              <Button size="lg" className="bg-sand-400 text-ink-950 hover:bg-sand-300">
-                {primary.label}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            {secondary ? <Link to={secondary.to}>
-              <Button size="lg" variant="outline" className="border-white/25 bg-white/5 text-white hover:bg-white/10">
-                {secondary.label}
-              </Button>
-            </Link> : null}
-          </div>
-          <p className="mt-5 text-xs text-ink-400">
+          <h2 className="mk-h2">{title}</h2>
+          <p className="mk-lead" style={{ color: '#c5d4e8', maxWidth: 620 }}>{description}</p>
+          <p className="mk-small" style={{ color: '#8ea2bd', fontSize: '.8rem' }}>
             Offre de lancement jusqu’au {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition}, selon la première échéance.
           </p>
+        </div>
+        <div className="mk-cta-actions">
+          <Link to={primary.to} className="mk-btn mk-btn-cyan">
+            {primary.label}
+            <ArrowRight />
+          </Link>
+          {secondary ? (
+            <Link to={secondary.to} className="mk-btn mk-btn-line-light">
+              {secondary.label}
+            </Link>
+          ) : null}
         </div>
       </div>
     </section>

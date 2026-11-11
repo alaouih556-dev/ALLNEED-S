@@ -12,7 +12,7 @@ export const Route = createFileRoute('/app/missions/$id')({
   head: ({ params }) => ({ meta: [{ title: `Mission ${params.id ?? ''} — ALLNEEDS` }] }),
 })
 
-export function MissionDetail() {
+function MissionDetail() {
   const { id } = Route.useParams()
   const { data: mission, loading, error, code, refresh } = useApiResource<Mission>(`/api/missions/${encodeURIComponent(id)}`)
   const [feedback, setFeedback] = useState('')

@@ -33,7 +33,7 @@ export const Route = createFileRoute('/admin/besoins/')({
 
 const CLOSED_STATUSES = new Set(['cloture', 'valide', 'annule'])
 
-export function AdminNeeds() {
+function AdminNeeds() {
   const { state, dispatch } = useDemo()
   const auth = useAuth()
   const operations = useOperationalNeeds(state.needs)

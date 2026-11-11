@@ -1107,7 +1107,7 @@ export const SECTORS: Record<Sector, SectorContent> = {
   },
   sante: {
     id: 'sante',
-    name: 'ALLNEEDS SANTÉ',
+    name: 'ALLNEEDS',
     tagline: 'Votre réseau de solutions pour cabinets, centres de santé et laboratoires',
     audience:
       'Cabinets médicaux et dentaires · centres pluridisciplinaires · laboratoires d’analyses · professions paramédicales',

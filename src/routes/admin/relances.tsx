@@ -13,7 +13,7 @@ export const Route = createFileRoute('/admin/relances')({ component: AdminRelanc
 
 type FollowUp = { id: string; kind: 'lead'|'document'|'quote'; orgId?: string; needId?: string; leadId?: string; title: string; body: string; due: string; tone: 'danger'|'warning'|'info'; contact: string; email: string; phone: string; subject: string; message: string; record?: (nextDate: string, note: string) => void }
 
-export function AdminRelances() {
+function AdminRelances() {
   const { state, dispatch } = useDemo()
   const modal = useDisclosure()
   const [filter, setFilter] = useState('toutes')

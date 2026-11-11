@@ -44,7 +44,7 @@ const PRINCIPES = [
   },
 ]
 
-export function AProposPage() {
+function AProposPage() {
   return (
     <>
       <section className="border-b border-ink-100 bg-[#f8fbff]">

@@ -4,6 +4,7 @@ import { RouterProvider } from '@tanstack/react-router'
 import { router } from '@/router'
 import { DemoStoreProvider } from '@/store/store'
 import '@/index.css'
+import '@/styles/marketing.css'
 
 const container = document.getElementById('root')
 

@@ -12,7 +12,7 @@ import type { Provider } from '@/types'
 
 export const Route = createFileRoute('/admin/prestataires/')({ component: AdminProviders, head: () => ({ meta: [{ title: 'Réseau prestataires — ALLNEEDS' }] }) })
 
-export function AdminProviders() {
+function AdminProviders() {
   const { state, dispatch } = useDemo()
   const [filter, setFilter] = useState('tous')
   const [category, setCategory] = useState('toutes')
