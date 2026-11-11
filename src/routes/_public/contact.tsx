@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, CheckCircle2, MessageSquare } from 'lucide-react'
+import { ArrowRight, CheckCircle2, GraduationCap, HeartPulse, LogIn, MessageSquare, Plane, PlayCircle, CalendarCheck, type LucideIcon } from 'lucide-react'
 import { SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { useDemo } from '@/store/store'
-import { Button, Card, Field, Input, Select, Textarea, Alert } from '@/components/ui'
+import { Field, Input, Textarea } from '@/components/ui'
+import { Note, PageHero } from '@/components/marketing'
 import type { Sector } from '@/types'
 
 export const Route = createFileRoute('/_public/contact')({
@@ -16,6 +17,16 @@ export const Route = createFileRoute('/_public/contact')({
   }),
 })
 
+const SECTOR_ICON: Record<Sector, LucideIcon> = { enseignement: GraduationCap, sante: HeartPulse, tourisme: Plane }
+
+const SUBJECTS = ['Question avant de m’engager', 'Le diagnostic', 'Les offres et les prix', 'Autre demande']
+
+const SHORTCUTS: { to: '/inscription' | '/diagnostic' | '/connexion'; label: string; detail: string; icon: LucideIcon }[] = [
+  { to: '/inscription', label: 'Réserver le diagnostic', detail: 'Choisir un créneau pour le premier échange.', icon: CalendarCheck },
+  { to: '/diagnostic', label: 'Voir le déroulement du diagnostic', detail: 'Ce qui se passe, étape par étape.', icon: PlayCircle },
+  { to: '/connexion', label: 'Accéder à mon espace', detail: 'Messagerie, documents et suivi.', icon: LogIn },
+]
+
 function ContactPage() {
   const { dispatch } = useDemo()
   const [sent, setSent] = useState(false)
@@ -25,7 +36,7 @@ function ContactPage() {
     email: '',
     phone: '',
     sector: 'enseignement' as Sector,
-    subject: 'Question avant de m’engager',
+    subject: SUBJECTS[0],
     message: '',
   })
 
@@ -53,71 +64,79 @@ function ContactPage() {
   }
 
   return (
-    <>
-      <section className="border-b border-ink-100 bg-[#f8fbff]">
-        <div className="container-page py-16 sm:py-20">
-          <p className="eyebrow">Parlons de votre situation</p>
-          <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-[-.04em] sm:text-6xl">Une question avant le premier pas ?</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-ink-600">
-            Décrivez votre contexte, votre question ou votre échéance. Nous vous orienterons vers la prochaine étape la plus utile.
-          </p>
-        </div>
-      </section>
+    <div className="mk">
+      <PageHero
+        eyebrow="Parlons de votre situation"
+        title="Une question"
+        highlight="avant le premier pas ?"
+        lead="Décrivez votre contexte, votre question ou votre échéance. Nous vous orienterons vers la prochaine étape la plus utile."
+      />
 
-      <section className="container-page py-16">
-        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-          <Card className="p-6 sm:p-8">
+      <section className="mk-sec mk-bg-cool">
+        <div className="mk-wrap mk-contact">
+          <div className="mk-formcard">
             {sent ? (
-              <div className="py-6 text-center">
-                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                  <CheckCircle2 className="h-7 w-7" />
-                </span>
-                <h2 className="display-2 mt-6">Enregistré dans la démonstration</h2>
-                <p className="lede mx-auto mt-3 max-w-md">
+              <div className="mk-sent mk-fade">
+                <span className="ok"><CheckCircle2 /></span>
+                <h2 className="mk-h2" style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)' }}>Enregistré dans la démonstration</h2>
+                <p className="mk-lead" style={{ maxWidth: 480 }}>
                   Merci {form.name.split(' ')[0] || 'pour votre message'}. Cette version conserve la saisie dans ce navigateur ; elle ne la transmet pas à l’équipe ALLNEEDS.
                 </p>
-                <Button variant="outline" className="mt-6" onClick={() => setSent(false)}>
+                <button type="button" className="mk-btn mk-btn-line" onClick={() => setSent(false)}>
                   Envoyer un autre message
-                </Button>
+                </button>
               </div>
             ) : (
-              <form onSubmit={submit} className="space-y-5">
-                <h2 className="font-display text-2xl tracking-tight text-ink-950">Nous écrire</h2>
-                <Alert tone="info" title="Formulaire de démonstration">
+              <form onSubmit={submit} className="mk-form">
+                <div style={{ display: 'grid', gap: 8 }}>
+                  <h2 className="mk-h2" style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)' }}>Nous écrire</h2>
+                  <p className="mk-body">Tous les champs marqués * sont nécessaires.</p>
+                </div>
+                <Note title="Formulaire de démonstration">
                   La saisie reste sur cet appareil. Aucun message ni rendez-vous n’est transmis depuis cette version.
-                </Alert>
+                </Note>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="mk-row-2">
                   <Field label="Votre nom" required>
-                    <Input value={form.name} onChange={(e) => set('name', e.target.value)} required />
+                    <Input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Amina Bennani" autoComplete="name" required />
                   </Field>
                   <Field label="Votre établissement">
-                    <Input value={form.org} onChange={(e) => set('org', e.target.value)} placeholder="Nom de votre établissement" />
+                    <Input value={form.org} onChange={(e) => set('org', e.target.value)} placeholder="Nom de votre établissement" autoComplete="organization" />
                   </Field>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="mk-row-2">
                   <Field label="E-mail" required>
-                    <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required />
+                    <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="vous@etablissement.ma" autoComplete="email" required />
                   </Field>
                   <Field label="Téléphone">
-                    <Input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+212 6 ..." />
+                    <Input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+212 6 ..." autoComplete="tel" />
                   </Field>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Field label="Secteur">
-                    <Select value={form.sector} onChange={(e) => set('sector', e.target.value as Sector)}>
-                      {SECTOR_ORDER.map((sector) => (
-                        <option key={sector} value={sector}>
-                          {SECTOR_LABEL[sector]}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                  <Field label="Objet">
-                    <Input value={form.subject} onChange={(e) => set('subject', e.target.value)} />
-                  </Field>
+                <div>
+                  <div className="mk-q-label"><strong>Votre secteur</strong></div>
+                  <div className="mk-chips" role="group" aria-label="Secteur">
+                    {SECTOR_ORDER.map((sector) => {
+                      const Icon = SECTOR_ICON[sector]
+                      return (
+                        <button key={sector} type="button" className="mk-chip-btn" aria-pressed={form.sector === sector} onClick={() => set('sector', sector)}>
+                          <Icon /> {SECTOR_LABEL[sector]}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mk-q-label"><strong>Objet</strong></div>
+                  <div className="mk-chips" role="group" aria-label="Objet">
+                    {SUBJECTS.map((subject) => (
+                      <button key={subject} type="button" className="mk-chip-btn" aria-pressed={form.subject === subject} onClick={() => set('subject', subject)}>
+                        {subject}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <Field label="Message" required>
@@ -130,57 +149,51 @@ function ContactPage() {
                   />
                 </Field>
 
-                <Button type="submit" size="lg">
-                  <MessageSquare className="h-4 w-4" />
-                  Enregistrer dans la démo
-                </Button>
+                <div className="mk-form-nav">
+                  <p className="mk-small">Les coordonnées officielles et les informations légales seront communiquées avant toute souscription.</p>
+                  <button type="submit" className="mk-btn mk-btn-dark">
+                    Enregistrer dans la démo <ArrowRight />
+                  </button>
+                </div>
               </form>
             )}
-          </Card>
+          </div>
 
-          <aside className="space-y-5">
-            <Card className="p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Prendre contact</p>
-              <div className="mt-5 rounded-2xl bg-ink-50 p-5">
-                <MessageSquare className="h-5 w-5 text-brand-700" />
-                <p className="mt-3 text-sm font-semibold text-ink-950">Décrivez votre besoin dans le formulaire.</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink-600">Les coordonnées officielles et les informations légales seront communiquées avant toute souscription.</p>
-              </div>
-            </Card>
+          <aside className="mk-contact-aside">
+            <div className="mk-contact-dark">
+              <span className="ic"><MessageSquare /></span>
+              <p className="mk-eyebrow">Prendre contact</p>
+              <h3 className="mk-h3" style={{ color: '#fff' }}>Décrivez votre besoin dans le formulaire.</h3>
+              <p className="mk-body">Nous vous orienterons vers la prochaine étape la plus utile.</p>
+            </div>
 
-            <Alert tone="info" title="Vous êtes déjà client ?">
-              Utilisez la messagerie de votre espace client : la réponse y est rattachée à votre besoin, donc traçable.
-            </Alert>
+            <div className="mk-contact-card">
+              <p className="mk-eyebrow">Vous êtes déjà client ?</p>
+              <p className="mk-body">
+                Utilisez la messagerie de votre espace client : la réponse y est rattachée à votre besoin, donc traçable.
+              </p>
+            </div>
 
-            <Card className="p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-ink-400">Raccourcis</p>
-              <ul className="mt-4 space-y-3 text-sm">
-                <li>
-                  <Link to="/inscription" className="inline-flex items-center gap-1.5 font-semibold text-brand-700">
-                    Réserver le diagnostic
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </li>
-                <li>
-
-                </li>
-                <li>
-                  <Link to="/diagnostic" className="inline-flex items-center gap-1.5 font-semibold text-brand-700">
-                    Voir le déroulement du diagnostic
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/connexion" className="inline-flex items-center gap-1.5 font-semibold text-brand-700">
-                    Accéder à mon espace
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </li>
+            <div className="mk-contact-card">
+              <p className="mk-eyebrow">Raccourcis</p>
+              <ul className="mk-shortcuts">
+                {SHORTCUTS.map(({ to, label, detail, icon: Icon }) => (
+                  <li key={to}>
+                    <Link to={to}>
+                      <span className="ic"><Icon /></span>
+                      <span>
+                        <strong>{label}</strong>
+                        <small>{detail}</small>
+                      </span>
+                      <ArrowRight className="arrow" />
+                    </Link>
+                  </li>
+                ))}
               </ul>
-            </Card>
+            </div>
           </aside>
         </div>
       </section>
-    </>
+    </div>
   )
 }

@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ArrowRight, Check, FileCheck2, ShieldCheck } from 'lucide-react'
-import { SECTORS } from '@/data/catalog'
-import { FaqList } from '@/components/marketing'
-import { Card } from '@/components/ui'
+import { AlertTriangle, ArrowRight, Check, FileCheck2, GraduationCap, HeartPulse, Plane, ShieldCheck } from 'lucide-react'
+import { SECTOR_LABEL } from '@/data/catalog'
+import { CtaBand, FaqList } from '@/components/marketing'
 import type { Sector } from '@/types'
 import { selectSector } from '@/lib/sector-filter'
 
@@ -31,26 +30,128 @@ const STORIES: Record<Sector, { headline: string; tension: string; symptoms: str
   },
 }
 
+const METHOD = [
+  { title: 'On écoute', detail: 'Votre activité, vos objectifs et les échéances qui approchent.' },
+  { title: 'On met à plat', detail: 'Les faits, les points d’appui et les difficultés sont examinés ensemble.' },
+  { title: 'On priorise', detail: 'Vous validez trois priorités et choisissez la suite qui vous convient.' },
+]
+
+const TAKEAWAYS = [
+  { icon: FileCheck2, title: 'Un état des lieux', detail: 'La situation observée, résumée clairement.' },
+  { icon: ShieldCheck, title: 'Les points à éclaircir', detail: 'Ce qui fonctionne et ce qui mérite attention.' },
+  { icon: Check, title: '3 priorités', detail: 'Des axes à valider ensemble avant toute suite.' },
+]
+
+const SECTOR_ICON = { enseignement: GraduationCap, sante: HeartPulse, tourisme: Plane } as const
+
 export function SectorPage({ sector }: { sector: Sector }) {
   useEffect(() => { selectSector(sector) }, [sector])
-  const content = SECTORS[sector]
   const story = STORIES[sector]
+  const Icon = SECTOR_ICON[sector]
 
-  return <div className="bg-white">
-    <section className="relative isolate overflow-hidden bg-[#f8fbff]">
-      <div aria-hidden="true" className="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(ellipse_at_80%_35%,#ddecff,transparent_70%)]"/>
-      <div className="container-page grid items-center gap-12 py-16 sm:py-20 lg:min-h-[540px] lg:grid-cols-[1fr_.8fr] lg:py-24">
-        <div><p className="text-xs font-bold uppercase tracking-[.18em] text-brand-700">Une réalité métier · {content.name}</p><h1 className="mt-5 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-[-.04em] sm:text-5xl">{story.headline}</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-ink-600">{story.tension}</p><div className="mt-8 flex flex-wrap gap-3"><Link to="/inscription" className="inline-flex min-h-14 items-center gap-2 rounded-full bg-brand-700 px-7 font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-brand-800">Faire le point gratuitement <ArrowRight className="h-4 w-4"/></Link></div><p className="mt-4 text-sm text-ink-500">Environ 2h15 · sans obligation de poursuivre</p></div>
-        <Card className="rounded-[1.75rem] border-white bg-white/90 p-6 shadow-[0_30px_80px_rgba(22,47,85,.10)] sm:p-8"><p className="text-xs font-bold uppercase tracking-[.16em] text-ink-400">Peut-être que vous vivez cela</p><h2 className="mt-3 font-display text-2xl font-semibold leading-snug">Les symptômes sont visibles. La bonne priorité l’est moins.</h2><div className="mt-6 space-y-3">{story.symptoms.map((item)=><div key={item} className="flex items-start gap-3 rounded-xl bg-[#f8fafc] p-4"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-brand-700"><Check className="h-3.5 w-3.5"/></span><p className="text-sm leading-6 text-ink-700">{item}</p></div>)}</div></Card>
-      </div>
-    </section>
+  return (
+    <div className="mk">
+      <section className="mk-hero mk-bg-ink">
+        <div className="mk-wrap mk-hero-grid">
+          <div className="mk-hero-copy">
+            <span className="mk-pill"><Icon /> Une réalité métier · ALLNEEDS {SECTOR_LABEL[sector]}</span>
+            <h1 className="mk-h1" style={{ fontSize: 'clamp(2.3rem,4vw,3.7rem)' }}>{story.headline}</h1>
+            <p className="mk-lead" style={{ maxWidth: 580 }}>{story.tension}</p>
+            <div className="mk-cta-row">
+              <Link to="/inscription" className="mk-btn mk-btn-cyan">
+                Faire le point gratuitement <ArrowRight />
+              </Link>
+              <a href="#methode" className="mk-btn mk-btn-line-light">Comment ça se passe</a>
+            </div>
+            <p className="mk-sub">Environ 2h15 · sans obligation de poursuivre</p>
+          </div>
 
-    <section id="methode" className="container-page py-20 sm:py-24"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-bold uppercase tracking-[.18em] text-brand-700">Le diagnostic, sans jargon</p><h2 className="mt-4 font-display text-4xl font-semibold tracking-[-.035em] sm:text-5xl">Comprendre avant d’ajouter une solution.</h2><p className="mt-5 text-base leading-7 text-ink-600">Un échange guidé pour transformer une impression de surcharge en prochaines étapes compréhensibles.</p></div><div className="mt-12 grid gap-4 md:grid-cols-3">{[['01','On écoute','Votre activité, vos objectifs et les échéances qui approchent.'],['02','On met à plat','Les faits, les points d’appui et les difficultés sont examinés ensemble.'],['03','On priorise','Vous validez trois priorités et choisissez la suite qui vous convient.']].map(([n,title,desc])=><article key={n} className="rounded-[1.5rem] border border-ink-100 bg-white p-7"><span className="font-display text-3xl font-semibold text-brand-700">{n}</span><h3 className="mt-5 font-display text-2xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-7 text-ink-600">{desc}</p></article>)}</div></section>
+          <aside className="mk-hero-card">
+            <p className="mk-eyebrow">Peut-être que vous vivez cela</p>
+            <h2 className="mk-h3">Les symptômes sont visibles. La bonne priorité l’est moins.</h2>
+            <ul className="mk-symptoms">
+              {story.symptoms.map((item) => (
+                <li key={item}><AlertTriangle /> {item}</li>
+              ))}
+            </ul>
+          </aside>
+        </div>
+      </section>
 
-    <section className="bg-[#f7f9fc] py-20 sm:py-24"><div className="container-page grid items-start gap-10 lg:grid-cols-[.8fr_1.2fr]"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-brand-700">Vous repartez avec</p><h2 className="mt-4 font-display text-4xl font-semibold leading-tight tracking-[-.035em]">De la clarté, même si vous vous arrêtez là.</h2><p className="mt-5 text-base leading-7 text-ink-600">La valeur du diagnostic ne dépend pas d’une mission ensuite. Vous repartez avec une lecture utile pour décider.</p><Link to="/inscription" className="mt-7 inline-flex items-center gap-2 font-bold text-brand-700">Choisir mon créneau <ArrowRight className="h-4 w-4"/></Link></div><div className="grid gap-4 sm:grid-cols-3">{[{icon:FileCheck2,title:'Un état des lieux',detail:'La situation observée, résumée clairement.'},{icon:ShieldCheck,title:'Les points à éclaircir',detail:'Ce qui fonctionne et ce qui mérite attention.'},{icon:Check,title:'3 priorités',detail:'Des axes à valider ensemble avant toute suite.'}].map(({icon:Icon,title,detail})=><Card key={title} className="p-6"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><Icon className="h-5 w-5"/></span><h3 className="mt-5 font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-ink-600">{detail}</p></Card>)}</div></div></section>
+      <section id="methode" className="mk-sec mk-bg-dark" style={{ scrollMarginTop: 64 }}>
+        <div className="mk-wrap">
+          <div className="mk-head">
+            <p className="mk-eyebrow">Le diagnostic, sans jargon</p>
+            <h2 className="mk-h2">Comprendre avant d’ajouter une solution.</h2>
+            <p className="mk-lead">Un échange guidé pour transformer une impression de surcharge en prochaines étapes compréhensibles.</p>
+          </div>
+          <div className="mk-steps">
+            {METHOD.map((step, i) => (
+              <div key={step.title} className="mk-step">
+                <span className="n">0{i + 1}</span>
+                <h3 className="mk-h3">{step.title}</h3>
+                <p className="mk-body">{step.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-    <section className="container-page py-20 sm:py-24"><div className="mx-auto max-w-3xl"><p className="text-xs font-bold uppercase tracking-[.18em] text-brand-700">Un cadre qui respecte votre métier</p><h2 className="mt-4 font-display text-4xl font-semibold tracking-[-.035em]">Votre activité reste au centre. Vos limites aussi.</h2><p className="mt-5 text-base leading-7 text-ink-600">{story.guardrail}</p><div className="mt-8 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-ink-100 p-5"><p className="font-semibold">Pas de vente forcée</p><p className="mt-2 text-sm leading-6 text-ink-600">Une suite n’est proposée que si elle répond à un besoin validé.</p></div><div className="rounded-2xl border border-ink-100 p-5"><p className="font-semibold">Tout est cadré avant accord</p><p className="mt-2 text-sm leading-6 text-ink-600">Périmètre, livrables, calendrier et prix sont présentés avant toute mission.</p></div></div><div className="mt-12"><FaqList items={story.faq}/></div></div></section>
+      <section className="mk-sec mk-bg-white">
+        <div className="mk-wrap mk-split">
+          <div className="mk-sticky">
+            <p className="mk-eyebrow">Vous repartez avec</p>
+            <h2 className="mk-h2">De la clarté, même si vous vous arrêtez là.</h2>
+            <p className="mk-lead">La valeur du diagnostic ne dépend pas d’une mission ensuite. Vous repartez avec une lecture utile pour décider.</p>
+            <Link to="/inscription" className="mk-link">Choisir mon créneau <ArrowRight /></Link>
+          </div>
+          <div style={{ display: 'grid', gap: 16 }}>
+            {TAKEAWAYS.map(({ icon: ItemIcon, title, detail }) => (
+              <div key={title} className="mk-card" style={{ gridTemplateColumns: '48px 1fr', alignItems: 'center', columnGap: 20 }}>
+                <span className="ic"><ItemIcon /></span>
+                <div style={{ display: 'grid', gap: 4 }}>
+                  <h3 className="mk-h4">{title}</h3>
+                  <p className="mk-body">{detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-    <section className="container-page pb-20 sm:pb-24"><div className="rounded-[2rem] bg-ink-950 px-7 py-10 text-white sm:px-12 sm:py-14"><div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between"><div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[.18em] text-sky-300">Le premier pas</p><h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Votre situation mérite un vrai temps de recul.</h2><p className="mt-4 text-base leading-7 text-ink-200">Réservez un échange offert d’environ 2h15. Vous gardez la liberté de décider après.</p></div><Link to="/inscription" className="inline-flex min-h-14 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-7 font-bold text-ink-950 transition hover:bg-brand-50">Choisir mon créneau <ArrowRight className="h-4 w-4"/></Link></div></div></section>
-  </div>
+      <section className="mk-sec mk-bg-cool">
+        <div className="mk-wrap mk-split">
+          <div className="mk-sticky">
+            <p className="mk-eyebrow">Un cadre qui respecte votre métier</p>
+            <h2 className="mk-h2">Votre activité reste au centre. Vos limites aussi.</h2>
+            <p className="mk-lead">{story.guardrail}</p>
+            <div className="mk-grid-2" style={{ width: '100%', marginTop: 8 }}>
+              {[
+                { title: 'Pas de vente forcée', detail: 'Une suite n’est proposée que si elle répond à un besoin validé.' },
+                { title: 'Tout est cadré avant accord', detail: 'Périmètre, livrables, calendrier et prix sont présentés avant toute mission.' },
+              ].map((item) => (
+                <div key={item.title} className="mk-card" style={{ padding: 24 }}>
+                  <h3 className="mk-h4">{item.title}</h3>
+                  <p className="mk-small">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <p className="mk-eyebrow">Questions fréquentes · {SECTOR_LABEL[sector]}</p>
+            <FaqList items={story.faq} />
+          </div>
+        </div>
+      </section>
+
+      <CtaBand
+        eyebrow="Le premier pas"
+        title="Votre situation mérite un vrai temps de recul."
+        description="Réservez un échange offert d’environ 2h15. Vous gardez la liberté de décider après."
+        primary={{ label: 'Choisir mon créneau', to: '/inscription' }}
+        secondary={{ label: 'Nous contacter', to: '/contact' }}
+        showOffer={false}
+      />
+    </div>
+  )
 }

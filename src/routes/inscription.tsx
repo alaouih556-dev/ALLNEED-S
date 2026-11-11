@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { AlertCircle, ArrowLeft, ArrowRight, Building2, CheckCircle2, Clock3, GraduationCap, HeartPulse, Info, MapPin, Phone, Plane, Sprout, TrendingUp, Video, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Building2, Clock3, GraduationCap, HeartPulse, MapPin, Phone, Plane, Sprout, TrendingUp, Video, type LucideIcon } from 'lucide-react'
 import { ACCESS_OFFERS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { AuthLayout } from '@/components/AuthLayout'
+import { Note } from '@/components/marketing'
 import { Checkbox, Field, Input } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { AccessTier, Sector } from '@/types'
@@ -265,14 +266,4 @@ function InscriptionPage() {
       </div>
     </div>
   </AuthLayout>
-}
-
-function Note({ tone = 'info', title, children }: { tone?: 'info' | 'danger' | 'success'; title?: string; children: ReactNode }) {
-  const Icon = tone === 'danger' ? AlertCircle : tone === 'success' ? CheckCircle2 : Info
-  return (
-    <div className={cn('mk-note', tone !== 'info' && tone)} role={tone === 'danger' ? 'alert' : undefined}>
-      <Icon />
-      <div>{title ? <strong>{title}. </strong> : null}{children}</div>
-    </div>
-  )
 }

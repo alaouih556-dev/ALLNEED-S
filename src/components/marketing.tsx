@@ -1,8 +1,11 @@
 import { useState, type ReactNode } from 'react'
 import { Link, type LinkProps } from '@tanstack/react-router'
 import {
+  AlertCircle,
   ArrowRight,
   Check,
+  CheckCircle2,
+  Info,
   GraduationCap,
   HeartPulse,
   Menu,
@@ -326,8 +329,17 @@ export function ComparisonTable({ rows, caption }: { rows: FeatureRow[]; caption
 /* FAQ                                                                 */
 /* ------------------------------------------------------------------ */
 
-export function FaqList({ items, className }: { items: { q: string; a: string }[]; className?: string }) {
-  const [open, setOpen] = useState<number | null>(0)
+export function FaqList({
+  items,
+  className,
+  defaultOpen = 0,
+}: {
+  items: { q: string; a: string }[]
+  className?: string
+  /** Index of the answer shown open on first render; null keeps them all closed. */
+  defaultOpen?: number | null
+}) {
+  const [open, setOpen] = useState<number | null>(defaultOpen)
 
   return (
     <div className={cn('mk mk-faq', className)}>
@@ -351,6 +363,39 @@ export function FaqList({ items, className }: { items: { q: string; a: string }[
         )
       })}
     </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Page hero (inner public pages)                                      */
+/* ------------------------------------------------------------------ */
+
+export function PageHero({
+  eyebrow,
+  title,
+  highlight,
+  lead,
+  children,
+}: {
+  eyebrow: string
+  title: string
+  /** Optional ending of the title, shown in the accent colour. */
+  highlight?: string
+  lead: string
+  children?: ReactNode
+}) {
+  return (
+    <section className="mk mk-hero mk-bg-ink">
+      <div className="mk-wrap mk-page-hero">
+        <span className="mk-pill">{eyebrow}</span>
+        <h1 className="mk-h1">
+          {title}
+          {highlight ? <> <span className="mk-hl">{highlight}</span></> : null}
+        </h1>
+        <p className="mk-lead">{lead}</p>
+        {children}
+      </div>
+    </section>
   )
 }
 
@@ -433,24 +478,32 @@ export function CtaBand({
   description,
   primary = { label: 'Commencer par le diagnostic', to: '/diagnostic' },
   secondary = { label: 'Contacter notre équipe', to: '/contact' },
+  eyebrow,
+  showOffer = true,
 }: {
   title: string
   description: string
   primary?: { label: string; to: LinkProps['to'] }
   secondary?: { label: string; to: LinkProps['to'] } | null
+  /** Replaces the default launch-offer label above the title. */
+  eyebrow?: string
+  /** Show the launch-offer fine print under the description. */
+  showOffer?: boolean
 }) {
   return (
     <section className="mk mk-wrap" style={{ padding: '56px 24px' }}>
       <div className="mk-cta">
         <div style={{ display: 'grid', gap: 18 }}>
           <p className="mk-eyebrow" style={{ color: 'var(--mk-cyan-l)' }}>
-            {LAUNCH_OFFER.label} · {LAUNCH_OFFER.deadline}
+            {eyebrow ?? `${LAUNCH_OFFER.label} · ${LAUNCH_OFFER.deadline}`}
           </p>
           <h2 className="mk-h2">{title}</h2>
           <p className="mk-lead" style={{ color: '#c5d4e8', maxWidth: 620 }}>{description}</p>
-          <p className="mk-small" style={{ color: '#8ea2bd', fontSize: '.8rem' }}>
-            Offre de lancement jusqu’au {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition}, selon la première échéance.
-          </p>
+          {showOffer ? (
+            <p className="mk-small" style={{ color: '#8ea2bd', fontSize: '.8rem' }}>
+              Offre de lancement jusqu’au {LAUNCH_OFFER.deadline} {LAUNCH_OFFER.condition}, selon la première échéance.
+            </p>
+          ) : null}
         </div>
         <div className="mk-cta-actions">
           <Link to={primary.to} className="mk-btn mk-btn-cyan">
@@ -492,4 +545,18 @@ function PublicNavigationLink({to,sector,children,className,onClick,activeProps}
  }
  const props={children,className,onClick:handleClick,activeProps}
  return <Link to={to as LinkProps['to']} {...props}/>
+}
+
+/* ------------------------------------------------------------------ */
+/* Inline notice                                                       */
+/* ------------------------------------------------------------------ */
+
+export function Note({ tone = 'info', title, children }: { tone?: 'info' | 'danger' | 'success' | 'warning'; title?: string; children: ReactNode }) {
+  const Icon = tone === 'danger' || tone === 'warning' ? AlertCircle : tone === 'success' ? CheckCircle2 : Info
+  return (
+    <div className={cn('mk-note', tone !== 'info' && tone)} role={tone === 'danger' ? 'alert' : undefined}>
+      <Icon />
+      <div>{title ? <strong>{title}. </strong> : null}{children}</div>
+    </div>
+  )
 }
