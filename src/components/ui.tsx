@@ -223,6 +223,16 @@ export function Checkbox({
 /* Stats, progress, meters                                             */
 /* ------------------------------------------------------------------ */
 
+const STAT_TONE_HEX: Record<Tone, string> = {
+  neutral: '#64748b',
+  brand: 'var(--an-accent, #075fd5)',
+  success: '#10b981',
+  warning: '#f59e0b',
+  danger: '#f43f5e',
+  info: '#0ea5e9',
+  violet: '#8b5cf6',
+}
+
 export function Stat({
   label,
   value,
@@ -237,13 +247,14 @@ export function Stat({
   icon?: ReactNode
 }) {
   return (
-    <div className={cn('an-stat relative overflow-hidden rounded-2xl border border-ink-100 bg-white p-5', `an-stat-${tone}`)}>
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[0.78rem] font-semibold text-ink-500">{label}</p>
-        {icon ? <span className={cn('grid h-9 w-9 place-items-center rounded-xl ring-1 ring-inset', TONES[tone])}>{icon}</span> : null}
-      </div>
-      <p className="mt-3 font-display text-[1.9rem] font-extrabold leading-none tracking-tight text-ink-950 tabular-nums">{value}</p>
-      {hint ? <p className="mt-2.5 text-xs leading-relaxed text-ink-500">{hint}</p> : null}
+    <div className="an-statcard an-stat" style={{ ['--tone' as string]: STAT_TONE_HEX[tone] }}>
+      <span className="an-statcard-top">
+        <span className="an-statcard-icon">{icon ?? <span className="h-2 w-2 rounded-full bg-white" />}</span>
+      </span>
+      <span className="an-statcard-label">{label}</span>
+      <span className="an-statcard-value">{value}</span>
+      <span className="an-statcard-bar"><i style={{ width: '100%' }} /></span>
+      {hint ? <span className="an-statcard-hint">{hint}</span> : null}
     </div>
   )
 }

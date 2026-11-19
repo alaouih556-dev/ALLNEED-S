@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { CalendarClock, Sparkles } from 'lucide-react'
+import { MiniStat, StatGrid } from '@/components/admin-kit'
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, Inbox, Mail, Phone, UserPlus } from 'lucide-react'
 import { useDemo } from '@/store/store'
@@ -78,6 +80,13 @@ function QualificationPage() {
         title="Qualification des demandes"
         description="Répondez au contact, attribuez un responsable et décidez de la suite : suivi commercial, besoin à traiter ou diagnostic à confirmer."
       />
+
+      <StatGrid>
+        <MiniStat icon={<Inbox size={18} />} tone="indigo" label="Demandes reçues" value={state.requests.length} active={filter === 'tous'} onClick={() => setFilter('tous')} />
+        <MiniStat icon={<Sparkles size={18} />} tone="amber" label="Nouvelles" value={state.requests.filter((r) => r.status === 'nouveau').length} hint="À qualifier" />
+        <MiniStat icon={<CalendarClock size={18} />} tone="sky" label="Diagnostics demandés" value={state.requests.filter((r) => r.kind === 'diagnostic').length} active={filter === 'diagnostic'} onClick={() => setFilter('diagnostic')} />
+        <MiniStat icon={<CalendarClock size={18} />} tone="emerald" label="Réservations" value={state.bookings.length} />
+      </StatGrid>
 
       <div className="mb-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
         <Tabs

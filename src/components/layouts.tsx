@@ -8,10 +8,16 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
+  Check,
+  Monitor,
+  Moon,
+  Palette,
+  Sun,
   Home,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  Sparkles,
   ClipboardCheck,
   ClipboardList,
   FileText,
@@ -34,6 +40,7 @@ import { useDemo } from '@/store/store'
 import { useAuth } from '@/features/auth/AuthContext'
 import { clientModules, orgSaasActive, type AccessModule } from '@/lib/access'
 import { cn } from '@/lib/utils'
+import { THEMES, useWorkspaceTheme, type ThemeMode } from '@/lib/theme'
 import { Avatar } from '@/components/ui'
 
 /* ------------------------------------------------------------------ */
@@ -150,13 +157,13 @@ function buildAdminNav(): NavItem[] {
     { group: 'Clients', label: 'Diagnostics', to: '/admin/diagnostics/reel' as any, icon: <Gauge className="h-4 w-4" /> },
     { group: 'Commercial', label: 'Offres', to: '/admin/offres' as any, icon: <Receipt className="h-4 w-4" /> },
     { group: 'Commercial', label: 'Abonnements Besoins', to: '/admin/abonnements' as any, icon: <RefreshCcw className="h-4 w-4" /> },
+    { group: 'Commercial', label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
     { group: 'Commercial', label: 'Missions', to: '/admin/missions', icon: <Briefcase className="h-4 w-4" /> },
     { group: 'Équipe', label: 'Concierges', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
     { group: 'Équipe', label: 'Grille STARTER', to: '/admin/grille', icon: <ClipboardList className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Relances', to: '/admin/relances', icon: <Bell className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Qualification', to: '/admin/qualification', icon: <MessageSquare className="h-4 w-4" /> },
-    { group: PREVIEW_GROUP, label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Prestataires', to: '/admin/prestataires', icon: <Network className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Quotas', to: '/admin/quotas', icon: <LineChart className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Autoévaluations', to: '/admin/diagnostics-auto', icon: <FileText className="h-4 w-4" /> },
@@ -169,9 +176,9 @@ function buildAdminNav(): NavItem[] {
 /* ------------------------------------------------------------------ */
 
 const VARIANT_META = {
-  admin: { label: 'Administration', badge: 'Admin', accent: '#6366f1' },
-  concierge: { label: 'Concierge', badge: 'Concierge', accent: '#0d9488' },
-  client: { label: 'Espace client', badge: 'Client', accent: '#0878f9' },
+  admin: { label: 'Administration', badge: 'Admin', palette: 'indigo' },
+  concierge: { label: 'Concierge', badge: 'Concierge', palette: 'ocean' },
+  client: { label: 'Espace client', badge: 'Client', palette: 'allneeds' },
 } as const
 
 function readCollapsed() {
@@ -198,6 +205,8 @@ export function AppShell({
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const meta = VARIANT_META[variant]
+  const theme = useWorkspaceTheme(meta.palette)
+  const [themeOpen, setThemeOpen] = useState(false)
 
   const displayUser = auth.status === 'authenticated' && auth.user ? {
     ...user,
@@ -256,7 +265,11 @@ export function AppShell({
   const orgName = variant === 'client' ? (clientOrg?.name ?? 'Espace client') : null
 
   return (
-    <div className={cn('an-shell', `workspace-${variant}`, collapsed && 'is-collapsed')} style={{ ['--an-accent' as string]: meta.accent }}>
+    <div
+      className={cn('an-shell', `workspace-${variant}`, collapsed && 'is-collapsed')}
+      data-mode={theme.dark ? 'dark' : 'light'}
+      style={{ ['--an-accent' as string]: theme.palette.accent, ['--an-accent-2' as string]: theme.palette.accent2, colorScheme: theme.dark ? 'dark' : 'light' }}
+    >
       <div className="an-shell-sidebar-wrap">
         <aside className="an-sidebar" aria-label="Barre latérale">
           <SidebarContent
@@ -297,6 +310,18 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="relative">
+              <button type="button" onClick={() => setThemeOpen((o) => !o)} className="an-icon-btn" aria-label="Changer le thème" aria-expanded={themeOpen} title="Thème">
+                {theme.dark ? <Moon size={17} /> : <Palette size={17} />}
+              </button>
+              {themeOpen ? (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setThemeOpen(false)} />
+                  <ThemeMenu theme={theme} />
+                </>
+              ) : null}
+            </div>
+
             <button type="button" onClick={() => setPaletteOpen(true)} className="an-search-trigger" aria-label="Rechercher une page">
               <Search size={15} />
               <span className="hidden md:inline">Rechercher…</span>
@@ -464,6 +489,35 @@ function WorkspaceNavigation({ items, collapsed, onNavigate }: { items: NavItem[
   </nav>
 }
 
+function ThemeMenu({ theme }: { theme: ReturnType<typeof useWorkspaceTheme> }) {
+  const modes: Array<{ id: ThemeMode; label: string; icon: ReactNode }> = [
+    { id: 'light', label: 'Clair', icon: <Sun size={15} /> },
+    { id: 'dark', label: 'Sombre', icon: <Moon size={15} /> },
+    { id: 'auto', label: 'Auto', icon: <Monitor size={15} /> },
+  ]
+  return (
+    <div role="dialog" aria-label="Thème" className="an-menu an-theme-menu">
+      <p className="an-theme-label">Apparence</p>
+      <div className="an-theme-modes">
+        {modes.map((m) => (
+          <button key={m.id} type="button" onClick={() => theme.setMode(m.id)} className={cn(theme.mode === m.id && 'is-on')} aria-pressed={theme.mode === m.id}>
+            {m.icon}{m.label}
+          </button>
+        ))}
+      </div>
+      <p className="an-theme-label">Couleur</p>
+      <div className="an-theme-swatches">
+        {THEMES.map((t) => (
+          <button key={t.id} type="button" onClick={() => theme.setPalette(t.id)} aria-pressed={theme.palette.id === t.id} className={cn(theme.palette.id === t.id && 'is-on')} title={t.label}>
+            <span style={{ background: `linear-gradient(135deg, ${t.accent}, ${t.accent2})` }}>{theme.palette.id === t.id ? <Check size={14} /> : null}</span>
+            <small>{t.label}</small>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function CommandPalette({ items, onClose }: { items: NavItem[]; onClose: () => void }) {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
@@ -531,13 +585,15 @@ export function PageHeader({
   className?: string
 }) {
   return (
-    <div className={cn('an-page-header mb-7 flex flex-wrap items-end justify-between gap-4', className)}>
-      <div className="min-w-0">
-        {eyebrow ? <p className="an-eyebrow mb-2">{eyebrow}</p> : null}
-        <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-950 sm:text-[1.9rem]">{title}</h1>
-        {description ? <div className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-500">{description}</div> : null}
+    <section className={cn('an-page-header an-hero-banner mb-6', className)}>
+      <div className="relative z-[1] flex flex-wrap items-end justify-between gap-5">
+        <div className="min-w-0 max-w-3xl">
+          {eyebrow ? <span className="an-hero-chip"><Sparkles size={12} />{eyebrow}</span> : null}
+          <h1 className="mt-3.5 font-display text-2xl font-extrabold tracking-tight sm:text-[1.9rem]">{title}</h1>
+          {description ? <div className="an-hero-desc mt-2 text-sm leading-relaxed">{description}</div> : null}
+        </div>
+        {actions ? <div className="an-hero-actions flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
-    </div>
+    </section>
   )
 }

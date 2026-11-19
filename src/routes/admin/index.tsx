@@ -59,8 +59,8 @@ interface DashboardData {
 const EMPTY: DashboardData = { orgs: [], registrations: [], diagnostics: [], missions: [], needs: [], offers: [], needsSubs: [], concierges: [], pendingConcierges: [], requests: [] }
 
 const SECTORS: Record<string, { label: string; color: string }> = {
-  sante: { label: 'Santé', color: '#0ea5e9' },
-  enseignement: { label: 'Enseignement', color: '#6366f1' },
+  sante: { label: 'Santé', color: 'var(--an-accent-2)' },
+  enseignement: { label: 'Enseignement', color: 'var(--an-accent)' },
   tourisme: { label: 'Tourisme', color: '#14b8a6' },
 }
 const OTHER_SECTOR = { label: 'Autre', color: '#94a3b8' }
@@ -206,8 +206,8 @@ function AdminDashboard() {
     const sectorCounts = new Map<string, number>()
     for (const o of orgs) sectorCounts.set(o.sector ?? 'autre', (sectorCounts.get(o.sector ?? 'autre') ?? 0) + 1)
     const statusSlices = [
-      { label: 'Comptes actifs', value: orgs.filter((o) => o.active !== false && !o.saas?.subscriptionActive).length, color: '#0ea5e9' },
-      { label: 'Actifs avec SaaS', value: orgs.filter((o) => o.active !== false && o.saas?.subscriptionActive).length, color: '#6366f1' },
+      { label: 'Comptes actifs', value: orgs.filter((o) => o.active !== false && !o.saas?.subscriptionActive).length, color: 'var(--an-accent-2)' },
+      { label: 'Actifs avec SaaS', value: orgs.filter((o) => o.active !== false && o.saas?.subscriptionActive).length, color: 'var(--an-accent)' },
       { label: 'Désactivés', value: orgs.filter((o) => o.active === false).length, color: '#cbd5e1' },
     ]
     const sectorSlices = SINGLE_SECTOR ? statusSlices : [...sectorCounts.entries()].map(([k, value]) => ({ label: (SECTORS[k] ?? OTHER_SECTOR).label, color: (SECTORS[k] ?? OTHER_SECTOR).color, value })).sort((a, b) => b.value - a.value)
@@ -215,7 +215,7 @@ function AdminDashboard() {
     const diagStages = [
       { label: 'Brouillon', value: diagnostics.filter((d) => !d.status || d.status === 'brouillon').length, color: '#cbd5e1' },
       { label: 'Soumis', value: diagnostics.filter((d) => d.status === 'soumis').length, color: '#f59e0b' },
-      { label: 'En analyse', value: diagnostics.filter((d) => ['analyse', 'en_analyse', 'pret_a_valider'].includes(d.status ?? '')).length, color: '#6366f1' },
+      { label: 'En analyse', value: diagnostics.filter((d) => ['analyse', 'en_analyse', 'pret_a_valider'].includes(d.status ?? '')).length, color: 'var(--an-accent)' },
       { label: 'Restitué', value: diagnostics.filter((d) => d.status === 'restitue').length, color: '#10b981' },
     ]
 
@@ -280,8 +280,8 @@ function AdminDashboard() {
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   const kpis = [
-    { label: 'Entreprises clientes', value: m.activeOrgs.length, delta: since(m.regDates, 30), deltaLabel: '30 j', spark: countPerBucket(m.regDates, m.b8), color: '#6366f1', icon: <Building2 size={18} />, iconCls: 'bg-indigo-50 text-indigo-600', to: '/admin/clients', foot: `${m.usersActivated}/${m.usersTotal} utilisateurs activés` },
-    { label: 'Inscriptions', value: data.registrations.length, delta: since(m.regDates, 7), deltaLabel: '7 j', spark: countPerBucket(m.regDates, m.b8), color: '#0ea5e9', icon: <UserPlus size={18} />, iconCls: 'bg-sky-50 text-sky-600', to: '/admin/inscriptions', foot: `${m.pendingRegs.length} en attente de traitement` },
+    { label: 'Entreprises clientes', value: m.activeOrgs.length, delta: since(m.regDates, 30), deltaLabel: '30 j', spark: countPerBucket(m.regDates, m.b8), color: 'var(--an-accent)', icon: <Building2 size={18} />, iconCls: 'bg-indigo-50 text-indigo-600', to: '/admin/clients', foot: `${m.usersActivated}/${m.usersTotal} utilisateurs activés` },
+    { label: 'Inscriptions', value: data.registrations.length, delta: since(m.regDates, 7), deltaLabel: '7 j', spark: countPerBucket(m.regDates, m.b8), color: 'var(--an-accent-2)', icon: <UserPlus size={18} />, iconCls: 'bg-sky-50 text-sky-600', to: '/admin/inscriptions', foot: `${m.pendingRegs.length} en attente de traitement` },
     { label: 'Diagnostics 360°', value: data.diagnostics.length, delta: since(m.diagDates, 30), deltaLabel: '30 j', spark: countPerBucket(m.diagDates, m.b8), color: '#f59e0b', icon: <Gauge size={18} />, iconCls: 'bg-amber-50 text-amber-600', to: '/admin/diagnostics/reel', foot: `${m.diagToReview.length} à relire` },
     { label: 'Missions actives', value: m.missionsActive.length, delta: since(m.missionDates, 30), deltaLabel: '30 j', spark: countPerBucket(m.missionDates, m.b8), color: '#10b981', icon: <Briefcase size={18} />, iconCls: 'bg-emerald-50 text-emerald-600', to: '/admin/missions', foot: `${m.missionsDone.length} terminées` },
   ]
@@ -327,9 +327,9 @@ function AdminDashboard() {
       {/* KPIs */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((k) => (
-          <Link key={k.label} to={k.to as any} className="an-kpi group">
+          <Link key={k.label} to={k.to as any} className="an-kpi an-kpi-toned group" style={{ ['--tone' as string]: k.color }}>
             <div className="flex items-start justify-between">
-              <span className={cn('an-kpi-icon', k.iconCls)}>{k.icon}</span>
+              <span className="an-kpi-icon an-kpi-icon-toned">{k.icon}</span>
               <ArrowUpRight size={16} className="text-ink-300 transition group-hover:text-ink-600" />
             </div>
             <p className="mt-4 text-[0.8rem] font-medium text-ink-500">{k.label}</p>
@@ -353,7 +353,7 @@ function AdminDashboard() {
             </div>
             <div className="flex items-center gap-4">
               <div className="hidden items-center gap-4 text-xs text-ink-500 sm:flex">
-                <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#6366f1]" />Inscriptions</span>
+                <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[var(--an-accent)]" />Inscriptions</span>
                 <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#f59e0b]" />Diagnostics</span>
               </div>
               <div className="an-seg">
@@ -365,7 +365,7 @@ function AdminDashboard() {
             <AreaChart
               labels={buckets.map((b) => b.label)}
               series={[
-                { name: 'Inscriptions', color: '#6366f1', values: countPerBucket(m.regDates, buckets) },
+                { name: 'Inscriptions', color: 'var(--an-accent)', values: countPerBucket(m.regDates, buckets) },
                 { name: 'Diagnostics', color: '#f59e0b', values: countPerBucket(m.diagDates, buckets) },
               ]}
             />

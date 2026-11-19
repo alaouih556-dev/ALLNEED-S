@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import { CheckCircle2 as CheckCircle2Icon, Inbox, Sparkles } from 'lucide-react'
+import { MiniStat, StatGrid } from '@/components/admin-kit'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { Check, Filter, Plus, Search, Star, X } from 'lucide-react'
 import { useDemo, makeQuote } from '@/store/store'
@@ -114,6 +116,13 @@ function AdminNeeds() {
           </Link>
         }
       />
+
+      <StatGrid>
+        <MiniStat icon={<Inbox size={18} />} tone="indigo" label="Besoins actifs" value={operations.needs.filter((n) => !CLOSED_STATUSES.has(normalizeNeedStatus(n.status) ?? n.status)).length} active={status === 'actifs'} onClick={() => setStatus('actifs')} />
+        <MiniStat icon={<Sparkles size={18} />} tone="amber" label="Nouveaux" value={operations.needs.filter((n) => ['nouveau', 'recu'].includes(n.status)).length} hint="À analyser" />
+        <MiniStat icon={<Search size={18} />} tone="sky" label="Recherche de prestataires" value={operations.needs.filter((n) => ['en_recherche', 'recherche', 'en_analyse', 'analyse'].includes(n.status)).length} />
+        <MiniStat icon={<CheckCircle2Icon size={18} />} tone="emerald" label="Validés / clos" value={operations.needs.filter((n) => CLOSED_STATUSES.has(normalizeNeedStatus(n.status) ?? n.status)).length} active={status === 'tous'} onClick={() => setStatus('tous')} />
+      </StatGrid>
 
       {operations.live ? <Alert tone="info" className="mb-5" title="Besoins synchronisés">Les demandes et leurs changements d’étape sont persistants et partagés entre les espaces. Les propositions de prestataires et devis restent à raccorder.</Alert> : null}
       {operations.error ? <Alert tone="danger" className="mb-5" title="Chargement des besoins impossible">{operations.error}</Alert> : null}

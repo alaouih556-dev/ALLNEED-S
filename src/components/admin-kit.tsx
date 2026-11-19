@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Search } from 'lucide-react'
+import { ArrowUpRight, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /* Briques d’interface partagées par les pages d’administration.
@@ -15,6 +15,17 @@ const TONE_CLS: Record<KitTone, string> = {
   rose: 'bg-rose-50 text-rose-600',
   slate: 'bg-slate-100 text-slate-600',
   teal: 'bg-teal-50 text-teal-600',
+}
+
+/** Couleur pleine de chaque ton (utilisée pour les dégradés des cartes). */
+const TONE_HEX: Record<KitTone, string> = {
+  indigo: 'var(--an-accent)',
+  sky: '#0ea5e9',
+  emerald: '#10b981',
+  amber: '#f59e0b',
+  rose: '#f43f5e',
+  slate: '#64748b',
+  teal: '#14b8a6',
 }
 
 export function toneClass(tone: KitTone) {
@@ -34,6 +45,7 @@ export function MiniStat({
   value,
   hint,
   active,
+  ratio,
   onClick,
 }: {
   icon: ReactNode
@@ -42,25 +54,28 @@ export function MiniStat({
   value: ReactNode
   hint?: string
   active?: boolean
+  /** Remplissage de la barre (0 à 1). Par défaut : barre pleine décorative. */
+  ratio?: number
   onClick?: () => void
 }) {
   const Tag = onClick ? 'button' : 'div'
+  const fill = ratio === undefined ? 100 : Math.max(4, Math.min(100, Math.round(ratio * 100)))
   return (
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={cn(
-        'an-panel flex items-center gap-3 p-4 text-left transition',
-        onClick && 'hover:-translate-y-0.5 hover:shadow-md',
-        active && 'ring-2 ring-indigo-400 ring-offset-2 ring-offset-[#f5f7fb]',
-      )}
+      aria-pressed={onClick ? !!active : undefined}
+      className={cn('an-statcard', onClick && 'is-clickable', active && 'is-active')}
+      style={{ ['--tone' as string]: TONE_HEX[tone] }}
     >
-      <span className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-xl', TONE_CLS[tone])}>{icon}</span>
-      <span className="min-w-0">
-        <span className="block truncate text-xs font-medium text-ink-500">{label}</span>
-        <span className="block font-display text-2xl font-extrabold leading-tight tabular-nums text-ink-950">{value}</span>
-        {hint ? <span className="block truncate text-[0.7rem] text-ink-400">{hint}</span> : null}
+      <span className="an-statcard-top">
+        <span className="an-statcard-icon">{icon}</span>
+        {onClick ? <ArrowUpRight size={16} className="an-statcard-arrow" /> : null}
       </span>
+      <span className="an-statcard-label">{label}</span>
+      <span className="an-statcard-value">{value}</span>
+      <span className="an-statcard-bar"><i style={{ width: `${fill}%` }} /></span>
+      {hint ? <span className="an-statcard-hint">{hint}</span> : null}
     </Tag>
   )
 }
@@ -127,7 +142,7 @@ export function Segmented<T extends string>({
       {options.map((o) => (
         <button key={o.value} type="button" role="tab" aria-selected={value === o.value} className={cn('flex shrink-0 items-center gap-1.5', value === o.value && 'is-on')} onClick={() => onChange(o.value)}>
           {o.label}
-          {o.count !== undefined ? <span className={cn('rounded-md px-1.5 text-[0.65rem] tabular-nums', value === o.value ? 'bg-indigo-50 text-indigo-700' : 'bg-white/70 text-ink-500')}>{o.count}</span> : null}
+          {o.count !== undefined ? <span className={cn('an-seg-count', value === o.value && 'is-on')}>{o.count}</span> : null}
         </button>
       ))}
     </div>

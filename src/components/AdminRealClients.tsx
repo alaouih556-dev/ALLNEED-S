@@ -7,6 +7,7 @@ import { AdminClientDocuments } from '@/components/AdminClientDocuments'
 import { PageHeader } from '@/components/layouts'
 import { Alert, Avatar, Badge, Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
+import { MiniStat } from '@/components/admin-kit'
 
 type User = { id: string; name: string; email: string; role: string; active?: boolean; passwordConfigured?: boolean }
 type Org = { id: string; name: string; sector: string; slug: string; active: boolean; plan?: string; modules: Record<string, boolean>; users: User[]; saas?: { subscriptionActive?: boolean } }
@@ -72,11 +73,11 @@ export function AdminRealClients() {
         actions={<Button variant="outline" size="sm" onClick={() => void load()}><RefreshCcw size={14} className={cn(loading && 'animate-spin')} />Actualiser</Button>}
       />
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MiniStat icon={<Building2 size={17} />} tone="bg-indigo-50 text-indigo-600" label="Entreprises" value={items.length} />
-        <MiniStat icon={<CheckCircle2 size={17} />} tone="bg-emerald-50 text-emerald-600" label="Comptes actifs" value={activeCount} />
-        <MiniStat icon={<UsersRound size={17} />} tone="bg-sky-50 text-sky-600" label="Utilisateurs liés" value={usersCount} />
-        <MiniStat icon={<ShieldCheck size={17} />} tone="bg-amber-50 text-amber-600" label="Abonnements SaaS" value={saasCount} />
+      <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <MiniStat icon={<Building2 size={18} />} tone="indigo" label="Entreprises" value={items.length} />
+        <MiniStat icon={<CheckCircle2 size={18} />} tone="emerald" label="Comptes actifs" value={activeCount} />
+        <MiniStat icon={<UsersRound size={18} />} tone="sky" label="Utilisateurs liés" value={usersCount} />
+        <MiniStat icon={<ShieldCheck size={18} />} tone="amber" label="Abonnements SaaS" value={saasCount} />
       </div>
 
       {error ? <Alert tone="danger" className="mb-4">{error}</Alert> : null}
@@ -175,18 +176,6 @@ export function AdminRealClients() {
             </div>
           </div>
         ) : null}
-      </div>
-    </div>
-  )
-}
-
-function MiniStat({ icon, tone, label, value }: { icon: React.ReactNode; tone: string; label: string; value: number }) {
-  return (
-    <div className="an-panel flex items-center gap-3 p-4">
-      <span className={cn('grid h-10 w-10 place-items-center rounded-xl', tone)}>{icon}</span>
-      <div>
-        <p className="text-xs font-medium text-ink-500">{label}</p>
-        <p className="font-display text-xl font-extrabold tabular-nums text-ink-950">{value}</p>
       </div>
     </div>
   )

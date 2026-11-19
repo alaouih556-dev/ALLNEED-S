@@ -53,31 +53,31 @@ export function AreaChart({
         <defs>
           {series.map((s, si) => (
             <linearGradient key={si} id={`${id}-g${si}`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor={s.color} stopOpacity={0.22} />
-              <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+              <stop offset="0%" style={{ stopColor: s.color, stopOpacity: 0.22 }} />
+              <stop offset="100%" style={{ stopColor: s.color, stopOpacity: 0 }} />
             </linearGradient>
           ))}
         </defs>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="#e7ecf3" strokeDasharray={t === 0 ? undefined : '3 4'} />
-            <text x={pad.l - 8} y={y(t) + 3.5} textAnchor="end" fontSize="10" fill="#94a3b8">{t}</text>
+            <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} className="an-chart-grid" strokeDasharray={t === 0 ? undefined : '3 4'} />
+            <text x={pad.l - 8} y={y(t) + 3.5} textAnchor="end" fontSize="10" className="an-chart-label">{t}</text>
           </g>
         ))}
         {labels.map((l, i) => (
-          <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#94a3b8">{l}</text>
+          <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" className="an-chart-label">{l}</text>
         ))}
         {series.map((s, si) => (
           <g key={si}>
             <path d={`${path(s.values)} L${x(s.values.length - 1)},${y(0)} L${x(0)},${y(0)} Z`} fill={`url(#${id}-g${si})`} />
-            <path d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2.4} strokeLinecap="round" />
+            <path d={path(s.values)} fill="none" style={{ stroke: s.color }} strokeWidth={2.4} strokeLinecap="round" />
           </g>
         ))}
         {hover !== null ? (
           <g>
             <line x1={x(hover)} x2={x(hover)} y1={pad.t} y2={H - pad.b} stroke="#cbd5e1" />
             {series.map((s, si) => (
-              <circle key={si} cx={x(hover)} cy={y(s.values[hover] ?? 0)} r={4.5} fill="#fff" stroke={s.color} strokeWidth={2.4} />
+              <circle key={si} cx={x(hover)} cy={y(s.values[hover] ?? 0)} r={4.5} style={{ fill: 'var(--an-surface)', stroke: s.color }} strokeWidth={2.4} />
             ))}
           </g>
         ) : null}
@@ -130,7 +130,7 @@ export function DonutChart({ slices, center, sub, size = 168 }: { slices: Slice[
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-        <circle cx="50" cy="50" r={r} fill="none" stroke="#eef2f7" strokeWidth="11" />
+        <circle cx="50" cy="50" r={r} fill="none" className="an-chart-track" strokeWidth="11" />
         {total > 0
           ? slices.map((s) => {
               const len = (s.value / total) * c
@@ -141,7 +141,7 @@ export function DonutChart({ slices, center, sub, size = 168 }: { slices: Slice[
                   cy="50"
                   r={r}
                   fill="none"
-                  stroke={s.color}
+                  style={{ stroke: s.color }}
                   strokeWidth="11"
                   strokeDasharray={`${Math.max(0, len - 1.2)} ${c}`}
                   strokeDashoffset={-offset}
@@ -218,12 +218,12 @@ export function Sparkline({ values, color = '#4f46e5', className }: { values: nu
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className={cn('h-9 w-full', className)} aria-hidden>
       <defs>
         <linearGradient id={`${id}-s`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.25} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
+          <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.25 }} />
+          <stop offset="100%" style={{ stopColor: color, stopOpacity: 0 }} />
         </linearGradient>
       </defs>
       <path d={`${d} L${W},${H} L0,${H} Z`} fill={`url(#${id}-s)`} />
-      <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+      <path d={d} fill="none" style={{ stroke: color }} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
     </svg>
   )
 }

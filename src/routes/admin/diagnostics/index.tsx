@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { ClipboardList, FilePen } from 'lucide-react'
+import { MiniStat, StatGrid } from '@/components/admin-kit'
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, Check, Eye, FileCheck2, Gauge, LockKeyhole, Pencil, Send, ShieldCheck, Undo2 } from 'lucide-react'
 import { useDemo } from '@/store/store'
@@ -73,6 +75,13 @@ function AdminDiagnostics() {
           </Badge>
         }
       />
+
+      <StatGrid>
+        <MiniStat icon={<ClipboardList size={18} />} tone="indigo" label="Diagnostics" value={state.diagnostics.length} />
+        <MiniStat icon={<Eye size={18} />} tone="amber" label="En relecture" value={state.diagnostics.filter((d) => d.status === 'en_revue').length} />
+        <MiniStat icon={<FilePen size={18} />} tone="sky" label="Brouillons" value={state.diagnostics.filter((d) => d.status === 'brouillon').length} />
+        <MiniStat icon={<Send size={18} />} tone="emerald" label="Publiés" value={state.diagnostics.filter((d) => d.status === 'publie').length} />
+      </StatGrid>
 
       <div className="mb-5">
         <Tabs
