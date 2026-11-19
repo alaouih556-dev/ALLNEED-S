@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as ConciergeRouteImport } from './routes/concierge'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as CreerMotDePasseRouteImport } from './routes/creer-mot-de-passe'
+import { Route as CrmRouteImport } from './routes/crm'
 import { Route as ExpertRouteImport } from './routes/expert'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -71,6 +72,14 @@ import { Route as ConciergeMissionsRouteImport } from './routes/concierge/missio
 import { Route as ConciergePrestatairesRouteImport } from './routes/concierge/prestataires'
 import { Route as ConciergeRendezVousRouteImport } from './routes/concierge/rendez-vous'
 import { Route as ConciergeSuiviCommercialRouteImport } from './routes/concierge/suivi-commercial'
+import { Route as CrmIndexRouteImport } from './routes/crm/index'
+import { Route as CrmAppelsRouteImport } from './routes/crm/appels'
+import { Route as CrmCarteRouteImport } from './routes/crm/carte'
+import { Route as CrmNotificationsRouteImport } from './routes/crm/notifications'
+import { Route as CrmRapportsRouteImport } from './routes/crm/rapports'
+import { Route as CrmReglagesRouteImport } from './routes/crm/reglages'
+import { Route as CrmRendezVousRouteImport } from './routes/crm/rendez-vous'
+import { Route as CrmUtilisateursRouteImport } from './routes/crm/utilisateurs'
 import { Route as EntrepriseSlugRouteImport } from './routes/entreprise/$slug'
 import { Route as ExpertIndexRouteImport } from './routes/expert/index'
 import { Route as ExpertAgendaRouteImport } from './routes/expert/agenda'
@@ -104,6 +113,14 @@ import { Route as ConciergeDiagnosticsIdRouteImport } from './routes/concierge/d
 import { Route as ConciergeEntreprisesIndexRouteImport } from './routes/concierge/entreprises/index'
 import { Route as ConciergeEntreprisesIdRouteImport } from './routes/concierge/entreprises/$id'
 import { Route as ConciergeEntreprisesNouvelleRouteImport } from './routes/concierge/entreprises/nouvelle'
+import { Route as CrmAgentsIndexRouteImport } from './routes/crm/agents/index'
+import { Route as CrmAgentsIdRouteImport } from './routes/crm/agents/$id'
+import { Route as CrmBasesIndexRouteImport } from './routes/crm/bases/index'
+import { Route as CrmBasesIdRouteImport } from './routes/crm/bases/$id'
+import { Route as CrmCampagnesIndexRouteImport } from './routes/crm/campagnes/index'
+import { Route as CrmCampagnesIdRouteImport } from './routes/crm/campagnes/$id'
+import { Route as CrmContactsIndexRouteImport } from './routes/crm/contacts/index'
+import { Route as CrmContactsIdRouteImport } from './routes/crm/contacts/$id'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -132,6 +149,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
 const CreerMotDePasseRoute = CreerMotDePasseRouteImport.update({
   id: '/creer-mot-de-passe',
   path: '/creer-mot-de-passe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrmRoute = CrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExpertRoute = ExpertRouteImport.update({
@@ -416,6 +438,46 @@ const ConciergeSuiviCommercialRoute =
     path: '/suivi-commercial',
     getParentRoute: () => ConciergeRoute,
   } as any)
+const CrmIndexRoute = CrmIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmAppelsRoute = CrmAppelsRouteImport.update({
+  id: '/appels',
+  path: '/appels',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmCarteRoute = CrmCarteRouteImport.update({
+  id: '/carte',
+  path: '/carte',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmNotificationsRoute = CrmNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmRapportsRoute = CrmRapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmReglagesRoute = CrmReglagesRouteImport.update({
+  id: '/reglages',
+  path: '/reglages',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmRendezVousRoute = CrmRendezVousRouteImport.update({
+  id: '/rendez-vous',
+  path: '/rendez-vous',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmUtilisateursRoute = CrmUtilisateursRouteImport.update({
+  id: '/utilisateurs',
+  path: '/utilisateurs',
+  getParentRoute: () => CrmRoute,
+} as any)
 const EntrepriseSlugRoute = EntrepriseSlugRouteImport.update({
   id: '/entreprise/$slug',
   path: '/entreprise/$slug',
@@ -585,6 +647,46 @@ const ConciergeEntreprisesNouvelleRoute =
     path: '/entreprises/nouvelle',
     getParentRoute: () => ConciergeRoute,
   } as any)
+const CrmAgentsIndexRoute = CrmAgentsIndexRouteImport.update({
+  id: '/agents/',
+  path: '/agents/',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmAgentsIdRoute = CrmAgentsIdRouteImport.update({
+  id: '/agents/$id',
+  path: '/agents/$id',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmBasesIndexRoute = CrmBasesIndexRouteImport.update({
+  id: '/bases/',
+  path: '/bases/',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmBasesIdRoute = CrmBasesIdRouteImport.update({
+  id: '/bases/$id',
+  path: '/bases/$id',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmCampagnesIndexRoute = CrmCampagnesIndexRouteImport.update({
+  id: '/campagnes/',
+  path: '/campagnes/',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmCampagnesIdRoute = CrmCampagnesIdRouteImport.update({
+  id: '/campagnes/$id',
+  path: '/campagnes/$id',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmContactsIndexRoute = CrmContactsIndexRouteImport.update({
+  id: '/contacts/',
+  path: '/contacts/',
+  getParentRoute: () => CrmRoute,
+} as any)
+const CrmContactsIdRoute = CrmContactsIdRouteImport.update({
+  id: '/contacts/$id',
+  path: '/contacts/$id',
+  getParentRoute: () => CrmRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -593,6 +695,7 @@ export interface FileRoutesByFullPath {
   '/concierge': typeof ConciergeRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/creer-mot-de-passe': typeof CreerMotDePasseRoute
+  '/crm': typeof CrmRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
@@ -645,6 +748,13 @@ export interface FileRoutesByFullPath {
   '/concierge/prestataires': typeof ConciergePrestatairesRoute
   '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
   '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
+  '/crm/appels': typeof CrmAppelsRoute
+  '/crm/carte': typeof CrmCarteRoute
+  '/crm/notifications': typeof CrmNotificationsRoute
+  '/crm/rapports': typeof CrmRapportsRoute
+  '/crm/reglages': typeof CrmReglagesRoute
+  '/crm/rendez-vous': typeof CrmRendezVousRoute
+  '/crm/utilisateurs': typeof CrmUtilisateursRoute
   '/entreprise/$slug': typeof EntrepriseSlugRoute
   '/expert/agenda': typeof ExpertAgendaRoute
   '/expert/clients': typeof ExpertClientsRoute
@@ -657,6 +767,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/concierge/': typeof ConciergeIndexRoute
+  '/crm/': typeof CrmIndexRoute
   '/expert/': typeof ExpertIndexRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -671,6 +782,10 @@ export interface FileRoutesByFullPath {
   '/concierge/diagnostics/$id': typeof ConciergeDiagnosticsIdRoute
   '/concierge/entreprises/$id': typeof ConciergeEntreprisesIdRoute
   '/concierge/entreprises/nouvelle': typeof ConciergeEntreprisesNouvelleRoute
+  '/crm/agents/$id': typeof CrmAgentsIdRoute
+  '/crm/bases/$id': typeof CrmBasesIdRoute
+  '/crm/campagnes/$id': typeof CrmCampagnesIdRoute
+  '/crm/contacts/$id': typeof CrmContactsIdRoute
   '/secteurs/': typeof PublicSecteursIndexRoute
   '/admin/besoins/': typeof AdminBesoinsIndexRoute
   '/admin/clients/': typeof AdminClientsIndexRoute
@@ -681,6 +796,10 @@ export interface FileRoutesByFullPath {
   '/app/missions/': typeof AppMissionsIndexRoute
   '/concierge/diagnostics/': typeof ConciergeDiagnosticsIndexRoute
   '/concierge/entreprises/': typeof ConciergeEntreprisesIndexRoute
+  '/crm/agents/': typeof CrmAgentsIndexRoute
+  '/crm/bases/': typeof CrmBasesIndexRoute
+  '/crm/campagnes/': typeof CrmCampagnesIndexRoute
+  '/crm/contacts/': typeof CrmContactsIndexRoute
 }
 export interface FileRoutesByTo {
   '/connexion': typeof ConnexionRoute
@@ -735,6 +854,13 @@ export interface FileRoutesByTo {
   '/concierge/prestataires': typeof ConciergePrestatairesRoute
   '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
   '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
+  '/crm/appels': typeof CrmAppelsRoute
+  '/crm/carte': typeof CrmCarteRoute
+  '/crm/notifications': typeof CrmNotificationsRoute
+  '/crm/rapports': typeof CrmRapportsRoute
+  '/crm/reglages': typeof CrmReglagesRoute
+  '/crm/rendez-vous': typeof CrmRendezVousRoute
+  '/crm/utilisateurs': typeof CrmUtilisateursRoute
   '/entreprise/$slug': typeof EntrepriseSlugRoute
   '/expert/agenda': typeof ExpertAgendaRoute
   '/expert/clients': typeof ExpertClientsRoute
@@ -748,6 +874,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/concierge': typeof ConciergeIndexRoute
+  '/crm': typeof CrmIndexRoute
   '/expert': typeof ExpertIndexRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -762,6 +889,10 @@ export interface FileRoutesByTo {
   '/concierge/diagnostics/$id': typeof ConciergeDiagnosticsIdRoute
   '/concierge/entreprises/$id': typeof ConciergeEntreprisesIdRoute
   '/concierge/entreprises/nouvelle': typeof ConciergeEntreprisesNouvelleRoute
+  '/crm/agents/$id': typeof CrmAgentsIdRoute
+  '/crm/bases/$id': typeof CrmBasesIdRoute
+  '/crm/campagnes/$id': typeof CrmCampagnesIdRoute
+  '/crm/contacts/$id': typeof CrmContactsIdRoute
   '/secteurs': typeof PublicSecteursIndexRoute
   '/admin/besoins': typeof AdminBesoinsIndexRoute
   '/admin/clients': typeof AdminClientsIndexRoute
@@ -772,6 +903,10 @@ export interface FileRoutesByTo {
   '/app/missions': typeof AppMissionsIndexRoute
   '/concierge/diagnostics': typeof ConciergeDiagnosticsIndexRoute
   '/concierge/entreprises': typeof ConciergeEntreprisesIndexRoute
+  '/crm/agents': typeof CrmAgentsIndexRoute
+  '/crm/bases': typeof CrmBasesIndexRoute
+  '/crm/campagnes': typeof CrmCampagnesIndexRoute
+  '/crm/contacts': typeof CrmContactsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -781,6 +916,7 @@ export interface FileRoutesById {
   '/concierge': typeof ConciergeRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/creer-mot-de-passe': typeof CreerMotDePasseRoute
+  '/crm': typeof CrmRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
@@ -833,6 +969,13 @@ export interface FileRoutesById {
   '/concierge/prestataires': typeof ConciergePrestatairesRoute
   '/concierge/rendez-vous': typeof ConciergeRendezVousRoute
   '/concierge/suivi-commercial': typeof ConciergeSuiviCommercialRoute
+  '/crm/appels': typeof CrmAppelsRoute
+  '/crm/carte': typeof CrmCarteRoute
+  '/crm/notifications': typeof CrmNotificationsRoute
+  '/crm/rapports': typeof CrmRapportsRoute
+  '/crm/reglages': typeof CrmReglagesRoute
+  '/crm/rendez-vous': typeof CrmRendezVousRoute
+  '/crm/utilisateurs': typeof CrmUtilisateursRoute
   '/entreprise/$slug': typeof EntrepriseSlugRoute
   '/expert/agenda': typeof ExpertAgendaRoute
   '/expert/clients': typeof ExpertClientsRoute
@@ -846,6 +989,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/concierge/': typeof ConciergeIndexRoute
+  '/crm/': typeof CrmIndexRoute
   '/expert/': typeof ExpertIndexRoute
   '/_public/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/_public/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
@@ -860,6 +1004,10 @@ export interface FileRoutesById {
   '/concierge/diagnostics/$id': typeof ConciergeDiagnosticsIdRoute
   '/concierge/entreprises/$id': typeof ConciergeEntreprisesIdRoute
   '/concierge/entreprises/nouvelle': typeof ConciergeEntreprisesNouvelleRoute
+  '/crm/agents/$id': typeof CrmAgentsIdRoute
+  '/crm/bases/$id': typeof CrmBasesIdRoute
+  '/crm/campagnes/$id': typeof CrmCampagnesIdRoute
+  '/crm/contacts/$id': typeof CrmContactsIdRoute
   '/_public/secteurs/': typeof PublicSecteursIndexRoute
   '/admin/besoins/': typeof AdminBesoinsIndexRoute
   '/admin/clients/': typeof AdminClientsIndexRoute
@@ -870,6 +1018,10 @@ export interface FileRoutesById {
   '/app/missions/': typeof AppMissionsIndexRoute
   '/concierge/diagnostics/': typeof ConciergeDiagnosticsIndexRoute
   '/concierge/entreprises/': typeof ConciergeEntreprisesIndexRoute
+  '/crm/agents/': typeof CrmAgentsIndexRoute
+  '/crm/bases/': typeof CrmBasesIndexRoute
+  '/crm/campagnes/': typeof CrmCampagnesIndexRoute
+  '/crm/contacts/': typeof CrmContactsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -880,6 +1032,7 @@ export interface FileRouteTypes {
     | '/concierge'
     | '/connexion'
     | '/creer-mot-de-passe'
+    | '/crm'
     | '/expert'
     | '/inscription'
     | '/onboarding'
@@ -932,6 +1085,13 @@ export interface FileRouteTypes {
     | '/concierge/prestataires'
     | '/concierge/rendez-vous'
     | '/concierge/suivi-commercial'
+    | '/crm/appels'
+    | '/crm/carte'
+    | '/crm/notifications'
+    | '/crm/rapports'
+    | '/crm/reglages'
+    | '/crm/rendez-vous'
+    | '/crm/utilisateurs'
     | '/entreprise/$slug'
     | '/expert/agenda'
     | '/expert/clients'
@@ -944,6 +1104,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/concierge/'
+    | '/crm/'
     | '/expert/'
     | '/secteurs/$sector'
     | '/secteurs/enseignement'
@@ -958,6 +1119,10 @@ export interface FileRouteTypes {
     | '/concierge/diagnostics/$id'
     | '/concierge/entreprises/$id'
     | '/concierge/entreprises/nouvelle'
+    | '/crm/agents/$id'
+    | '/crm/bases/$id'
+    | '/crm/campagnes/$id'
+    | '/crm/contacts/$id'
     | '/secteurs/'
     | '/admin/besoins/'
     | '/admin/clients/'
@@ -968,6 +1133,10 @@ export interface FileRouteTypes {
     | '/app/missions/'
     | '/concierge/diagnostics/'
     | '/concierge/entreprises/'
+    | '/crm/agents/'
+    | '/crm/bases/'
+    | '/crm/campagnes/'
+    | '/crm/contacts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/connexion'
@@ -1022,6 +1191,13 @@ export interface FileRouteTypes {
     | '/concierge/prestataires'
     | '/concierge/rendez-vous'
     | '/concierge/suivi-commercial'
+    | '/crm/appels'
+    | '/crm/carte'
+    | '/crm/notifications'
+    | '/crm/rapports'
+    | '/crm/reglages'
+    | '/crm/rendez-vous'
+    | '/crm/utilisateurs'
     | '/entreprise/$slug'
     | '/expert/agenda'
     | '/expert/clients'
@@ -1035,6 +1211,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/concierge'
+    | '/crm'
     | '/expert'
     | '/secteurs/$sector'
     | '/secteurs/enseignement'
@@ -1049,6 +1226,10 @@ export interface FileRouteTypes {
     | '/concierge/diagnostics/$id'
     | '/concierge/entreprises/$id'
     | '/concierge/entreprises/nouvelle'
+    | '/crm/agents/$id'
+    | '/crm/bases/$id'
+    | '/crm/campagnes/$id'
+    | '/crm/contacts/$id'
     | '/secteurs'
     | '/admin/besoins'
     | '/admin/clients'
@@ -1059,6 +1240,10 @@ export interface FileRouteTypes {
     | '/app/missions'
     | '/concierge/diagnostics'
     | '/concierge/entreprises'
+    | '/crm/agents'
+    | '/crm/bases'
+    | '/crm/campagnes'
+    | '/crm/contacts'
   id:
     | '__root__'
     | '/_public'
@@ -1067,6 +1252,7 @@ export interface FileRouteTypes {
     | '/concierge'
     | '/connexion'
     | '/creer-mot-de-passe'
+    | '/crm'
     | '/expert'
     | '/inscription'
     | '/onboarding'
@@ -1119,6 +1305,13 @@ export interface FileRouteTypes {
     | '/concierge/prestataires'
     | '/concierge/rendez-vous'
     | '/concierge/suivi-commercial'
+    | '/crm/appels'
+    | '/crm/carte'
+    | '/crm/notifications'
+    | '/crm/rapports'
+    | '/crm/reglages'
+    | '/crm/rendez-vous'
+    | '/crm/utilisateurs'
     | '/entreprise/$slug'
     | '/expert/agenda'
     | '/expert/clients'
@@ -1132,6 +1325,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/concierge/'
+    | '/crm/'
     | '/expert/'
     | '/_public/secteurs/$sector'
     | '/_public/secteurs/enseignement'
@@ -1146,6 +1340,10 @@ export interface FileRouteTypes {
     | '/concierge/diagnostics/$id'
     | '/concierge/entreprises/$id'
     | '/concierge/entreprises/nouvelle'
+    | '/crm/agents/$id'
+    | '/crm/bases/$id'
+    | '/crm/campagnes/$id'
+    | '/crm/contacts/$id'
     | '/_public/secteurs/'
     | '/admin/besoins/'
     | '/admin/clients/'
@@ -1156,6 +1354,10 @@ export interface FileRouteTypes {
     | '/app/missions/'
     | '/concierge/diagnostics/'
     | '/concierge/entreprises/'
+    | '/crm/agents/'
+    | '/crm/bases/'
+    | '/crm/campagnes/'
+    | '/crm/contacts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1165,6 +1367,7 @@ export interface RootRouteChildren {
   ConciergeRoute: typeof ConciergeRouteWithChildren
   ConnexionRoute: typeof ConnexionRoute
   CreerMotDePasseRoute: typeof CreerMotDePasseRoute
+  CrmRoute: typeof CrmRouteWithChildren
   ExpertRoute: typeof ExpertRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -1214,6 +1417,13 @@ declare module '@tanstack/react-router' {
       path: '/creer-mot-de-passe'
       fullPath: '/creer-mot-de-passe'
       preLoaderRoute: typeof CreerMotDePasseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crm': {
+      id: '/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof CrmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/expert': {
@@ -1608,6 +1818,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConciergeSuiviCommercialRouteImport
       parentRoute: typeof ConciergeRoute
     }
+    '/crm/': {
+      id: '/crm/'
+      path: '/'
+      fullPath: '/crm/'
+      preLoaderRoute: typeof CrmIndexRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/appels': {
+      id: '/crm/appels'
+      path: '/appels'
+      fullPath: '/crm/appels'
+      preLoaderRoute: typeof CrmAppelsRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/carte': {
+      id: '/crm/carte'
+      path: '/carte'
+      fullPath: '/crm/carte'
+      preLoaderRoute: typeof CrmCarteRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/notifications': {
+      id: '/crm/notifications'
+      path: '/notifications'
+      fullPath: '/crm/notifications'
+      preLoaderRoute: typeof CrmNotificationsRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/rapports': {
+      id: '/crm/rapports'
+      path: '/rapports'
+      fullPath: '/crm/rapports'
+      preLoaderRoute: typeof CrmRapportsRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/reglages': {
+      id: '/crm/reglages'
+      path: '/reglages'
+      fullPath: '/crm/reglages'
+      preLoaderRoute: typeof CrmReglagesRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/rendez-vous': {
+      id: '/crm/rendez-vous'
+      path: '/rendez-vous'
+      fullPath: '/crm/rendez-vous'
+      preLoaderRoute: typeof CrmRendezVousRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/utilisateurs': {
+      id: '/crm/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/crm/utilisateurs'
+      preLoaderRoute: typeof CrmUtilisateursRouteImport
+      parentRoute: typeof CrmRoute
+    }
     '/entreprise/$slug': {
       id: '/entreprise/$slug'
       path: '/entreprise/$slug'
@@ -1839,6 +2105,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConciergeEntreprisesNouvelleRouteImport
       parentRoute: typeof ConciergeRoute
     }
+    '/crm/agents/': {
+      id: '/crm/agents/'
+      path: '/agents'
+      fullPath: '/crm/agents/'
+      preLoaderRoute: typeof CrmAgentsIndexRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/agents/$id': {
+      id: '/crm/agents/$id'
+      path: '/agents/$id'
+      fullPath: '/crm/agents/$id'
+      preLoaderRoute: typeof CrmAgentsIdRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/bases/': {
+      id: '/crm/bases/'
+      path: '/bases'
+      fullPath: '/crm/bases/'
+      preLoaderRoute: typeof CrmBasesIndexRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/bases/$id': {
+      id: '/crm/bases/$id'
+      path: '/bases/$id'
+      fullPath: '/crm/bases/$id'
+      preLoaderRoute: typeof CrmBasesIdRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/campagnes/': {
+      id: '/crm/campagnes/'
+      path: '/campagnes'
+      fullPath: '/crm/campagnes/'
+      preLoaderRoute: typeof CrmCampagnesIndexRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/campagnes/$id': {
+      id: '/crm/campagnes/$id'
+      path: '/campagnes/$id'
+      fullPath: '/crm/campagnes/$id'
+      preLoaderRoute: typeof CrmCampagnesIdRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/contacts/': {
+      id: '/crm/contacts/'
+      path: '/contacts'
+      fullPath: '/crm/contacts/'
+      preLoaderRoute: typeof CrmContactsIndexRouteImport
+      parentRoute: typeof CrmRoute
+    }
+    '/crm/contacts/$id': {
+      id: '/crm/contacts/$id'
+      path: '/contacts/$id'
+      fullPath: '/crm/contacts/$id'
+      preLoaderRoute: typeof CrmContactsIdRouteImport
+      parentRoute: typeof CrmRoute
+    }
   }
 }
 
@@ -2036,6 +2358,46 @@ const ConciergeRouteWithChildren = ConciergeRoute._addFileChildren(
   ConciergeRouteChildren,
 )
 
+interface CrmRouteChildren {
+  CrmAppelsRoute: typeof CrmAppelsRoute
+  CrmCarteRoute: typeof CrmCarteRoute
+  CrmNotificationsRoute: typeof CrmNotificationsRoute
+  CrmRapportsRoute: typeof CrmRapportsRoute
+  CrmReglagesRoute: typeof CrmReglagesRoute
+  CrmRendezVousRoute: typeof CrmRendezVousRoute
+  CrmUtilisateursRoute: typeof CrmUtilisateursRoute
+  CrmIndexRoute: typeof CrmIndexRoute
+  CrmAgentsIdRoute: typeof CrmAgentsIdRoute
+  CrmBasesIdRoute: typeof CrmBasesIdRoute
+  CrmCampagnesIdRoute: typeof CrmCampagnesIdRoute
+  CrmContactsIdRoute: typeof CrmContactsIdRoute
+  CrmAgentsIndexRoute: typeof CrmAgentsIndexRoute
+  CrmBasesIndexRoute: typeof CrmBasesIndexRoute
+  CrmCampagnesIndexRoute: typeof CrmCampagnesIndexRoute
+  CrmContactsIndexRoute: typeof CrmContactsIndexRoute
+}
+
+const CrmRouteChildren: CrmRouteChildren = {
+  CrmAppelsRoute: CrmAppelsRoute,
+  CrmCarteRoute: CrmCarteRoute,
+  CrmNotificationsRoute: CrmNotificationsRoute,
+  CrmRapportsRoute: CrmRapportsRoute,
+  CrmReglagesRoute: CrmReglagesRoute,
+  CrmRendezVousRoute: CrmRendezVousRoute,
+  CrmUtilisateursRoute: CrmUtilisateursRoute,
+  CrmIndexRoute: CrmIndexRoute,
+  CrmAgentsIdRoute: CrmAgentsIdRoute,
+  CrmBasesIdRoute: CrmBasesIdRoute,
+  CrmCampagnesIdRoute: CrmCampagnesIdRoute,
+  CrmContactsIdRoute: CrmContactsIdRoute,
+  CrmAgentsIndexRoute: CrmAgentsIndexRoute,
+  CrmBasesIndexRoute: CrmBasesIndexRoute,
+  CrmCampagnesIndexRoute: CrmCampagnesIndexRoute,
+  CrmContactsIndexRoute: CrmContactsIndexRoute,
+}
+
+const CrmRouteWithChildren = CrmRoute._addFileChildren(CrmRouteChildren)
+
 interface ExpertRouteChildren {
   ExpertAgendaRoute: typeof ExpertAgendaRoute
   ExpertClientsRoute: typeof ExpertClientsRoute
@@ -2070,6 +2432,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConciergeRoute: ConciergeRouteWithChildren,
   ConnexionRoute: ConnexionRoute,
   CreerMotDePasseRoute: CreerMotDePasseRoute,
+  CrmRoute: CrmRouteWithChildren,
   ExpertRoute: ExpertRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
   OnboardingRoute: OnboardingRoute,

@@ -37,9 +37,17 @@ import {
   X,
   BadgeCheck,
   Presentation,
+  Contact as ContactIcon,
+  Database,
+  PhoneCall,
+  MapPinned,
+  Megaphone,
+  Settings,
+  Activity,
 } from 'lucide-react'
 import { useDemo } from '@/store/store'
 import { canAccessSalesPresentation, useAuth } from '@/features/auth/AuthContext'
+import { useCrmOptional } from '@/features/crm/core'
 import { clientModules, orgSaasActive, type AccessModule } from '@/lib/access'
 import { cn } from '@/lib/utils'
 import { THEMES, useWorkspaceTheme, type ThemeMode } from '@/lib/theme'
@@ -157,6 +165,7 @@ function buildAdminNav(): NavItem[] {
   return [
     { group: 'Pilotage', label: 'Tableau de bord', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> },
+    { group: 'Pilotage', label: 'CRM', to: '/crm' as any, icon: <PhoneCall className="h-4 w-4" /> },
     { group: 'Clients', label: 'Inscriptions', to: '/admin/inscriptions' as any, icon: <ClipboardCheck className="h-4 w-4" /> },
     { group: 'Clients', label: 'Clients & accès', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },
     { group: 'Clients', label: 'Diagnostics', to: '/admin/diagnostics/reel' as any, icon: <Gauge className="h-4 w-4" /> },
@@ -177,6 +186,28 @@ function buildAdminNav(): NavItem[] {
   ]
 }
 
+/** Navigation CRM : chaque entrée n'apparaît que si le serveur accorde la permission correspondante. */
+function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string): NavItem[] {
+  const has = (p: string) => perms.includes(p)
+  const items: Array<NavItem & { perm?: string }> = [
+    { group: 'Pilotage', label: 'Tableau de bord', to: '/crm' as any, icon: <LayoutDashboard className="h-4 w-4" />, perm: 'dashboard.view' },
+    { group: 'Équipe', label: 'Utilisateurs', to: '/crm/utilisateurs' as any, icon: <UsersRound className="h-4 w-4" />, perm: 'users.manage' },
+    { group: 'Équipe', label: 'Agents', to: '/crm/agents' as any, icon: <UserRoundCog className="h-4 w-4" />, perm: 'agents.view' },
+    ...(!isAdmin && userId ? [{ group: 'Équipe', label: 'Ma performance', to: `/crm/agents/${userId}` as any, icon: <Activity className="h-4 w-4" />, perm: 'reports.view' }] : []),
+    { group: 'Données', label: 'Bases de contacts', to: '/crm/bases' as any, icon: <Database className="h-4 w-4" />, perm: 'contacts.view' },
+    { group: 'Données', label: 'Contacts', to: '/crm/contacts' as any, icon: <ContactIcon className="h-4 w-4" />, perm: 'contacts.view' },
+    { group: 'Activité', label: 'Appels', to: '/crm/appels' as any, icon: <PhoneCall className="h-4 w-4" />, perm: 'contacts.view' },
+    { group: 'Activité', label: 'Rendez-vous', to: '/crm/rendez-vous' as any, icon: <CalendarDays className="h-4 w-4" />, perm: 'appointments.view' },
+    { group: 'Activité', label: 'Carte géographique', to: '/crm/carte' as any, icon: <MapPinned className="h-4 w-4" />, perm: 'map.view' },
+    { group: 'Développement', label: 'Campagnes', to: '/crm/campagnes' as any, icon: <Megaphone className="h-4 w-4" />, perm: 'campaigns.view' },
+    { group: 'Développement', label: 'Rapports', to: '/crm/rapports' as any, icon: <LineChart className="h-4 w-4" />, perm: 'reports.view' },
+    { group: 'Compte', label: 'Notifications', to: '/crm/notifications' as any, icon: <Bell className="h-4 w-4" /> },
+    { group: 'Compte', label: 'Réglages', to: '/crm/reglages' as any, icon: <Settings className="h-4 w-4" />, perm: 'settings.manage' },
+    ...(isAdmin ? [{ group: 'Compte', label: 'Administration ALLNEEDS', to: '/admin' as any, icon: <Home className="h-4 w-4" /> }] : []),
+  ]
+  return items.filter((i) => !i.perm || has(i.perm)).map(({ perm: _perm, ...rest }) => rest)
+}
+
 /* ------------------------------------------------------------------ */
 /* App shell                                                           */
 /* ------------------------------------------------------------------ */
@@ -184,6 +215,7 @@ function buildAdminNav(): NavItem[] {
 const VARIANT_META = {
   admin: { label: 'Administration', badge: 'Admin', palette: 'indigo' },
   concierge: { label: 'Concierge', badge: 'Concierge', palette: 'ocean' },
+  crm: { label: 'CRM', badge: 'CRM', palette: 'violet' },
   client: { label: 'Espace client', badge: 'Client', palette: 'allneeds' },
 } as const
 
@@ -200,9 +232,10 @@ export function AppShell({
   variant,
 }: {
   children: ReactNode
-  variant: 'client' | 'admin' | 'concierge'
+  variant: 'client' | 'admin' | 'concierge' | 'crm'
 }) {
   const { state, user } = useDemo()
+  const crm = useCrmOptional()
   const auth = useAuth()
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -219,7 +252,7 @@ export function AppShell({
     id: auth.user.id,
     name: auth.user.name,
     email: auth.user.email,
-    roleLabel: auth.user.role === 'admin' ? 'Administrateur' : auth.user.role === 'concierge' ? 'Concierge' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
+    roleLabel: auth.user.role === 'admin' ? 'Administrateur' : auth.user.role === 'concierge' ? 'Concierge' : auth.user.role === 'agent' ? 'Agent CRM' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
   } : user
 
   const unread = auth.status === 'authenticated' ? 0 : state.threads.reduce((acc, t) => acc + t.unread, 0)
@@ -227,7 +260,7 @@ export function AppShell({
   const clientOrg = auth.status === 'authenticated' ? auth.user?.organization : state.orgs.find((org) => org.id === user.orgId)
   const modules = clientModules(auth.user?.organization ?? null)
   const saasAccess = orgSaasActive(auth.user?.organization ?? null)
-  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
+  const nav = variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
   const current = [...nav].sort((a, b) => String(b.to).length - String(a.to).length).find((item) => {
     const to = String(item.to).replace(/\/$/, '')
     return pathname === to || pathname === `${to}/` || (to.split('/').length > 2 && pathname.startsWith(`${to}/`))
@@ -267,7 +300,7 @@ export function AppShell({
     void navigate({ to: '/' })
   }
 
-  const subtitle = variant === 'admin' ? 'Pilotage ALLNEEDS' : variant === 'concierge' ? 'Entreprises attribuées' : clientOrg ? `${clientOrg.sector ?? 'Entreprise'} · accès sécurisé` : 'Votre espace ALLNEEDS'
+  const subtitle = variant === 'crm' ? (crm?.me?.crmName ?? 'CRM') : variant === 'admin' ? 'Pilotage ALLNEEDS' : variant === 'concierge' ? 'Entreprises attribuées' : clientOrg ? `${clientOrg.sector ?? 'Entreprise'} · accès sécurisé` : 'Votre espace ALLNEEDS'
   const orgName = variant === 'client' ? (clientOrg?.name ?? 'Espace client') : null
 
   return (
@@ -334,6 +367,13 @@ export function AppShell({
               <span className="hidden md:inline">Rechercher…</span>
               <kbd className="hidden md:inline">Ctrl K</kbd>
             </button>
+
+            {variant === 'crm' ? (
+              <Link to={'/crm/notifications' as any} className="an-icon-btn relative" aria-label={`Notifications${crm?.me?.unread ? ` (${crm.me.unread} non lues)` : ''}`}>
+                <Bell size={17} />
+                {crm?.me?.unread ? <span className="crm-bell-count">{crm.me.unread > 99 ? '99+' : crm.me.unread}</span> : null}
+              </Link>
+            ) : null}
 
             {variant === 'client' && modules.messages ? (
               <Link to="/app/messages" className="an-icon-btn relative" aria-label="Messages">

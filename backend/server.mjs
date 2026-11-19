@@ -6,6 +6,7 @@ import { promisify } from 'node:util'
 import net from 'node:net'
 import tls from 'node:tls'
 import { SALES_PRESENTATION } from './sales-presentation.mjs'
+import { createCrm, CRM_COLLECTIONS } from './crm.mjs'
 
 const scrypt = promisify(scryptCallback)
 const ROOT = process.env.ALLNEEDS_DATA_DIR || join(process.cwd(), 'backend', 'data')
@@ -31,6 +32,7 @@ const emptyDb = () => ({
   users: [], orgs: [], diagnostics: [], needs: [], consents: [], registrations: [], invitations: [],
   missions: [], offers: [], documents: [], messages: [], meetings: [], quotes: [], notifications: [],
   needsSubscriptions: [], saasSubscriptions: [], conversations: [],
+  crmDatabases: [], crmContacts: [], crmCalls: [], crmAppointments: [], crmCampaigns: [], crmZones: [], crmActivity: [], crmImports: [], crmSettings: [],
 })
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
@@ -40,7 +42,7 @@ let remoteSaveQueue = Promise.resolve()
 
 function normalizeDb(input) {
   const data = input && typeof input === 'object' ? input : emptyDb()
-  for (const key of ['users','orgs','diagnostics','needs','consents','registrations','invitations','missions','offers','documents','messages','meetings','quotes','notifications','needsSubscriptions','saasSubscriptions','conversations']) if (!Array.isArray(data[key])) data[key] = []
+  for (const key of ['users','orgs','diagnostics','needs','consents','registrations','invitations','missions','offers','documents','messages','meetings','quotes','notifications','needsSubscriptions','saasSubscriptions','conversations', ...Object.keys(CRM_COLLECTIONS)]) if (!Array.isArray(data[key])) data[key] = []
   return data
 }
 
@@ -104,12 +106,31 @@ async function loadDb() {
     data.users = userRows.map((row) => ({ ...(row.metadata || {}), id: row.id, email: row.email, role: row.role, orgIds: row.role === 'admin' ? ['*'] : row.role === 'concierge' ? (assignments.get(row.id) || []) : row.organization_id ? [row.organization_id] : [], sectors: row.sectors || [], name: row.name, active: row.active !== false, passwordHash: row.password_hash, passwordConfigured: row.password_configured === true, permissions: row.permissions || [] }))
     data.invitations = inviteRows.map((row) => ({ ...(row.metadata || {}), id: row.id, orgId: row.organization_id, email: row.email, name: row.name, role: row.role, permissions: row.permissions || [], kind: row.kind, metadata: row.invitation_metadata || {}, tokenHash: row.token_hash, createdBy: row.created_by, createdAt: row.created_at, expiresAt: row.expires_at, usedAt: row.used_at, revokedAt: row.revoked_at, lastEmailAt: row.last_email_at, lastEmailStatus: row.last_email_status, lastEmailError: row.last_email_error }))
     Object.keys(COLLECTION_TABLES).forEach((key,index) => { data[key] = collectionRows[index].map((row) => row.payload || { id: row.id, orgId: row.organization_id }) })
+    // CRM : tables chargées une fois, puis synchronisées de façon incrémentale (seules les lignes modifiées partent).
+    const crmRows = await Promise.all(Object.values(CRM_COLLECTIONS).map(remoteRowsOptional))
+    Object.entries(CRM_COLLECTIONS).forEach(([key, table], index) => {
+      data[key] = crmRows[index].map((row) => row.payload || { id: row.id })
+      crmSynced.set(table, new Map(data[key].map((item) => [item.id, JSON.stringify(item)])))
+    })
     return normalizeDb(data)
   } catch (error) {
     if (isProduction) throw error
     console.warn('Supabase relationnel indisponible, fallback local:', error.message)
     return localLoadDb()
   }
+}
+
+/** Dernier état envoyé à Supabase pour chaque ligne CRM (id → JSON), pour n'envoyer que les différences. */
+const crmSynced = new Map()
+async function syncCrmTable(table, items) {
+  const previous = crmSynced.get(table) || new Map()
+  const current = new Map(items.filter((item) => item?.id).map((item) => [item.id, JSON.stringify(item)]))
+  const changed = []
+  for (const [id, value] of current) if (previous.get(id) !== value) changed.push({ id, organization_id: null, payload: JSON.parse(value) })
+  const gone = [...previous.keys()].filter((id) => !current.has(id))
+  for (let i = 0; i < changed.length; i += 500) await upsertTable(table, changed.slice(i, i + 500))
+  for (let i = 0; i < gone.length; i += 100) await remoteRequest(`${table}?id=in.(${gone.slice(i, i + 100).map((id) => `"${encodeURIComponent(id)}"`).join(',')})`, { method: 'DELETE' })
+  crmSynced.set(table, current)
 }
 
 async function upsertTable(table, rows) {
@@ -124,7 +145,7 @@ async function syncTable(table, rows) { await upsertTable(table, rows); await pr
 
 async function syncRemote(data) {
   const orgRows = data.orgs.map((org) => ({ id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active !== false, modules: org.modules || {}, metadata: Object.fromEntries(Object.entries(org).filter(([key]) => !['id','name','slug','sector','active','modules'].includes(key))) }))
-  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
+  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
   const assignmentRows = data.users.filter((user) => user.role === 'concierge').flatMap((user) => (user.orgIds || []).filter((id) => id !== '*').map((orgId) => ({ id: `${user.id}:${orgId}`, concierge_user_id: user.id, organization_id: orgId })))
   const inviteRows = data.invitations.map((inv) => ({ id: inv.id, organization_id: inv.orgId || null, email: inv.email, name: inv.name || '', role: inv.role, permissions: inv.permissions || [], kind: inv.kind, invitation_metadata: inv.metadata || {}, token_hash: inv.tokenHash, created_by: inv.createdBy || null, created_at: inv.createdAt, expires_at: inv.expiresAt, used_at: inv.usedAt || null, revoked_at: inv.revokedAt || null, last_email_at: inv.lastEmailAt || null, last_email_status: inv.lastEmailStatus || null, last_email_error: inv.lastEmailError || null, metadata: {} }))
   // Insert/update parents first, then children. Deletions are pruned in reverse dependency order.
@@ -136,6 +157,7 @@ async function syncRemote(data) {
     const rows = (data[key] || []).filter((item) => item?.id).map((item) => ({ id: item.id, organization_id: item.orgId || null, payload: item }))
     await syncTable(table, rows)
   }
+  for (const [key, table] of Object.entries(CRM_COLLECTIONS)) await syncCrmTable(table, data[key] || [])
   await pruneTable('v46_users', userRows)
   await pruneTable('v46_organizations', orgRows)
 }
@@ -762,7 +784,7 @@ const OPERATIONS_ROLES = new Set(['admin', 'concierge'])
 const SALES_ROLE = 'sales'
 // Permission qu'un administrateur peut accorder à un concierge (membre interne) sans changer son rôle.
 const SALES_PERMISSION = 'sales_presentation'
-const STAFF_INVITATION_KINDS = new Set(['concierge', 'sales'])
+const STAFF_INVITATION_KINDS = new Set(['concierge', 'sales', 'crm'])
 // Seules ces routes restent ouvertes à un compte `sales` (en plus de /api/me et de la déconnexion).
 const SALES_ALLOWED_API = [/^\/api\/sales\//]
 
@@ -779,7 +801,7 @@ function allowedText(value, maximum, field) {
 
 
 function orgForUser(user) {
-  if (!user || ['admin', 'concierge', 'prestataire', 'sales'].includes(user.role)) return null
+  if (!user || ['admin', 'concierge', 'prestataire', 'sales', 'agent'].includes(user.role)) return null
   return db.orgs.find((org) => Array.isArray(user.orgIds) && user.orgIds.includes(org.id)) || null
 }
 
@@ -837,6 +859,7 @@ function htmlEscape(value='') { return String(value).replace(/[&<>\"]/g, (ch) =>
 function invitationCopy(invitation) {
   if (invitation.kind === 'owner') return { subject: 'Activez votre compte ALLNEEDS', intro: 'Votre entreprise a été validée par ALLNEEDS.' }
   if (invitation.kind === 'concierge') return { subject: 'Votre accès Concierge ALLNEEDS', intro: 'Votre compte Concierge ALLNEEDS est prêt.' }
+  if (invitation.kind === 'crm') return { subject: 'Votre accès au CRM ALLNEEDS', intro: 'Votre compte CRM ALLNEEDS est prêt.' }
   if (invitation.kind === 'sales') return { subject: 'Votre accès Présentation commerciale ALLNEEDS', intro: 'Votre accès à la présentation commerciale ALLNEEDS est prêt.' }
   return { subject: 'Invitation à rejoindre votre espace ALLNEEDS', intro: 'Vous avez été invité à rejoindre l’espace ALLNEEDS de votre entreprise.' }
 }
@@ -1060,6 +1083,9 @@ function scopedNeeds(user) {
   return db.needs.filter((need) => canAccessOrg(user, need.orgId))
 }
 
+async function hashPassword(password) { const salt = randomBytes(16).toString('hex'); return `scrypt$${salt}$${(await scrypt(password, salt, 64)).toString('hex')}` }
+const crm = createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification })
+
 const failures = new Map()
 function loginThrottled(key) {
   const now = Date.now()
@@ -1117,7 +1143,9 @@ const server = createServer(async (req, res) => {
         audit('auth.login.denied', { email: email.slice(0, 160), ip: req.socket.remoteAddress ?? 'unknown' })
         return json(res, 401, { error: 'adresse e-mail ou mot de passe incorrect' }, cors)
       }
+      if (user.status === 'suspended' || user.status === 'inactive') { audit('auth.login.denied', { email: email.slice(0, 160), reason: user.status }); return json(res, 403, { error: 'compte désactivé', code: 'ACCOUNT_DISABLED' }, cors) }
       clearLoginFailures(key)
+      user.lastLoginAt = new Date().toISOString(); saveDb(db)
       audit('auth.login.ok', { by: user.id })
       const org = orgForUser(user); return json(res, 200, { user: { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null } }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
@@ -1169,8 +1197,9 @@ const server = createServer(async (req, res) => {
       let user = db.users.find((u) => u.email?.toLowerCase() === inv.email)
       if (user && inv.orgId && Array.isArray(user.orgIds) && user.orgIds.length && !user.orgIds.includes(inv.orgId)) return json(res, 409, { error: 'cet e-mail appartient déjà à un autre compte' }, cors)
       const salt = randomBytes(16).toString('hex'); const hash = await scrypt(password, salt, 64)
-      if (!user) { user = { id: `usr-${randomBytes(10).toString('hex')}`, email: inv.email, role: inv.role, orgIds: inv.kind === 'concierge' ? (inv.metadata?.assignedOrgIds || []) : inv.kind === 'sales' ? [] : [inv.orgId], sectors: inv.metadata?.sectors || [], name: inv.name, active: true, passwordHash: null, passwordConfigured: false, permissions: inv.permissions }; db.users.push(user) }
-      user.passwordHash = `scrypt$${salt}$${hash.toString('hex')}`; user.passwordConfigured = true; user.active = true; user.role = inv.role; user.permissions = inv.permissions; if (inv.kind === 'concierge') { user.sectors = inv.metadata?.sectors || user.sectors || []; user.orgIds = inv.metadata?.assignedOrgIds || user.orgIds || [] } ; if (inv.kind === 'sales') user.orgIds = [] ; inv.usedAt = new Date().toISOString()
+      if (!user) { user = { id: `usr-${randomBytes(10).toString('hex')}`, email: inv.email, role: inv.role, orgIds: inv.kind === 'concierge' ? (inv.metadata?.assignedOrgIds || []) : inv.kind === 'sales' || inv.kind === 'crm' ? [] : [inv.orgId], sectors: inv.metadata?.sectors || [], name: inv.name, active: true, passwordHash: null, passwordConfigured: false, permissions: inv.permissions }; db.users.push(user) }
+      if (inv.kind === 'crm' && (user.status === 'suspended' || user.status === 'inactive')) return json(res, 403, { error: 'compte CRM désactivé' }, cors)
+      user.passwordHash = `scrypt$${salt}$${hash.toString('hex')}`; user.passwordConfigured = true; if (inv.kind !== 'crm') { user.active = true; user.role = inv.role; user.permissions = inv.permissions }; if (inv.kind === 'concierge') { user.sectors = inv.metadata?.sectors || user.sectors || []; user.orgIds = inv.metadata?.assignedOrgIds || user.orgIds || [] } ; if (inv.kind === 'sales') user.orgIds = [] ; inv.usedAt = new Date().toISOString()
       if (inv.kind === 'owner' && inv.orgId) {
         const reg = db.registrations.find((r) => r.orgId === inv.orgId && r.email?.toLowerCase() === inv.email.toLowerCase())
         if (reg) { reg.status = 'actif'; reg.activatedAt = new Date().toISOString(); reg.userId = user.id; pushRegistrationEvent(reg, 'compte_active', { byUserId: user.id }) }
@@ -1233,6 +1262,9 @@ const server = createServer(async (req, res) => {
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(req.method) && url.pathname.startsWith('/api/') && !requireSameOrigin(req, res)) return
     // Un compte commercial n'accède qu'à la présentation : tout le reste est refusé côté serveur.
     if (user.role === SALES_ROLE && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à la présentation commerciale' }, cors)
+    // Un agent CRM n'accède qu'aux routes du CRM, filtrées par ses permissions et son périmètre.
+    if (user.role === 'agent' && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé au CRM' }, cors)
+    if (await crm.handle(req, res, url, user, cors)) return
 
     if (req.method === 'GET' && url.pathname === '/api/sales/presentation') {
       if (!canAccessSalesPresentation(user)) return json(res, 403, { error: 'présentation commerciale réservée aux administrateurs et aux commerciaux' }, cors)

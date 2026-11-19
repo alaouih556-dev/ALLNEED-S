@@ -29,20 +29,27 @@
     "test:phase5:offres": "node scripts/test-phase5-offres.mjs",
     "test:phase5:missions": "node scripts/test-phase5-missions.mjs",
     "test:phase6": "node scripts/test-phase6.mjs",
-    "test:sales": "node scripts/test-sales-access.mjs"
+    "test:sales": "node scripts/test-sales-access.mjs",
+    "test:crm": "node scripts/test-crm.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.39",
     "clsx": "2.1.1",
+    "leaflet": "1.9.4",
+    "leaflet.markercluster": "1.5.3",
     "lucide-react": "0.510.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "tailwind-merge": "3.7.0"
+    "read-excel-file": "9.3.19",
+    "tailwind-merge": "3.7.0",
+    "write-excel-file": "4.1.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/router-generator": "1.167.38",
     "@tanstack/router-plugin": "1.168.40",
+    "@types/leaflet": "1.9.22",
+    "@types/leaflet.markercluster": "1.5.6",
     "@types/node": "22.20.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

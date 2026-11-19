@@ -28,8 +28,9 @@ type AuthState = {
 const AuthContext = createContext<AuthState | null>(null)
 
 /** Espace de travail ouvert par défaut pour un rôle (null si aucun espace n’existe). */
-export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | '/sales-presentation' | null {
+export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | '/sales-presentation' | '/crm' | null {
   if (role === 'admin') return '/admin'
+  if (role === 'agent') return '/crm'
   if (role === 'sales') return '/sales-presentation'
   if (role === 'concierge') return '/concierge'
   if (role === 'prestataire') return '/expert'

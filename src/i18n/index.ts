@@ -96,6 +96,8 @@ const SHORT_DATES: [string, string][] = [
 const DATES: [RegExp, string][] = [
   ...LONG_DATES.map(([fr, en]): [RegExp, string] => [new RegExp(`(?<![\\p{L}])${fr}(?![\\p{L}])`, 'giu'), en]),
   ...SHORT_DATES.map(([fr, en]): [RegExp, string] => [new RegExp(`(?<=\\d\\s?)${fr}(?![\\p{L}])`, 'giu'), en]),
+  // Jours abrégés suivis d'un numéro (« lun. 16 »).
+  ...([['lun', 'Mon'], ['mar', 'Tue'], ['mer', 'Wed'], ['jeu', 'Thu'], ['ven', 'Fri'], ['sam', 'Sat'], ['dim', 'Sun']] as const).map(([fr, en]): [RegExp, string] => [new RegExp(`(?<![\\p{L}])${fr}\\.(?=\\s?\\d)`, 'giu'), en]),
 ]
 
 /** Cherche une phrase connue, en tolérant une différence de majuscule initiale. */
