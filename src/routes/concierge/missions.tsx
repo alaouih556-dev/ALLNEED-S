@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Building2, CalendarClock, CircleAlert, ClipboardCheck, Clock3 } from 'lucide-react'
+import { Building2, CalendarClock, CheckCircle2, CircleAlert, ClipboardCheck, Clock3, ListTodo } from 'lucide-react'
+import { LoadingRows, MiniStat, Panel, StatGrid } from '@/components/admin-kit'
 import { ConciergeGuard, ConciergeHeading, ScopedEmpty } from '@/features/concierge/ScopedSection'
 import { Alert, Badge, Button, Card, Select } from '@/components/ui'
 import { useApiResource } from '@/lib/useApiResource'
@@ -24,11 +25,12 @@ function ConciergeMissions() {
     <ConciergeGuard>
       <div className="space-y-5">
         <ConciergeHeading
-          eyebrow="Tenir l’engagement client"
-          title="Chaque mission doit aboutir à un résultat suivi."
-          description="Suivez les missions des entreprises qui vous sont attribuées : statut, priorité, échéance et retours client."
+          eyebrow="Suivi"
+          title="Missions"
+          description="Les missions des entreprises qui vous sont attribuées : statut, priorité, échéance et retours client."
+          actions={<Link to={'/concierge/rendez-vous' as any}><Button size="sm" variant="outline"><CalendarClock size={14} />Organiser un point client</Button></Link>}
         />
-        {loading ? <p className="text-sm text-ink-500">Chargement des missions…</p> : null}
+        {loading ? <Panel><LoadingRows /></Panel> : null}
         {error ? <Alert tone="danger" title="Missions indisponibles">{error}</Alert> : null}
         {!loading && !error ? <MissionsBoard missions={data ?? []} onRefresh={refresh} /> : null}
       </div>
@@ -70,31 +72,17 @@ function MissionsBoard({ missions, onRefresh }: { missions: Mission[]; onRefresh
 
   return (
     <>
-      <section className="concierge-mission-stats">
-        <article><ClipboardCheck size={17} /><strong>{counts.total}</strong><span>mission{counts.total === 1 ? '' : 's'} au total</span></article>
-        <article><Clock3 size={17} /><strong>{counts.en_cours}</strong><span>en cours</span></article>
-        <article className={counts.attention ? 'has-alert' : ''}><CircleAlert size={17} /><strong>{counts.attention}</strong><span>en attente client</span></article>
-        <Link to={'/concierge/rendez-vous' as any}><CalendarClock size={17} /> Organiser un point client <ArrowRight size={14} /></Link>
-      </section>
-
-      <div className="concierge-mission-toolbar">
-        <div><small>VOTRE FILE DE COORDINATION</small><h2>Ce qui demande votre attention</h2></div>
-        <div>
-          {([
-            ['actives', `Actives (${counts.total - counts.terminee})`],
-            ['a_faire', `À faire (${counts.a_faire})`],
-            ['en_cours', `En cours (${counts.en_cours})`],
-            ['a_valider_client', `Attente client (${counts.a_valider_client})`],
-            ['terminee', `Terminées (${counts.terminee})`],
-          ] as const).map(([key, label]) => (
-            <button type="button" key={key} className={filter === key ? 'is-active' : ''} onClick={() => setFilter(key)}>{label}</button>
-          ))}
-        </div>
-      </div>
+      <StatGrid>
+        <MiniStat icon={<ClipboardCheck size={18} />} tone="indigo" label="Actives" value={counts.total - counts.terminee} hint={`${counts.total} au total`} active={filter === 'actives'} onClick={() => setFilter('actives')} />
+        <MiniStat icon={<ListTodo size={18} />} tone="sky" label="À faire" value={counts.a_faire} active={filter === 'a_faire'} onClick={() => setFilter('a_faire')} />
+        <MiniStat icon={<Clock3 size={18} />} tone="teal" label="En cours" value={counts.en_cours} active={filter === 'en_cours'} onClick={() => setFilter('en_cours')} />
+        <MiniStat icon={<CircleAlert size={18} />} tone="amber" label="En attente client" value={counts.a_valider_client} hint="Décision du client attendue" active={filter === 'a_valider_client'} onClick={() => setFilter('a_valider_client')} />
+      </StatGrid>
+      <div className="mb-4 flex justify-end"><button type="button" className={`cg-filter-chip ${filter === 'terminee' ? 'is-active' : ''}`} onClick={() => setFilter(filter === 'terminee' ? 'actives' : 'terminee')}><CheckCircle2 size={14} />Terminées ({counts.terminee})</button></div>
 
       {actionError ? <Alert tone="danger" className="mb-4">{actionError}</Alert> : null}
 
-      {visible.length === 0 ? <ScopedEmpty title="Aucune mission pour ce filtre" description="Les missions apparaissent ici dès qu’une entreprise de votre portefeuille accepte une offre." /> : null}
+      {visible.length === 0 ? <ScopedEmpty icon={<ClipboardCheck size={20} />} title="Aucune mission pour ce filtre" description="Les missions apparaissent ici dès qu’une entreprise de votre portefeuille accepte une offre." /> : null}
 
       <div className="concierge-mission-list">
         {visible.map((mission) => {
@@ -103,7 +91,7 @@ function MissionsBoard({ missions, onRefresh }: { missions: Mission[]; onRefresh
             <Card key={mission.id} className={`concierge-mission-card ${mission.status === 'a_valider_client' ? 'is-blocked' : ''}`}>
               <header>
                 <div>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-500"><Building2 size={14} /> {mission.orgName || mission.orgId.slice(0, 8)}</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-500"><Building2 size={14} /> {mission.orgName || 'Entreprise'}</span>
                   <h3>{mission.title}</h3>
                   <small>{mission.offerCode} · {mission.description}</small>
                 </div>

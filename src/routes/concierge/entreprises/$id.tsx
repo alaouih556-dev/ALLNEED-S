@@ -3,6 +3,10 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Building2, CalendarCheck, ClipboardCheck, FileText, FolderOpen, MessageSquare, PhoneCall, Plus, Target } from 'lucide-react'
 import { Alert, Badge, Button, Card, Field, Input, Select, Textarea } from '@/components/ui'
 import { ConciergeGuard } from '@/features/concierge/ScopedSection'
+import { PageHeader } from '@/components/layouts'
+import { EmptyBox, LoadingRows, MiniStat, Panel, StatGrid } from '@/components/admin-kit'
+
+const COLLECTION_LABEL: Record<string, string> = { needs: 'Besoins', missions: 'Missions', offers: 'Offres', messages: 'Messages', meetings: 'Rendez-vous', quotes: 'Devis', notifications: 'Notifications', consents: 'Consentements', needsSubscriptions: 'Abonnements Besoins', saasSubscriptions: 'Abonnements SaaS', conversations: 'Conversations', registrations: 'Inscriptions' }
 import { DocumentsPanel } from '@/features/documents/DocumentsPanel'
 import { createNeedProposal, fetchNeedProposals, patchProposal, transmitProposal, PROPOSAL_STATUS_META, type NeedProposal } from '@/lib/besoins'
 import { money } from '@/lib/format'
@@ -78,40 +82,34 @@ function ConciergeCompanyDetail() {
 
   return (
     <ConciergeGuard>
-      <div className="container-app py-8">
-        <Link to="/concierge/entreprises" className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-ink-600">
-          <ArrowLeft size={14} />
-          Retour aux entreprises
-        </Link>
-        {error ? <Alert tone="danger">{error}</Alert> : null}
-        {info ? <Alert tone="success">{info}</Alert> : null}
+      <div>
+        {error ? <Alert tone="danger" className="mb-4">{error}</Alert> : null}
+        {info ? <Alert tone="success" className="mb-4">{info}</Alert> : null}
+        {!data && !error ? <Panel><LoadingRows /></Panel> : null}
 
         {data ? (
           <>
-            <div className="mb-6 flex flex-wrap items-center gap-3">
-              <span className="rounded-xl bg-brand-50 p-3 text-brand-700">
-                <Building2 />
-              </span>
-              <div>
-                <h1 className="font-display text-2xl font-bold text-ink-950">{data.org.name}</h1>
-                <p className="text-sm text-ink-500">
-                  {data.org.sector} · {data.org.city || 'Ville non renseignée'} · {data.org.contactName || 'Contact non renseigné'}
-                </p>
-              </div>
+            <PageHeader
+              eyebrow="Fiche entreprise"
+              title={data.org.name}
+              description={`${data.org.sector === 'sante' ? 'Santé' : data.org.sector} · ${data.org.city || 'Ville non renseignée'} · ${data.org.contactName || registration?.name || 'Contact non renseigné'}`}
+              actions={
+                <>
+                  <Link to="/concierge/entreprises"><Button size="sm" variant="outline"><ArrowLeft size={14} />Entreprises</Button></Link>
+                  {diagnostic ? <Link to="/concierge/diagnostics/$id" params={{ id: diagnostic.id }}><Button size="sm"><ClipboardCheck size={14} />Ouvrir le diagnostic</Button></Link> : null}
+                </>
+              }
+            />
+
+            <div className="cg-tabs mb-6">
+              {diagnostic ? <Link to="/concierge/diagnostics/$id" params={{ id: diagnostic.id }} className="cg-filter-chip"><FileText size={14} />Rapport / restitution</Link> : <span className="cg-filter-chip is-muted"><ClipboardCheck size={14} />Diagnostic non envoyé</span>}
+              <a href="#documents" className="cg-filter-chip"><FolderOpen size={14} />Documents</a>
+              <Link to="/concierge/missions" className="cg-filter-chip">Missions</Link>
+              <Link to="/concierge/besoins" className="cg-filter-chip">Besoins</Link>
             </div>
 
-            <Card className="mb-6 p-4 sm:p-5">
-              <div className="flex flex-wrap gap-2">
-                {diagnostic ? <Link to="/concierge/diagnostics/$id" params={{ id: diagnostic.id }}><Button size="sm"><ClipboardCheck size={15} />Diagnostic</Button></Link> : <Button size="sm" variant="outline" disabled><ClipboardCheck size={15} />Diagnostic non envoyé</Button>}
-                {diagnostic ? <Link to="/concierge/diagnostics/$id" params={{ id: diagnostic.id }}><Button size="sm" variant="outline"><FileText size={15} />Rapport / restitution</Button></Link> : null}
-                <a href="#documents"><Button size="sm" variant="outline"><FolderOpen size={15} />Documents</Button></a>
-                <Link to="/concierge/missions"><Button size="sm" variant="outline">Missions</Button></Link>
-                <Link to="/concierge/besoins"><Button size="sm" variant="outline">Besoins</Button></Link>
-              </div>
-            </Card>
-
             <div className="mb-6 grid gap-4 lg:grid-cols-2">
-              <Card className="p-5"><p className="eyebrow">Informations entreprise</p><dl className="mt-3 grid gap-2 text-sm"><div className="flex justify-between gap-4"><dt className="text-ink-500">Entreprise</dt><dd className="font-semibold">{data.org.name}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">Secteur</dt><dd className="font-semibold">{data.org.sector}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">Ville</dt><dd className="font-semibold">{data.org.city || 'Non renseignée'}</dd></div></dl></Card>
+              <Card className="p-5"><p className="eyebrow">Informations entreprise</p><dl className="mt-3 grid gap-2 text-sm"><div className="flex justify-between gap-4"><dt className="text-ink-500">Entreprise</dt><dd className="font-semibold">{data.org.name}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">Secteur</dt><dd className="font-semibold">{data.org.sector === 'sante' ? 'Santé' : data.org.sector}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">Ville</dt><dd className="font-semibold">{data.org.city || 'Non renseignée'}</dd></div></dl></Card>
               <Card className="p-5"><p className="eyebrow">Contact client</p><dl className="mt-3 grid gap-2 text-sm"><div className="flex justify-between gap-4"><dt className="text-ink-500">Nom</dt><dd className="font-semibold">{data.org.contactName || registration?.name || 'Non renseigné'}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">E-mail</dt><dd className="font-semibold">{data.org.contactEmail || registration?.email || 'Non renseigné'}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-500">Téléphone</dt><dd className="font-semibold">{data.org.contactPhone || registration?.phone || 'Non renseigné'}</dd></div></dl></Card>
             </div>
 
@@ -127,7 +125,7 @@ function ConciergeCompanyDetail() {
                 <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                   <div className="flex justify-between gap-4"><dt className="text-ink-500">Contact</dt><dd className="text-right font-medium text-ink-900">{registration.name}</dd></div>
                   <div className="flex justify-between gap-4"><dt className="text-ink-500">Téléphone</dt><dd className="text-right font-medium text-ink-900">{registration.phone || '—'}</dd></div>
-                  <div className="flex justify-between gap-4"><dt className="text-ink-500">Secteur</dt><dd className="text-right font-medium text-ink-900">{registration.sector}</dd></div>
+                  <div className="flex justify-between gap-4"><dt className="text-ink-500">Secteur</dt><dd className="text-right font-medium text-ink-900">{registration.sector === 'sante' ? 'Santé' : registration.sector}</dd></div>
                   <div className="flex justify-between gap-4"><dt className="text-ink-500">Créneau</dt><dd className="text-right font-medium text-ink-900">{registration.appointmentDate || '—'} {registration.appointmentSlot || ''}</dd></div>
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -141,46 +139,39 @@ function ConciergeCompanyDetail() {
               </Card>
             ) : null}
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card className="p-4">
-                <Target size={18} className="text-brand-700" />
-                <p className="mt-2 text-xs text-ink-500">Besoins</p>
-                <strong className="text-2xl">{data.collections.needs?.length || 0}</strong>
-              </Card>
-              <Card className="p-4">
-                <FileText size={18} className="text-brand-700" />
-                <p className="mt-2 text-xs text-ink-500">Missions</p>
-                <strong className="text-2xl">{data.collections.missions?.length || 0}</strong>
-              </Card>
-              <Card className="p-4">
-                <MessageSquare size={18} className="text-brand-700" />
-                <p className="mt-2 text-xs text-ink-500">Messages</p>
-                <strong className="text-2xl">{data.collections.messages?.length || 0}</strong>
-              </Card>
-            </div>
+            <StatGrid>
+              <MiniStat icon={<Target size={18} />} tone="sky" label="Besoins" value={data.collections.needs?.length || 0} />
+              <MiniStat icon={<FileText size={18} />} tone="emerald" label="Missions" value={data.collections.missions?.length || 0} />
+              <MiniStat icon={<ClipboardCheck size={18} />} tone="amber" label="Offres" value={data.collections.offers?.length || 0} />
+              <MiniStat icon={<MessageSquare size={18} />} tone="indigo" label="Messages" value={data.collections.messages?.length || 0} />
+            </StatGrid>
 
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
-              {(Object.entries(data.collections) as Array<[string, Item[]]>).filter(([key]) => !['documents', 'diagnostics'].includes(key)).map(([key, rows]) => (
-                <Card key={key} id={key} className="p-4 scroll-mt-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-semibold capitalize">{key}</h2>
-                    <Badge>{rows.length}</Badge>
-                  </div>
-                  <div className="mt-3 divide-y divide-ink-50">
-                    {rows.length ? (
-                      rows.map((row) => (
-                        <div key={row.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                          <span className="truncate font-medium text-ink-900">{row.title || row.name || 'Sans titre'}</span>
-                          {row.status ? <Badge tone={row.status === 'valide' ? 'success' : 'neutral'}>{row.status}</Badge> : null}
+            {(() => {
+              const sections = (Object.entries(data.collections) as Array<[string, Item[]]>).filter(([key, rows]) => !['documents', 'diagnostics'].includes(key) && rows.length)
+              return (
+                <Panel title="Activité du dossier" description="Besoins, missions, offres, rendez-vous et échanges de cette entreprise.">
+                  {!sections.length ? <EmptyBox icon={<FolderOpen size={20} />} title="Aucune activité pour le moment" text="Les besoins, offres, missions et rendez-vous de cette entreprise apparaîtront ici." /> : null}
+                  <div className="grid gap-4 p-4 lg:grid-cols-2">
+                    {sections.map(([key, rows]) => (
+                      <section key={key} id={key} className="scroll-mt-6 rounded-xl border border-ink-100 p-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-bold text-ink-950">{COLLECTION_LABEL[key] ?? key}</h3>
+                          <Badge>{rows.length}</Badge>
                         </div>
-                      ))
-                    ) : (
-                      <p className="py-2 text-xs text-ink-500">Aucun élément.</p>
-                    )}
+                        <div className="mt-2 divide-y divide-ink-50">
+                          {rows.map((row) => (
+                            <div key={row.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                              <span className="truncate font-medium text-ink-900">{row.title || row.name || 'Sans titre'}</span>
+                              {row.status ? <Badge tone={row.status === 'valide' ? 'success' : 'neutral'}>{row.status}</Badge> : null}
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
                   </div>
-                </Card>
-              ))}
-            </div>
+                </Panel>
+              )
+            })()}
 
             <div className="mt-8">
               <ConciergeProposalsPanel needs={data.collections.needs || []} />

@@ -1468,3 +1468,66 @@ html.i18n-pending body{opacity:0}
 .mk-lang-mobile{display:none}
 @media (max-width:1023px){.mk-lang-mobile{display:inline-flex;margin-left:auto;margin-right:6px}}
 @media (max-width:720px){.sp-lang{display:none}}
+
+/* ===== V55 — Espace concierge : tableau de bord et listes ===== */
+.cg-task,.cg-org-row{display:flex;align-items:center;gap:12px;padding:13px 20px;transition:background .15s}
+.cg-task:hover,.cg-org-row:hover{background:color-mix(in srgb,var(--an-accent) 5%,transparent)}
+.cg-task-icon{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;border-radius:11px}
+.cg-task-cta{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;color:var(--an-accent);background:color-mix(in srgb,var(--an-accent) 9%,transparent)}
+.cg-task:hover .cg-task-cta{background:var(--an-accent);color:#fff}
+.cg-shortcut{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:13px;border:1px solid var(--an-line);transition:.15s}
+.cg-shortcut:hover{border-color:color-mix(in srgb,var(--an-accent) 35%,white);transform:translateX(2px)}
+.cg-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--an-accent)}
+.cg-link:hover{text-decoration:underline}
+@media (max-width:640px){.cg-task,.cg-org-row{padding:12px 14px;flex-wrap:wrap}.cg-task-cta{margin-left:48px}.cg-org-row .an-badge,.cg-org-row>span:last-of-type{order:3}}
+.cg-filter-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;border:1px solid var(--an-line);background:var(--an-surface,#fff);font-size:12px;font-weight:700;color:#475569;transition:.15s}
+.cg-filter-chip:hover{border-color:color-mix(in srgb,var(--an-accent) 40%,white);color:var(--an-accent)}
+.cg-filter-chip.is-active{background:var(--an-accent);border-color:var(--an-accent);color:#fff}
+.cg-hero-select{min-width:220px}
+.cg-hero-select select{background:rgba(255,255,255,.95);color:#0f172a}
+.cg-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.cg-filter-chip.is-muted{opacity:.6;cursor:default}
+.concierge-commercial-page,.concierge-needs-page{padding:0;max-width:none}
+.concierge-needs-toolbar h2,.commercial-work-heading h2{font-size:1rem}
+.concierge-needs-toolbar p{font-size:.75rem}
+.concierge-needs-search input{font-size:.8rem}
+.concierge-needs-filters{display:none}
+@media (max-width:640px){
+  .cg-org-row{align-items:flex-start}
+  .cg-org-row>svg:last-child{display:none}
+  .cg-org-row{flex-wrap:wrap}
+  .cg-org-row>span.min-w-0{flex-basis:calc(100% - 52px)}
+  .cg-org-row>span.whitespace-nowrap{margin-left:52px}
+  .cg-task{align-items:flex-start}
+}
+@media (max-width:640px){.cg-task{flex-wrap:wrap}.cg-task>span.min-w-0{flex-basis:calc(100% - 52px)}.cg-task-cta{margin-left:48px}}
+
+/* ===== V56 — Corrections mode sombre : recherche Besoins, tableau Quotas, listes déroulantes ===== */
+/* Barre de recherche des besoins (concierge) : un seul champ, pas de champ imbriqué */
+.concierge-needs-search{min-width:240px;padding:.45rem .8rem;border-radius:12px}
+.concierge-needs-search input{width:100%;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;font-size:.82rem}
+.an-shell[data-mode="dark"] .concierge-needs-search{background:var(--an-surface-2);border-color:var(--an-line);color:var(--an-muted)}
+.an-shell[data-mode="dark"] .concierge-needs-search input{color:var(--an-text)!important}
+.an-shell[data-mode="dark"] .concierge-needs-search input::placeholder{color:var(--an-faint)}
+.concierge-needs-search:focus-within{border-color:var(--an-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--an-accent) 20%,transparent)}
+
+/* Options des listes déroulantes : toujours lisibles (fond et texte contrastés) */
+.an-shell select option{background:#fff;color:#0f172a}
+.an-shell[data-mode="dark"] select option{background:var(--an-surface);color:var(--an-text)}
+
+/* Sélecteur dans la bannière : lisible en clair comme en sombre */
+.an-hero-actions select{background-color:rgba(255,255,255,.12)!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+.an-hero-actions select:focus{border-color:#fff!important;box-shadow:0 0 0 3px rgba(255,255,255,.25)!important}
+
+/* Tableaux : en-tête et ligne mise en avant en mode sombre */
+.an-shell[data-mode="dark"] .an-main thead th{background:var(--an-surface-2)!important;color:var(--an-muted)!important;border-color:var(--an-line)!important}
+.an-shell[data-mode="dark"] .an-main tbody tr{border-color:var(--an-line)}
+.an-shell[data-mode="dark"] .an-main tbody td{color:var(--an-text-2)}
+.an-shell[data-mode="dark"] .bg-brand-50\/50,.an-shell[data-mode="dark"] .bg-brand-50\/60{background-color:color-mix(in srgb,var(--an-accent) 16%,transparent)!important}
+.an-shell[data-mode="dark"] .bg-brand-50{background-color:color-mix(in srgb,var(--an-accent) 18%,transparent)!important}
+.an-shell[data-mode="dark"] .text-brand-800,.an-shell[data-mode="dark"] .text-brand-700{color:color-mix(in srgb,var(--an-accent) 55%,white)!important}
+.an-shell[data-mode="dark"] .ring-brand-200{--tw-ring-color:color-mix(in srgb,var(--an-accent) 45%,transparent)!important}
+.concierge-needs-search input{color:#0f172a}
+.an-shell[data-mode="dark"] .border-ink-50,.an-shell[data-mode="dark"] .border-ink-100,.an-shell[data-mode="dark"] .divide-ink-50>*+*,.an-shell[data-mode="dark"] .divide-ink-100>*+*{border-color:var(--an-line)!important}
+.an-hero-actions select option{color:#0f172a}
+.an-shell[data-mode="dark"] .an-hero-actions select option{color:var(--an-text)}

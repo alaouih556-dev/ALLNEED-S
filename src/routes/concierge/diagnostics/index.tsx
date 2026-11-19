@@ -1,11 +1,12 @@
 import { isSectorActive } from '@/lib/active-sectors'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowRight, ArrowUpRight, BadgeCheck, ClipboardList, FileSearch, RefreshCw } from 'lucide-react'
-import { ConciergeHeading, ScopedEmpty } from '@/features/concierge/ScopedSection'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight, ArrowUpRight, BadgeCheck, ClipboardList, EyeOff, FileSearch, RefreshCw } from 'lucide-react'
+import { EmptyBox, HowItWorks, Initial, LoadingRows, MiniStat, Panel, Rows, StatGrid } from '@/components/admin-kit'
+import { ConciergeHeading } from '@/features/concierge/ScopedSection'
 import { useSubmittedDiagnostics } from '@/features/parcours/useDiagnosticRecord'
 import { PACKS, type SectorKey } from '@/features/health360/packs'
 import { diagnosticStaffStatusLabel } from '@/lib/diagnostic-status'
-import { Alert, Badge, Button, Card } from '@/components/ui'
+import { Alert, Badge, Button } from '@/components/ui'
 
 export const Route = createFileRoute('/concierge/diagnostics/')({ component: ConciergeDiagnostics })
 
@@ -25,170 +26,73 @@ function contactLine(record: { conciergeRequest?: { contact?: string; phone?: st
 function ConciergeDiagnostics() {
   const { records: allRecords, loading, error, refresh } = useSubmittedDiagnostics()
   const records = allRecords.filter((item) => !item.sector || isSectorActive(item.sector))
-  const navigate = useNavigate()
   const toAnalyse = records.filter((item) => item.status !== 'restitue')
   const published = records.filter((item) => item.status === 'restitue')
 
   return (
-    <div className="mx-auto max-w-7xl px-6">
-        <ConciergeHeading
-          eyebrow="La base du diagnostic"
-          title="Comprendre. Prioriser. Restituer. Faire avancer."
-          description="Chaque diagnostic envoyé par un client attend une lecture, un commentaire pour le client et des priorités validées. Rien n’est publié automatiquement."
-        />
+    <div>
+      <ConciergeHeading
+        eyebrow="Suivi"
+        title="Diagnostics"
+        description="Lisez les diagnostics envoyés par vos entreprises, préparez vos conclusions puis publiez la restitution. Rien n’est publié automatiquement."
+        actions={<Button size="sm" variant="outline" onClick={() => void refresh()}><RefreshCw size={14} />Actualiser</Button>}
+      />
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          <Card className="p-5">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-700">
-              <FileSearch className="h-4 w-4" />
-              À analyser
-            </p>
-            <p className="mt-3 font-display text-3xl font-bold text-ink-950">{toAnalyse.length}</p>
-            <p className="mt-1 text-sm text-ink-500">Diagnostics soumis, à lire et restituer.</p>
-          </Card>
-          <Card className="p-5">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">
-              <BadgeCheck className="h-4 w-4" />
-              Validés
-            </p>
-            <p className="mt-3 font-display text-3xl font-bold text-ink-950">{published.length}</p>
-            <p className="mt-1 text-sm text-ink-500">Restitutions publiées au client.</p>
-          </Card>
-          <Card className="p-5">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-ink-500">
-              <ClipboardList className="h-4 w-4" />
-              Total
-            </p>
-            <p className="mt-3 font-display text-3xl font-bold text-ink-950">{records.length}</p>
-            <p className="mt-1 text-sm text-ink-500">Diagnostics du portefeuille.</p>
-          </Card>
-        </div>
+      <HowItWorks steps={['Le client envoie son diagnostic', 'Vous l’analysez', 'Vous publiez la restitution']} />
 
-        {error ? (
-          <Alert tone="warning" title="Diagnostics indisponibles" className="mt-6">
-            {error} · Vérifiez que l’API est démarrée, puis rechargez.
-            <div className="mt-3">
-              <Button size="sm" variant="outline" onClick={() => void refresh()}>
-                <RefreshCw className="mr-2 h-3.5 w-3.5" /> Réessayer
-              </Button>
-            </div>
-          </Alert>
-        ) : null}
+      <StatGrid>
+        <MiniStat icon={<FileSearch size={18} />} tone="amber" label="À analyser" value={loading ? '–' : toAnalyse.length} hint="À lire puis restituer" />
+        <MiniStat icon={<BadgeCheck size={18} />} tone="emerald" label="Restitutions publiées" value={loading ? '–' : published.length} hint="Visibles par le client" />
+        <MiniStat icon={<ClipboardList size={18} />} tone="indigo" label="Total" value={loading ? '–' : records.length} hint="Diagnostics du portefeuille" />
+        <MiniStat icon={<EyeOff size={18} />} tone="slate" label="Masquées au client" value={loading ? '–' : published.filter((r) => r.restitutionVisible === false).length} />
+      </StatGrid>
 
-        <section className="mt-10">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="eyebrow">En attente de votre lecture</p>
-              <h2 className="mt-2 font-display text-2xl font-bold text-ink-950">Diagnostics à analyser</h2>
-            </div>
-            {!loading ? <span className="text-sm text-ink-500">{toAnalyse.length} diagnostic(s)</span> : null}
-          </div>
+      {error ? (
+        <Alert tone="warning" title="Diagnostics indisponibles" className="mb-5">
+          {error} · Vérifiez que l’API est démarrée, puis rechargez.
+        </Alert>
+      ) : null}
 
-          {loading && !records.length ? (
-            <Card className="mt-5 p-6">
-              <p className="flex items-center gap-2 text-sm text-ink-500">
-                <RefreshCw className="h-4 w-4 animate-spin" /> Chargement des diagnostics…
-              </p>
-            </Card>
-          ) : null}
+      <div className="grid gap-5 xl:grid-cols-2">
+        <Panel title="À analyser" description="Diagnostics soumis, en attente de votre lecture." action={<Badge tone={toAnalyse.length ? 'warning' : 'success'}>{toAnalyse.length}</Badge>}>
+          {loading && !records.length ? <LoadingRows /> : null}
+          {!loading && !toAnalyse.length ? <EmptyBox icon={<FileSearch size={20} />} title="Aucun diagnostic en attente" text="Dès qu’un client soumet son questionnaire, il apparaît ici pour analyse." /> : null}
+          <Rows>
+            {toAnalyse.map((record) => (
+              <li key={record.id}>
+                <Link to="/concierge/diagnostics/$id" params={{ id: record.id }} className="cg-org-row">
+                  <Initial name={companyName(record)} tone="amber" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-ink-950">{companyName(record)}</span>
+                    <span className="block truncate text-xs text-ink-500">{contactLine(record) ? `${contactLine(record)} · ` : ''}{PACKS[sectorKey(record.sector)].label} · envoyé le {new Date(record.createdAt).toLocaleDateString('fr-FR')}</span>
+                  </span>
+                  <Badge tone={record.status === 'soumis' ? 'info' : 'warning'}>{diagnosticStaffStatusLabel(record.status)}</Badge>
+                  <span className="cg-task-cta">Analyser<ArrowRight size={14} /></span>
+                </Link>
+              </li>
+            ))}
+          </Rows>
+        </Panel>
 
-          {!loading && toAnalyse.length === 0 ? (
-            <div className="mt-5">
-              <ScopedEmpty
-                title="Aucun diagnostic en attente"
-                description="Dès qu’un client soumet son questionnaire, il apparaît ici pour analyse."
-              />
-            </div>
-          ) : null}
-
-          <div className="mt-5 space-y-4">
-            {toAnalyse.map((record) => {
-              const sector = sectorKey(record.sector)
-              return (
-                <div key={record.id} className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" onClick={() => void navigate({ to: '/concierge/diagnostics/$id', params: { id: record.id } })}>
-                  <Card className="cursor-pointer p-5 transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md sm:p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="min-w-0 max-w-2xl">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-lg font-bold text-ink-950">{companyName(record)}</h3>
-                          <Badge tone={record.status === 'soumis' ? 'info' : 'warning'}>
-                            {diagnosticStaffStatusLabel(record.status)}
-                          </Badge>
-                        </div>
-                        <p className="mt-1 text-sm text-ink-600">
-                          {contactLine(record) ? `${contactLine(record)} · ` : ''}
-                          {PACKS[sector].label} · {record.format} · envoyé le{' '}
-                          {new Date(record.createdAt).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <span>
-                        <Button
-                          tabIndex={-1}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            void navigate({ to: '/concierge/diagnostics/$id', params: { id: record.id } })
-                          }}
-                        >
-                          Analyser <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </span>
-                    </div>
-                  </Card>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        <section className="mt-12">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="eyebrow">Validées et publiées au client</p>
-              <h2 className="mt-2 font-display text-2xl font-bold text-ink-950">Restitutions validées</h2>
-            </div>
-            <span className="text-sm text-ink-500">{published.length} restitution(s)</span>
-          </div>
-
-          {published.length === 0 ? (
-            <div className="mt-5">
-              <ScopedEmpty
-                title="Aucune restitution validée"
-                description="La restitution n’apparaît ici qu’après validation explicite par l’équipe."
-              />
-            </div>
-          ) : (
-            <div className="mt-5 space-y-4">
-              {published.map((record) => {
-                const sector = sectorKey(record.sector)
-                return (
-                  <Link key={record.id} to="/concierge/diagnostics/$id" params={{ id: record.id }} className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"><Card className="cursor-pointer p-5 transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md sm:p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="min-w-0 max-w-2xl">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-lg font-bold text-ink-950">{companyName(record)}</h3>
-                          <Badge tone="success">Validé</Badge>
-                          {record.restitutionVisible === false ? <Badge tone="neutral">Masquée au client</Badge> : null}
-                        </div>
-                        <p className="mt-1 text-sm text-ink-600">
-                          {contactLine(record) ? `${contactLine(record)} · ` : ''}
-                          {PACKS[sector].label} ·{' '}
-                          {record.publishedAt
-                            ? `publiée le ${new Date(record.publishedAt).toLocaleDateString('fr-FR')}`
-                            : 'publiée'}
-                        </p>
-                      </div>
-                      <span>
-                        <Button variant="outline" tabIndex={-1}>
-                          Voir la restitution <ArrowUpRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </span>
-                    </div>
-                  </Card></Link>
-                )
-              })}
-            </div>
-          )}
-        </section>
+        <Panel title="Restitutions publiées" description="Validées par l’équipe et visibles dans l’espace client." action={<Badge tone="success">{published.length}</Badge>}>
+          {!loading && !published.length ? <EmptyBox icon={<BadgeCheck size={20} />} title="Aucune restitution publiée" text="Une restitution n’apparaît ici qu’après votre validation explicite." /> : null}
+          <Rows>
+            {published.map((record) => (
+              <li key={record.id}>
+                <Link to="/concierge/diagnostics/$id" params={{ id: record.id }} className="cg-org-row">
+                  <Initial name={companyName(record)} tone="emerald" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-ink-950">{companyName(record)}</span>
+                    <span className="block truncate text-xs text-ink-500">{PACKS[sectorKey(record.sector)].label} · {record.publishedAt ? `publiée le ${new Date(record.publishedAt).toLocaleDateString('fr-FR')}` : 'publiée'}</span>
+                  </span>
+                  {record.restitutionVisible === false ? <Badge tone="neutral">Masquée au client</Badge> : <Badge tone="success">Publiée</Badge>}
+                  <ArrowUpRight size={15} className="text-ink-300" />
+                </Link>
+              </li>
+            ))}
+          </Rows>
+        </Panel>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, CircleAlert, Clock3, FileCheck2, Handshake, Search, UsersRound } from 'lucide-react'
+import { ArrowRight, CheckCircle2, CircleAlert, Clock3, FileCheck2, Handshake, Search } from 'lucide-react'
+import { MiniStat, StatGrid } from '@/components/admin-kit'
 import { ConciergeGuard, ConciergeHeading, OrgIdentity, ScopedEmpty } from '@/features/concierge/ScopedSection'
 import { conciergeScope, useDemo } from '@/store/store'
 import { useAuth } from '@/features/auth/AuthContext'
@@ -61,16 +62,19 @@ function ConciergeNeeds() {
   }).sort((a, b) => Number(b.urgency === 'haute') - Number(a.urgency === 'haute') || phase(b.status) - phase(a.status) || a.submittedAt.localeCompare(b.submittedAt)), [items, filter, query, orgs])
 
   return <ConciergeGuard><div className="concierge-needs-page">
-    <ConciergeHeading eyebrow="Votre rôle : faire le lien" title="De la demande client à une solution suivie." description="Votre travail ne s’arrête pas au changement de statut : vous cadrez, coordonnez et relancez jusqu’à une décision puis un démarrage clair."/>
+    <ConciergeHeading eyebrow="Suivi" title="Besoins clients" description="De la demande à une solution suivie : cadrez, coordonnez et relancez jusqu’à une décision puis un démarrage clair."/>
 
-    {operations.live ? <Alert tone="info" className="mb-4" title="Dossiers synchronisés">Les besoins et changements d’étape sont partagés avec l’entreprise et l’administration. Les prestataires, devis et missions restent à raccorder.</Alert> : null}
     {operations.loading ? <Alert tone="info" className="mb-4" title="Actualisation de la file">Chargement des dossiers du serveur…</Alert> : null}
     {operations.error ? <Alert tone="danger" className="mb-4" title="Chargement des besoins impossible">{operations.error}</Alert> : null}
-    <section className="concierge-value-chain"><article><span><UsersRound size={18}/></span><div><small>POUR LE CLIENT</small><strong>Une demande comprise et suivie</strong><p>Il sait où en est son besoin, quelles options existent et quel est le prochain pas.</p></div></article><i><ArrowRight size={16}/></i><article><span><BriefcaseBusiness size={18}/></span><div><small>VOTRE RÔLE</small><strong>Coordonner et débloquer</strong><p>Vous gardez le lien, vérifiez les étapes et alertez quand une décision manque.</p></div></article><i><ArrowRight size={16}/></i><article><span><CheckCircle2 size={18}/></span><div><small>POUR ALLNEEDS</small><strong>Un service qui tient sa promesse</strong><p>Les besoins avancent, les décisions sont tracées et la relation client reste claire.</p></div></article></section>
 
-    <section className="concierge-needs-summary"><article className={urgent.length ? 'is-alert' : ''}><CircleAlert size={18}/><strong>{urgent.length}</strong><span>besoin{urgent.length === 1 ? '' : 's'} urgent{urgent.length === 1 ? '' : 's'}</span></article><article><Handshake size={18}/><strong>{waitingDecision.length}</strong><span>en attente d’une décision</span></article><article><Clock3 size={18}/><strong>{active.length}</strong><span>à accompagner jusqu’au résultat</span></article><div><FileCheck2 size={16}/><span>Objectif concierge : une prochaine étape claire pour chaque dossier ouvert.</span></div></section>
+    <StatGrid>
+      <MiniStat icon={<Clock3 size={18}/>} tone="indigo" label="À accompagner" value={active.length} hint="Dossiers ouverts" active={filter === 'a_suivre'} onClick={() => setFilter('a_suivre')}/>
+      <MiniStat icon={<CircleAlert size={18}/>} tone="rose" label="Urgents" value={urgent.length} hint="À traiter en priorité" active={filter === 'urgents'} onClick={() => setFilter('urgents')}/>
+      <MiniStat icon={<Handshake size={18}/>} tone="amber" label="En attente d’une décision" value={waitingDecision.length} hint="Propositions transmises" active={filter === 'decision'} onClick={() => setFilter('decision')}/>
+      <MiniStat icon={<FileCheck2 size={18}/>} tone="emerald" label="Tous les besoins" value={items.length} hint="Dans votre portefeuille" active={filter === 'tous'} onClick={() => setFilter('tous')}/>
+    </StatGrid>
 
-    <div className="concierge-needs-toolbar"><div><small>VOTRE FILE DE SUIVI</small><h2>À traiter dans cet ordre</h2><p>Urgence déclarée d’abord, puis dossiers proches d’une décision.</p></div><div className="concierge-needs-search"><Search size={16}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Entreprise ou besoin" aria-label="Rechercher une entreprise ou un besoin"/></div></div>
+    <div className="concierge-needs-toolbar"><div><h2>À traiter dans cet ordre</h2><p>Urgence déclarée d’abord, puis dossiers proches d’une décision.</p></div><div className="concierge-needs-search"><Search size={16}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Entreprise ou besoin" aria-label="Rechercher une entreprise ou un besoin"/></div></div>
     <div className="concierge-needs-filters">{([['a_suivre', 'À suivre'], ['urgents', `Urgents (${urgent.length})`], ['decision', `Décision (${waitingDecision.length})`], ['tous', `Tous (${items.length})`]] as const).map(([key, label]) => <button type="button" key={key} className={filter === key ? 'is-active' : ''} onClick={() => setFilter(key)}>{label}</button>)}</div>
 
     <div className="concierge-needs-list">{visible.map((item) => {
@@ -86,6 +90,6 @@ function ConciergeNeeds() {
         <div className="concierge-need-work"><div className="concierge-next-work"><small>VOTRE PROCHAIN GESTE</small><strong>{next.title}</strong><p>{next.detail}</p></div><div className="concierge-outcome-pair"><div><small>LE CLIENT Y GAGNE</small><p>{next.client}</p></div><div><small>ALLNEEDS Y GAGNE</small><p>{next.allneeds}</p></div></div></div>
         <div className="concierge-need-footer"><div><strong>{company?.contactName ?? 'Contact à confirmer'}</strong><small>{item.assignedTo ? `Suivi interne : ${item.assignedTo}` : 'Suivi interne à attribuer'}</small><small>{operations.live ? `${item.candidateIds.length} proposition(s) · ${item.quoteIds.length} devis` : `${item.candidateIds.length} prestataire${item.candidateIds.length === 1 ? '' : 's'} · ${item.quoteIds.length} devis`}</small></div><div className="concierge-need-actions"><Select aria-label={`Mettre à jour l’étape de ${item.title}`} value={normalizeNeedStatus(item.status) ?? item.status} onChange={(event) => { const status = event.target.value as NeedStatus; const label = `Étape mise à jour par le concierge : ${(NEED_STATUS[status] ?? NEED_STATUS.nouveau).label}`; if (auth.status === 'authenticated') void operations.setStatus(item.id, status, label).catch((cause) => dispatch({ type: 'TOAST_ADD', toast: { title: 'Étape non enregistrée', description: cause instanceof Error ? cause.message : 'Réessayez.', tone: 'warning' } })); else dispatch({ type: 'NEED_SET_STATUS', id: item.id, status, label }) }}>{[...NEED_FLOW, 'annule' as const].map((value) => <option key={value} value={value}>{(NEED_STATUS[value] ?? NEED_STATUS.nouveau).label}</option>)}</Select><Link to={'/concierge/entreprises/$id' as any} params={{ id: item.orgId } as any}>{next.action} <ArrowRight size={14}/></Link></div></div>
       </Card>
-    })}{!visible.length ? <ScopedEmpty/> : null}</div>
+    })}{!visible.length ? <ScopedEmpty icon={<CheckCircle2 size={20}/>} title={items.length ? 'Aucun besoin pour ce filtre' : 'Aucun besoin pour le moment'} description={items.length ? 'Choisissez un autre filtre ci-dessus.' : 'Les besoins déposés par vos entreprises apparaîtront ici, avec la prochaine étape à mener.'}/> : null}</div>
   </div></ConciergeGuard>
 }

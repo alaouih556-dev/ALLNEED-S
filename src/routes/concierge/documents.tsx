@@ -37,7 +37,7 @@ function ConciergeDocuments() {
         title="Documents du portefeuille"
         description="Pièces disponibles pour vos entreprises, uniquement celles qui vous sont affectées."
       />
-      <div className="mt-8">
+      <div>
         {orgs.length > 1 ? (
           <div className="mb-4 max-w-xs">
             <Select value={orgId} onChange={(e) => setOrgId(e.target.value)}>

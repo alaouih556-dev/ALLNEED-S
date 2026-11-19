@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { AlertTriangle, ArrowUpRight, CheckCircle2, Gauge, RefreshCcw } from 'lucide-react'
+import { AlertTriangle, ArrowUpRight, CheckCircle2, Gauge, Inbox, Layers, RefreshCcw } from 'lucide-react'
+import { MiniStat } from '@/components/admin-kit'
 import { useDemo, tierLimit } from '@/store/store'
 import { PageHeader } from '@/components/layouts'
 import {
@@ -13,7 +14,6 @@ import {
   KeyValue,
   Progress,
   Select,
-  Stat,
   TableWrap,
   Td,
   Th,
@@ -68,10 +68,10 @@ function AdminQuotas() {
         }
       />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Stat label="Besoins restants" value={remaining} hint={`${sub.consumed} utilisés sur ${needsLimit} cette année`} tone={usedPct >= 85 ? 'warning' : 'success'} />
-        <Stat label="Capacité en parallèle" value={`${Math.max(0, concurrentLimit - activeNeeds.length)} place(s)`} hint={`${activeNeeds.length} ouverts · ${concurrentLimit} autorisés`} tone={concurrentOk ? 'success' : 'danger'} />
-        <Stat label="Renouvellement" value={sub.autoRenew ? 'Automatique' : 'À confirmer'} hint={`Échéance ${longDate(sub.renewsAt)}`} tone={sub.autoRenew ? 'brand' : 'warning'} />
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <MiniStat icon={<Inbox size={18} />} tone={usedPct >= 85 ? 'amber' : 'emerald'} label="Besoins restants" value={remaining} hint={`${sub.consumed} utilisés sur ${needsLimit} cette année`} ratio={needsLimit ? remaining / needsLimit : 0} />
+        <MiniStat icon={<Layers size={18} />} tone={concurrentOk ? 'teal' : 'rose'} label="Capacité en parallèle" value={`${Math.max(0, concurrentLimit - activeNeeds.length)} place(s)`} hint={`${activeNeeds.length} ouverts · ${concurrentLimit} autorisés`} ratio={concurrentLimit ? Math.max(0, concurrentLimit - activeNeeds.length) / concurrentLimit : 0} />
+        <MiniStat icon={<RefreshCcw size={18} />} tone={sub.autoRenew ? 'indigo' : 'amber'} label="Renouvellement" value={sub.autoRenew ? 'Automatique' : 'À confirmer'} hint={`Échéance ${longDate(sub.renewsAt)}`} />
       </div>
 
       <Card className={`mb-6 border-l-4 ${attention ? 'border-l-amber-400' : 'border-l-emerald-500'}`}>
@@ -88,7 +88,7 @@ function AdminQuotas() {
         </CardBody>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-6 2xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
           <Card>
             <CardHeader
