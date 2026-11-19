@@ -35,13 +35,16 @@ import {
   UserRoundCog,
   UsersRound,
   X,
+  BadgeCheck,
+  Presentation,
 } from 'lucide-react'
 import { useDemo } from '@/store/store'
-import { useAuth } from '@/features/auth/AuthContext'
+import { canAccessSalesPresentation, useAuth } from '@/features/auth/AuthContext'
 import { clientModules, orgSaasActive, type AccessModule } from '@/lib/access'
 import { cn } from '@/lib/utils'
 import { THEMES, useWorkspaceTheme, type ThemeMode } from '@/lib/theme'
 import { Avatar } from '@/components/ui'
+import { LanguageSwitch } from '@/i18n/LanguageSwitch'
 
 /* ------------------------------------------------------------------ */
 /* Toaster                                                             */
@@ -131,7 +134,7 @@ function buildClientNav(
 }
 
 
-function buildConciergeNav(): NavItem[] {
+function buildConciergeNav(salesAccess = false): NavItem[] {
   return [
     { group: 'Portefeuille', label: 'Mon portefeuille', to: '/concierge' as any, icon: <LayoutDashboard className="h-4 w-4" /> },
     { group: 'Portefeuille', label: 'Entreprises suivies', to: '/concierge/entreprises' as any, icon: <Building2 className="h-4 w-4" /> },
@@ -143,6 +146,7 @@ function buildConciergeNav(): NavItem[] {
     { group: 'Coordination', label: 'Rendez-vous', to: '/concierge/rendez-vous' as any, icon: <CalendarDays className="h-4 w-4" /> },
     { group: 'Coordination', label: 'Documents', to: '/concierge/documents' as any, icon: <FileText className="h-4 w-4" /> },
     { group: 'Coordination', label: 'Messages', to: '/concierge/messages' as any, icon: <MessageSquare className="h-4 w-4" /> },
+    ...(salesAccess ? [{ group: 'Développement client', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> }] : []),
   ]
 }
 
@@ -152,6 +156,7 @@ const PREVIEW_GROUP = 'En préparation'
 function buildAdminNav(): NavItem[] {
   return [
     { group: 'Pilotage', label: 'Tableau de bord', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { group: 'Pilotage', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> },
     { group: 'Clients', label: 'Inscriptions', to: '/admin/inscriptions' as any, icon: <ClipboardCheck className="h-4 w-4" /> },
     { group: 'Clients', label: 'Clients & accès', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },
     { group: 'Clients', label: 'Diagnostics', to: '/admin/diagnostics/reel' as any, icon: <Gauge className="h-4 w-4" /> },
@@ -160,6 +165,7 @@ function buildAdminNav(): NavItem[] {
     { group: 'Commercial', label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
     { group: 'Commercial', label: 'Missions', to: '/admin/missions', icon: <Briefcase className="h-4 w-4" /> },
     { group: 'Équipe', label: 'Concierges', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
+    { group: 'Équipe', label: 'Accès commerciaux', to: '/admin/commerciaux' as any, icon: <BadgeCheck className="h-4 w-4" /> },
     { group: 'Équipe', label: 'Grille STARTER', to: '/admin/grille', icon: <ClipboardList className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Relances', to: '/admin/relances', icon: <Bell className="h-4 w-4" /> },
@@ -221,7 +227,7 @@ export function AppShell({
   const clientOrg = auth.status === 'authenticated' ? auth.user?.organization : state.orgs.find((org) => org.id === user.orgId)
   const modules = clientModules(auth.user?.organization ?? null)
   const saasAccess = orgSaasActive(auth.user?.organization ?? null)
-  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(modules, unread, pendingDocs, saasAccess)
+  const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
   const current = [...nav].sort((a, b) => String(b.to).length - String(a.to).length).find((item) => {
     const to = String(item.to).replace(/\/$/, '')
     return pathname === to || pathname === `${to}/` || (to.split('/').length > 2 && pathname.startsWith(`${to}/`))
@@ -310,6 +316,7 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <LanguageSwitch className="hidden sm:inline-flex" />
             <div className="relative">
               <button type="button" onClick={() => setThemeOpen((o) => !o)} className="an-icon-btn" aria-label="Changer le thème" aria-expanded={themeOpen} title="Thème">
                 {theme.dark ? <Moon size={17} /> : <Palette size={17} />}
@@ -353,6 +360,7 @@ export function AppShell({
                       <p className="truncate text-xs text-ink-500">{displayUser.email}</p>
                       <span className="an-role-chip mt-2">{meta.badge}</span>
                     </div>
+                    <div className="flex items-center justify-between px-3 py-2 sm:hidden"><span className="text-xs font-semibold text-ink-500">Langue</span><LanguageSwitch /></div>
                     <Link to="/" role="menuitem" className="an-menu-item"><Home size={15} />Site public</Link>
                     {variant === 'client' ? <Link to={'/app/parametres' as any} role="menuitem" className="an-menu-item"><Settings2 size={15} />Profil & activité</Link> : null}
                     <button type="button" role="menuitem" onClick={logout} className="an-menu-item text-red-600"><LogOut size={15} />Se déconnecter</button>

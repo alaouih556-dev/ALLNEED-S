@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Building2, MapPin, RefreshCcw } from 'lucide-react'
+import { ArrowRight, Building2, MapPin, Presentation, RefreshCcw } from 'lucide-react'
 import { Badge, Button, Card, SectionHeading, Alert } from '@/components/ui'
-import { useAuth } from '@/features/auth/AuthContext'
+import { canAccessSalesPresentation, useAuth } from '@/features/auth/AuthContext'
 import { ValidationRequests } from '@/components/ValidationRequests'
 
 export const Route = createFileRoute('/concierge/')({ component: ConciergeDashboard })
@@ -18,6 +18,7 @@ function ConciergeDashboard() {
   useEffect(()=>{if(auth.status==='authenticated'&&auth.user?.role==='concierge')void load()},[auth.status,auth.user?.id,auth.user?.role])
   return <div className="container-app py-8 concierge-portfolio-page">
     <div className="flex flex-wrap items-end justify-between gap-4"><SectionHeading eyebrow="Espace concierge" title="Vos entreprises attribuées" description="Votre portefeuille est défini par l’administrateur ALLNEEDS. Vous ne voyez que les entreprises qui vous sont affectées."/><Button variant="outline" size="sm" onClick={()=>void load()}><RefreshCcw size={15}/>Actualiser</Button></div>
+    {canAccessSalesPresentation(auth.user)?<Link to={'/sales-presentation' as any} className="an-quick mt-5"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600"><Presentation size={17}/></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-ink-950">Sales Presentation</span><span className="block truncate text-xs text-ink-500">Présenter ALLNEEDS à une structure de santé</span></span><ArrowRight size={15} className="text-ink-300"/></Link>:null}
     {error?<Alert tone="danger" className="mt-5">{error}</Alert>:null}
     {loading?<p className="mt-5 text-sm text-ink-500">Chargement du portefeuille…</p>:null}
     <div className="mt-6 grid gap-4 lg:grid-cols-2">{orgs.map(org=><Card key={org.id} className="p-5"><div className="flex items-start justify-between gap-3"><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold text-ink-950">{org.name}</h2><Badge>{org.sector}</Badge></div><p className="mt-2 flex items-center gap-1 text-xs text-ink-500"><MapPin size={13}/>{org.city||'Ville non renseignée'}{org.contactName?` · ${org.contactName}`:''}</p></div><Building2 className="text-brand-700" size={19}/></div><Link to={'/concierge/entreprises/$id' as any} params={{id:org.id} as any} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-700">Ouvrir le suivi <ArrowRight size={14}/></Link></Card>)}</div>

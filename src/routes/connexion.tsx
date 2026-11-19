@@ -20,6 +20,7 @@ function ConnexionPage() {
       const account=await auth.login(email,password)
       const destination=workspacePathForRole(account.role)
       if(!destination) throw new Error('Ce rôle ne dispose pas encore d’un espace autorisé.')
+      if(account.role==='sales'){ await navigate({to:destination}); return }
       const appRole=account.role==='admin'?'admin':account.role==='concierge'?'concierge':'client'
       dispatch({type:'RESET'}); setRole(appRole); dispatch({type:'SWITCH_USER',userId:account.id})
       if(appRole==='client') dispatch({type:'CLIENT_WORKSPACE_ROLE_SET',role:account.role==='manager'?'manager':account.role==='collaborateur'?'collaborateur':'dirigeant'})

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Building2, Mail, Pencil, Power, RefreshCcw, Send, UserPlus, UsersRound } from 'lucide-react'
+import { Building2, Copy, Mail, Pencil, Power, RefreshCcw, Send, UserPlus, UsersRound } from 'lucide-react'
 import { PageHeader } from '@/components/layouts'
 import { Alert, Avatar, Badge, Button, Checkbox, Field, Input, Modal } from '@/components/ui'
 import { EmptyBox, MiniStat, Panel, Rows, SearchBox, StatGrid, Toolbar, matches } from '@/components/admin-kit'
@@ -160,6 +160,8 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
   const [orgIds, setOrgIds] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [fallback, setFallback] = useState<{ email: string; setupUrl: string; reason: string } | null>(null)
+  const [copied, setCopied] = useState(false)
   const valid = name.trim().length > 1 && /.+@.+\..+/.test(email)
 
   async function submit(event: React.FormEvent) {
@@ -172,8 +174,14 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
       const r = await fetch('/api/admin/concierges', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name.trim(), email: email.trim(), sectors, assignedOrgIds: orgIds }) })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Création impossible')
-      if (!b.delivery?.sent) throw new Error(b.delivery?.error || 'Compte préparé, mais l’e-mail n’est pas parti. Vérifiez la configuration SMTP.')
       const sent = email.trim()
+      if (!b.delivery?.sent) {
+        // L’invitation existe : on donne le lien personnel à transmettre à la main.
+        if (!b.delivery?.setupUrl) throw new Error(b.delivery?.error || 'Compte préparé, mais l’e-mail n’est pas parti. Vérifiez la configuration SMTP.')
+        setName(''); setEmail(''); setOrgIds([])
+        setFallback({ email: sent, setupUrl: b.delivery.setupUrl, reason: smtpReason(b.delivery.error) })
+        return
+      }
       setName(''); setEmail(''); setOrgIds([])
       await onDone(sent)
     } catch (e) {
@@ -181,6 +189,26 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
     } finally {
       setBusy(false)
     }
+  }
+
+  if (fallback) {
+    const finish = async () => { const done = fallback.email; setFallback(null); setCopied(false); await onDone(done) }
+    return (
+      <Modal open={open} onClose={() => void finish()} title="Invitation créée" description={`Le compte de ${fallback.email} est prêt, mais l’e-mail n’a pas pu partir.`}>
+        <div className="space-y-4">
+          <Alert tone="warning" title="E-mail non envoyé">{fallback.reason}</Alert>
+          <div>
+            <p className="mb-2 text-xs font-semibold text-ink-700">Lien personnel de création du mot de passe (valable 48 h, usage unique)</p>
+            <code className="block break-all rounded-xl border border-ink-100 bg-ink-50 p-3 text-xs" data-no-translate>{fallback.setupUrl}</code>
+            <p className="mt-2 text-xs text-ink-500">Transmettez-le au concierge par un canal sûr (WhatsApp, SMS…). Ne le partagez avec personne d’autre.</p>
+          </div>
+          <div className="flex justify-end gap-2 border-t border-ink-100 pt-4">
+            <Button type="button" variant="outline" onClick={() => { void navigator.clipboard?.writeText(fallback.setupUrl).then(() => setCopied(true)) }}><Copy size={14} />{copied ? 'Lien copié' : 'Copier le lien'}</Button>
+            <Button type="button" onClick={() => void finish()}>Terminé</Button>
+          </div>
+        </div>
+      </Modal>
+    )
   }
 
   return (
@@ -201,6 +229,14 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
       </form>
     </Modal>
   )
+}
+
+/** Message lisible pour les erreurs SMTP les plus courantes. */
+function smtpReason(error?: string) {
+  if (!error) return 'Le serveur d’e-mail n’a pas répondu. Vérifiez la configuration SMTP.'
+  if (/SMTP 535|BadCredentials/i.test(error)) return 'Gmail a refusé l’identifiant d’envoi (EMAIL_USER / EMAIL_PASS dans .env). Créez un nouveau mot de passe d’application Google, puis redémarrez le serveur.'
+  if (/non configuré/i.test(error)) return 'L’envoi d’e-mails n’est pas configuré (EMAIL_HOST dans .env).'
+  return error
 }
 
 function PerimeterModal({ concierge, orgs, onClose, onSave }: { concierge: Concierge; orgs: Org[]; onClose: () => void; onSave: (body: Record<string, unknown>) => Promise<void> }) {

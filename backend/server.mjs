@@ -5,6 +5,7 @@ import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } fr
 import { promisify } from 'node:util'
 import net from 'node:net'
 import tls from 'node:tls'
+import { SALES_PRESENTATION } from './sales-presentation.mjs'
 
 const scrypt = promisify(scryptCallback)
 const ROOT = process.env.ALLNEEDS_DATA_DIR || join(process.cwd(), 'backend', 'data')
@@ -123,7 +124,7 @@ async function syncTable(table, rows) { await upsertTable(table, rows); await pr
 
 async function syncRemote(data) {
   const orgRows = data.orgs.map((org) => ({ id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active !== false, modules: org.modules || {}, metadata: Object.fromEntries(Object.entries(org).filter(([key]) => !['id','name','slug','sector','active','modules'].includes(key))) }))
-  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
+  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
   const assignmentRows = data.users.filter((user) => user.role === 'concierge').flatMap((user) => (user.orgIds || []).filter((id) => id !== '*').map((orgId) => ({ id: `${user.id}:${orgId}`, concierge_user_id: user.id, organization_id: orgId })))
   const inviteRows = data.invitations.map((inv) => ({ id: inv.id, organization_id: inv.orgId || null, email: inv.email, name: inv.name || '', role: inv.role, permissions: inv.permissions || [], kind: inv.kind, invitation_metadata: inv.metadata || {}, token_hash: inv.tokenHash, created_by: inv.createdBy || null, created_at: inv.createdAt, expires_at: inv.expiresAt, used_at: inv.usedAt || null, revoked_at: inv.revokedAt || null, last_email_at: inv.lastEmailAt || null, last_email_status: inv.lastEmailStatus || null, last_email_error: inv.lastEmailError || null, metadata: {} }))
   // Insert/update parents first, then children. Deletions are pruned in reverse dependency order.
@@ -484,6 +485,40 @@ if (!db.users.some((user) => user.role === 'admin') && bootstrapEmail && bootstr
   saveDb(db)
   console.log(`Administrateur initial créé: ${bootstrapEmail}. Retirez ALLNEEDS_ADMIN_PASSWORD du .env après ce premier démarrage.`)
 }
+/*
+ * Compte de présentation commerciale (seed idempotent au démarrage).
+ * Le mot de passe vient uniquement de l'environnement : il n'est jamais écrit en clair,
+ * seule son empreinte scrypt est stockée. Un compte existant est mis à jour, jamais dupliqué.
+ */
+const salesEmail = (process.env.ALLNEEDS_SALES_EMAIL || 'sales_presentation@gmail.com').trim().toLowerCase()
+const salesPassword = process.env.ALLNEEDS_SALES_PASSWORD || ''
+if (salesPassword) {
+  const existing = db.users.filter((user) => user.email?.toLowerCase() === salesEmail)
+  if (salesPassword.length < 12 || salesPassword.length > 1024) console.warn('ALLNEEDS_SALES_PASSWORD doit contenir entre 12 et 1024 caractères : compte commercial non créé.')
+  else if (existing.length > 1) console.warn(`Plusieurs comptes utilisent ${salesEmail} : corrigez la base avant de créer le compte commercial.`)
+  else if (existing[0] && existing[0].role === 'admin') console.warn(`${salesEmail} est un compte administrateur : il n'est pas converti en compte commercial.`)
+  else {
+    let account = existing[0]
+    let changed = false
+    if (!account) { account = { id: `sales-${randomBytes(8).toString('hex')}`, email: salesEmail, name: process.env.ALLNEEDS_SALES_NAME || 'Présentation commerciale', passwordHash: null }; db.users.push(account); changed = true }
+    let passwordMatches = false
+    const [scheme, salt, stored] = String(account.passwordHash || '').split('$')
+    if (scheme === 'scrypt' && salt && stored) {
+      const candidate = await scrypt(salesPassword, salt, 64)
+      const expected = Buffer.from(stored, 'hex')
+      passwordMatches = candidate.length === expected.length && timingSafeEqual(candidate, expected)
+    }
+    if (!passwordMatches) {
+      const newSalt = randomBytes(16).toString('hex')
+      account.passwordHash = `scrypt$${newSalt}$${(await scrypt(salesPassword, newSalt, 64)).toString('hex')}`
+      changed = true
+    }
+    const wanted = { role: 'sales', orgIds: [], sectors: [], permissions: [], active: true, passwordConfigured: true }
+    for (const [key, value] of Object.entries(wanted)) if (JSON.stringify(account[key]) !== JSON.stringify(value)) { account[key] = value; changed = true }
+    if (changed) { saveDb(db); console.log(`Compte de présentation commerciale prêt : ${salesEmail}.`) }
+  }
+}
+
 if (!db.users.some((user) => user.role === 'admin')) console.warn('Aucun administrateur configuré. Définissez ALLNEEDS_ADMIN_EMAIL et ALLNEEDS_ADMIN_PASSWORD (12+ caractères) pour le premier démarrage.')
 
 const json = (res, code, body, headers = {}) => {
@@ -720,6 +755,23 @@ function normalizeNeedStatus(value) {
 }
 const OPERATIONS_ROLES = new Set(['admin', 'concierge'])
 
+/* ------------------------------------------------------------------ */
+/* Présentation commerciale : rôle `sales` + permission déléguée        */
+/* ------------------------------------------------------------------ */
+// Rôle dédié aux comptes commerciaux : aucun accès aux données clients ni à l'administration.
+const SALES_ROLE = 'sales'
+// Permission qu'un administrateur peut accorder à un concierge (membre interne) sans changer son rôle.
+const SALES_PERMISSION = 'sales_presentation'
+const STAFF_INVITATION_KINDS = new Set(['concierge', 'sales'])
+// Seules ces routes restent ouvertes à un compte `sales` (en plus de /api/me et de la déconnexion).
+const SALES_ALLOWED_API = [/^\/api\/sales\//]
+
+function canAccessSalesPresentation(user) {
+  if (!user || user.active === false) return false
+  if (user.role === 'admin' || user.role === SALES_ROLE) return true
+  return user.role === 'concierge' && Array.isArray(user.permissions) && user.permissions.includes(SALES_PERMISSION)
+}
+
 function allowedText(value, maximum, field) {
   if (typeof value !== 'string' || !value.trim() || value.length > maximum) throw Object.assign(new Error(`${field} invalide`), { status: 400 })
   return value.trim()
@@ -727,7 +779,7 @@ function allowedText(value, maximum, field) {
 
 
 function orgForUser(user) {
-  if (!user || user.role === 'admin' || user.role === 'concierge' || user.role === 'prestataire') return null
+  if (!user || ['admin', 'concierge', 'prestataire', 'sales'].includes(user.role)) return null
   return db.orgs.find((org) => Array.isArray(user.orgIds) && user.orgIds.includes(org.id)) || null
 }
 
@@ -785,6 +837,7 @@ function htmlEscape(value='') { return String(value).replace(/[&<>\"]/g, (ch) =>
 function invitationCopy(invitation) {
   if (invitation.kind === 'owner') return { subject: 'Activez votre compte ALLNEEDS', intro: 'Votre entreprise a été validée par ALLNEEDS.' }
   if (invitation.kind === 'concierge') return { subject: 'Votre accès Concierge ALLNEEDS', intro: 'Votre compte Concierge ALLNEEDS est prêt.' }
+  if (invitation.kind === 'sales') return { subject: 'Votre accès Présentation commerciale ALLNEEDS', intro: 'Votre accès à la présentation commerciale ALLNEEDS est prêt.' }
   return { subject: 'Invitation à rejoindre votre espace ALLNEEDS', intro: 'Vous avez été invité à rejoindre l’espace ALLNEEDS de votre entreprise.' }
 }
 
@@ -1102,7 +1155,7 @@ const server = createServer(async (req, res) => {
       const inv = db.invitations.find((item) => item.tokenHash === hashInvitationToken(token) && !item.usedAt && !item.revokedAt)
       if (!inv || Date.parse(inv.expiresAt) <= Date.now()) return json(res, 404, { error: 'lien invalide ou expiré' }, cors)
       const org = db.orgs.find((o) => o.id === inv.orgId)
-      return json(res, 200, { email: inv.email, name: inv.name, organization: inv.kind === 'concierge' ? 'ALLNEEDS' : (org?.name || ''), role: inv.role, kind: inv.kind, expiresAt: inv.expiresAt }, cors)
+      return json(res, 200, { email: inv.email, name: inv.name, organization: STAFF_INVITATION_KINDS.has(inv.kind) ? 'ALLNEEDS' : (org?.name || ''), role: inv.role, kind: inv.kind, expiresAt: inv.expiresAt }, cors)
     }
 
     if (req.method === 'POST' && url.pathname === '/api/auth/setup-password') {
@@ -1112,12 +1165,12 @@ const server = createServer(async (req, res) => {
       const inv = db.invitations.find((item) => item.tokenHash === hashInvitationToken(token) && !item.usedAt && !item.revokedAt)
       if (!inv || Date.parse(inv.expiresAt) <= Date.now()) return json(res, 404, { error: 'lien invalide ou expiré' }, cors)
       const org = inv.orgId ? db.orgs.find((o) => o.id === inv.orgId) : null
-      if (inv.kind !== 'concierge' && (!org || org.active === false)) return json(res, 403, { error: 'compte entreprise désactivé' }, cors)
+      if (!STAFF_INVITATION_KINDS.has(inv.kind) && (!org || org.active === false)) return json(res, 403, { error: 'compte entreprise désactivé' }, cors)
       let user = db.users.find((u) => u.email?.toLowerCase() === inv.email)
       if (user && inv.orgId && Array.isArray(user.orgIds) && user.orgIds.length && !user.orgIds.includes(inv.orgId)) return json(res, 409, { error: 'cet e-mail appartient déjà à un autre compte' }, cors)
       const salt = randomBytes(16).toString('hex'); const hash = await scrypt(password, salt, 64)
-      if (!user) { user = { id: `usr-${randomBytes(10).toString('hex')}`, email: inv.email, role: inv.role, orgIds: inv.kind === 'concierge' ? (inv.metadata?.assignedOrgIds || []) : [inv.orgId], sectors: inv.metadata?.sectors || [], name: inv.name, active: true, passwordHash: null, passwordConfigured: false, permissions: inv.permissions }; db.users.push(user) }
-      user.passwordHash = `scrypt$${salt}$${hash.toString('hex')}`; user.passwordConfigured = true; user.active = true; user.role = inv.role; user.permissions = inv.permissions; if (inv.kind === 'concierge') { user.sectors = inv.metadata?.sectors || user.sectors || []; user.orgIds = inv.metadata?.assignedOrgIds || user.orgIds || [] } ; inv.usedAt = new Date().toISOString()
+      if (!user) { user = { id: `usr-${randomBytes(10).toString('hex')}`, email: inv.email, role: inv.role, orgIds: inv.kind === 'concierge' ? (inv.metadata?.assignedOrgIds || []) : inv.kind === 'sales' ? [] : [inv.orgId], sectors: inv.metadata?.sectors || [], name: inv.name, active: true, passwordHash: null, passwordConfigured: false, permissions: inv.permissions }; db.users.push(user) }
+      user.passwordHash = `scrypt$${salt}$${hash.toString('hex')}`; user.passwordConfigured = true; user.active = true; user.role = inv.role; user.permissions = inv.permissions; if (inv.kind === 'concierge') { user.sectors = inv.metadata?.sectors || user.sectors || []; user.orgIds = inv.metadata?.assignedOrgIds || user.orgIds || [] } ; if (inv.kind === 'sales') user.orgIds = [] ; inv.usedAt = new Date().toISOString()
       if (inv.kind === 'owner' && inv.orgId) {
         const reg = db.registrations.find((r) => r.orgId === inv.orgId && r.email?.toLowerCase() === inv.email.toLowerCase())
         if (reg) { reg.status = 'actif'; reg.activatedAt = new Date().toISOString(); reg.userId = user.id; pushRegistrationEvent(reg, 'compte_active', { byUserId: user.id }) }
@@ -1150,6 +1203,8 @@ const server = createServer(async (req, res) => {
       const user = sessionUser(req)
       if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
       if (!requireSameOrigin(req, res)) return
+      // Compte commercial partagé : profil verrouillé.
+      if (user.role === SALES_ROLE) return json(res, 403, { error: 'profil non modifiable pour un compte commercial' }, cors)
       const body = await readBody(req)
       const allowed = ['name', 'firstName', 'lastName', 'phone', 'jobTitle']
       const changes = {}
@@ -1176,6 +1231,52 @@ const server = createServer(async (req, res) => {
     const user = sessionUser(req)
     if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(req.method) && url.pathname.startsWith('/api/') && !requireSameOrigin(req, res)) return
+    // Un compte commercial n'accède qu'à la présentation : tout le reste est refusé côté serveur.
+    if (user.role === SALES_ROLE && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à la présentation commerciale' }, cors)
+
+    if (req.method === 'GET' && url.pathname === '/api/sales/presentation') {
+      if (!canAccessSalesPresentation(user)) return json(res, 403, { error: 'présentation commerciale réservée aux administrateurs et aux commerciaux' }, cors)
+      return json(res, 200, SALES_PRESENTATION, cors)
+    }
+
+    /* Gestion des accès commerciaux (administrateur uniquement). */
+    if (req.method === 'GET' && url.pathname === '/api/admin/sales-access') {
+      if (!adminOnly(user, res, cors)) return
+      const salesView = (u) => ({ id: u.id, email: u.email, name: u.name || '', role: u.role, active: u.active !== false, passwordConfigured: u.passwordConfigured === true, salesAccess: canAccessSalesPresentation(u) })
+      const accounts = db.users.filter((u) => u.role === SALES_ROLE).map(salesView)
+      const concierges = db.users.filter((u) => u.role === 'concierge').map(salesView)
+      const pending = db.invitations.filter((i) => i.kind === 'sales' && !i.usedAt && !i.revokedAt && Date.parse(i.expiresAt) > Date.now()).map(({ tokenHash: _t, ...i }) => i)
+      return json(res, 200, { accounts, concierges, pending }, cors)
+    }
+    if (req.method === 'POST' && url.pathname === '/api/admin/sales-access/invite') {
+      if (!adminOnly(user, res, cors)) return
+      const body = await readBody(req)
+      const email = allowedText(body.email, 200, 'e-mail').toLowerCase()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(res, 400, { error: 'e-mail invalide' }, cors)
+      if (db.users.some((u) => u.email?.toLowerCase() === email)) return json(res, 409, { error: 'cet e-mail possède déjà un compte' }, cors)
+      for (const old of db.invitations) if (old.kind === 'sales' && old.email === email && !old.usedAt && !old.revokedAt) old.revokedAt = new Date().toISOString()
+      const { invitation, token } = createInvitation({ email, name: allowedText(body.name, 160, 'nom'), role: SALES_ROLE, permissions: [], createdBy: user.id, kind: 'sales' })
+      const delivery = await sendInvitationEmail(invitation, token)
+      audit('sales.invite', { by: user.id, email })
+      const { tokenHash: _t, ...publicInvitation } = invitation
+      return json(res, 201, { invitation: publicInvitation, delivery }, cors)
+    }
+    const salesAccessRoute = url.pathname.match(/^\/api\/admin\/sales-access\/([^/]+)$/)
+    if (salesAccessRoute && req.method === 'PATCH') {
+      if (!adminOnly(user, res, cors)) return
+      const member = db.users.find((u) => u.id === salesAccessRoute[1])
+      if (!member) return json(res, 404, { error: 'utilisateur introuvable' }, cors)
+      const body = await readBody(req)
+      if (typeof body.enabled !== 'boolean') return json(res, 400, { error: 'champ enabled requis' }, cors)
+      if (member.role === SALES_ROLE) member.active = body.enabled
+      else if (member.role === 'concierge') {
+        const others = (member.permissions || []).filter((p) => p !== SALES_PERMISSION)
+        member.permissions = body.enabled ? [...others, SALES_PERMISSION] : others
+      } else return json(res, 400, { error: 'seuls les comptes commerciaux et les concierges peuvent recevoir cet accès' }, cors)
+      saveDb(db)
+      audit('sales.access.update', { by: user.id, member: member.id, enabled: body.enabled })
+      return json(res, 200, { id: member.id, active: member.active !== false, salesAccess: canAccessSalesPresentation(member) }, cors)
+    }
 
     if (req.method === 'GET' && url.pathname === '/api/notifications') {
       const rows = db.notifications.filter((n) => n.userId === user.id).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))

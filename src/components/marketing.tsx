@@ -20,6 +20,7 @@ import { clearSelectedSector, useSelectedSector } from '@/lib/sector-filter'
 import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
 import { Badge, Button, Card } from '@/components/ui'
 import type { FeatureRow, MissionCode, Sector } from '@/types'
+import { LanguageSwitch } from '@/i18n/LanguageSwitch'
 
 /* ------------------------------------------------------------------ */
 /* Banner                                                              */
@@ -80,6 +81,7 @@ export function PublicHeader() {
         </nav>
 
         <div className="mk-header-actions">
+          <LanguageSwitch />
           <Link to={(accountPath ?? '/connexion') as any} className="mk-signin">
             {accountPath ? 'Mon espace' : 'Se connecter'}
           </Link>
@@ -89,6 +91,7 @@ export function PublicHeader() {
           </Link>
         </div>
 
+        <LanguageSwitch className="mk-lang-mobile" />
         <button
           type="button"
           className="mk-burger"

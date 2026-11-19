@@ -1,19 +1,50 @@
 {
   "users": [
     {
-      "id": "admin-3e37a3d391225635",
-      "email": "admin@allneeds.local",
+      "id": "admin-95f24f67ce9cd0fd",
+      "email": "alaouih556@gmail.com",
       "role": "admin",
       "orgIds": [
         "*"
       ],
+      "sectors": [],
       "name": "Administrateur ALLNEEDS",
       "active": true,
-      "passwordHash": "scrypt$9df7510778f3e6d32a6e80aacbaddeff$d878a6770f6238c2f063e55f6d773b008a7e3b5793e5a457c043c5fc7caebc1cf1d979240deff6aadab4750f3dd874545ae10507b1057c036646ec2840bb40f3",
+      "passwordHash": "scrypt$d44af90e603ac00db2e136775645f566$63666288043fbddbb3df7a6324ace842f52681568f9f2000607b52bb982816132a24c223bb4d5e56e1e2962f68744ff20551f40c5a4039b03f9ae8112c9a70e5",
       "passwordConfigured": true,
       "permissions": [
         "*"
       ]
+    },
+    {
+      "id": "admin-18a88e259ea915f7",
+      "email": "allneedsadmin@gmail.com",
+      "role": "admin",
+      "orgIds": [
+        "*"
+      ],
+      "sectors": [],
+      "name": "Administrateur ALLNEEDS",
+      "active": true,
+      "passwordHash": "scrypt$1fe7763755bf139cec91c3250d494f47$8543a7e3fc7f74363890a6783ebd9bf27f9a53cfdcfa9ae13764fd74e277587b20499e4453125e2cb40ae86040718a1db4442b05ff0fe94bcdc214da2dda719c",
+      "passwordConfigured": true,
+      "permissions": [
+        "*"
+      ]
+    },
+    {
+      "id": "usr-3a65045f24c4c52a60d6",
+      "email": "mohamaderretby002@gmail.com",
+      "role": "concierge",
+      "orgIds": [],
+      "sectors": [
+        "sante"
+      ],
+      "name": "Test Erretby",
+      "active": true,
+      "passwordHash": "scrypt$2b67dd154804be3a60e013bd0999f6f9$9f593e9d272765dede985cd822205e549dc139cdf63ab327b428a845300248a03c0ccc9c49c53fac2a16422d36e934cca4ae0e0675fd9e01020511c6654807f7",
+      "passwordConfigured": true,
+      "permissions": []
     }
   ],
   "orgs": [],
@@ -21,7 +52,31 @@
   "needs": [],
   "consents": [],
   "registrations": [],
-  "invitations": [],
+  "invitations": [
+    {
+      "id": "inv-0893537d5944a0721ef0",
+      "orgId": null,
+      "email": "mohamaderretby002@gmail.com",
+      "name": "Test Erretby",
+      "role": "concierge",
+      "permissions": [],
+      "kind": "concierge",
+      "metadata": {
+        "sectors": [
+          "sante"
+        ],
+        "assignedOrgIds": []
+      },
+      "tokenHash": "128d37d6a0490d692a9f109b23c95ecb9a80d5fefee7fea98c73fc04a8c55c60",
+      "createdBy": "admin-18a88e259ea915f7",
+      "createdAt": "2026-11-19T16:43:18.494Z",
+      "expiresAt": "2026-11-21T16:43:18.494Z",
+      "usedAt": "2026-11-19T16:43:58.694Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-11-19T16:43:19.840Z",
+      "lastEmailStatus": "sent"
+    }
+  ],
   "missions": [],
   "offers": [],
   "documents": [],

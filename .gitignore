@@ -5,3 +5,6 @@ dist/
 !.env.example
 *.bak
 backup*/
+
+# Seeds locaux contenant des empreintes de mot de passe
+database/*.local.sql

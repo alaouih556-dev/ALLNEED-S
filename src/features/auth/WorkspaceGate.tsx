@@ -78,6 +78,6 @@ function DiagnosticRequiredGate(){
   )
 }
 
-function GateMessage({title,detail,children}:{title:string;detail:string;children?:ReactNode}){
+export function GateMessage({title,detail,children}:{title:string;detail:string;children?:ReactNode}){
   return <div className="flex min-h-screen items-center justify-center bg-[#f6f9fd] p-5"><Card className="max-w-xl p-8 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><ShieldCheck className="h-6 w-6"/></div><LockKeyhole className="mx-auto mt-4 h-5 w-5 text-ink-400"/><h1 className="mt-3 font-display text-2xl text-ink-950">{title}</h1><p className="mt-3 text-sm leading-relaxed text-ink-600">{detail}</p><div className="mt-6 flex justify-center">{children??<Link to="/"><Button variant="outline">Retour à l’accueil</Button></Link>}</div></Card></div>
 }

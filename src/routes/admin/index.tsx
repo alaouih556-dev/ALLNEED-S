@@ -19,9 +19,10 @@ import {
   Sparkles,
   UserPlus,
   UserRoundCog,
+  Presentation,
 } from 'lucide-react'
 import { apiRequest } from '@/lib/accompagnement'
-import { useAuth } from '@/features/auth/AuthContext'
+import { canAccessSalesPresentation, useAuth } from '@/features/auth/AuthContext'
 import { ValidationRequests } from '@/components/ValidationRequests'
 import { AreaChart, BarList, DonutChart, Legend, Sparkline, StageBar } from '@/components/charts'
 import { Avatar } from '@/components/ui'
@@ -306,6 +307,7 @@ function AdminDashboard() {
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Link to="/admin/inscriptions" className="an-hero-btn">Traiter les inscriptions<ArrowRight size={15} /></Link>
+              {canAccessSalesPresentation(auth.user) ? <Link to={'/sales-presentation' as any} className="an-hero-btn is-ghost"><Presentation size={15} />Sales Presentation</Link> : null}
               <button type="button" onClick={() => void refresh()} className="an-hero-btn is-ghost"><RefreshCcw size={14} className={cn(loading && 'animate-spin')} />Actualiser</button>
             </div>
           </div>
@@ -492,8 +494,9 @@ function AdminDashboard() {
       {/* Accès rapides */}
       <section>
         <p className="mb-3 text-xs font-bold uppercase tracking-wider text-ink-500">Accès rapides</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {[
+            ...(canAccessSalesPresentation(auth.user) ? [{ to: '/sales-presentation', label: 'Sales Presentation', detail: 'Présenter ALLNEEDS à un client', icon: <Presentation size={17} /> }] : []),
             { to: '/admin/clients', label: 'Clients & accès', detail: 'Modules et utilisateurs', icon: <Building2 size={17} /> },
             { to: '/admin/concierges', label: 'Concierges', detail: 'Équipe et affectations', icon: <UserRoundCog size={17} /> },
             { to: '/admin/offres', label: 'Offres', detail: 'Catalogue et demandes', icon: <Receipt size={17} /> },

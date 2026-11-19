@@ -5,6 +5,9 @@ import { router } from '@/router'
 import { DemoStoreProvider } from '@/store/store'
 import '@/index.css'
 import '@/styles/marketing.css'
+import { initI18n } from '@/i18n'
+
+initI18n()
 
 const container = document.getElementById('root')
 

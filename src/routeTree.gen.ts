@@ -18,6 +18,7 @@ import { Route as CreerMotDePasseRouteImport } from './routes/creer-mot-de-passe
 import { Route as ExpertRouteImport } from './routes/expert'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as SalesPresentationRouteImport } from './routes/sales-presentation'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAProposRouteImport } from './routes/_public/a-propos'
 import { Route as PublicConditionsRouteImport } from './routes/_public/conditions'
@@ -29,6 +30,7 @@ import { Route as PublicSanteRouteImport } from './routes/_public/sante'
 import { Route as PublicTarifsRouteImport } from './routes/_public/tarifs'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAbonnementsRouteImport } from './routes/admin/abonnements'
+import { Route as AdminCommerciauxRouteImport } from './routes/admin/commerciaux'
 import { Route as AdminConciergesRouteImport } from './routes/admin/concierges'
 import { Route as AdminDiagnosticsAutoRouteImport } from './routes/admin/diagnostics-auto'
 import { Route as AdminGrilleRouteImport } from './routes/admin/grille'
@@ -147,6 +149,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesPresentationRoute = SalesPresentationRouteImport.update({
+  id: '/sales-presentation',
+  path: '/sales-presentation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -200,6 +207,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminAbonnementsRoute = AdminAbonnementsRouteImport.update({
   id: '/abonnements',
   path: '/abonnements',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCommerciauxRoute = AdminCommerciauxRouteImport.update({
+  id: '/commerciaux',
+  path: '/commerciaux',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminConciergesRoute = AdminConciergesRouteImport.update({
@@ -584,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
+  '/sales-presentation': typeof SalesPresentationRoute
   '/a-propos': typeof PublicAProposRoute
   '/conditions': typeof PublicConditionsRoute
   '/contact': typeof PublicContactRoute
@@ -593,6 +606,7 @@ export interface FileRoutesByFullPath {
   '/sante': typeof PublicSanteRoute
   '/tarifs': typeof PublicTarifsRoute
   '/admin/abonnements': typeof AdminAbonnementsRoute
+  '/admin/commerciaux': typeof AdminCommerciauxRoute
   '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
@@ -673,6 +687,7 @@ export interface FileRoutesByTo {
   '/creer-mot-de-passe': typeof CreerMotDePasseRoute
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
+  '/sales-presentation': typeof SalesPresentationRoute
   '/a-propos': typeof PublicAProposRoute
   '/conditions': typeof PublicConditionsRoute
   '/contact': typeof PublicContactRoute
@@ -682,6 +697,7 @@ export interface FileRoutesByTo {
   '/sante': typeof PublicSanteRoute
   '/tarifs': typeof PublicTarifsRoute
   '/admin/abonnements': typeof AdminAbonnementsRoute
+  '/admin/commerciaux': typeof AdminCommerciauxRoute
   '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
@@ -768,6 +784,7 @@ export interface FileRoutesById {
   '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
+  '/sales-presentation': typeof SalesPresentationRoute
   '/_public/a-propos': typeof PublicAProposRoute
   '/_public/conditions': typeof PublicConditionsRoute
   '/_public/contact': typeof PublicContactRoute
@@ -777,6 +794,7 @@ export interface FileRoutesById {
   '/_public/sante': typeof PublicSanteRoute
   '/_public/tarifs': typeof PublicTarifsRoute
   '/admin/abonnements': typeof AdminAbonnementsRoute
+  '/admin/commerciaux': typeof AdminCommerciauxRoute
   '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
@@ -865,6 +883,7 @@ export interface FileRouteTypes {
     | '/expert'
     | '/inscription'
     | '/onboarding'
+    | '/sales-presentation'
     | '/a-propos'
     | '/conditions'
     | '/contact'
@@ -874,6 +893,7 @@ export interface FileRouteTypes {
     | '/sante'
     | '/tarifs'
     | '/admin/abonnements'
+    | '/admin/commerciaux'
     | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
@@ -954,6 +974,7 @@ export interface FileRouteTypes {
     | '/creer-mot-de-passe'
     | '/inscription'
     | '/onboarding'
+    | '/sales-presentation'
     | '/a-propos'
     | '/conditions'
     | '/contact'
@@ -963,6 +984,7 @@ export interface FileRouteTypes {
     | '/sante'
     | '/tarifs'
     | '/admin/abonnements'
+    | '/admin/commerciaux'
     | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
@@ -1048,6 +1070,7 @@ export interface FileRouteTypes {
     | '/expert'
     | '/inscription'
     | '/onboarding'
+    | '/sales-presentation'
     | '/_public/a-propos'
     | '/_public/conditions'
     | '/_public/contact'
@@ -1057,6 +1080,7 @@ export interface FileRouteTypes {
     | '/_public/sante'
     | '/_public/tarifs'
     | '/admin/abonnements'
+    | '/admin/commerciaux'
     | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
@@ -1144,6 +1168,7 @@ export interface RootRouteChildren {
   ExpertRoute: typeof ExpertRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
   OnboardingRoute: typeof OnboardingRoute
+  SalesPresentationRoute: typeof SalesPresentationRoute
   EntrepriseSlugRoute: typeof EntrepriseSlugRoute
 }
 
@@ -1210,6 +1235,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales-presentation': {
+      id: '/sales-presentation'
+      path: '/sales-presentation'
+      fullPath: '/sales-presentation'
+      preLoaderRoute: typeof SalesPresentationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/': {
@@ -1287,6 +1319,13 @@ declare module '@tanstack/react-router' {
       path: '/abonnements'
       fullPath: '/admin/abonnements'
       preLoaderRoute: typeof AdminAbonnementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/commerciaux': {
+      id: '/admin/commerciaux'
+      path: '/commerciaux'
+      fullPath: '/admin/commerciaux'
+      preLoaderRoute: typeof AdminCommerciauxRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/concierges': {
@@ -1842,6 +1881,7 @@ const PublicRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminAbonnementsRoute: typeof AdminAbonnementsRoute
+  AdminCommerciauxRoute: typeof AdminCommerciauxRoute
   AdminConciergesRoute: typeof AdminConciergesRoute
   AdminDiagnosticsAutoRoute: typeof AdminDiagnosticsAutoRoute
   AdminGrilleRoute: typeof AdminGrilleRoute
@@ -1864,6 +1904,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAbonnementsRoute: AdminAbonnementsRoute,
+  AdminCommerciauxRoute: AdminCommerciauxRoute,
   AdminConciergesRoute: AdminConciergesRoute,
   AdminDiagnosticsAutoRoute: AdminDiagnosticsAutoRoute,
   AdminGrilleRoute: AdminGrilleRoute,
@@ -2032,6 +2073,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExpertRoute: ExpertRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
   OnboardingRoute: OnboardingRoute,
+  SalesPresentationRoute: SalesPresentationRoute,
   EntrepriseSlugRoute: EntrepriseSlugRoute,
 }
 export const routeTree = rootRouteImport

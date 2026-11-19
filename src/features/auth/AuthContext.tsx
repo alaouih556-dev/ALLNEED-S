@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 export interface AuthUser {
   id: string
   email: string
-  role: 'admin' | 'concierge' | 'dirigeant' | 'manager' | 'collaborateur' | string
+  role: 'admin' | 'concierge' | 'dirigeant' | 'manager' | 'collaborateur' | 'sales' | string
   orgIds: string[]
   name: string
   phone?: string
@@ -28,12 +28,26 @@ type AuthState = {
 const AuthContext = createContext<AuthState | null>(null)
 
 /** Espace de travail ouvert par défaut pour un rôle (null si aucun espace n’existe). */
-export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | null {
+export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | '/sales-presentation' | null {
   if (role === 'admin') return '/admin'
+  if (role === 'sales') return '/sales-presentation'
   if (role === 'concierge') return '/concierge'
   if (role === 'prestataire') return '/expert'
   if (role && ['dirigeant', 'manager', 'collaborateur'].includes(role)) return '/app'
   return null
+}
+
+/** Permission accordée par un administrateur à un concierge pour ouvrir la présentation commerciale. */
+export const SALES_PERMISSION = 'sales_presentation'
+
+/**
+ * Accès à la présentation commerciale : administrateurs, comptes `sales`,
+ * et concierges ayant reçu la permission. Le serveur applique la même règle.
+ */
+export function canAccessSalesPresentation(user?: Pick<AuthUser, 'role' | 'permissions' | 'active'> | null) {
+  if (!user || user.active === false) return false
+  if (user.role === 'admin' || user.role === 'sales') return true
+  return user.role === 'concierge' && (user.permissions ?? []).includes(SALES_PERMISSION)
 }
 
 async function readError(response: Response) {

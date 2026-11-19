@@ -135,11 +135,11 @@ export interface DemoActivity {
 }
 
 export const DEMO_CLIENT_PROFILES = {
-  'usr-amina': { orgId: 'org-amal', name: 'Amina Bennani', email: 'a.bennani@al-amal.ma', roleLabel: 'Direction Â· Enseignement', initials: 'AB' },
-  'usr-youssef': { orgId: 'org-nour', name: 'Dr Youssef Idrissi', email: 'direction@clinique-nour.ma', roleLabel: 'Direction Â· SantÃ©', initials: 'YI' },
-  'usr-salma': { orgId: 'org-riad', name: 'Salma Ouazzani', email: 'salma@riad-lumen.ma', roleLabel: 'Direction Â· Tourisme', initials: 'SO' },
-  'usr-manager': { orgId: 'org-amal', name: 'Responsable Al Amal', email: 'manager@al-amal.ma', roleLabel: 'Responsable Â· Enseignement', initials: 'RA' },
-  'usr-collab': { orgId: 'org-amal', name: 'Collaborateur Al Amal', email: 'collaborateur@al-amal.ma', roleLabel: 'Collaborateur Â· Enseignement', initials: 'CA' },
+  'usr-amina': { orgId: 'org-amal', name: 'Amina Bennani', email: 'a.bennani@al-amal.ma', roleLabel: 'Direction · Enseignement', initials: 'AB' },
+  'usr-youssef': { orgId: 'org-nour', name: 'Dr Youssef Idrissi', email: 'direction@clinique-nour.ma', roleLabel: 'Direction · Santé', initials: 'YI' },
+  'usr-salma': { orgId: 'org-riad', name: 'Salma Ouazzani', email: 'salma@riad-lumen.ma', roleLabel: 'Direction · Tourisme', initials: 'SO' },
+  'usr-manager': { orgId: 'org-amal', name: 'Responsable Al Amal', email: 'manager@al-amal.ma', roleLabel: 'Responsable · Enseignement', initials: 'RA' },
+  'usr-collab': { orgId: 'org-amal', name: 'Collaborateur Al Amal', email: 'collaborateur@al-amal.ma', roleLabel: 'Collaborateur · Enseignement', initials: 'CA' },
 } as const
 
 
@@ -308,7 +308,7 @@ function withActivity(state: DemoState, activity: Omit<DemoActivity, 'id' | 'at'
 function activityActor(state: DemoState) {
   if (state.role === 'admin') return { actor: 'Administrateur ALLNEEDS', role: 'Pilotage ALLNEEDS' }
   if (state.role === 'concierge') return { actor: 'Concierge ALLNEEDS', role: 'Concierge' }
-  if (state.role === 'client') return { actor: 'Ã‰quipe de lâ€™Ã©tablissement', role: 'Espace client' }
+  if (state.role === 'client') return { actor: 'Équipe de l’établissement', role: 'Espace client' }
   return { actor: state.providers[0]?.name ?? 'Partenaire', role: 'Partenaire' }
 }
 
@@ -347,33 +347,33 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case 'TEAM_MEMBER_CREATE': {
       const exists = state.teamMembers.some((member) => member.orgId === action.member.orgId && member.email.toLowerCase() === action.member.email.toLowerCase())
-      if (exists) return withToast(state, 'AccÃ¨s dÃ©jÃ  enregistrÃ©', 'Cette adresse e-mail possÃ¨de dÃ©jÃ  un accÃ¨s pour cet Ã©tablissement.', 'warning')
+      if (exists) return withToast(state, 'Accès déjà enregistré', 'Cette adresse e-mail possède déjà un accès pour cet établissement.', 'warning')
       const member: ClientTeamMember = { ...action.member, id: uid('team'), createdAt: state.now, status: 'invitation_en_attente' }
       const org = state.orgs.find((item) => item.id === member.orgId)
-      return withToast(withActivity({ ...state, teamMembers: [member, ...state.teamMembers] }, { ...activityActor(state), orgId: member.orgId, organization: org?.name ?? 'Ã‰tablissement', type: 'action', text: `A prÃ©parÃ© un accÃ¨s ${member.role === 'manager' ? 'responsable' : 'collaborateur'} pour ${member.name}.` }), 'AccÃ¨s prÃ©parÃ©', 'Invitation enregistrÃ©e.', 'info')
+      return withToast(withActivity({ ...state, teamMembers: [member, ...state.teamMembers] }, { ...activityActor(state), orgId: member.orgId, organization: org?.name ?? 'Établissement', type: 'action', text: `A préparé un accès ${member.role === 'manager' ? 'responsable' : 'collaborateur'} pour ${member.name}.` }), 'Accès préparé', 'Invitation enregistrée.', 'info')
     }
 
     case 'TEAM_MEMBER_REVOKE':
-      return withToast(withActivity({ ...state, teamMembers: state.teamMembers.filter((member) => member.id !== action.id) }, { ...activityActor(state), orgId: state.teamMembers.find((member) => member.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.teamMembers.find((member) => member.id === action.id)?.orgId)?.name ?? 'Ã‰tablissement', type: 'decision', text: `A retirÃ© lâ€™accÃ¨s de ${state.teamMembers.find((member) => member.id === action.id)?.name ?? 'un membre'}.` }), 'AccÃ¨s retirÃ©', 'Le membre a Ã©tÃ© retirÃ©.')
+      return withToast(withActivity({ ...state, teamMembers: state.teamMembers.filter((member) => member.id !== action.id) }, { ...activityActor(state), orgId: state.teamMembers.find((member) => member.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.teamMembers.find((member) => member.id === action.id)?.orgId)?.name ?? 'Établissement', type: 'decision', text: `A retiré l’accès de ${state.teamMembers.find((member) => member.id === action.id)?.name ?? 'un membre'}.` }), 'Accès retiré', 'Le membre a été retiré.')
 
     case 'TEAM_MEMBER_ROLE_SET':
-      return withActivity({ ...state, teamMembers: state.teamMembers.map((member) => member.id === action.id ? { ...member, role: action.role, access: action.role === 'manager' ? ['actions', 'missions', 'documents', 'messages', 'results', 'team'] : ['actions', 'missions', 'documents', 'messages'] } : member) }, { ...activityActor(state), orgId: state.teamMembers.find((member) => member.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.teamMembers.find((member) => member.id === action.id)?.orgId)?.name ?? 'Ã‰tablissement', type: 'decision', text: `A ajustÃ© le rÃ´le de ${state.teamMembers.find((member) => member.id === action.id)?.name ?? 'un membre'} en Â« ${action.role === 'manager' ? 'responsable' : 'collaborateur'} Â».` })
+      return withActivity({ ...state, teamMembers: state.teamMembers.map((member) => member.id === action.id ? { ...member, role: action.role, access: action.role === 'manager' ? ['actions', 'missions', 'documents', 'messages', 'results', 'team'] : ['actions', 'missions', 'documents', 'messages'] } : member) }, { ...activityActor(state), orgId: state.teamMembers.find((member) => member.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.teamMembers.find((member) => member.id === action.id)?.orgId)?.name ?? 'Établissement', type: 'decision', text: `A ajusté le rôle de ${state.teamMembers.find((member) => member.id === action.id)?.name ?? 'un membre'} en « ${action.role === 'manager' ? 'responsable' : 'collaborateur'} ».` })
 
     case 'PROVIDER_PATCH':
-      return withActivity({ ...state, providers: state.providers.map((provider) => provider.id === action.id ? { ...provider, ...action.patch } : provider) }, { ...activityActor(state), orgId: '', organization: state.providers.find((provider) => provider.id === action.id)?.name ?? 'Profil partenaire', type: 'progression', text: 'A actualisÃ© ses informations et ses disponibilitÃ©s de prestation.' })
+      return withActivity({ ...state, providers: state.providers.map((provider) => provider.id === action.id ? { ...provider, ...action.patch } : provider) }, { ...activityActor(state), orgId: '', organization: state.providers.find((provider) => provider.id === action.id)?.name ?? 'Profil partenaire', type: 'progression', text: 'A actualisé ses informations et ses disponibilités de prestation.' })
 
     case 'COMMERCIAL_OPPORTUNITY_CREATE': {
       const exists = state.commercialOpportunities.some((item) => item.orgId === action.opportunity.orgId && item.offerCode === action.opportunity.offerCode && !['acceptee', 'refusee'].includes(item.status))
-      if (exists) return withToast(state, 'Piste dÃ©jÃ  ouverte', 'Cette offre complÃ©mentaire est dÃ©jÃ  suivie pour cette entreprise.', 'warning')
+      if (exists) return withToast(state, 'Piste déjà ouverte', 'Cette offre complémentaire est déjà suivie pour cette entreprise.', 'warning')
       const opportunity: CommercialOpportunity = { ...action.opportunity, id: uid('opportunity'), createdAt: state.now, status: 'a_qualifier' }
-      return withToast({ ...state, commercialOpportunities: [opportunity, ...state.commercialOpportunities] }, 'Piste commerciale crÃ©Ã©e', 'Qualifiez le besoin avec le dirigeant avant de prÃ©parer une proposition.', 'success')
+      return withToast({ ...state, commercialOpportunities: [opportunity, ...state.commercialOpportunities] }, 'Piste commerciale créée', 'Qualifiez le besoin avec le dirigeant avant de préparer une proposition.', 'success')
     }
 
     case 'COMMERCIAL_OPPORTUNITY_STATUS_SET':
       return { ...state, commercialOpportunities: state.commercialOpportunities.map((item) => item.id === action.id ? { ...item, status: action.status } : item) }
 
     case 'CONCIERGE_CREATE':
-      return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge crÃ©Ã©', action.account.email)
+      return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge créé', action.account.email)
 
     case 'CONCIERGE_TOGGLE':
       return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, active: !c.active } : c) }
@@ -385,7 +385,7 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
       return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, sectors: action.value ? Array.from(new Set([...c.sectors, action.sector])) : c.sectors.filter((x) => x !== action.sector) } : c) }
 
     case 'CONCIERGE_ADD_ORG':
-      return withToast({ ...state, orgs: [action.org, ...state.orgs], concierges: state.concierges.map((c) => c.id === action.conciergeId ? { ...c, createdOrgIds: [action.org.id, ...c.createdOrgIds] } : c) }, 'Entreprise ajoutÃ©e', action.org.name)
+      return withToast({ ...state, orgs: [action.org, ...state.orgs], concierges: state.concierges.map((c) => c.id === action.conciergeId ? { ...c, createdOrgIds: [action.org.id, ...c.createdOrgIds] } : c) }, 'Entreprise ajoutée', action.org.name)
 
     case 'SWITCH_USER':
       return { ...state, userId: action.userId }
@@ -409,14 +409,14 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
               id: uid('req'),
               at: state.now,
               status: 'nouveau',
-              assignedTo: 'Non assignÃ©',
+              assignedTo: 'Non assigné',
               notes: '',
             },
             ...state.requests,
           ],
         },
-        'Demande enregistrÃ©e dans la dÃ©mo',
-        'Cette version conserve les donnÃ©es dans ce navigateur ; aucune demande nâ€™est transmise Ã  lâ€™Ã©quipe.',
+        'Demande enregistrée dans la démo',
+        'Cette version conserve les données dans ce navigateur ; aucune demande n’est transmise à l’équipe.',
         'success',
       )
 
@@ -435,8 +435,8 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
             ...state.bookings,
           ],
         },
-        'CrÃ©neau enregistrÃ© dans la dÃ©mo',
-        'Action enregistrÃ©e.',
+        'Créneau enregistré dans la démo',
+        'Action enregistrée.',
         'success',
       )
 
@@ -453,8 +453,8 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
             consumed: state.subscription.consumed + 1,
           },
         },
-        'Besoin enregistrÃ©',
-        'Votre recherche de prestataires est lancÃ©e.',
+        'Besoin enregistré',
+        'Votre recherche de prestataires est lancée.',
         'success',
       )
 
@@ -472,7 +472,7 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
               }
             : need,
         ),
-      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === action.id)?.orgId)?.name ?? 'Demande client', type: 'progression', text: action.label ?? `A fait avancer la demande vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === action.id)?.orgId)?.name ?? 'Demande client', type: 'progression', text: action.label ?? `A fait avancer la demande vers « ${action.status.replaceAll('_', ' ')} ».` })
 
     case 'NEED_ADD_PROVIDER': {
       const need = state.needs.find((n) => n.id === action.needId)
@@ -485,7 +485,7 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
                 ...n,
                 candidateIds: [...n.candidateIds, action.providerId],
                 status: n.status === 'recherche' || n.status === 'recu' || n.status === 'analyse' ? 'propositions' : n.status,
-                timeline: [...n.timeline, { at: state.now, label: 'Prestataire proposÃ©' }],
+                timeline: [...n.timeline, { at: state.now, label: 'Prestataire proposé' }],
               }
             : n,
         ),
@@ -499,13 +499,13 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
         needs: state.needs.map((n) =>
           n.id === action.quote.needId ? { ...n, quoteIds: [...n.quoteIds, action.quote.id], status: 'devis' } : n,
         ),
-      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === action.quote.needId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === action.quote.needId)?.orgId)?.name ?? 'Demande client', type: 'action', text: `A transmis une proposition de ${action.quote.amount.toLocaleString('fr-FR')} MAD, avec dÃ©lai et pÃ©rimÃ¨tre.` })
+      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === action.quote.needId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === action.quote.needId)?.orgId)?.name ?? 'Demande client', type: 'action', text: `A transmis une proposition de ${action.quote.amount.toLocaleString('fr-FR')} MAD, avec délai et périmètre.` })
 
     case 'QUOTE_SET_STATUS':
       return withActivity({
         ...state,
         quotes: state.quotes.map((q) => (q.id === action.id ? { ...q, status: action.status } : q)),
-      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === state.quotes.find((quote) => quote.id === action.id)?.needId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === state.quotes.find((quote) => quote.id === action.id)?.needId)?.orgId)?.name ?? 'Proposition partenaire', type: action.status === 'accepte' || action.status === 'refuse' ? 'decision' : 'progression', text: `La proposition est maintenant Â« ${action.status.replaceAll('_', ' ')} Â».` })
+      }, { ...activityActor(state), orgId: state.needs.find((need) => need.id === state.quotes.find((quote) => quote.id === action.id)?.needId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.needs.find((need) => need.id === state.quotes.find((quote) => quote.id === action.id)?.needId)?.orgId)?.name ?? 'Proposition partenaire', type: action.status === 'accepte' || action.status === 'refuse' ? 'decision' : 'progression', text: `La proposition est maintenant « ${action.status.replaceAll('_', ' ')} ».` })
 
     case 'MEETING_SET_STATUS':
       return { ...state, meetings: state.meetings.map((m) => (m.id === action.id ? { ...m, status: action.status } : m)) }
@@ -513,7 +513,7 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
     case 'MEETING_CREATE':
       return withToast(
         { ...state, meetings: [{ ...action.meeting, id: uid('meet'), status: 'confirme' }, ...state.meetings] },
-        'Rendez-vous confirmÃ©',
+        'Rendez-vous confirmé',
         action.meeting.title,
         'success',
       )
@@ -550,7 +550,7 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
             ? { ...t, lastAt: state.now, unread: isOwn ? t.unread : t.unread + 1 }
             : t,
         ),
-      }, { actor: action.authorName, role: action.author === 'client' ? 'Ã‰quipe cliente' : 'Ã‰quipe ALLNEEDS', orgId, organization: orgName, type: 'action', text: `A partagÃ© une mise Ã  jour dans la conversation : Â« ${action.body.slice(0, 110)}${action.body.length > 110 ? 'â€¦' : ''} Â»` })
+      }, { actor: action.authorName, role: action.author === 'client' ? 'Équipe cliente' : 'Équipe ALLNEEDS', orgId, organization: orgName, type: 'action', text: `A partagé une mise à jour dans la conversation : « ${action.body.slice(0, 110)}${action.body.length > 110 ? '…' : ''} »` })
     }
 
     case 'DOC_SET_STATUS':
@@ -559,16 +559,16 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
         documents: state.documents.map((doc) =>
           doc.id === action.id ? { ...doc, status: action.status, comment: action.comment ?? doc.comment, updatedAt: state.now } : doc,
         ),
-      }, { ...activityActor(state), orgId: state.documents.find((doc) => doc.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.documents.find((doc) => doc.id === action.id)?.orgId)?.name ?? 'Dossier client', type: action.status === 'valide' ? 'progression' : 'action', text: `${state.documents.find((doc) => doc.id === action.id)?.name ?? 'Document'} : statut mis Ã  jour vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+      }, { ...activityActor(state), orgId: state.documents.find((doc) => doc.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.documents.find((doc) => doc.id === action.id)?.orgId)?.name ?? 'Dossier client', type: action.status === 'valide' ? 'progression' : 'action', text: `${state.documents.find((doc) => doc.id === action.id)?.name ?? 'Document'} : statut mis à jour vers « ${action.status.replaceAll('_', ' ')} ».` })
 
     case 'DELIVERABLE_SET_STATUS':
       return withActivity({
         ...state,
         deliverables: state.deliverables.map((d) => (d.id === action.id ? { ...d, status: action.status, updatedAt: state.now } : d)),
-      }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === state.deliverables.find((item) => item.id === action.id)?.missionId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === state.deliverables.find((item) => item.id === action.id)?.missionId)?.orgId)?.name ?? 'Livrable de mission', type: action.status === 'valide' ? 'progression' : 'action', text: `${state.deliverables.find((item) => item.id === action.id)?.title ?? 'Un livrable'} a Ã©tÃ© mis Ã  jour : Â« ${action.status.replaceAll('_', ' ')} Â».` })
+      }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === state.deliverables.find((item) => item.id === action.id)?.missionId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === state.deliverables.find((item) => item.id === action.id)?.missionId)?.orgId)?.name ?? 'Livrable de mission', type: action.status === 'valide' ? 'progression' : 'action', text: `${state.deliverables.find((item) => item.id === action.id)?.title ?? 'Un livrable'} a été mis à jour : « ${action.status.replaceAll('_', ' ')} ».` })
 
     case 'MISSION_SET_STATUS':
-      return withActivity({ ...state, missions: state.missions.map((m) => (m.id === action.id ? { ...m, status: action.status } : m)) }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === action.id)?.orgId)?.name ?? 'Mission', type: action.status === 'terminee' ? 'decision' : 'progression', text: `La mission a Ã©voluÃ© vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+      return withActivity({ ...state, missions: state.missions.map((m) => (m.id === action.id ? { ...m, status: action.status } : m)) }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === action.id)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === action.id)?.orgId)?.name ?? 'Mission', type: action.status === 'terminee' ? 'decision' : 'progression', text: `La mission a évolué vers « ${action.status.replaceAll('_', ' ')} ».` })
 
     case 'MILESTONE_SET_STATUS':
       return withActivity({
@@ -578,13 +578,13 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
             ? { ...m, milestones: m.milestones.map((ms) => (ms.id === action.milestoneId ? { ...ms, status: action.status } : ms)) }
             : m,
         ),
-      }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === action.missionId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === action.missionId)?.orgId)?.name ?? 'Mission', type: action.status === 'fait' ? 'progression' : 'action', text: `Un jalon de mission a Ã©voluÃ© vers Â« ${action.status.replaceAll('_', ' ')} Â».` })
+      }, { ...activityActor(state), orgId: state.missions.find((mission) => mission.id === action.missionId)?.orgId ?? '', organization: state.orgs.find((org) => org.id === state.missions.find((mission) => mission.id === action.missionId)?.orgId)?.name ?? 'Mission', type: action.status === 'fait' ? 'progression' : 'action', text: `Un jalon de mission a évolué vers « ${action.status.replaceAll('_', ' ')} ».` })
 
     case 'DIAGNOSTIC_PUBLISH': {
       const diag = state.diagnostics.find((x) => x.id === action.id)
       const published = { ...state, diagnostics: state.diagnostics.map((x) => (x.id === action.id ? { ...x, status: 'publie' as const, publishedAt: state.now } : x)) }
       const org = state.orgs.find((item) => item.id === diag?.orgId)
-      return withToast(withActivity(published, { ...activityActor(state), orgId: diag?.orgId ?? '', organization: org?.name ?? 'Dossier client', type: 'progression', text: `A publiÃ© le diagnostic ${diag?.ref ?? ''} avec les prioritÃ©s Ã  suivre.` }), 'Diagnostic publiÃ©', `RÃ©f. ${diag?.ref ?? ''} â€” visible dans lâ€™espace client.`)
+      return withToast(withActivity(published, { ...activityActor(state), orgId: diag?.orgId ?? '', organization: org?.name ?? 'Dossier client', type: 'progression', text: `A publié le diagnostic ${diag?.ref ?? ''} avec les priorités à suivre.` }), 'Diagnostic publié', `Réf. ${diag?.ref ?? ''} — visible dans l’espace client.`)
     }
 
     case 'DIAGNOSTIC_BACK_TO_REVIEW':
@@ -611,19 +611,19 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
         leads: state.leads.map((l) =>
           l.id === action.id ? { ...l, stage: action.stage, lastContactAt: state.now } : l,
         ),
-      }, { ...activityActor(state), orgId: '', organization: state.leads.find((lead) => lead.id === action.id)?.orgName ?? 'Prospect', type: action.stage === 'gagne' || action.stage === 'perdu' ? 'decision' : 'progression', text: `A fait Ã©voluer le dossier vers lâ€™Ã©tape Â« ${action.stage.replaceAll('_', ' ')} Â».` })
+      }, { ...activityActor(state), orgId: '', organization: state.leads.find((lead) => lead.id === action.id)?.orgName ?? 'Prospect', type: action.stage === 'gagne' || action.stage === 'perdu' ? 'decision' : 'progression', text: `A fait évoluer le dossier vers l’étape « ${action.stage.replaceAll('_', ' ')} ».` })
 
     case 'LEAD_PATCH':
-      return withActivity({ ...state, leads: state.leads.map((l) => (l.id === action.id ? { ...l, ...action.patch } : l)) }, { ...activityActor(state), orgId: '', organization: state.leads.find((lead) => lead.id === action.id)?.orgName ?? 'Prospect', type: 'action', text: action.patch.nextAction ? `Action consignÃ©e Â· ${action.patch.nextAction}` : 'Le dossier prospect a Ã©tÃ© actualisÃ©.' })
+      return withActivity({ ...state, leads: state.leads.map((l) => (l.id === action.id ? { ...l, ...action.patch } : l)) }, { ...activityActor(state), orgId: '', organization: state.leads.find((lead) => lead.id === action.id)?.orgName ?? 'Prospect', type: 'action', text: action.patch.nextAction ? `Action consignée · ${action.patch.nextAction}` : 'Le dossier prospect a été actualisé.' })
 
     case 'LEAD_CREATE':
-      return withToast({ ...state, leads: [action.lead, ...state.leads] }, 'Lead crÃ©Ã©', action.lead.orgName)
+      return withToast({ ...state, leads: [action.lead, ...state.leads] }, 'Lead créé', action.lead.orgName)
 
     case 'LEADS_DEMO_SET':
-      return withToast(withActivity({ ...state, leads: action.leads }, { ...activityActor(state), orgId: '', organization: 'Portefeuille de prospection', type: 'action', text: 'A prÃ©parÃ© une journÃ©e de prospection simulÃ©e : 30 Ã©tablissements rÃ©partis entre santÃ©, enseignement et tourisme.' }), 'JournÃ©e de prospection prÃªte', 'Prospection prÃ©parÃ©e.', 'info')
+      return withToast(withActivity({ ...state, leads: action.leads }, { ...activityActor(state), orgId: '', organization: 'Portefeuille de prospection', type: 'action', text: 'A préparé une journée de prospection simulée : 30 établissements répartis entre santé, enseignement et tourisme.' }), 'Journée de prospection prête', 'Prospection préparée.', 'info')
 
     case 'LEADS_DEMO_RESET':
-      return withToast({ ...state, leads: LEADS }, 'Pipeline initial restaurÃ©', 'Les donnÃ©es ont Ã©tÃ© rÃ©initialisÃ©es.', 'info')
+      return withToast({ ...state, leads: LEADS }, 'Pipeline initial restauré', 'Les données ont été réinitialisées.', 'info')
 
     case 'NOTIF_READ':
       return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, read: true } : n)) }
@@ -643,8 +643,8 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
     case 'SUBSCRIPTION_CANCEL':
       return withToast(
         { ...state, subscription: { ...state.subscription, status: 'expire', autoRenew: false } },
-        'RÃ©siliation enregistrÃ©e',
-        'PrÃ©avis de 30 jours avant lâ€™Ã©chÃ©ance.',
+        'Résiliation enregistrée',
+        'Préavis de 30 jours avant l’échéance.',
         'info',
       )
 
@@ -676,7 +676,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<StoreValue>(() => {
     const concierge = state.concierges.find((item) => item.id === state.userId)
     const orgId = state.role === 'client' ? (state.orgs.find((org) => org.id === state.userId)?.id ?? '') : ''
-    const user: AppUser = { id: state.userId, orgId, name: concierge?.name ?? 'Utilisateur ALLNEEDS', email: concierge?.email ?? '', role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction', roleLabel: state.role === 'admin' ? 'ALLNEEDS Â· Administrateur' : state.role === 'concierge' ? 'ALLNEEDS Â· Concierge' : 'Compte entreprise', initials: 'AN' }
+    const user: AppUser = { id: state.userId, orgId, name: concierge?.name ?? 'Utilisateur ALLNEEDS', email: concierge?.email ?? '', role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction', roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Concierge' : 'Compte entreprise', initials: 'AN' }
     return { state, dispatch, user, role: state.role, setRole, orgId }
   }, [state, setRole])
 
@@ -685,7 +685,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
 
 export function useDemo(): StoreValue {
   const ctx = useContext(DemoContext)
-  if (!ctx) throw new Error('useDemo doit Ãªtre utilisÃ© dans DemoStoreProvider')
+  if (!ctx) throw new Error('useDemo doit être utilisé dans DemoStoreProvider')
   return ctx
 }
 
@@ -732,7 +732,7 @@ export function makeNeed(input: {
     candidateIds: [],
     quoteIds: [],
     assignedTo: 'Nada (ALLNEEDS)',
-    timeline: [{ at: DEMO_NOW, label: 'Demande reÃ§ue' }],
+    timeline: [{ at: DEMO_NOW, label: 'Demande reçue' }],
   }
 }
 
