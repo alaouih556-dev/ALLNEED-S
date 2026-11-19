@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useNavigate, type LinkProps } from '@tanstack/react-router'
+import { Link, useNavigate, useRouterState, type LinkProps } from '@tanstack/react-router'
 import {
   BarChart3,
   Bell,
@@ -7,6 +7,11 @@ import {
   Building2,
   CalendarDays,
   ChevronDown,
+  ChevronRight,
+  Home,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
   ClipboardCheck,
   ClipboardList,
   FileText,
@@ -29,7 +34,7 @@ import { useDemo } from '@/store/store'
 import { useAuth } from '@/features/auth/AuthContext'
 import { clientModules, orgSaasActive, type AccessModule } from '@/lib/access'
 import { cn } from '@/lib/utils'
-import { Avatar, Button } from '@/components/ui'
+import { Avatar } from '@/components/ui'
 
 /* ------------------------------------------------------------------ */
 /* Toaster                                                             */
@@ -57,7 +62,7 @@ export function Toaster() {
   return (
     <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2">
       {state.toasts.map((toast) => (
-        <div key={toast.id} className={cn('pointer-events-auto animate-fade-up rounded-xl border px-4 py-3 shadow-lift', tones[toast.tone])}>
+        <div key={toast.id} className={cn('pointer-events-auto animate-fade-up rounded-2xl border px-4 py-3 shadow-[0_18px_40px_-12px_rgba(16,36,76,.25)]', tones[toast.tone])}>
           <p className="text-sm font-semibold">{toast.title}</p>
           {toast.description ? <p className="mt-0.5 text-xs opacity-80">{toast.description}</p> : null}
         </div>
@@ -136,27 +141,42 @@ function buildConciergeNav(): NavItem[] {
 
 function buildAdminNav(): NavItem[] {
   return [
-    { group: 'Pilotage', label: 'Vue d’ensemble', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { group: 'Pilotage', label: 'Tableau de bord', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Relances', to: '/admin/relances', icon: <Bell className="h-4 w-4" /> },
+    { group: 'Clients', label: 'Inscriptions', to: '/admin/inscriptions' as any, icon: <ClipboardCheck className="h-4 w-4" /> },
+    { group: 'Clients', label: 'Clients & accès', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },
+    { group: 'Clients', label: 'Offres', to: '/admin/offres' as any, icon: <Receipt className="h-4 w-4" /> },
+    { group: 'Clients', label: 'Quotas & abonnements', to: '/admin/quotas', icon: <RefreshCcw className="h-4 w-4" /> },
+    { group: 'Diagnostics', label: 'À relire', to: '/admin/diagnostics-auto', icon: <Gauge className="h-4 w-4" /> },
+    { group: 'Diagnostics', label: 'Diagnostics clients', to: '/admin/diagnostics/reel' as any, icon: <FileText className="h-4 w-4" /> },
+    { group: 'Diagnostics', label: 'Diagnostics internes', to: '/admin/diagnostics', icon: <ClipboardList className="h-4 w-4" /> },
+    { group: 'Diagnostics', label: 'Grille STARTER', to: '/admin/grille', icon: <LineChart className="h-4 w-4" /> },
+    { group: 'Opérations', label: 'Qualification', to: '/admin/qualification', icon: <MessageSquare className="h-4 w-4" /> },
     { group: 'Opérations', label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Diagnostics à relire', to: '/admin/diagnostics-auto', icon: <Gauge className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Diagnostics clients', to: '/admin/diagnostics/reel' as any, icon: <FileText className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Diagnostics internes', to: '/admin/diagnostics', icon: <ClipboardList className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Qualification', to: '/admin/qualification', icon: <ClipboardList className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Grille STARTER', to: '/admin/grille', icon: <ClipboardCheck className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Prestataires', to: '/admin/prestataires', icon: <Network className="h-4 w-4" /> },
     { group: 'Opérations', label: 'Missions', to: '/admin/missions', icon: <Briefcase className="h-4 w-4" /> },
-    { group: 'Accès', label: 'Inscriptions', to: '/admin/inscriptions' as any, icon: <ClipboardCheck className="h-4 w-4" /> },
-    { group: 'Accès', label: 'Clients', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },
-    { group: 'Accès', label: 'Concierges & accès', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
-    { group: 'Accès', label: 'Quotas & abonnements', to: '/admin/quotas', icon: <RefreshCcw className="h-4 w-4" /> },
+    { group: 'Opérations', label: 'Prestataires', to: '/admin/prestataires', icon: <Network className="h-4 w-4" /> },
+    { group: 'Équipe', label: 'Concierges & accès', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
   ]
 }
 
 /* ------------------------------------------------------------------ */
 /* App shell                                                           */
 /* ------------------------------------------------------------------ */
+
+const VARIANT_META = {
+  admin: { label: 'Administration', badge: 'Admin', accent: '#6366f1' },
+  concierge: { label: 'Concierge', badge: 'Concierge', accent: '#0d9488' },
+  client: { label: 'Espace client', badge: 'Client', accent: '#0878f9' },
+} as const
+
+function readCollapsed() {
+  try {
+    return window.localStorage.getItem('an-sidebar-collapsed') === '1'
+  } catch {
+    return false
+  }
+}
 
 export function AppShell({
   children,
@@ -165,17 +185,22 @@ export function AppShell({
   children: ReactNode
   variant: 'client' | 'admin' | 'concierge'
 }) {
-  const { state, dispatch, user } = useDemo()
+  const { state, user } = useDemo()
   const auth = useAuth()
   const navigate = useNavigate()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(readCollapsed)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const meta = VARIANT_META[variant]
 
   const displayUser = auth.status === 'authenticated' && auth.user ? {
     ...user,
     id: auth.user.id,
     name: auth.user.name,
     email: auth.user.email,
-    roleLabel: auth.user.role === 'admin' ? 'ALLNEEDS · Administrateur' : auth.user.role === 'concierge' ? 'ALLNEEDS · Concierge' : auth.user.role === 'manager' ? 'Responsable · Espace client' : auth.user.role === 'collaborateur' ? 'Collaborateur · Espace client' : user.roleLabel,
+    roleLabel: auth.user.role === 'admin' ? 'Administrateur' : auth.user.role === 'concierge' ? 'Concierge' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
   } : user
 
   const unread = auth.status === 'authenticated' ? 0 : state.threads.reduce((acc, t) => acc + t.unread, 0)
@@ -184,123 +209,283 @@ export function AppShell({
   const modules = clientModules(auth.user?.organization ?? null)
   const saasAccess = orgSaasActive(auth.user?.organization ?? null)
   const nav = variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav() : buildClientNav(modules, unread, pendingDocs, saasAccess)
+  const current = [...nav].sort((a, b) => String(b.to).length - String(a.to).length).find((item) => {
+    const to = String(item.to).replace(/\/$/, '')
+    return pathname === to || pathname === `${to}/` || (to.split('/').length > 2 && pathname.startsWith(`${to}/`))
+  })
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('an-sidebar-collapsed', collapsed ? '1' : '0')
+    } catch {
+      /* stockage indisponible */
+    }
+  }, [collapsed])
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPaletteOpen((open) => !open)
+      }
+      if (event.key === 'Escape') {
+        setPaletteOpen(false)
+        setMenuOpen(false)
+        setMobileNavOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  useEffect(() => {
+    setMobileNavOpen(false)
+    setMenuOpen(false)
+  }, [pathname])
+
+  const logout = () => {
+    void auth.logout().catch(() => undefined)
+    void navigate({ to: '/' })
+  }
+
+  const subtitle = variant === 'admin' ? 'Pilotage ALLNEEDS' : variant === 'concierge' ? 'Entreprises attribuées' : clientOrg ? `${clientOrg.sector ?? 'Entreprise'} · accès sécurisé` : 'Votre espace ALLNEEDS'
+  const orgName = variant === 'client' ? (clientOrg?.name ?? 'Espace client') : null
 
   return (
-    <div className={`workspace-redesign workspace-${variant} flex min-h-screen bg-[#f6f9fd]`}>
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-ink-100 bg-white lg:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b border-ink-100 px-5">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src="/allneeds-icon.svg" alt="" className="h-8 w-8 rounded-lg" />
-            <span className="leading-none">
-              <span className="block font-display text-sm font-extrabold tracking-tight text-ink-950">all<span className="text-brand-700">needs</span></span>
-              <span className="block text-[0.65rem] font-semibold uppercase tracking-widest text-ink-400">
-                {variant === 'admin' ? 'Administration' : variant === 'concierge' ? 'Concierge' : 'Espace client'}
-              </span>
-            </span>
-          </Link>
+    <div className={cn('an-shell', `workspace-${variant}`, collapsed && 'is-collapsed')} style={{ ['--an-accent' as string]: meta.accent }}>
+      <div className="an-shell-sidebar-wrap">
+        <aside className="an-sidebar" aria-label="Barre latérale">
+          <SidebarContent
+            nav={nav}
+            meta={meta}
+            collapsed={collapsed}
+            orgName={orgName}
+            user={displayUser}
+            onLogout={logout}
+            onToggle={() => setCollapsed((c) => !c)}
+            onNavigate={() => setMobileNavOpen(false)}
+          />
+        </aside>
+      </div>
+
+      {mobileNavOpen ? (
+        <div className="an-drawer-backdrop" onClick={() => setMobileNavOpen(false)}>
+          <aside className="an-sidebar an-drawer" onClick={(event) => event.stopPropagation()}>
+            <SidebarContent nav={nav} meta={meta} collapsed={false} orgName={orgName} user={displayUser} onLogout={logout} onNavigate={() => setMobileNavOpen(false)} onClose={() => setMobileNavOpen(false)} />
+          </aside>
         </div>
+      ) : null}
 
-        <WorkspaceNavigation items={nav} onNavigate={() => setMobileNavOpen(false)} />
-
-        <div className="border-t border-ink-100 p-3">
-          <div className="rounded-xl bg-ink-50 p-3">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-ink-400">Session</p>
-            <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-500">
-              Accès vérifié côté serveur pour votre compte.
-            </p>
-          </div>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-100 bg-white/90 px-4 backdrop-blur sm:px-6">
+      <div className="an-shell-main">
+        <header className="an-topbar">
           <div className="flex min-w-0 items-center gap-3">
-            <button type="button" onClick={() => setMobileNavOpen((open) => !open)} aria-label={mobileNavOpen ? 'Fermer le menu' : 'Ouvrir le menu'} aria-expanded={mobileNavOpen} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-950 text-white lg:hidden">
-              {mobileNavOpen ? <X size={18} /> : <Menu size={18} />}
+            <button type="button" onClick={() => setMobileNavOpen(true)} aria-label="Ouvrir le menu" className="an-icon-btn an-mobile-only">
+              <Menu size={18} />
             </button>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-ink-950">
-                {variant === 'admin' ? 'Administration ALLNEEDS' : variant === 'concierge' ? 'Portefeuille concierge' : (clientOrg?.name ?? 'Espace client')}
+              <p className="an-crumb truncate">
+                <span>{meta.label}</span>
+                <ChevronRight size={13} />
+                <b>{current?.label ?? 'Espace'}</b>
               </p>
-              <p className="truncate text-xs text-ink-500">
-                {variant === 'admin' ? 'Vue interne · gestion des accès' : variant === 'concierge' ? 'Pilotage des entreprises attribuées' : clientOrg ? `${clientOrg.sector ?? 'Entreprise'} · accès sécurisé` : 'Votre espace ALLNEEDS'}
-              </p>
+              <p className="an-topbar-sub truncate">{orgName ?? subtitle}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="hidden rounded-full border border-ink-200 bg-ink-50 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-wider text-ink-600 sm:block">
-              {variant === 'admin' ? 'Administrateur' : variant === 'concierge' ? 'Concierge' : 'Client'}
-            </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button type="button" onClick={() => setPaletteOpen(true)} className="an-search-trigger" aria-label="Rechercher une page">
+              <Search size={15} />
+              <span className="hidden md:inline">Rechercher…</span>
+              <kbd className="hidden md:inline">Ctrl K</kbd>
+            </button>
 
             {variant === 'client' && modules.messages ? (
-              <Link
-                to="/app/messages"
-                className="relative rounded-lg p-2 text-ink-500 transition hover:bg-ink-100 hover:text-ink-900"
-              >
-                <Bell className="h-4 w-4" />
-                {unread > 0 ? <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" /> : null}
+              <Link to="/app/messages" className="an-icon-btn relative" aria-label="Messages">
+                <Bell size={17} />
+                {unread > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" /> : null}
               </Link>
             ) : null}
 
-            <div className="flex items-center gap-2 border-l border-ink-100 pl-2">
-              <Avatar name={displayUser.name} size="sm" />
-              <div className="hidden leading-tight md:block">
-                <p className="text-xs font-semibold text-ink-900">{displayUser.name}</p>
-                <p className="text-[0.65rem] text-ink-500">{displayUser.roleLabel}</p>
-              </div>
-              <ChevronDown className="hidden h-3.5 w-3.5 text-ink-400 md:block" />
+            <div className="relative">
+              <button type="button" onClick={() => setMenuOpen((o) => !o)} className="an-user-trigger" aria-expanded={menuOpen} aria-haspopup="menu">
+                <Avatar name={displayUser.name} size="sm" />
+                <span className="hidden text-left leading-tight md:block">
+                  <span className="block text-xs font-semibold text-ink-900">{displayUser.name}</span>
+                  <span className="block text-[0.68rem] text-ink-500">{displayUser.roleLabel}</span>
+                </span>
+                <ChevronDown size={14} className="hidden text-ink-400 md:block" />
+              </button>
+              {menuOpen ? (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                  <div role="menu" className="an-menu">
+                    <div className="border-b border-ink-100 px-3 pb-3 pt-2">
+                      <p className="truncate text-sm font-semibold text-ink-950">{displayUser.name}</p>
+                      <p className="truncate text-xs text-ink-500">{displayUser.email}</p>
+                      <span className="an-role-chip mt-2">{meta.badge}</span>
+                    </div>
+                    <Link to="/" role="menuitem" className="an-menu-item"><Home size={15} />Site public</Link>
+                    {variant === 'client' ? <Link to={'/app/parametres' as any} role="menuitem" className="an-menu-item"><Settings2 size={15} />Profil & activité</Link> : null}
+                    <button type="button" role="menuitem" onClick={logout} className="an-menu-item text-red-600"><LogOut size={15} />Se déconnecter</button>
+                  </div>
+                </>
+              ) : null}
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                void auth.logout().catch(() => undefined)
-                void navigate({ to: '/' })
-              }}
-              className="rounded-lg p-2 text-ink-400 transition hover:bg-ink-100 hover:text-ink-800"
-              title="Retour au site public"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
           </div>
         </header>
 
-        {mobileNavOpen ? <div className="fixed inset-0 top-16 z-40 bg-ink-950/30 lg:hidden" onClick={() => setMobileNavOpen(false)}>
-          <div className="max-h-[calc(100vh-4rem)] w-full overflow-y-auto border-b border-ink-100 bg-white p-3 shadow-lift" onClick={(event) => event.stopPropagation()}>
-            <WorkspaceNavigation items={nav} onNavigate={() => setMobileNavOpen(false)} />
-            <Link to="/" onClick={() => setMobileNavOpen(false)} className="mt-3 flex items-center gap-2 rounded-xl border border-ink-100 px-3 py-3 text-sm font-semibold text-ink-700"><LogOut size={16} />Retour à l’accueil ALLNEEDS</Link>
-          </div>
-        </div> : null}
-
-        <main className="mx-auto flex-1 px-4 py-6 sm:px-6 lg:px-8 w-full max-w-7xl">{children}</main>
+        <main className="an-main">{children}</main>
       </div>
+
+      {paletteOpen ? <CommandPalette items={nav} onClose={() => setPaletteOpen(false)} /> : null}
     </div>
   )
 }
 
-function WorkspaceNavigation({ items, onNavigate }: { items: NavItem[]; onNavigate: () => void }) {
+function SidebarContent({
+  nav,
+  meta,
+  collapsed,
+  orgName,
+  user,
+  onLogout,
+  onToggle,
+  onNavigate,
+  onClose,
+}: {
+  nav: NavItem[]
+  meta: (typeof VARIANT_META)[keyof typeof VARIANT_META]
+  collapsed: boolean
+  orgName: string | null
+  user: { name: string; email?: string; roleLabel: string }
+  onLogout: () => void
+  onToggle?: () => void
+  onNavigate: () => void
+  onClose?: () => void
+}) {
+  return (
+    <>
+      <div className="an-sidebar-head">
+        <Link to="/" className="flex min-w-0 items-center gap-2.5" onClick={onNavigate}>
+          <span className="an-logo-mark"><img src="/allneeds-icon.svg" alt="" /></span>
+          {!collapsed ? (
+            <span className="min-w-0 leading-none">
+              <span className="an-logo-text">all<em>needs</em></span>
+              <span className="an-logo-sub">{meta.label}</span>
+            </span>
+          ) : null}
+        </Link>
+        {onClose ? <button type="button" onClick={onClose} className="an-side-icon" aria-label="Fermer le menu"><X size={17} /></button> : null}
+      </div>
+
+      {orgName && !collapsed ? (
+        <div className="an-org-card">
+          <span>{orgName.slice(0, 1).toUpperCase()}</span>
+          <div className="min-w-0"><b className="truncate">{orgName}</b><small>Organisation</small></div>
+        </div>
+      ) : null}
+
+      <WorkspaceNavigation items={nav} collapsed={collapsed} onNavigate={onNavigate} />
+
+      <div className="an-sidebar-foot">
+        {!collapsed ? (
+          <div className="an-side-user">
+            <Avatar name={user.name} size="sm" />
+            <div className="min-w-0 flex-1"><b className="truncate">{user.name}</b><small className="truncate">{user.roleLabel}</small></div>
+            <button type="button" onClick={onLogout} className="an-side-icon" title="Se déconnecter" aria-label="Se déconnecter"><LogOut size={15} /></button>
+          </div>
+        ) : (
+          <button type="button" onClick={onLogout} className="an-side-icon mx-auto" title="Se déconnecter" aria-label="Se déconnecter"><LogOut size={16} /></button>
+        )}
+        {onToggle ? (
+          <button type="button" onClick={onToggle} className="an-collapse-btn" aria-label={collapsed ? 'Déplier la barre latérale' : 'Replier la barre latérale'}>
+            {collapsed ? <PanelLeftOpen size={16} /> : <><PanelLeftClose size={16} /><span>Replier</span></>}
+          </button>
+        ) : null}
+      </div>
+    </>
+  )
+}
+
+function WorkspaceNavigation({ items, collapsed, onNavigate }: { items: NavItem[]; collapsed: boolean; onNavigate: () => void }) {
   let previousGroup = ''
-  return <nav aria-label="Navigation de l’espace" className="flex-1 space-y-1 overflow-y-auto p-3">
+  return <nav aria-label="Navigation de l’espace" className="an-nav">
     {items.map((item) => {
       const showGroup = item.group !== previousGroup
       previousGroup = item.group
       return <div key={String(item.to)}>
-        {showGroup ? <p className="mb-1 mt-4 px-3 text-[0.64rem] font-bold uppercase tracking-[0.14em] text-ink-400 first:mt-1">{item.group}</p> : null}
+        {showGroup ? (collapsed ? <hr className="an-nav-sep" /> : <p className="an-nav-group">{item.group}</p>) : null}
         {item.disabled ? (
-          <div title={item.disabledHint} className="flex cursor-not-allowed items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-300">
-            <span className="flex items-center gap-2.5">{item.icon}{item.label}</span>
-            <span className="text-[0.62rem] font-bold uppercase tracking-wider text-ink-300">Verrouillé</span>
+          <div title={item.disabledHint} className="an-nav-link is-disabled">
+            <span className="an-nav-icon">{item.icon}</span>
+            {!collapsed ? <span className="truncate">{item.label}</span> : null}
           </div>
         ) : (
-          <Link to={item.to} onClick={onNavigate} className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-950" activeProps={{ className: 'bg-brand-50 text-brand-800 hover:bg-brand-50' }}>
-            <span className="flex items-center gap-2.5">{item.icon}{item.label}</span>
-            {item.badge ? <span className="rounded-full bg-ink-950 px-1.5 py-0.5 text-[0.62rem] font-bold text-white">{item.badge}</span> : null}
+          <Link
+            to={item.to}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className="an-nav-link"
+            activeOptions={{ exact: String(item.to).split('/').filter(Boolean).length <= 1 }}
+            activeProps={{ className: 'is-active' }}
+          >
+            <span className="an-nav-icon">{item.icon}</span>
+            {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
+            {item.badge && !collapsed ? <span className="an-nav-badge">{item.badge}</span> : null}
           </Link>
         )}
       </div>
     })}
   </nav>
+}
+
+function CommandPalette({ items, onClose }: { items: NavItem[]; onClose: () => void }) {
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [active, setActive] = useState(0)
+  const q = query.trim().toLowerCase()
+  const results = items.filter((item) => !item.disabled && (!q || `${item.label} ${item.group}`.toLowerCase().includes(q)))
+
+  const go = (item?: NavItem) => {
+    if (!item) return
+    onClose()
+    void navigate({ to: item.to as any })
+  }
+
+  return (
+    <div className="an-palette-backdrop" onClick={onClose}>
+      <div className="an-palette" role="dialog" aria-label="Recherche rapide" onClick={(event) => event.stopPropagation()}>
+        <div className="flex items-center gap-3 border-b border-ink-100 px-4">
+          <Search size={17} className="text-ink-400" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => { setQuery(event.target.value); setActive(0) }}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowDown') { event.preventDefault(); setActive((a) => Math.min(results.length - 1, a + 1)) }
+              if (event.key === 'ArrowUp') { event.preventDefault(); setActive((a) => Math.max(0, a - 1)) }
+              if (event.key === 'Enter') go(results[active])
+            }}
+            placeholder="Aller à une page…"
+            className="h-14 flex-1 bg-transparent text-[0.95rem] text-ink-900 outline-none placeholder:text-ink-400"
+          />
+          <kbd className="an-kbd">Échap</kbd>
+        </div>
+        <ul className="max-h-[50vh] overflow-y-auto p-2">
+          {results.map((item, index) => (
+            <li key={String(item.to)}>
+              <button type="button" onMouseEnter={() => setActive(index)} onClick={() => go(item)} className={cn('an-palette-item', index === active && 'is-active')}>
+                <span className="an-palette-icon">{item.icon}</span>
+                <span className="flex-1 text-left">{item.label}</span>
+                <small>{item.group}</small>
+              </button>
+            </li>
+          ))}
+          {results.length === 0 ? <li className="px-3 py-8 text-center text-sm text-ink-500">Aucune page ne correspond à « {query} ».</li> : null}
+        </ul>
+      </div>
+    </div>
+  )
 }
 
 /* ------------------------------------------------------------------ */
@@ -321,11 +506,11 @@ export function PageHeader({
   className?: string
 }) {
   return (
-    <div className={cn('mb-6 flex flex-wrap items-end justify-between gap-4', className)}>
+    <div className={cn('an-page-header mb-7 flex flex-wrap items-end justify-between gap-4', className)}>
       <div className="min-w-0">
-        {eyebrow ? <p className="mb-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand-700">{eyebrow}</p> : null}
-        <h1 className="font-display text-2xl tracking-tight text-ink-950 sm:text-3xl">{title}</h1>
-        {description ? <div className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-500">{description}</div> : null}
+        {eyebrow ? <p className="an-eyebrow mb-2">{eyebrow}</p> : null}
+        <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-950 sm:text-[1.9rem]">{title}</h1>
+        {description ? <div className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-500">{description}</div> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>

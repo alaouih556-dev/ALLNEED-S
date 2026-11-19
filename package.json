@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:all": "node scripts/dev-all.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "backend:start": "node --env-file-if-exists=.env backend/server.mjs",

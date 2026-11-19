@@ -22,18 +22,18 @@ type Size = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    'rounded-full bg-brand-700 text-white hover:bg-brand-800 active:scale-[0.98] shadow-lg shadow-brand-900/15',
-  secondary: 'rounded-full bg-brand-50 text-brand-800 hover:bg-brand-100',
-  outline: 'rounded-full border border-ink-200 bg-white text-ink-800 hover:border-ink-400 hover:bg-ink-50',
-  ghost: 'rounded-full text-ink-600 hover:bg-ink-100 hover:text-ink-950',
-  danger: 'rounded-full bg-red-600 text-white hover:bg-red-700',
-  dark: 'rounded-full bg-ink-950 text-white hover:bg-ink-900',
+    'an-btn-primary bg-brand-700 text-white hover:bg-brand-800 shadow-[0_1px_2px_rgba(16,36,76,.18),0_6px_16px_-6px_rgba(7,95,213,.55)]',
+  secondary: 'bg-brand-50 text-brand-800 hover:bg-brand-100',
+  outline: 'border border-ink-200 bg-white text-ink-800 shadow-[0_1px_2px_rgba(16,36,76,.06)] hover:border-ink-300 hover:bg-ink-50',
+  ghost: 'text-ink-600 hover:bg-ink-100 hover:text-ink-950',
+  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-[0_6px_16px_-6px_rgba(220,38,38,.5)]',
+  dark: 'bg-ink-950 text-white hover:bg-ink-900',
 }
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5',
-  md: 'h-10 px-4 text-sm gap-2',
-  lg: 'h-12 px-6 text-[0.95rem] gap-2.5',
+  sm: 'h-8 rounded-lg px-3 text-xs gap-1.5',
+  md: 'h-10 rounded-xl px-4 text-sm gap-2',
+  lg: 'h-12 rounded-xl px-6 text-[0.95rem] gap-2.5',
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -46,7 +46,7 @@ export function Button({ className, variant = 'primary', size = 'md', fullWidth,
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-lg font-semibold transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex items-center justify-center font-semibold transition-all duration-150 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         VARIANTS[variant],
         SIZES[size],
         fullWidth && 'w-full',
@@ -63,7 +63,7 @@ export function Button({ className, variant = 'primary', size = 'md', fullWidth,
 
 export function Card({ className, children, ...props }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('allneeds-card rounded-3xl border border-ink-100 bg-white shadow-[0_20px_45px_-18px_rgba(16,42,74,.18)] transition hover:shadow-[0_26px_60px_-20px_rgba(16,42,74,.22)]', className)} {...props}>
+    <div className={cn('allneeds-card rounded-2xl border border-ink-100 bg-white', className)} {...props}>
       {children}
     </div>
   )
@@ -73,7 +73,7 @@ export function CardHeader({ title, description, action, className }: { title: R
   return (
     <div className={cn('flex items-start justify-between gap-4 border-b border-ink-100 px-5 py-4', className)}>
       <div>
-        <h3 className="text-sm font-semibold text-ink-950">{title}</h3>
+        <h3 className="text-[0.95rem] font-bold tracking-tight text-ink-950">{title}</h3>
         {description ? <p className="mt-0.5 text-xs text-ink-500">{description}</p> : null}
       </div>
       {action}
@@ -117,7 +117,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide ring-1 ring-inset',
+        'inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset',
         TONES[tone],
         className,
       )}
@@ -178,7 +178,7 @@ export function Field({
 }
 
 const CONTROL =
-  'w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:bg-ink-50 disabled:text-ink-400'
+  'w-full rounded-xl border border-ink-200 bg-white px-3.5 text-sm text-ink-900 shadow-[0_1px_2px_rgba(16,36,76,.04)] placeholder:text-ink-400 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100 disabled:bg-ink-50 disabled:text-ink-400'
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(CONTROL, 'h-10', className)} {...props} />
@@ -237,13 +237,13 @@ export function Stat({
   icon?: ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-ink-100 bg-white p-4">
+    <div className={cn('an-stat relative overflow-hidden rounded-2xl border border-ink-100 bg-white p-5', `an-stat-${tone}`)}>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink-500">{label}</p>
-        {icon ? <span className={cn('rounded-lg p-1.5', TONES[tone])}>{icon}</span> : null}
+        <p className="text-[0.78rem] font-semibold text-ink-500">{label}</p>
+        {icon ? <span className={cn('grid h-9 w-9 place-items-center rounded-xl ring-1 ring-inset', TONES[tone])}>{icon}</span> : null}
       </div>
-      <p className="mt-2 font-display text-3xl leading-none tracking-tight text-ink-950">{value}</p>
-      {hint ? <p className="mt-2 text-xs text-ink-500">{hint}</p> : null}
+      <p className="mt-3 font-display text-[1.9rem] font-extrabold leading-none tracking-tight text-ink-950 tabular-nums">{value}</p>
+      {hint ? <p className="mt-2.5 text-xs leading-relaxed text-ink-500">{hint}</p> : null}
     </div>
   )
 }

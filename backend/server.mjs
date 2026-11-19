@@ -14,7 +14,10 @@ const COOKIE_NAME = 'allneeds_session'
 const SESSION_TTL_SECONDS = 8 * 60 * 60
 const INVITATION_TTL_SECONDS = 48 * 60 * 60
 const MAX_BODY_BYTES = 1024 * 1024
-const FRONTEND_ORIGIN = process.env.ALLNEEDS_FRONTEND_ORIGIN || 'http://127.0.0.1:5176'
+const FRONTEND_ORIGIN = (process.env.ALLNEEDS_FRONTEND_ORIGIN || 'http://127.0.0.1:5176').trim().replace(/\/$/, '')
+// Origines autorisées : ALLNEEDS_FRONTEND_ORIGIN + liste CORS_ORIGINS (séparées par des virgules)
+const ALLOWED_ORIGINS = new Set([FRONTEND_ORIGIN, ...(process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean)])
+const isAllowedOrigin = (origin) => ALLOWED_ORIGINS.has(origin)
 const isProduction = process.env.NODE_ENV === 'production'
 const sessionSecret = process.env.ALLNEEDS_SESSION_SECRET || (!isProduction ? randomBytes(32).toString('base64url') : '')
 
@@ -534,7 +537,7 @@ function cookie(value, maxAge) {
 
 function requireSameOrigin(req, res) {
   const origin = req.headers.origin
-  if (origin && origin !== FRONTEND_ORIGIN) {
+  if (origin && !isAllowedOrigin(origin)) {
     json(res, 403, { error: 'origine refusée' })
     return false
   }
@@ -1022,9 +1025,9 @@ const server = createServer(async (req, res) => {
   try {
     if (req.method === 'OPTIONS') {
       const origin = req.headers.origin
-      if (origin !== FRONTEND_ORIGIN) return json(res, 403, { error: 'origine refusée' })
+      if (!isAllowedOrigin(origin)) return json(res, 403, { error: 'origine refusée' })
       res.writeHead(204, {
-        'access-control-allow-origin': FRONTEND_ORIGIN,
+        'access-control-allow-origin': origin,
         'access-control-allow-credentials': 'true',
         'access-control-allow-methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
         'access-control-allow-headers': 'content-type',
@@ -1034,7 +1037,7 @@ const server = createServer(async (req, res) => {
       return res.end()
     }
 
-    const cors = req.headers.origin === FRONTEND_ORIGIN ? { 'access-control-allow-origin': FRONTEND_ORIGIN, 'access-control-allow-credentials': 'true', vary: 'Origin' } : {}
+    const cors = isAllowedOrigin(req.headers.origin) ? { 'access-control-allow-origin': req.headers.origin, 'access-control-allow-credentials': 'true', vary: 'Origin' } : {}
     if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { ok: true }, cors)
 
     if (req.method === 'POST' && url.pathname === '/api/auth/login') {

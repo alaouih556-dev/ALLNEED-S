@@ -9,6 +9,11 @@ export default defineConfig({
 server: {
   host: '0.0.0.0',
   allowedHosts: true,
+  // Les fichiers écrits par le backend (audit.jsonl, db.json…) ne doivent pas
+  // déclencher de rechargement complet de la page à chaque requête API.
+  watch: {
+    ignored: ['**/backend/**', '**/database/**', '**/reference/**', '**/*.md'],
+  },
   proxy: {
     '/api': {
       target: 'http://127.0.0.1:8787',
