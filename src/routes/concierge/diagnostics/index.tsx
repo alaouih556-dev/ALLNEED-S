@@ -1,3 +1,4 @@
+import { isSectorActive } from '@/lib/active-sectors'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowRight, ArrowUpRight, BadgeCheck, ClipboardList, FileSearch, RefreshCw } from 'lucide-react'
 import { ConciergeHeading, ScopedEmpty } from '@/features/concierge/ScopedSection'
@@ -22,7 +23,8 @@ function contactLine(record: { conciergeRequest?: { contact?: string; phone?: st
 }
 
 function ConciergeDiagnostics() {
-  const { records, loading, error, refresh } = useSubmittedDiagnostics()
+  const { records: allRecords, loading, error, refresh } = useSubmittedDiagnostics()
+  const records = allRecords.filter((item) => !item.sector || isSectorActive(item.sector))
   const navigate = useNavigate()
   const toAnalyse = records.filter((item) => item.status !== 'restitue')
   const published = records.filter((item) => item.status === 'restitue')

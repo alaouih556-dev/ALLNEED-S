@@ -1,3 +1,4 @@
+import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
 import { useEffect, useRef, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, ArrowRight, Building2, Clock3, GraduationCap, HeartPulse, MapPin, Phone, Plane, Sprout, TrendingUp, Video, type LucideIcon } from 'lucide-react'
@@ -69,7 +70,7 @@ function InscriptionPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
-    situation: 'entreprise_existante' as Situation, org: '', kind: '', sector: 'enseignement' as Sector, workspaceProfile: 'ecole', city: '', size: '',
+    situation: 'entreprise_existante' as Situation, org: '', kind: '', sector: DEFAULT_SECTOR as Sector, workspaceProfile: WORKSPACE_PROFILES[DEFAULT_SECTOR][0].value, city: '', size: '',
     name: '', role: '', email: '', phone: '', appointmentDate: '', appointmentSlot: APPOINTMENT_SLOTS[0], appointmentFormat: 'visio' as Format, accept: false,
   })
   const [error, setError] = useState('')
@@ -157,7 +158,7 @@ function InscriptionPage() {
           </div>
         </div>
 
-        <div>
+        {SINGLE_SECTOR ? null : <div>
           <div className="mk-q-label"><strong>Votre secteur</strong></div>
           <div className="mk-chips" role="group" aria-label="Secteur">
             {SECTOR_ORDER.map((sector) => {
@@ -169,7 +170,7 @@ function InscriptionPage() {
               )
             })}
           </div>
-        </div>
+        </div>}
 
         <div>
           <div className="mk-q-label"><strong>Quel type d’établissement dirigez-vous ?</strong><span>Cela nous aide à adapter la conversation à votre métier.</span></div>

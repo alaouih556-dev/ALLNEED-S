@@ -53,7 +53,7 @@ export function AdminClientAccess({ orgId }: { orgId:string }) {
           <Field label="Date de début"><Input type="date" value={data.saas.startDate??''} onChange={(e)=>void save({...data,saas:{...data.saas,startDate:e.target.value||null}})}/></Field>
           <Field label="Date de fin (si applicable)"><Input type="date" value={data.saas.endDate??''} onChange={(e)=>void save({...data,saas:{...data.saas,endDate:e.target.value||null}})}/></Field>
         </div>
-        <Field label="Type / formule SaaS" hint="Ex. Santé, Tourisme, Enseignement, formules spécifiques."><Input value={data.saas.plan??''} placeholder="Formule SaaS" onChange={(e)=>void save({...data,saas:{...data.saas,plan:e.target.value||null}})}/></Field>
+        <Field label="Type / formule SaaS" hint="Ex. Santé, formules spécifiques."><Input value={data.saas.plan??''} placeholder="Formule SaaS" onChange={(e)=>void save({...data,saas:{...data.saas,plan:e.target.value||null}})}/></Field>
         <Alert tone={data.saas.subscriptionActive&&data.saas.enabled?'success':'info'}>{data.saas.subscriptionActive&&data.saas.enabled?'SaaS visible côté client (abonnement actif + activation ON).':'SaaS invisible côté client tant que l’abonnement et l’activation ne sont pas tous deux validés.'}</Alert>
         <p className="text-xs text-ink-500">Désactiver le SaaS ne désactive ni le compte, ni les modules, ni la session du client.</p>
       </CardBody>

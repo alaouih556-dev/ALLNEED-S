@@ -26,6 +26,7 @@ import { ValidationRequests } from '@/components/ValidationRequests'
 import { AreaChart, BarList, DonutChart, Legend, Sparkline, StageBar } from '@/components/charts'
 import { Avatar } from '@/components/ui'
 import { cn } from '@/lib/utils'
+import { isSectorActive, SINGLE_SECTOR } from '@/lib/active-sectors'
 
 export const Route = createFileRoute('/admin/')({ component: AdminDashboard, head: () => ({ meta: [{ title: 'Tableau de bord — ALLNEEDS' }] }) })
 
@@ -93,16 +94,20 @@ async function loadDashboard(): Promise<{ data: DashboardData; failed: number }>
     apiRequest<unknown>('/api/staff/requests'),
   ])
   const v = (i: number) => (calls[i].status === 'fulfilled' ? (calls[i] as PromiseFulfilledResult<unknown>).value : null)
+  // Seuls les secteurs actifs (aujourd’hui : Santé) sont affichés.
+  const orgs = arr<Org>(v(0)).filter((o) => isSectorActive(o.sector))
+  const orgIds = new Set(orgs.map((o) => o.id))
+  const inScope = (x: { orgId?: string; sector?: string }) => (x.sector ? isSectorActive(x.sector) : !x.orgId || orgIds.has(x.orgId))
   return {
     failed: calls.filter((c) => c.status === 'rejected').length,
     data: {
-      orgs: arr<Org>(v(0)),
-      registrations: arr<Registration>(v(1)),
-      diagnostics: arr<Diagnostic>(v(2)),
-      missions: arr<Mission>(v(3), 'missions'),
-      needs: arr<Need>(v(4), 'needs'),
-      offers: arr<Offer>(v(5), 'offers'),
-      needsSubs: arr<NeedsSub>(v(6), 'subscriptions'),
+      orgs,
+      registrations: arr<Registration>(v(1)).filter(inScope),
+      diagnostics: arr<Diagnostic>(v(2)).filter(inScope),
+      missions: arr<Mission>(v(3), 'missions').filter(inScope),
+      needs: arr<Need>(v(4), 'needs').filter(inScope),
+      offers: arr<Offer>(v(5), 'offers').filter(inScope),
+      needsSubs: arr<NeedsSub>(v(6), 'subscriptions').filter(inScope),
       concierges: arr(v(7), 'concierges'),
       pendingConcierges: arr(v(7), 'pending'),
       requests: arr<StaffRequest>(v(8), 'requests'),
@@ -200,7 +205,12 @@ function AdminDashboard() {
 
     const sectorCounts = new Map<string, number>()
     for (const o of orgs) sectorCounts.set(o.sector ?? 'autre', (sectorCounts.get(o.sector ?? 'autre') ?? 0) + 1)
-    const sectorSlices = [...sectorCounts.entries()].map(([k, value]) => ({ label: (SECTORS[k] ?? OTHER_SECTOR).label, color: (SECTORS[k] ?? OTHER_SECTOR).color, value })).sort((a, b) => b.value - a.value)
+    const statusSlices = [
+      { label: 'Comptes actifs', value: orgs.filter((o) => o.active !== false && !o.saas?.subscriptionActive).length, color: '#0ea5e9' },
+      { label: 'Actifs avec SaaS', value: orgs.filter((o) => o.active !== false && o.saas?.subscriptionActive).length, color: '#6366f1' },
+      { label: 'Désactivés', value: orgs.filter((o) => o.active === false).length, color: '#cbd5e1' },
+    ]
+    const sectorSlices = SINGLE_SECTOR ? statusSlices : [...sectorCounts.entries()].map(([k, value]) => ({ label: (SECTORS[k] ?? OTHER_SECTOR).label, color: (SECTORS[k] ?? OTHER_SECTOR).color, value })).sort((a, b) => b.value - a.value)
 
     const diagStages = [
       { label: 'Brouillon', value: diagnostics.filter((d) => !d.status || d.status === 'brouillon').length, color: '#cbd5e1' },
@@ -365,8 +375,8 @@ function AdminDashboard() {
         <div className="an-panel">
           <div className="an-panel-head">
             <div>
-              <h2>Répartition par secteur</h2>
-              <p>Entreprises clientes enregistrées</p>
+              <h2>{SINGLE_SECTOR ? 'Comptes clients Santé' : 'Répartition par secteur'}</h2>
+              <p>{SINGLE_SECTOR ? 'Statut des entreprises clientes' : 'Entreprises clientes enregistrées'}</p>
             </div>
           </div>
           <div className="flex flex-col items-center gap-6 p-5 sm:flex-row xl:flex-col 2xl:flex-row">
@@ -487,7 +497,7 @@ function AdminDashboard() {
             { to: '/admin/clients', label: 'Clients & accès', detail: 'Modules et utilisateurs', icon: <Building2 size={17} /> },
             { to: '/admin/concierges', label: 'Concierges', detail: 'Équipe et affectations', icon: <UserRoundCog size={17} /> },
             { to: '/admin/offres', label: 'Offres', detail: 'Catalogue et demandes', icon: <Receipt size={17} /> },
-            { to: '/admin/prestataires', label: 'Prestataires', detail: 'Réseau de partenaires', icon: <Network size={17} /> },
+            { to: '/admin/abonnements', label: 'Abonnements Besoins', detail: 'Formules mensuelles', icon: <Network size={17} /> },
           ].map((q) => (
             <Link key={q.to} to={q.to as any} className="an-quick">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">{q.icon}</span>

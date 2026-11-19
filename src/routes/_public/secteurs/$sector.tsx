@@ -51,12 +51,12 @@ function UnknownSector() {
       <p className="eyebrow">Secteur introuvable</p>
       <h1 className="display-1 mt-4">Ce secteur n’existe pas encore</h1>
       <p className="lede mt-4 max-w-xl">
-        Nous travaillons l’enseignement, la santé et le tourisme. Si votre activité n’y figure pas, contactez-nous : le
-        diagnostic reste utile hors de ces trois secteurs.
+        Nous accompagnons aujourd’hui : {SECTOR_ORDER.map((s) => SECTOR_LABEL[s]).join(', ')}. Si votre activité n’y
+        figure pas, contactez-nous.
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link to="/secteurs">
-          <Button>Voir les trois secteurs</Button>
+          <Button>Voir nos secteurs</Button>
         </Link>
         <Link to="/contact">
           <Button variant="outline">Nous contacter</Button>

@@ -1,3 +1,4 @@
+import { ACTIVE_SECTORS } from '@/lib/active-sectors'
 import type { AccessOffer, LaunchOffer, MissionCode, MissionOffer, Sector, SectorContent } from '@/types'
 
 export const LAUNCH_OFFER: LaunchOffer = {
@@ -1434,7 +1435,10 @@ export const SECTORS: Record<Sector, SectorContent> = {
   },
 }
 
-export const SECTOR_ORDER: Sector[] = ['enseignement', 'sante', 'tourisme']
+/** Tous les secteurs connus (données, libellés). */
+export const ALL_SECTORS: Sector[] = ['enseignement', 'sante', 'tourisme']
+/** Secteurs affichés dans l’interface (voir src/lib/active-sectors.ts). */
+export const SECTOR_ORDER: Sector[] = ACTIVE_SECTORS
 
 export const SECTOR_LABEL: Record<Sector, string> = {
   enseignement: 'Enseignement',

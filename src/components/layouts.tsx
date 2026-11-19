@@ -139,24 +139,28 @@ function buildConciergeNav(): NavItem[] {
   ]
 }
 
+/** Groupe replié en bas du menu : pages encore basées sur des données de démonstration. */
+const PREVIEW_GROUP = 'En préparation'
+
 function buildAdminNav(): NavItem[] {
   return [
     { group: 'Pilotage', label: 'Tableau de bord', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
-    { group: 'Pilotage', label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
-    { group: 'Pilotage', label: 'Relances', to: '/admin/relances', icon: <Bell className="h-4 w-4" /> },
     { group: 'Clients', label: 'Inscriptions', to: '/admin/inscriptions' as any, icon: <ClipboardCheck className="h-4 w-4" /> },
     { group: 'Clients', label: 'Clients & accès', to: '/admin/clients', icon: <Building2 className="h-4 w-4" /> },
-    { group: 'Clients', label: 'Offres', to: '/admin/offres' as any, icon: <Receipt className="h-4 w-4" /> },
-    { group: 'Clients', label: 'Quotas & abonnements', to: '/admin/quotas', icon: <RefreshCcw className="h-4 w-4" /> },
-    { group: 'Diagnostics', label: 'À relire', to: '/admin/diagnostics-auto', icon: <Gauge className="h-4 w-4" /> },
-    { group: 'Diagnostics', label: 'Diagnostics clients', to: '/admin/diagnostics/reel' as any, icon: <FileText className="h-4 w-4" /> },
-    { group: 'Diagnostics', label: 'Diagnostics internes', to: '/admin/diagnostics', icon: <ClipboardList className="h-4 w-4" /> },
-    { group: 'Diagnostics', label: 'Grille STARTER', to: '/admin/grille', icon: <LineChart className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Qualification', to: '/admin/qualification', icon: <MessageSquare className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Missions', to: '/admin/missions', icon: <Briefcase className="h-4 w-4" /> },
-    { group: 'Opérations', label: 'Prestataires', to: '/admin/prestataires', icon: <Network className="h-4 w-4" /> },
-    { group: 'Équipe', label: 'Concierges & accès', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
+    { group: 'Clients', label: 'Diagnostics', to: '/admin/diagnostics/reel' as any, icon: <Gauge className="h-4 w-4" /> },
+    { group: 'Commercial', label: 'Offres', to: '/admin/offres' as any, icon: <Receipt className="h-4 w-4" /> },
+    { group: 'Commercial', label: 'Abonnements Besoins', to: '/admin/abonnements' as any, icon: <RefreshCcw className="h-4 w-4" /> },
+    { group: 'Commercial', label: 'Missions', to: '/admin/missions', icon: <Briefcase className="h-4 w-4" /> },
+    { group: 'Équipe', label: 'Concierges', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
+    { group: 'Équipe', label: 'Grille STARTER', to: '/admin/grille', icon: <ClipboardList className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Relances', to: '/admin/relances', icon: <Bell className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Qualification', to: '/admin/qualification', icon: <MessageSquare className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Prestataires', to: '/admin/prestataires', icon: <Network className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Quotas', to: '/admin/quotas', icon: <LineChart className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Autoévaluations', to: '/admin/diagnostics-auto', icon: <FileText className="h-4 w-4" /> },
+    { group: PREVIEW_GROUP, label: 'Diagnostics internes', to: '/admin/diagnostics', icon: <ClipboardList className="h-4 w-4" /> },
   ]
 }
 
@@ -407,35 +411,56 @@ function SidebarContent({
   )
 }
 
-function WorkspaceNavigation({ items, collapsed, onNavigate }: { items: NavItem[]; collapsed: boolean; onNavigate: () => void }) {
-  let previousGroup = ''
-  return <nav aria-label="Navigation de l’espace" className="an-nav">
-    {items.map((item) => {
-      const showGroup = item.group !== previousGroup
-      previousGroup = item.group
-      return <div key={String(item.to)}>
-        {showGroup ? (collapsed ? <hr className="an-nav-sep" /> : <p className="an-nav-group">{item.group}</p>) : null}
-        {item.disabled ? (
-          <div title={item.disabledHint} className="an-nav-link is-disabled">
-            <span className="an-nav-icon">{item.icon}</span>
-            {!collapsed ? <span className="truncate">{item.label}</span> : null}
-          </div>
-        ) : (
-          <Link
-            to={item.to}
-            onClick={onNavigate}
-            title={collapsed ? item.label : undefined}
-            className="an-nav-link"
-            activeOptions={{ exact: String(item.to).split('/').filter(Boolean).length <= 1 }}
-            activeProps={{ className: 'is-active' }}
-          >
-            <span className="an-nav-icon">{item.icon}</span>
-            {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
-            {item.badge && !collapsed ? <span className="an-nav-badge">{item.badge}</span> : null}
-          </Link>
-        )}
+function NavLinkItem({ item, collapsed, exact, onNavigate }: { item: NavItem; collapsed: boolean; exact: boolean; onNavigate: () => void }) {
+  if (item.disabled) {
+    return (
+      <div title={item.disabledHint} className="an-nav-link is-disabled">
+        <span className="an-nav-icon">{item.icon}</span>
+        {!collapsed ? <span className="truncate">{item.label}</span> : null}
       </div>
-    })}
+    )
+  }
+  return (
+    <Link
+      to={item.to}
+      onClick={onNavigate}
+      title={collapsed ? item.label : undefined}
+      className="an-nav-link"
+      activeOptions={{ exact }}
+      activeProps={{ className: 'is-active' }}
+    >
+      <span className="an-nav-icon">{item.icon}</span>
+      {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
+      {item.badge && !collapsed ? <span className="an-nav-badge">{item.badge}</span> : null}
+    </Link>
+  )
+}
+
+function WorkspaceNavigation({ items, collapsed, onNavigate }: { items: NavItem[]; collapsed: boolean; onNavigate: () => void }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const main = items.filter((item) => item.group !== PREVIEW_GROUP)
+  const preview = items.filter((item) => item.group === PREVIEW_GROUP)
+  const previewActive = preview.some((item) => pathname === String(item.to) || pathname.startsWith(`${String(item.to)}/`) && !main.some((m) => pathname.startsWith(String(m.to)) && String(m.to).length > String(item.to).length))
+  const groups = [...new Set(main.map((item) => item.group))]
+  // Un lien qui est le préfixe d’un autre (ex. /admin, /admin/diagnostics) n’est actif que sur sa page exacte.
+  const isExact = (item: NavItem) => items.some((other) => other !== item && String(other.to).startsWith(`${String(item.to).replace(/\/$/, '')}/`))
+  return <nav aria-label="Navigation de l’espace" className="an-nav">
+    {groups.map((group) => (
+      <div key={group}>
+        {collapsed ? <hr className="an-nav-sep" /> : <p className="an-nav-group">{group}</p>}
+        {main.filter((item) => item.group === group).map((item) => <NavLinkItem key={String(item.to)} item={item} collapsed={collapsed} exact={isExact(item)} onNavigate={onNavigate} />)}
+      </div>
+    ))}
+    {preview.length && !collapsed ? (
+      <details className="an-nav-preview" open={previewActive || undefined}>
+        <summary>
+          <span>{PREVIEW_GROUP}</span>
+          <ChevronDown size={14} />
+        </summary>
+        <p className="an-nav-preview-note">Pages de démonstration, pas encore reliées aux données réelles.</p>
+        {preview.map((item) => <NavLinkItem key={String(item.to)} item={item} collapsed={false} exact={isExact(item)} onNavigate={onNavigate} />)}
+      </details>
+    ) : null}
   </nav>
 }
 

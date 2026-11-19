@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { Sector } from '@/types'
+import { ACTIVE_SECTORS } from '@/lib/active-sectors'
 
 const KEY = 'allneeds-public-sector'
 const EVENT = 'allneeds:sector-changed'
-const VALID: Sector[] = ['enseignement', 'sante', 'tourisme']
+const VALID: Sector[] = ACTIVE_SECTORS
 
 export function readSelectedSector(): Sector | null {
   if (typeof window === 'undefined') return null

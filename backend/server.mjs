@@ -11,7 +11,8 @@ const ROOT = process.env.ALLNEEDS_DATA_DIR || join(process.cwd(), 'backend', 'da
 const DB_PATH = join(ROOT, 'db.json')
 const AUDIT_PATH = join(ROOT, 'audit.jsonl')
 const COOKIE_NAME = 'allneeds_session'
-const SESSION_TTL_SECONDS = 8 * 60 * 60
+// Durée d'inactivité avant expiration : la session est renouvelée à chaque chargement de page (/api/me).
+const SESSION_TTL_SECONDS = Math.round((Number(process.env.ALLNEEDS_SESSION_TTL_HOURS) || 8) * 60 * 60)
 const INVITATION_TTL_SECONDS = 48 * 60 * 60
 const MAX_BODY_BYTES = 1024 * 1024
 const FRONTEND_ORIGIN = (process.env.ALLNEEDS_FRONTEND_ORIGIN || 'http://127.0.0.1:5176').trim().replace(/\/$/, '')
@@ -1138,7 +1139,8 @@ const server = createServer(async (req, res) => {
       const user = sessionUser(req)
       if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
       const org = orgForUser(user)
-      return json(res, 200, { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null }, cors)
+      // Session glissante : chaque visite repousse l'expiration, l'utilisateur actif reste connecté.
+      return json(res, 200, { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
 
     /* ------------------------------------------------------------------ */

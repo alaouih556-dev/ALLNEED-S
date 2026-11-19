@@ -28,6 +28,7 @@ import { Route as PublicFaqRouteImport } from './routes/_public/faq'
 import { Route as PublicSanteRouteImport } from './routes/_public/sante'
 import { Route as PublicTarifsRouteImport } from './routes/_public/tarifs'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAbonnementsRouteImport } from './routes/admin/abonnements'
 import { Route as AdminConciergesRouteImport } from './routes/admin/concierges'
 import { Route as AdminDiagnosticsAutoRouteImport } from './routes/admin/diagnostics-auto'
 import { Route as AdminGrilleRouteImport } from './routes/admin/grille'
@@ -194,6 +195,11 @@ const PublicTarifsRoute = PublicTarifsRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAbonnementsRoute = AdminAbonnementsRouteImport.update({
+  id: '/abonnements',
+  path: '/abonnements',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminConciergesRoute = AdminConciergesRouteImport.update({
@@ -586,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof PublicFaqRoute
   '/sante': typeof PublicSanteRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/admin/abonnements': typeof AdminAbonnementsRoute
   '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
@@ -674,6 +681,7 @@ export interface FileRoutesByTo {
   '/faq': typeof PublicFaqRoute
   '/sante': typeof PublicSanteRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/admin/abonnements': typeof AdminAbonnementsRoute
   '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
@@ -768,6 +776,7 @@ export interface FileRoutesById {
   '/_public/faq': typeof PublicFaqRoute
   '/_public/sante': typeof PublicSanteRoute
   '/_public/tarifs': typeof PublicTarifsRoute
+  '/admin/abonnements': typeof AdminAbonnementsRoute
   '/admin/concierges': typeof AdminConciergesRoute
   '/admin/diagnostics-auto': typeof AdminDiagnosticsAutoRoute
   '/admin/grille': typeof AdminGrilleRoute
@@ -864,6 +873,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/sante'
     | '/tarifs'
+    | '/admin/abonnements'
     | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
@@ -952,6 +962,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/sante'
     | '/tarifs'
+    | '/admin/abonnements'
     | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
@@ -1045,6 +1056,7 @@ export interface FileRouteTypes {
     | '/_public/faq'
     | '/_public/sante'
     | '/_public/tarifs'
+    | '/admin/abonnements'
     | '/admin/concierges'
     | '/admin/diagnostics-auto'
     | '/admin/grille'
@@ -1268,6 +1280,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/abonnements': {
+      id: '/admin/abonnements'
+      path: '/abonnements'
+      fullPath: '/admin/abonnements'
+      preLoaderRoute: typeof AdminAbonnementsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/concierges': {
@@ -1822,6 +1841,7 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 interface AdminRouteChildren {
+  AdminAbonnementsRoute: typeof AdminAbonnementsRoute
   AdminConciergesRoute: typeof AdminConciergesRoute
   AdminDiagnosticsAutoRoute: typeof AdminDiagnosticsAutoRoute
   AdminGrilleRoute: typeof AdminGrilleRoute
@@ -1843,6 +1863,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAbonnementsRoute: AdminAbonnementsRoute,
   AdminConciergesRoute: AdminConciergesRoute,
   AdminDiagnosticsAutoRoute: AdminDiagnosticsAutoRoute,
   AdminGrilleRoute: AdminGrilleRoute,

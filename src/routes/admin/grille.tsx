@@ -1,15 +1,16 @@
+import { ACTIVE_SECTORS, DEFAULT_SECTOR } from '@/lib/active-sectors'
 import { createFileRoute } from '@tanstack/react-router'
 import { PageHeader } from '@/components/layouts'
 import { InternalGrid } from '@/components/InternalGrid'
 import { Badge } from '@/components/ui'
 import type { Sector } from '@/types'
 
-const SECTORS: Sector[] = ['enseignement', 'sante', 'tourisme']
+const SECTORS: Sector[] = ACTIVE_SECTORS
 
 export const Route = createFileRoute('/admin/grille')({
   validateSearch: (search: Record<string, unknown>): { secteur?: Sector } => {
-    const value = String(search.secteur ?? 'enseignement')
-    return { secteur: (SECTORS.includes(value as Sector) ? value : 'enseignement') as Sector }
+    const value = String(search.secteur ?? DEFAULT_SECTOR)
+    return { secteur: (SECTORS.includes(value as Sector) ? value : DEFAULT_SECTOR) as Sector }
   },
   component: AdminGrille,
   head: () => ({
@@ -18,7 +19,7 @@ export const Route = createFileRoute('/admin/grille')({
 })
 
 function AdminGrille() {
-  const secteur = Route.useSearch().secteur ?? 'enseignement'
+  const secteur = Route.useSearch().secteur ?? DEFAULT_SECTOR
 
   return (
     <>

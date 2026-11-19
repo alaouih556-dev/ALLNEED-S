@@ -5,6 +5,7 @@ import { SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { CtaBand, PageHero } from '@/components/marketing'
 import { cn } from '@/lib/utils'
 import { selectSector, useSelectedSector } from '@/lib/sector-filter'
+import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
 import type { Sector } from '@/types'
 
 export const Route = createFileRoute('/_public/secteurs/')({
@@ -24,7 +25,7 @@ const EXTRA: Record<Sector, { signal: string; question: string; icon: LucideIcon
 }
 
 function SecteursPage() {
-  const selectedSector = useSelectedSector()
+  const selectedSector = useSelectedSector() ?? (SINGLE_SECTOR ? DEFAULT_SECTOR : null)
   const navigate = useNavigate()
   useEffect(() => {
     if (selectedSector) navigate({ to: '/secteurs/$sector', params: { sector: selectedSector }, replace: true })
@@ -37,7 +38,7 @@ function SecteursPage() {
         eyebrow="Nos secteurs"
         title="Chaque métier a ses urgences."
         highlight="Votre diagnostic doit le comprendre."
-        lead="Santé, enseignement ou tourisme : nous partons de ce qui se passe vraiment dans votre établissement, avant de parler de solutions."
+        lead="Nous partons de ce qui se passe vraiment dans votre établissement, avant de parler de solutions."
       >
         <nav className="mk-jump" aria-label="Aller à un secteur">
           {SECTOR_ORDER.map((sector) => {

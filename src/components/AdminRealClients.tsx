@@ -1,3 +1,4 @@
+import { isSectorActive } from '@/lib/active-sectors'
 import { useEffect, useMemo, useState } from 'react'
 import { Building2, CheckCircle2, Database, FileText, KeyRound, RefreshCcw, Search, ShieldCheck, UsersRound } from 'lucide-react'
 import { AdminClientAccess } from '@/components/AdminClientAccess'
@@ -40,7 +41,7 @@ export function AdminRealClients() {
       const r = await fetch('/api/admin/orgs', { credentials: 'same-origin', cache: 'no-store' })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Chargement impossible')
-      setItems(b)
+      setItems((b as Org[]).filter((o) => isSectorActive(o.sector)))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chargement impossible')
     } finally {

@@ -27,6 +27,15 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null)
 
+/** Espace de travail ouvert par défaut pour un rôle (null si aucun espace n’existe). */
+export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | null {
+  if (role === 'admin') return '/admin'
+  if (role === 'concierge') return '/concierge'
+  if (role === 'prestataire') return '/expert'
+  if (role && ['dirigeant', 'manager', 'collaborateur'].includes(role)) return '/app'
+  return null
+}
+
 async function readError(response: Response) {
   const body = await response.json().catch(() => ({})) as { error?: string }
   return body.error || 'La connexion a échoué. Réessayez.'

@@ -22,7 +22,7 @@ export const Route = createFileRoute('/_public/faq')({
 const GENERALES = [
   {
     q: 'À qui s’adresse ALLNEEDS ?',
-    a: 'Aux dirigeants d’établissements de santé, d’enseignement et de tourisme qui veulent mieux organiser leurs priorités et décider de la suite à partir de leur quotidien.',
+    a: 'Aux dirigeants de structures de santé (cabinets, centres, cliniques, laboratoires) qui veulent mieux organiser leurs priorités et décider de la suite à partir de leur quotidien.',
   },
   {
     q: 'Que se passe-t-il pendant le premier échange ?',

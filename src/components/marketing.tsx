@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link, type LinkProps } from '@tanstack/react-router'
+import { useAuth, workspacePathForRole } from '@/features/auth/AuthContext'
 import {
   AlertCircle,
   ArrowRight,
@@ -16,6 +17,7 @@ import {
 import { LAUNCH_OFFER, SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
 import { cn } from '@/lib/utils'
 import { clearSelectedSector, useSelectedSector } from '@/lib/sector-filter'
+import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
 import { Badge, Button, Card } from '@/components/ui'
 import type { FeatureRow, MissionCode, Sector } from '@/types'
 
@@ -42,7 +44,7 @@ export function LaunchBanner() {
 /* ------------------------------------------------------------------ */
 
 const BASE_PUBLIC_LINKS = [
-  { label: 'Nos secteurs', to: '/secteurs' },
+  { label: SINGLE_SECTOR ? SECTOR_LABEL[DEFAULT_SECTOR] : 'Nos secteurs', to: '/secteurs' },
   { label: 'À propos', to: '/a-propos' },
   { label: 'FAQ', to: '/faq' },
 ] as const
@@ -50,6 +52,8 @@ const BASE_PUBLIC_LINKS = [
 export function PublicHeader() {
   const [open, setOpen] = useState(false)
   const selectedSector = useSelectedSector()
+  const auth = useAuth()
+  const accountPath = auth.status === 'authenticated' ? workspacePathForRole(auth.user?.role) : null
   const publicLinks = [
     { label: 'Accueil', to: '/' as const },
     ...BASE_PUBLIC_LINKS,
@@ -76,8 +80,8 @@ export function PublicHeader() {
         </nav>
 
         <div className="mk-header-actions">
-          <Link to="/connexion" className="mk-signin">
-            Se connecter
+          <Link to={(accountPath ?? '/connexion') as any} className="mk-signin">
+            {accountPath ? 'Mon espace' : 'Se connecter'}
           </Link>
           <Link to="/inscription" className="mk-btn mk-btn-dark mk-btn-sm">
             Faire le point gratuitement
@@ -114,8 +118,8 @@ export function PublicHeader() {
               <Link to="/inscription" onClick={() => setOpen(false)} className="mk-btn mk-btn-dark">
                 Faire le point gratuitement <ArrowRight />
               </Link>
-              <Link to="/connexion" onClick={() => setOpen(false)} className="mk-btn mk-btn-line">
-                Se connecter
+              <Link to={(accountPath ?? '/connexion') as any} onClick={() => setOpen(false)} className="mk-btn mk-btn-line">
+                {accountPath ? 'Mon espace' : 'Se connecter'}
               </Link>
             </div>
           </div>
@@ -203,7 +207,7 @@ export function PublicFooter() {
         </div>
 
         <div className="mk-footer-bottom">
-          <p>© {new Date().getFullYear()} ALLNEEDS · Santé · Enseignement · Tourisme</p>
+          <p>© {new Date().getFullYear()} ALLNEEDS · {SECTOR_ORDER.map((s) => SECTOR_LABEL[s]).join(' · ')}</p>
           <p>
             ALLNEEDS ne fournit pas de conseil juridique, fiscal ou comptable et ne négocie pas pour le compte du
             membre.

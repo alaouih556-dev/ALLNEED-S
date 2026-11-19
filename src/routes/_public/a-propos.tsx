@@ -1,3 +1,4 @@
+import { DEFAULT_SECTOR } from '@/lib/active-sectors'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, ClipboardList, FileCheck2, Network, PackageCheck, ShieldCheck, Users } from 'lucide-react'
 import { SECTORS } from '@/data/catalog'
@@ -120,7 +121,7 @@ function AProposPage() {
             <h2 className="mk-h2">Trois raisons qui reviennent dans chaque mission.</h2>
           </div>
           <div className="mk-steps">
-            {SECTORS.enseignement.reasons.map((reason, i) => (
+            {SECTORS[DEFAULT_SECTOR].reasons.map((reason, i) => (
               <div key={reason.title} className="mk-step">
                 <span className="n">0{i + 1}</span>
                 <h3 className="mk-h3">{reason.title}</h3>

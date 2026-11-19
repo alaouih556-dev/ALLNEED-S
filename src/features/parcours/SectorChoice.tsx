@@ -1,3 +1,4 @@
+import { isSectorActive, SINGLE_SECTOR } from '@/lib/active-sectors'
 import { Compass, GraduationCap, HeartPulse, ArrowRight } from 'lucide-react'
 import { Card } from '@/components/ui'
 import type { Sector } from '@/types'
@@ -43,7 +44,7 @@ const SECTORS: Array<{
 export function SectorChoice({
   onPick,
   title = 'Quel est votre secteur ?',
-  description = 'Votre secteur détermine le questionnaire de diagnostic et toute la suite de votre parcours. Il n’est pas possible de mélanger les trois.',
+  description = 'Votre secteur détermine le questionnaire de diagnostic et toute la suite de votre parcours. Il n’est pas possible de mélanger plusieurs secteurs.',
 }: {
   onPick: (sector: Sector) => void
   title?: string
@@ -55,8 +56,8 @@ export function SectorChoice({
       <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-ink-950">{title}</h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">{description}</p>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {SECTORS.map(({ id, name, audience, detail, icon: Icon, color }) => (
+      <div className={`mt-6 grid gap-4 ${SINGLE_SECTOR ? 'md:max-w-md' : 'md:grid-cols-3'}`}>
+        {SECTORS.filter(({ id }) => isSectorActive(id)).map(({ id, name, audience, detail, icon: Icon, color }) => (
           <button
             key={id}
             type="button"

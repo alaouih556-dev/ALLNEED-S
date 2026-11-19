@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { AuthLayout } from '@/components/AuthLayout'
 import { Alert, Button, Field, Input } from '@/components/ui'
-import { useAuth } from '@/features/auth/AuthContext'
+import { useAuth, workspacePathForRole } from '@/features/auth/AuthContext'
 import { useDemo } from '@/store/store'
 
 export const Route = createFileRoute('/connexion')({ component: ConnexionPage, head: () => ({ meta: [{ title: 'Connexion — ALLNEEDS' }] }) })
@@ -11,11 +11,14 @@ export const Route = createFileRoute('/connexion')({ component: ConnexionPage, h
 function ConnexionPage() {
   const navigate = useNavigate(); const auth = useAuth(); const { setRole, dispatch } = useDemo()
   const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [show,setShow]=useState(false); const [error,setError]=useState(''); const [busy,setBusy]=useState(false)
+  // Déjà connecté (session valide après un rafraîchissement) : on rouvre directement l’espace.
+  const sessionDestination = auth.status==='authenticated' ? workspacePathForRole(auth.user?.role) : null
+  useEffect(()=>{ if(sessionDestination&&!busy) void navigate({to:sessionDestination,replace:true}) },[sessionDestination,busy,navigate])
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setError(''); setBusy(true)
     try {
       const account=await auth.login(email,password)
-      const destination=account.role==='admin'?'/admin':account.role==='concierge'?'/concierge':account.role==='prestataire'?'/expert':['dirigeant','manager','collaborateur'].includes(account.role)?'/app':null
+      const destination=workspacePathForRole(account.role)
       if(!destination) throw new Error('Ce rôle ne dispose pas encore d’un espace autorisé.')
       const appRole=account.role==='admin'?'admin':account.role==='concierge'?'concierge':'client'
       dispatch({type:'RESET'}); setRole(appRole); dispatch({type:'SWITCH_USER',userId:account.id})

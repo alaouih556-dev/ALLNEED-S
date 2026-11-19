@@ -1,7 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { isSectorActive } from '@/lib/active-sectors'
 import { SectorPage } from '@/components/SectorPage'
 
 export const Route = createFileRoute('/_public/secteurs/enseignement')({
+  beforeLoad: () => {
+    if (!isSectorActive('enseignement')) throw redirect({ to: '/', replace: true })
+  },
   component: () => <SectorPage sector="enseignement" />,
   head: () => ({
     meta: [

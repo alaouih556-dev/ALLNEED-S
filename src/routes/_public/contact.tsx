@@ -1,3 +1,4 @@
+import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
 import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, CheckCircle2, GraduationCap, HeartPulse, LogIn, MessageSquare, Plane, PlayCircle, CalendarCheck, type LucideIcon } from 'lucide-react'
@@ -35,7 +36,7 @@ function ContactPage() {
     org: '',
     email: '',
     phone: '',
-    sector: 'enseignement' as Sector,
+    sector: DEFAULT_SECTOR as Sector,
     subject: SUBJECTS[0],
     message: '',
   })
@@ -114,7 +115,7 @@ function ContactPage() {
                   </Field>
                 </div>
 
-                <div>
+                {SINGLE_SECTOR ? null : <div>
                   <div className="mk-q-label"><strong>Votre secteur</strong></div>
                   <div className="mk-chips" role="group" aria-label="Secteur">
                     {SECTOR_ORDER.map((sector) => {
@@ -126,7 +127,7 @@ function ContactPage() {
                       )
                     })}
                   </div>
-                </div>
+                </div>}
 
                 <div>
                   <div className="mk-q-label"><strong>Objet</strong></div>
