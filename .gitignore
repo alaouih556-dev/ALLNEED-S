@@ -11,3 +11,6 @@ database/*.local.sql
 
 # Identifiants des comptes de test (générés localement)
 test-accounts.local.md
+
+# Données locales (comptes, empreintes de mot de passe)
+backend/data/*
