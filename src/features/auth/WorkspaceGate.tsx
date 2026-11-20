@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, Navigate, useRouterState } from '@tanstack/react-router'
-import { ArrowRight, ClipboardCheck, LockKeyhole, ShieldCheck } from 'lucide-react'
+import { ArrowRight, ClipboardCheck, Lock, LockKeyhole, ShieldCheck } from 'lucide-react'
 import { AppShell } from '@/components/layouts'
 import { ExpertShell } from '@/components/ExpertWorkspace'
 import { Button, Card } from '@/components/ui'
@@ -62,16 +62,32 @@ function ClientAccessGate({org,path,children}:{org:AuthUser['organization'] & {i
 }
 
 function DiagnosticRequiredGate(){
+  const steps=[
+    {title:'Répondez au diagnostic 360°',text:'Une question à la fois, vos réponses sont enregistrées.'},
+    {title:'Votre concierge l’analyse',text:'Rapport, priorités et recommandations.'},
+    {title:'Cet espace s’ouvre',text:'Rapport, offres puis modules de votre accompagnement.'},
+  ]
   return (
-    <div className="mx-auto max-w-xl py-10">
-      <Card className="p-8 text-center sm:p-10">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><ClipboardCheck className="h-6 w-6"/></span>
-        <h1 className="mt-5 font-display text-2xl font-bold text-ink-950">Commencez par votre diagnostic</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-600">
-          Avant d’accéder à cette fonctionnalité, complétez votre diagnostic afin que votre accompagnement soit correctement configuré.
-        </p>
-        <div className="mt-7 flex justify-center">
-          <Link to="/app/diagnostic-auto"><Button size="lg">Faire mon diagnostic <ArrowRight className="h-4 w-4"/></Button></Link>
+    <div className="mx-auto max-w-2xl py-8">
+      <Card className="overflow-hidden p-0">
+        <div className="p-7 text-center sm:p-9">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><Lock className="h-6 w-6"/></span>
+          <h1 className="mt-5 font-display text-2xl font-bold text-ink-950">Cet espace s’ouvrira après votre diagnostic</h1>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-600">
+            Votre diagnostic permet à ALLNEEDS de configurer un accompagnement adapté à votre établissement. Il ne prend que quelques minutes.
+          </p>
+        </div>
+        <ol className="cl-gate-steps">
+          {steps.map((step,index)=>(
+            <li key={step.title}>
+              <span className="cl-gate-num">{index+1}</span>
+              <span><strong>{step.title}</strong><small>{step.text}</small></span>
+            </li>
+          ))}
+        </ol>
+        <div className="flex flex-wrap justify-center gap-2 p-6">
+          <Link to="/app/diagnostic-auto"><Button size="lg"><ClipboardCheck className="h-4 w-4"/>Faire mon diagnostic <ArrowRight className="h-4 w-4"/></Button></Link>
+          <Link to="/app"><Button size="lg" variant="outline">Retour à l’accueil</Button></Link>
         </div>
       </Card>
     </div>

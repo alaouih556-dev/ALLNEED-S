@@ -156,7 +156,7 @@ export function PublicFooter() {
         <div className="mk-footer-cols">
           <div className="mk-footer-brand">
             <Link to="/" className="mk-footer-logo" aria-label="ALLNEEDS — accueil">
-              <img src="/allneeds-logo.svg" alt="allneeds — Find it. Get it. Fast." />
+              <img src="/allneeds-logo-dark.svg" alt="allneeds — Find it. Get it. Fast." width={1030} height={320} />
             </Link>
             <p className="mk-small" style={{ marginTop: 20, maxWidth: 300, color: '#a9bbd2' }}>
               Votre réseau de solutions pour entreprises et établissements. Nous partons de votre situation, pas d’un

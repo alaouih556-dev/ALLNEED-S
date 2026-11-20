@@ -807,6 +807,12 @@ function orgForUser(user) {
   return db.orgs.find((org) => Array.isArray(user.orgIds) && user.orgIds.includes(org.id)) || null
 }
 
+/** Concierge affecté à l'entreprise, exposé au client : nom et e-mail uniquement. */
+function assignedConcierge(orgId) {
+  const concierge = db.users.find((item) => item.role === 'concierge' && item.active !== false && Array.isArray(item.orgIds) && item.orgIds.includes(orgId))
+  return concierge ? { name: concierge.name || '', email: concierge.email || '' } : null
+}
+
 function accessFailure(user, moduleName) {
   const org = orgForUser(user)
   if (!org) return null
@@ -1224,7 +1230,7 @@ const server = createServer(async (req, res) => {
       if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
       const org = orgForUser(user)
       // Session glissante : chaque visite repousse l'expiration, l'utilisateur actif reste connecté.
-      return json(res, 200, { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
+      return json(res, 200, { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
 
     /* ------------------------------------------------------------------ */

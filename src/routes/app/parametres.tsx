@@ -1,56 +1,191 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Bell, BriefcaseBusiness, Building2, FileCheck2, Gauge, Network, Target } from 'lucide-react'
+import { useCallback, useState, type ReactNode } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { Building2, Edit2, KeyRound, Save, ShieldCheck, UserRound, X } from 'lucide-react'
 import { PageHeader } from '@/components/layouts'
-import { useDemo } from '@/store/store'
-import { buildNextActions, buildObjectives, resolveSituation, situationLabel } from '@/lib/operational'
+import { Alert, Button, Input } from '@/components/ui'
+import { Initial, Panel } from '@/components/admin-kit'
+import { useAuth } from '@/features/auth/AuthContext'
+import { toSector } from '@/lib/parcours'
 import { SECTOR_LABEL } from '@/data/catalog'
+import { longDate } from '@/lib/format'
 
-export const Route = createFileRoute('/app/parametres')({ component: SettingsPage })
+export const Route = createFileRoute('/app/parametres')({
+  component: ProfilePage,
+  head: () => ({ meta: [{ title: 'Mon profil — ALLNEEDS' }] }),
+})
 
-function SettingsPage() {
-  const { state, orgId } = useDemo()
-  const org = state.orgs.find((item) => item.id === orgId)
-  const objectives = buildObjectives(state, orgId)
-  const actions = buildNextActions(state, orgId)
-  const needs = state.needs.filter((item) => item.orgId === orgId)
-  const missions = state.missions.filter((item) => item.orgId === orgId)
-  const diagnostics = state.diagnostics.filter((item) => item.orgId === orgId)
-  const documents = state.documents.filter((item) => item.orgId === orgId)
-  const threads = state.threads.filter((item) => item.orgId === orgId)
-  const candidateIds = new Set(needs.flatMap((need) => need.candidateIds))
-  const experts = state.providers.filter((provider) => candidateIds.has(provider.id))
-  const activeMissions = missions.filter((mission) => mission.status !== 'terminee')
-  const activeNeeds = needs.filter((need) => !['clos', 'signe'].includes(need.status))
-  const published = diagnostics.filter((diagnostic) => diagnostic.status === 'publie')
-  const alerts = state.notifications.filter((notification) => !notification.read && notification.tone === 'warning')
-  const meetings = state.meetings.filter((meeting) => meeting.orgId === orgId)
-  const priority = actions[0]
+const ROLE_LABEL: Record<string, string> = {
+  dirigeant: 'Dirigeant',
+  manager: 'Manager',
+  collaborateur: 'Collaborateur',
+}
 
-  return <>
-    <PageHeader
-      eyebrow="Compte"
-      title="Profil & activité"
-      description="Les repères essentiels de votre établissement. Cette page est un résumé, pas un écran de réglages."
-    />
+type ProfileForm = { name: string; firstName: string; lastName: string; phone: string; jobTitle: string }
 
-    <div className="company-cockpit-grid profile-summary-grid">
-      <section><small><Building2 size={13} /> VOTRE ÉTABLISSEMENT</small><h2>{org?.name ?? 'Établissement'}</h2><p>{org ? `${org.kind} · ${SECTOR_LABEL[org.sector]} · ${org.city} · ${org.size}` : 'Les informations de votre établissement apparaîtront ici.'}</p></section>
-      <section><small><Target size={13} /> VOTRE SITUATION</small><h2>{situationLabel(resolveSituation(state))}</h2><p>Ce contexte aide ALLNEEDS à adapter les priorités et les recommandations à votre activité.</p></section>
-      <section className="profile-priority-card"><small><Gauge size={13} /> PROCHAINE ACTION</small><h2>{priority?.title ?? 'Aucune action urgente'}</h2><p>{priority?.why ?? 'Aucun sujet ne demande votre attention pour le moment.'}</p>{priority ? <Link to={priority.to as any}>Voir quoi faire <ArrowRight size={14} /></Link> : null}</section>
-    </div>
+function ProfilePage() {
+  const auth = useAuth()
+  const user = auth.user
+  const org = user?.organization ?? null
 
-    <details className="profile-activity-details">
-      <summary>Voir les indicateurs de suivi <span>8 repères · activité de votre dossier</span></summary>
-      <div className="company-cockpit-grid profile-activity-grid">
-        <section><small><Target size={13} /> OBJECTIFS</small><h2>{objectives.length}</h2><p>{objectives.length ? objectives.map((objective) => objective.title).join(' · ') : 'Aucun objectif défini.'}</p></section>
-        <section><small><Gauge size={13} /> BESOINS</small><h2>{activeNeeds.length} actif{activeNeeds.length === 1 ? '' : 's'}</h2><p>{needs.length} besoin{needs.length === 1 ? '' : 's'} enregistré{needs.length === 1 ? '' : 's'} au total.</p></section>
-        <section><small><BriefcaseBusiness size={13} /> PROJETS & MISSIONS</small><h2>{activeMissions.length} en cours</h2><p>{missions.filter((mission) => mission.status === 'terminee').length} terminé{missions.filter((mission) => mission.status === 'terminee').length === 1 ? '' : 's'}.</p></section>
-        <section><small><FileCheck2 size={13} /> DIAGNOSTICS</small><h2>{published.length} publié{published.length === 1 ? '' : 's'}</h2><p>{diagnostics.length} diagnostic{diagnostics.length === 1 ? '' : 's'} dans votre espace.</p></section>
-        <section><small><Network size={13} /> EXPERTS LIÉS</small><h2>{experts.length}</h2><p>Prestataires déjà associés à vos besoins.</p></section>
-        <section><small><FileCheck2 size={13} /> DOCUMENTS</small><h2>{documents.filter((document) => document.status === 'valide').length}/{documents.length} validés</h2><p>{documents.filter((document) => document.required && document.status !== 'valide').length} pièce{documents.filter((document) => document.required && document.status !== 'valide').length === 1 ? '' : 's'} requise{documents.filter((document) => document.required && document.status !== 'valide').length === 1 ? '' : 's'} à compléter.</p></section>
-        <section><small><Bell size={13} /> ALERTES</small><h2>{alerts.length}</h2><p>{alerts.length ? 'Alerte(s) non lue(s) à vérifier.' : 'Aucune alerte urgente non lue.'}</p></section>
-        <section><small><BriefcaseBusiness size={13} /> HISTORIQUE</small><h2>{threads.length} conversation{threads.length === 1 ? '' : 's'}</h2><p>{meetings.length} rendez-vous enregistré{meetings.length === 1 ? '' : 's'}.</p></section>
+  const initial = useCallback((): ProfileForm => ({
+    name: user?.name ?? '',
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
+    phone: user?.phone ?? '',
+    jobTitle: user?.jobTitle ?? '',
+  }), [user])
+
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState<ProfileForm>(initial)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  function startEdit() {
+    setForm(initial())
+    setError('')
+    setSaved(false)
+    setEditing(true)
+  }
+
+  async function save() {
+    setError('')
+    if (!form.name.trim()) {
+      setError('Le nom est obligatoire.')
+      return
+    }
+    setSaving(true)
+    try {
+      const response = await fetch('/api/me/profile', {
+        method: 'PATCH',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          phone: form.phone.trim(),
+          jobTitle: form.jobTitle.trim(),
+        }),
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || 'Enregistrement impossible.')
+      }
+      await auth.refresh()
+      setEditing(false)
+      setSaved(true)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Enregistrement impossible.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const sectorKey = toSector(org?.sector) as keyof typeof SECTOR_LABEL | null
+  const sectorLabel = sectorKey ? SECTOR_LABEL[sectorKey] : org?.sector
+  const lastLogin = (user as { lastLoginAt?: string } | null)?.lastLoginAt
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Compte"
+        title="Mon profil"
+        description="Vos informations personnelles, celles de votre établissement et l’état de votre compte."
+      />
+
+      {saved ? <Alert tone="success" className="mb-5">Vos informations ont été enregistrées.</Alert> : null}
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <Panel
+          title={<span className="flex items-center gap-2"><UserRound size={16} className="text-[var(--an-accent)]" />Informations personnelles</span>}
+          description="Visibles par votre concierge ALLNEEDS."
+          action={!editing ? <Button size="sm" variant="outline" onClick={startEdit}><Edit2 size={14} />Modifier</Button> : null}
+        >
+          {editing ? (
+            <form className="grid gap-4 p-5 sm:grid-cols-2" onSubmit={(event) => { event.preventDefault(); void save() }}>
+              <FormField label="Nom affiché" required><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoComplete="name" /></FormField>
+              <FormField label="Fonction / poste"><Input value={form.jobTitle} onChange={(e) => setForm({ ...form, jobTitle: e.target.value })} autoComplete="organization-title" /></FormField>
+              <FormField label="Prénom"><Input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} autoComplete="given-name" /></FormField>
+              <FormField label="Nom de famille"><Input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} autoComplete="family-name" /></FormField>
+              <FormField label="Téléphone"><Input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} autoComplete="tel" /></FormField>
+              <FormField label="E-mail" hint="L’e-mail de connexion ne peut pas être modifié ici."><Input value={user?.email ?? ''} disabled /></FormField>
+              {error ? <Alert tone="danger" className="sm:col-span-2">{error}</Alert> : null}
+              <div className="flex flex-wrap gap-2 sm:col-span-2">
+                <Button type="submit" size="sm" disabled={saving}><Save size={14} />{saving ? 'Enregistrement…' : 'Enregistrer'}</Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => setEditing(false)} disabled={saving}><X size={14} />Annuler</Button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 px-5 pt-5">
+                <Initial name={user?.name || user?.email || '?'} size="lg" />
+                <div className="min-w-0">
+                  <p className="truncate font-bold text-ink-950">{user?.name || 'Nom non renseigné'}</p>
+                  <p className="truncate text-xs text-ink-500">{[user?.jobTitle, ROLE_LABEL[user?.role ?? ''] ?? user?.role].filter(Boolean).join(' · ')}</p>
+                </div>
+              </div>
+              <Facts rows={[
+                ['Prénom', user?.firstName],
+                ['Nom de famille', user?.lastName],
+                ['E-mail', user?.email],
+                ['Téléphone', user?.phone || org?.contactPhone],
+                ['Fonction / poste', user?.jobTitle],
+              ]} />
+            </>
+          )}
+        </Panel>
+
+        <div className="grid content-start gap-5">
+          <Panel
+            title={<span className="flex items-center gap-2"><Building2 size={16} className="text-[var(--an-accent)]" />Mon établissement</span>}
+            description="Pour modifier ces informations, contactez votre concierge."
+          >
+            <Facts rows={[
+              ['Établissement', org?.name],
+              ['Secteur', sectorLabel],
+              ['Type de structure', org?.kind],
+              ['Ville', org?.city],
+              ['Taille', org?.size],
+              ['Concierge', org?.concierge?.name || org?.concierge?.email],
+            ]} />
+          </Panel>
+
+          <Panel title={<span className="flex items-center gap-2"><ShieldCheck size={16} className="text-[var(--an-accent)]" />Compte et sécurité</span>}>
+            <Facts rows={[
+              ['Rôle', ROLE_LABEL[user?.role ?? ''] ?? user?.role],
+              ['Statut', user?.active === false ? 'Désactivé' : 'Actif'],
+              ['Dernière connexion', lastLogin ? longDate(lastLogin) : null],
+            ]} />
+            <p className="flex items-start gap-2 border-t border-[var(--an-line)] px-5 py-4 text-xs leading-5 text-ink-500">
+              <KeyRound size={14} className="mt-0.5 shrink-0" />Pour changer de mot de passe, demandez un nouveau lien de configuration à votre concierge.
+            </p>
+          </Panel>
+        </div>
       </div>
-    </details>
-  </>
+    </div>
+  )
+}
+
+function FormField({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: ReactNode }) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-xs font-semibold text-ink-600">{label}{required ? <span className="text-rose-500"> *</span> : null}</span>
+      {children}
+      {hint ? <span className="text-[0.7rem] text-ink-400">{hint}</span> : null}
+    </label>
+  )
+}
+
+function Facts({ rows }: { rows: Array<[string, string | null | undefined]> }) {
+  return (
+    <dl className="cl-facts">
+      {rows.map(([label, value]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd>{value || <span className="text-ink-400">Non renseigné</span>}</dd>
+        </div>
+      ))}
+    </dl>
+  )
 }

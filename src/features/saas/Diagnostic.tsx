@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { useDemo } from '@/store/store'
+import { useAuth } from '@/features/auth/AuthContext'
 import { titles } from './model'
 import './workspace.css'
 import { Diagnostic360 } from '@/features/health360/Diagnostic360'
 import { SectorChoice } from '@/features/parcours/SectorChoice'
 import { DiagnosticSubmit } from '@/features/parcours/DiagnosticSubmit'
 import { useOrgContext } from '@/features/parcours/useOrgContext'
-import { useParcours, parcoursCurrentStep, readParcours, writeParcours } from '@/lib/parcours'
+import { useParcours, readParcours, writeParcours } from '@/lib/parcours'
 import { readDiagnosticDraft } from '@/lib/diagnostic-draft'
 import { JourneyProgress } from '@/components/JourneyProgress'
 import type { SectorKey } from '@/features/health360/packs'
@@ -17,7 +17,7 @@ import type { SectorKey } from '@/features/health360/packs'
  */
 export function Diagnostic() {
   const { orgId, orgName, sector: accountSector } = useOrgContext()
-  const { state } = useDemo()
+  const auth = useAuth()
   const { parcours, patch } = useParcours(orgId)
   const [pending, setPending] = useState<SectorKey | null>(null)
 
@@ -53,16 +53,6 @@ export function Diagnostic() {
     synthesisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [showSynthesis])
 
-  const step = parcoursCurrentStep({
-    sector,
-    submittedAt: parcours.submittedAt,
-    conciergeRequestedAt: parcours.conciergeRequestedAt,
-    rendezVousAt: parcours.rendezVousAt,
-    restoredAt: parcours.restoredAt,
-    offerChosenAt: parcours.offerChosenAt,
-    subscriptionActive: state.subscription.status === 'actif',
-  })
-
   if (!sector) {
     return (
       <div className="space-y-6">
@@ -84,14 +74,6 @@ export function Diagnostic() {
 
   return (
     <div className="space-y-6">
-      <JourneyProgress current={step} />
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ink-100 bg-white px-4 py-3">
-        <p className="text-xs text-ink-500">
-          Secteur actif · <strong className="text-ink-800">{titles[sector]}</strong>
-          {orgName ? ` · ${orgName}` : ''}
-        </p>
-        <span className="text-xs font-semibold text-brand-700">Un seul secteur, un seul questionnaire</span>
-      </div>
       {showSynthesis ? (
         <div ref={synthesisRef}>
           <DiagnosticSubmit
@@ -105,6 +87,8 @@ export function Diagnostic() {
         <Diagnostic360
             sector={sector}
             readOnly={false}
+            organizationName={auth.user?.organization?.name || orgName || ''}
+            contactName={[auth.user?.name, auth.user?.jobTitle].filter(Boolean).join(', ')}
             onCompleted={() => {
               setQuestionnaireCompleted(true)
               justCompletedRef.current = true

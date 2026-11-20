@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react';
-import {CheckCircle2,ClipboardCheck,FileText,ShieldAlert,Stethoscope,Target,TrendingUp,UsersRound} from 'lucide-react';
+import {ArrowRight,Building2,CheckCircle2,ClipboardCheck,FileText,Send,ShieldAlert,Stethoscope,Target,TrendingUp,UsersRound} from 'lucide-react';
 import {computeDiagnostic,isVisible} from '@/lib/diagnostic360';
 import type { DiagnosticQuestion } from './diagnosticData';
 import { PACKS, type SectorKey, type SectorPack } from './packs';
@@ -17,8 +17,9 @@ type DiagnosticState={
  adequation:Record<string,Adequation>; adequationNext:string; satisfaction:string;
 };
 
-const empty=(sectorKey: SectorKey):DiagnosticState=>({
- meta:{structure:'Centre Atlas Santé',date:new Date().toISOString().slice(0,10),contact:'',animator:'',decider:'',citySize:'Casablanca · ',accepted:false,started:false,format:'Complet',consentAt:'',consentBy:'',consentVersion:''},
+const PLACEHOLDER_STRUCTURE='Centre Atlas Santé';
+const empty=(sectorKey: SectorKey,defaults:{structure?:string;contact?:string}={}):DiagnosticState=>({
+ meta:{structure:defaults.structure||'',date:new Date().toISOString().slice(0,10),contact:defaults.contact||'',animator:'',decider:'',citySize:'Casablanca · ',accepted:false,started:false,format:'Complet',consentAt:'',consentBy:'',consentVersion:''},
  answers:Object.fromEntries(PACKS[sectorKey].questions.map(q=>[q.id,{score:0,comment:'',completed:false}])),
  charges:Object.fromEntries(PACKS[sectorKey].chargesPostes.map(x=>[x,{supplier:'',annual:'',renewal:'',notice:'',compared:'',saving:''}])),
  roots:['','',''],solutions:['','',''],checks:['','',''],decisions:'',reportDate:'',nextMeeting:'',
@@ -26,14 +27,14 @@ const empty=(sectorKey: SectorKey):DiagnosticState=>({
  recheck:[0,1,2].map(()=>({initial:'',j90:'',gain:''})),
  adequation:Object.fromEntries(PACKS[sectorKey].adequationCriteria.map(x=>[x,{score:0,comment:''}])),adequationNext:'',satisfaction:''
 });
-function load(sectorKey: SectorKey){try{const v=JSON.parse(localStorage.getItem('allneeds.diagnostic360.v51.'+sectorKey)||'null');if(!v||!v.meta||!v.answers)return empty(sectorKey);const base=empty(sectorKey);const answers=Object.fromEntries(PACKS[sectorKey].questions.map(q=>{const old=v.answers[q.id]||base.answers[q.id];return[q.id,{...base.answers[q.id],...old,completed:old.completed??old.score>0}]}));return{...base,...v,meta:{...base.meta,...v.meta,format:'Complet'},answers}}catch{return empty(sectorKey)}}
+function load(sectorKey: SectorKey,defaults:{structure?:string;contact?:string}={}){try{const v=JSON.parse(localStorage.getItem('allneeds.diagnostic360.v51.'+sectorKey)||'null');if(!v||!v.meta||!v.answers)return empty(sectorKey,defaults);const base=empty(sectorKey,defaults);const answers=Object.fromEntries(PACKS[sectorKey].questions.map(q=>{const old=v.answers[q.id]||base.answers[q.id];return[q.id,{...base.answers[q.id],...old,completed:old.completed??old.score>0}]}));const structure=!v.meta.structure||v.meta.structure===PLACEHOLDER_STRUCTURE?base.meta.structure:v.meta.structure;const contact=v.meta.contact||base.meta.contact;return{...base,...v,meta:{...base.meta,...v.meta,structure,contact,format:'Complet'},answers}}catch{return empty(sectorKey,defaults)}}
 const fmt=(n:number)=>Number.isFinite(n)?Math.round(n*10)/10:0;
 
-export function Diagnostic360({sector='sante', audience='client', readOnly=false, onCompleted}: {sector?: SectorKey; audience?: 'client'|'staff'; readOnly?: boolean; onCompleted?: () => void}){
+export function Diagnostic360({sector='sante', audience='client', readOnly=false, onCompleted, organizationName, contactName}: {sector?: SectorKey; audience?: 'client'|'staff'; readOnly?: boolean; onCompleted?: () => void; organizationName?: string; contactName?: string}){
  const pack = PACKS[sector] as SectorPack;
  const STAFF = audience==='staff';
  const STORAGE_KEY = 'allneeds.diagnostic360.v51.'+sector;
- const [data,setData]=useState<DiagnosticState>(()=>load(sector as SectorKey)),[tab,setTab]=useState<'cadre'|'questions'|'synthese'|'suivi'|'adequation'>('cadre'),[questionIndex,setQuestionIndex]=useState<number|null>(null);
+ const [data,setData]=useState<DiagnosticState>(()=>load(sector as SectorKey,{structure:organizationName,contact:contactName})),[tab,setTab]=useState<'cadre'|'questions'|'synthese'|'suivi'|'adequation'>('cadre'),[questionIndex,setQuestionIndex]=useState<number|null>(null);
  const [saveError,setSaveError]=useState('');
  const persist=(next:DiagnosticState)=>{setData(next);if(!readOnly)localStorage.setItem(STORAGE_KEY,JSON.stringify(next))};
  const updateMeta=(k:keyof DiagnosticState['meta'],v:any)=>{if(readOnly)return;persist({...data,meta:{...data.meta,[k]:v}})};
@@ -65,16 +66,48 @@ export function Diagnostic360({sector='sante', audience='client', readOnly=false
  const availableTabs=STAFF?allTabs:allTabs.filter(([id])=>id==='cadre'||id==='questions');
  const visibleTabs=!data.meta.started?availableTabs.filter(([id])=>id==='cadre'):questionsComplete?availableTabs:availableTabs.filter(([id])=>id==='cadre'||id==='questions');
  return <section className="diag360">
-  <div className="diag-hero"><div><span className="eyebrow">FAIRE LE POINT · {pack.labelUpper}</span><h2>Repérons ensemble vos priorités.</h2><p>Un premier échange ciblé pour comprendre votre situation et décider de la suite avec votre concierge.</p></div><div className="diag-summary"><strong>{answeredCount}/{questionsTotal}</strong><span>{data.meta.started?'questions parcourues':'diagnostic complet'}</span><small>≈ 2 h 15 · {questionsTotal} questions</small></div></div>
-  {!data.meta.started?<div className="diag-launch"><div><small>ÉTAPE 1 · LIRE LE CADRE</small><strong>Validez le cadre de diagnostic, puis lancez le questionnaire.</strong><span>Le diagnostic avance ensuite à votre rythme, une question après l’autre.</span></div><button className={!data.meta.accepted||!data.meta.consentAt||readOnly?'disabled':''} disabled={!data.meta.accepted||!data.meta.consentAt||readOnly} onClick={startDiagnostic}>Commencer le diagnostic</button></div>:<><div className="diag-progress-head"><strong>{questionsComplete?'Diagnostic prêt pour la synthèse':`Diagnostic en cours · ${treatedCount}/${questionsTotal} questions parcourues`}</strong><span>{questionsComplete?'Vous pouvez désormais relire vos réponses et transmettre votre diagnostic.':'Vous pouvez revenir à une question précédente. Votre progression est enregistrée automatiquement.'}</span></div><div className="diag-tabs">{visibleTabs.map(([id,label])=><button key={id} disabled={readOnly} className={tab===id?'active':''} onClick={()=>setTab(id)}>{id==='questions'?`${treatedCount}/${questionsTotal} · Questions`:label}</button>)}</div></>}
+  <div className="diag-hero"><div><span className="eyebrow">DIAGNOSTIC 360° · {pack.labelUpper}</span><h2>Repérons ensemble vos priorités.</h2><p>Un premier échange ciblé pour comprendre votre situation et décider de la suite avec votre concierge.</p>{data.meta.structure?<span className="dg-hero-chip"><Building2 size={14}/>{data.meta.structure}</span>:null}</div>{data.meta.started?<div className="diag-summary"><strong>{treatedCount}/{questionsTotal}</strong><span>questions parcourues</span><small>Enregistré automatiquement</small></div>:<div className="dg-hero-facts"><span><b>{questionsTotal}</b>questions</span><span><b>{pack.volets.length}</b>axes</span><span><b>≈ 2 h 15</b>au total</span></div>}</div>
+  {data.meta.started?<><div className="diag-progress-head"><strong>{questionsComplete?'Diagnostic prêt pour la synthèse':`Diagnostic en cours · ${treatedCount}/${questionsTotal} questions parcourues`}</strong><span>{questionsComplete?'Vous pouvez désormais relire vos réponses et transmettre votre diagnostic.':'Vous pouvez revenir à une question précédente. Votre progression est enregistrée automatiquement.'}</span></div><div className="diag-tabs">{visibleTabs.map(([id,label])=><button key={id} disabled={readOnly} className={tab===id?'active':''} onClick={()=>setTab(id)}>{id==='questions'?`${treatedCount}/${questionsTotal} · Questions`:label}</button>)}</div></>:null}
 
-  {tab==='cadre'&&<div className="diag-stack">
-   <section className="diag-card"><div className="diag-card-title"><FileText/><div><h3>Qui participe ?</h3><p>Indiquez votre nom et votre rôle pour préparer l’échange.</p></div></div><div className="diag-form-grid"><label>Votre établissement<input disabled={readOnly} value={data.meta.structure} onChange={e=>updateMeta('structure',e.target.value)}/></label><label>Votre nom et fonction<input disabled={readOnly} value={data.meta.contact} onChange={e=>updateMeta('contact',e.target.value)}/></label></div></section>
-   <section className="diag-card diag-express-summary"><div className="diag-card-title"><Target/><div><h3>Ce premier échange</h3><p>Un format court pour identifier les sujets qui méritent votre attention.</p></div></div><div className="diag-express-points"><span><b>{questionsTotal}</b> questions</span><span><b>{pack.volets.length}</b> axes abordés</span><span><b>≈ 2 h 15</b> échange et synthèse</span></div><p>À la fin, vous pourrez décider avec le concierge s’il faut approfondir un sujet.</p></section>
-   <details className="diag-card diag-details"><summary>À préparer et informations utiles</summary><p>Si vous les avez sous la main, quelques documents non nominatifs peuvent faciliter l’échange. Vous pouvez aussi commencer sans eux.</p><ul className="diag-list">{pack.documents.map(x=><li key={x}>{x}</li>)}</ul><p>Aucune donnée nominative de patient, d’élève ou de voyageur n’est nécessaire. Le diagnostic ne remplace pas un avis professionnel spécialisé.</p></details>
-   <section className="diag-card diag-next-step"><div><small>SI UN APPROFONDISSEMENT EST UTILE</small><strong>Le diagnostic complet sera proposé par votre concierge après cet échange.</strong><p>Il représente environ 6 h 45 sur plusieurs séances. Vous recevrez d’abord le périmètre, le calendrier et le tarif. Rien ne commence sans votre accord.</p></div></section>
-   <section className="diag-card"><label className="diag-consent"><input type="checkbox" disabled={readOnly} checked={data.meta.accepted} onChange={e=>{const on=e.target.checked;persist({...data,meta:{...data.meta,accepted:on,consentAt:on?new Date().toISOString():'',consentBy:on?(data.meta.decider||data.meta.contact||'décideur'):'',consentVersion:on?'grille-360-v5.1':''}})}}/> J’ai compris le cadre de cet échange et je confirme pouvoir commencer le diagnostic.</label></section>
-   <section className="diag-card diag-next-step"><div><small>PRÊT À COMMENCER ?</small><strong>Vous pouvez répondre à votre rythme. Vos réponses sont enregistrées dans ce navigateur.</strong></div><button className={!data.meta.accepted||!data.meta.consentAt||readOnly?'disabled':''} disabled={!data.meta.accepted||!data.meta.consentAt||readOnly} onClick={startDiagnostic}>Commencer le diagnostic <span aria-hidden="true">→</span></button></section>
+  {tab==='cadre'&&<div className="dg-intro">
+   <div className="dg-col">
+    <section className="dg-card">
+     <header className="dg-card-head"><span className="dg-step">1</span><div><h3>Qui participe ?</h3><p>Ces informations préparent l’échange avec votre concierge.</p></div></header>
+     <div className="dg-fields">
+      <label><span>Votre établissement</span><input disabled={readOnly} value={data.meta.structure} placeholder="Nom de l’établissement" onChange={e=>updateMeta('structure',e.target.value)}/></label>
+      <label><span>Votre nom et fonction</span><input disabled={readOnly} value={data.meta.contact} placeholder="Ex. : Prénom Nom, direction" onChange={e=>updateMeta('contact',e.target.value)}/></label>
+     </div>
+    </section>
+    <section className="dg-card">
+     <header className="dg-card-head"><span className="dg-step">2</span><div><h3>À préparer <em>(facultatif)</em></h3><p>Quelques documents non nominatifs peuvent faciliter l’échange. Vous pouvez aussi commencer sans eux.</p></div></header>
+     <ul className="dg-docs">{pack.documents.map(x=><li key={x}><FileText size={14}/>{x}</li>)}</ul>
+     <p className="dg-note"><ShieldAlert size={14}/>Aucune donnée nominative de patient, d’élève ou de voyageur n’est nécessaire. Le diagnostic ne remplace pas un avis professionnel spécialisé.</p>
+    </section>
+    <section className="dg-card dg-start">
+     <header className="dg-card-head"><span className="dg-step">3</span><div><h3>{data.meta.started?'Reprendre le questionnaire':'Confirmer et commencer'}</h3><p>Répondez à votre rythme, une question après l’autre. Vos réponses sont enregistrées dans ce navigateur.</p></div></header>
+     <label className={`dg-consent ${data.meta.accepted?'is-checked':''}`}><input type="checkbox" disabled={readOnly} checked={data.meta.accepted} onChange={e=>{const on=e.target.checked;persist({...data,meta:{...data.meta,accepted:on,consentAt:on?new Date().toISOString():'',consentBy:on?(data.meta.decider||data.meta.contact||'décideur'):'',consentVersion:on?'grille-360-v5.1':''}})}}/><span>J’ai compris le cadre de cet échange et je confirme pouvoir commencer le diagnostic.</span></label>
+     <div className="dg-start-row">
+      <button type="button" className="dg-primary" disabled={!(data.meta.accepted&&Boolean(data.meta.consentAt)&&!readOnly)} onClick={startDiagnostic}>{data.meta.started?'Reprendre le questionnaire':'Commencer le diagnostic'}<ArrowRight size={16}/></button>
+      {!data.meta.accepted&&!readOnly?<span className="dg-hint">Cochez la case ci-dessus pour commencer.</span>:null}
+     </div>
+    </section>
+   </div>
+   <aside className="dg-col">
+    <section className="dg-card">
+     <h3 className="dg-aside-title">Comment ça se passe</h3>
+     <ol className="dg-flow">
+      <li><span><ClipboardCheck size={16}/></span><div><strong>Vous répondez</strong><small>{questionsTotal} questions réparties en {pack.volets.length} axes. Vous pouvez faire des pauses.</small></div></li>
+      <li><span><Send size={16}/></span><div><strong>Vous envoyez</strong><small>Relisez la synthèse puis transmettez-la à ALLNEEDS.</small></div></li>
+      <li><span><Stethoscope size={16}/></span><div><strong>Votre concierge analyse</strong><small>Rapport, priorités et recommandations publiés dans votre espace.</small></div></li>
+     </ol>
+     <ul className="dg-axes">{pack.volets.map(v=><li key={v.id}><b>{v.id}</b>{v.title}</li>)}</ul>
+    </section>
+    <section className="dg-card dg-card-soft">
+     <small className="dg-kicker">SI UN APPROFONDISSEMENT EST UTILE</small>
+     <p className="dg-soft-title">Le diagnostic complet sera proposé par votre concierge après cet échange.</p>
+     <p className="dg-soft-text">Il représente environ 6 h 45 sur plusieurs séances. Vous recevrez d’abord le périmètre, le calendrier et le tarif. Rien ne commence sans votre accord.</p>
+    </section>
+   </aside>
   </div>}
 
    {tab==='questions'&&currentQuestion&&<div className="question-flow">

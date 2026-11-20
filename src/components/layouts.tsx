@@ -32,6 +32,8 @@ import {
   Receipt,
   RefreshCcw,
   Settings2,
+  FileSearch,
+  UserRound,
   UserRoundCog,
   UsersRound,
   X,
@@ -111,10 +113,10 @@ function buildClientNav(
   _saasAccess: boolean,
 ): NavItem[] {
   const items: NavItem[] = [
-    { group: 'Espace', label: 'Accueil', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
-    { group: 'Espace', label: 'Diagnostic 360°', to: '/app/diagnostic-auto' as any, icon: <Gauge className="h-4 w-4" /> },
-    { group: 'Compte', label: 'Offres', to: '/app/offres' as any, icon: <Receipt className="h-4 w-4" /> },
-    { group: 'Compte', label: 'Abonnement Besoins', to: '/app/mon-abonnement-besoins' as any, icon: <Inbox className="h-4 w-4" /> },
+    { group: 'Mon parcours', label: 'Accueil', to: '/app', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { group: 'Mon parcours', label: 'Diagnostic 360°', to: '/app/diagnostic-auto' as any, icon: <Gauge className="h-4 w-4" /> },
+    { group: 'Mon parcours', label: 'Rapport de diagnostic', to: '/app/diagnostics' as any, icon: <FileSearch className="h-4 w-4" /> },
+    { group: 'Mon parcours', label: 'Offres', to: '/app/offres' as any, icon: <Receipt className="h-4 w-4" /> },
   ]
 
   const optional: Array<{ key: AccessModule; group: string; label: string; to: string; icon: ReactNode; badge?: number }> = [
@@ -137,7 +139,8 @@ function buildClientNav(
 
   items.push({ group: 'Réseau', label: 'Espace métier', to: '/app/espace-metier' as any, icon: <Building2 className="h-4 w-4" /> })
 
-  items.push({ group: 'Compte', label: 'Profil & activité', to: '/app/parametres' as any, icon: <Settings2 className="h-4 w-4" /> })
+  items.push({ group: 'Compte', label: 'Abonnement Besoins', to: '/app/mon-abonnement-besoins' as any, icon: <Inbox className="h-4 w-4" /> })
+  items.push({ group: 'Compte', label: 'Mon profil', to: '/app/parametres' as any, icon: <UserRound className="h-4 w-4" /> })
   return items
 }
 
@@ -403,7 +406,7 @@ export function AppShell({
                     </div>
                     <div className="flex items-center justify-between px-3 py-2 sm:hidden"><span className="text-xs font-semibold text-ink-500">Langue</span><LanguageSwitch /></div>
                     <Link to="/" role="menuitem" className="an-menu-item"><Home size={15} />Site public</Link>
-                    {variant === 'client' ? <Link to={'/app/parametres' as any} role="menuitem" className="an-menu-item"><Settings2 size={15} />Profil & activité</Link> : null}
+                    {variant === 'client' ? <Link to={'/app/parametres' as any} role="menuitem" className="an-menu-item"><UserRound size={15} />Mon profil</Link> : null}
                     <button type="button" role="menuitem" onClick={logout} className="an-menu-item text-red-600"><LogOut size={15} />Se déconnecter</button>
                   </div>
                 </>

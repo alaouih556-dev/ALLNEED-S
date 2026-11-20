@@ -360,8 +360,8 @@
 .mk-footer-cols ul { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .mk-footer-cols a { color: #a9bbd2; font-size: .95rem; transition: color .15s ease; }
 .mk-footer-cols a:hover { color: #fff; }
-.mk-footer-logo { display: inline-flex; padding: 10px 14px; border-radius: 14px; background: #fff; }
-.mk-footer-logo img { height: 34px; width: auto; display: block; }
+.mk-footer-logo { display: inline-flex; border-radius: 12px; }
+.mk-footer-logo img { width: 190px; height: auto; display: block; }
 .mk-footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; padding: 26px 0 34px; border-top: 1px solid rgba(255,255,255,.1); font-size: .82rem; color: #8ea2bd; }
 @media (max-width: 960px) { .mk-footer-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mk-footer-brand { grid-column: 1 / -1; } }
 @media (max-width: 480px) { .mk-footer-cols { grid-template-columns: 1fr; } }
