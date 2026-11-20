@@ -14,7 +14,8 @@ const DB_PATH = join(ROOT, 'db.json')
 const AUDIT_PATH = join(ROOT, 'audit.jsonl')
 const COOKIE_NAME = 'allneeds_session'
 // Durée d'inactivité avant expiration : la session est renouvelée à chaque chargement de page (/api/me).
-const SESSION_TTL_SECONDS = Math.round((Number(process.env.ALLNEEDS_SESSION_TTL_HOURS) || 8) * 60 * 60)
+// Session glissante : chaque requête authentifiée la prolonge. Par défaut 30 jours sans aucune activité avant de devoir se reconnecter.
+const SESSION_TTL_SECONDS = Math.round((Number(process.env.ALLNEEDS_SESSION_TTL_HOURS) || 720) * 60 * 60)
 const INVITATION_TTL_SECONDS = 48 * 60 * 60
 const MAX_BODY_BYTES = 1024 * 1024
 const FRONTEND_ORIGIN = (process.env.ALLNEEDS_FRONTEND_ORIGIN || 'http://127.0.0.1:5176').trim().replace(/\/$/, '')
@@ -145,7 +146,7 @@ async function syncTable(table, rows) { await upsertTable(table, rows); await pr
 
 async function syncRemote(data) {
   const orgRows = data.orgs.map((org) => ({ id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active !== false, modules: org.modules || {}, metadata: Object.fromEntries(Object.entries(org).filter(([key]) => !['id','name','slug','sector','active','modules'].includes(key))) }))
-  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
+  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent','crm'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
   const assignmentRows = data.users.filter((user) => user.role === 'concierge').flatMap((user) => (user.orgIds || []).filter((id) => id !== '*').map((orgId) => ({ id: `${user.id}:${orgId}`, concierge_user_id: user.id, organization_id: orgId })))
   const inviteRows = data.invitations.map((inv) => ({ id: inv.id, organization_id: inv.orgId || null, email: inv.email, name: inv.name || '', role: inv.role, permissions: inv.permissions || [], kind: inv.kind, invitation_metadata: inv.metadata || {}, token_hash: inv.tokenHash, created_by: inv.createdBy || null, created_at: inv.createdAt, expires_at: inv.expiresAt, used_at: inv.usedAt || null, revoked_at: inv.revokedAt || null, last_email_at: inv.lastEmailAt || null, last_email_status: inv.lastEmailStatus || null, last_email_error: inv.lastEmailError || null, metadata: {} }))
   // Insert/update parents first, then children. Deletions are pruned in reverse dependency order.
@@ -157,9 +158,10 @@ async function syncRemote(data) {
     const rows = (data[key] || []).filter((item) => item?.id).map((item) => ({ id: item.id, organization_id: item.orgId || null, payload: item }))
     await syncTable(table, rows)
   }
-  for (const [key, table] of Object.entries(CRM_COLLECTIONS)) await syncCrmTable(table, data[key] || [])
   await pruneTable('v46_users', userRows)
   await pruneTable('v46_organizations', orgRows)
+  // CRM en dernier : une table CRM absente (migration non appliquée) ne bloque pas le reste de la synchronisation.
+  for (const [key, table] of Object.entries(CRM_COLLECTIONS)) await syncCrmTable(table, data[key] || [])
 }
 
 function saveDb(data) {
@@ -790,7 +792,7 @@ const SALES_ALLOWED_API = [/^\/api\/sales\//]
 
 function canAccessSalesPresentation(user) {
   if (!user || user.active === false) return false
-  if (user.role === 'admin' || user.role === SALES_ROLE) return true
+  if (user.role === 'admin' || user.role === SALES_ROLE || user.role === 'crm') return true
   return user.role === 'concierge' && Array.isArray(user.permissions) && user.permissions.includes(SALES_PERMISSION)
 }
 
@@ -801,7 +803,7 @@ function allowedText(value, maximum, field) {
 
 
 function orgForUser(user) {
-  if (!user || ['admin', 'concierge', 'prestataire', 'sales', 'agent'].includes(user.role)) return null
+  if (!user || ['admin', 'concierge', 'prestataire', 'sales', 'agent', 'crm'].includes(user.role)) return null
   return db.orgs.find((org) => Array.isArray(user.orgIds) && user.orgIds.includes(org.id)) || null
 }
 
@@ -1260,10 +1262,14 @@ const server = createServer(async (req, res) => {
     const user = sessionUser(req)
     if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(req.method) && url.pathname.startsWith('/api/') && !requireSameOrigin(req, res)) return
+    // Tant que l'utilisateur utilise l'application, sa session est prolongée : pas de déconnexion automatique.
+    res.setHeader('set-cookie', cookie(issueSession(user), SESSION_TTL_SECONDS))
     // Un compte commercial n'accède qu'à la présentation : tout le reste est refusé côté serveur.
     if (user.role === SALES_ROLE && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à la présentation commerciale' }, cors)
     // Un agent CRM n'accède qu'aux routes du CRM, filtrées par ses permissions et son périmètre.
     if (user.role === 'agent' && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé au CRM' }, cors)
+    // Rôle « CRM » : uniquement le CRM et la présentation commerciale.
+    if (user.role === 'crm' && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé au CRM et à la présentation commerciale' }, cors)
     if (await crm.handle(req, res, url, user, cors)) return
 
     if (req.method === 'GET' && url.pathname === '/api/sales/presentation') {

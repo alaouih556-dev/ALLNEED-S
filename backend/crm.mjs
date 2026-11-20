@@ -49,7 +49,12 @@ export const AGENT_PERMISSIONS = ['dashboard.view', 'contacts.view', 'contacts.c
 /** Permissions réservées à l'administration (jamais attribuables à un agent). */
 export const ADMIN_PERMISSIONS = ['users.manage', 'databases.manage', 'imports.run', 'campaigns.manage', 'zones.manage', 'agents.view', 'settings.manage', 'audit.view', 'geocode.run']
 /** Rôles CRM. Ajouter un rôle = ajouter une entrée ici + ses permissions par défaut dans les réglages. */
-export const CRM_ROLES = { admin: { label: 'Administrateur', admin: true }, agent: { label: 'Agent', admin: false } }
+export const CRM_ROLES = {
+  admin: { label: 'Administrateur', admin: true },
+  agent: { label: 'Agent', admin: false },
+  // Rôle « CRM » : mêmes droits qu'un agent dans le CRM, plus la présentation commerciale (rien d'autre dans ALLNEEDS).
+  crm: { label: 'CRM', admin: false },
+}
 
 const NOTIFICATION_TYPES = ['appointment.created', 'appointment.confirmed', 'appointment.cancelled', 'appointment.rescheduled', 'callback.reminder', 'database.assigned', 'contacts.assigned', 'campaign.assigned', 'campaign.started', 'campaign.completed', 'user.created', 'agent.alert', 'import.completed', 'import.failed']
 
@@ -62,7 +67,7 @@ function defaultSettings() {
     campaigns: { types: ['Prospection', 'Relance', 'Fidélisation', 'Événement'], defaultGoalAppointments: 20 },
     imports: { duplicateKey: 'phone_or_email', defaultStrategy: 'skip', maxRows: 20000 },
     labels: JSON.parse(JSON.stringify(DEFAULT_LABELS)),
-    rolePermissions: { agent: [...AGENT_PERMISSIONS] },
+    rolePermissions: { agent: [...AGENT_PERMISSIONS], crm: [...AGENT_PERMISSIONS] },
     notifications: Object.fromEntries(NOTIFICATION_TYPES.map((t) => [t, true])),
     integrations: { geocoding: 'disabled', telephony: 'none' },
     updatedAt: null,
@@ -195,6 +200,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const d = defaultSettings()
     for (const key of Object.keys(d)) if (s[key] === undefined) s[key] = d[key]
     for (const k of ['contact', 'call', 'appointment']) s.labels[k] = { ...d.labels[k], ...(s.labels[k] || {}) }
+    // Un rôle ajouté après coup reçoit ses permissions par défaut.
+    for (const role of Object.keys(CRM_ROLES)) if (!CRM_ROLES[role].admin && !Array.isArray(s.rolePermissions[role])) s.rolePermissions[role] = [...(d.rolePermissions[role] || AGENT_PERMISSIONS)]
     return s
   }
 
@@ -219,7 +226,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   const contactById = (x) => db.crmContacts.find((c) => c.id === x)
   const userById = (x) => db.users.find((u) => u.id === x)
   const crmUsers = () => db.users.filter(isCrmUser)
-  const agents = () => db.users.filter((u) => u.role === 'agent')
+  const isFieldRole = (u) => Boolean(u && CRM_ROLES[u.role] && !CRM_ROLES[u.role].admin)
+  const agents = () => db.users.filter(isFieldRole)
   const campaignOfContact = (c) => c.campaignId || dbById(c.databaseId)?.campaignId || null
 
   function contactVisible(u, c, sc = scopeOf(u)) {
@@ -826,7 +834,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const d = { id: id('db'), name: text(body.name, 120, 'nom', { required: true }), description: text(body.description, 1000, 'description'), source: text(body.source, 120, 'source'), status: oneOf(body.status, DATABASE_STATUSES, 'statut', 'draft'), campaignId: body.campaignId ? (campById(body.campaignId) ? body.campaignId : (() => { throw httpError(400, 'campagne introuvable') })()) : null, zoneId: body.zoneId ? (zoneById(body.zoneId) ? body.zoneId : (() => { throw httpError(400, 'zone introuvable') })()) : null, createdBy: user.id, createdAt: nowIso(), updatedAt: nowIso(), importedAt: null, history: [{ at: nowIso(), by: user.id, byName: user.name, action: 'Création' }] }
       if (db.crmDatabases.some((x) => lower(x.name) === lower(d.name) && x.status !== 'archived')) throw httpError(409, 'une base porte déjà ce nom')
       db.crmDatabases.push(d)
-      const agentIds = idList(body.agentIds, (x) => userById(x)?.role === 'agent', 'agents') || []
+      const agentIds = idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents') || []
       setDatabaseAgents(user, d, agentIds)
       log(user, 'database.created', 'database', d.id, { name: d.name })
       saveDb(db)
@@ -848,7 +856,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
         if ('status' in body) { d.status = oneOf(body.status, DATABASE_STATUSES, 'statut', d.status); changed.push(`statut → ${d.status}`) }
         if ('campaignId' in body) { if (body.campaignId && !campById(body.campaignId)) throw httpError(400, 'campagne introuvable'); d.campaignId = body.campaignId || null; changed.push('campagne') }
         if ('zoneId' in body) { if (body.zoneId && !zoneById(body.zoneId)) throw httpError(400, 'zone introuvable'); d.zoneId = body.zoneId || null; changed.push('zone') }
-        if ('agentIds' in body) { setDatabaseAgents(user, d, idList(body.agentIds, (x) => userById(x)?.role === 'agent', 'agents') || []); changed.push('agents') }
+        if ('agentIds' in body) { setDatabaseAgents(user, d, idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents') || []); changed.push('agents') }
         d.updatedAt = nowIso(); d.history = [...(d.history || []), { at: nowIso(), by: user.id, byName: user.name, action: `Modification : ${changed.join(', ')}` }].slice(-200)
         log(user, 'database.updated', 'database', d.id, { changed })
         saveDb(db)
@@ -969,7 +977,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const d = dbById(String(body.databaseId || ''))
       if (!d || !databaseVisible(user, d)) throw httpError(400, 'base introuvable')
       const c = { id: id('ct'), databaseId: d.id, campaignId: null, agentId: isCrmAdmin(user) ? (body.agentId || null) : user.id, callStatus: null, lastContactAt: null, archived: false, createdAt: nowIso(), updatedAt: nowIso(), createdBy: user.id, noteLog: [] }
-      if (c.agentId && userById(c.agentId)?.role !== 'agent' && !isCrmAdmin(userById(c.agentId))) throw httpError(400, 'agent introuvable')
+      if (c.agentId && !isCrmUser(userById(c.agentId))) throw httpError(400, 'agent introuvable')
       if (isCrmAdmin(user) && body.campaignId) { if (!campById(body.campaignId)) throw httpError(400, 'campagne introuvable'); c.campaignId = body.campaignId }
       applyContactFields(c, body, { partial: false })
       const dup = findDuplicate(c, settings().imports.duplicateKey)
@@ -1184,7 +1192,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const c = { id: id('cmp'), createdBy: user.id, createdAt: nowIso() }
       applyCampaign(c, body, false)
       db.crmCampaigns.push(c)
-      if (Array.isArray(body.agentIds)) setCampaignAgents(user, c, idList(body.agentIds, (x) => userById(x)?.role === 'agent', 'agents'))
+      if (Array.isArray(body.agentIds)) setCampaignAgents(user, c, idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents'))
       if (Array.isArray(body.databaseIds)) for (const dId of idList(body.databaseIds, (x) => dbById(x), 'bases')) dbById(dId).campaignId = c.id
       log(user, 'campaign.created', 'campaign', c.id, { name: c.name })
       saveDb(db)
@@ -1204,7 +1212,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       if (M === 'PATCH') {
         const prevStatus = c.status
         applyCampaign(c, body, true)
-        if (Array.isArray(body.agentIds)) setCampaignAgents(user, c, idList(body.agentIds, (x) => userById(x)?.role === 'agent', 'agents'))
+        if (Array.isArray(body.agentIds)) setCampaignAgents(user, c, idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents'))
         if (Array.isArray(body.databaseIds)) { const ids = idList(body.databaseIds, (x) => dbById(x), 'bases'); for (const d of db.crmDatabases) { if (ids.includes(d.id)) d.campaignId = c.id; else if (d.campaignId === c.id) d.campaignId = null } }
         c.updatedAt = nowIso()
         const team = crmUsers().filter((u) => (u.crm?.campaignIds || []).includes(c.id)).map((u) => u.id)
@@ -1247,7 +1255,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const z = { id: id('zone'), createdBy: user.id, createdAt: nowIso() }
       applyZone(z, body, false)
       db.crmZones.push(z)
-      if (Array.isArray(body.agentIds)) setZoneAgents(user, z, idList(body.agentIds, (x) => userById(x)?.role === 'agent', 'agents'))
+      if (Array.isArray(body.agentIds)) setZoneAgents(user, z, idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents'))
       log(user, 'zone.created', 'zone', z.id, { name: z.name })
       saveDb(db)
       return send(201, z)
@@ -1258,7 +1266,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       if (!z) throw httpError(404, 'zone introuvable')
       if (M === 'PATCH') {
         applyZone(z, body, true)
-        if (Array.isArray(body.agentIds)) setZoneAgents(user, z, idList(body.agentIds, (x) => userById(x)?.role === 'agent', 'agents'))
+        if (Array.isArray(body.agentIds)) setZoneAgents(user, z, idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents'))
         z.updatedAt = nowIso()
         log(user, 'zone.updated', 'zone', z.id, {})
         saveDb(db)

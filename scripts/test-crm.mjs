@@ -204,6 +204,18 @@ try {
   const actions = new Set(x.data.rows.map((a) => a.action))
   for (const a of ['user.created', 'database.created', 'database.imported', 'contact.created', 'contact.assigned', 'call.recorded', 'appointment.created', 'appointment.updated', 'campaign.created', 'zone.created', 'settings.changed']) assert(actions.has(a), `journal : ${a}`)
 
+  /* --- Rôle « CRM » : droits d'agent + présentation commerciale --- */
+  const crmPw = `Crm-${randomBytes(8).toString('hex')}`
+  x = await req('/api/crm/users', { method: 'POST', cookie: admin, body: { name: 'Compte CRM', email: 'crm@test.ma', role: 'crm', password: crmPw, databaseIds: [dbA.id] } })
+  assert(x.status === 201 && x.data.user.role === 'crm' && x.data.user.roleLabel === 'CRM', 'rôle CRM : compte créé')
+  const crmUser = (await login('crm@test.ma', crmPw)).cookie
+  x = await req('/api/crm/me', { cookie: crmUser })
+  assert(x.status === 200 && !x.data.isAdmin && x.data.permissions.includes('contacts.view') && !x.data.permissions.includes('users.manage'), 'rôle CRM : droits d’agent dans le CRM')
+  assert((await req('/api/crm/contacts?pageSize=50', { cookie: crmUser })).data.total >= 1, 'rôle CRM : voit les contacts de sa base')
+  assert((await req('/api/sales/presentation', { cookie: crmUser })).status === 200, 'rôle CRM : présentation commerciale accessible')
+  for (const path of ['/api/crm/users', '/api/crm/settings', '/api/admin/orgs', '/api/needs', '/api/admin/sales-access']) assert((await req(path, { cookie: crmUser })).status === 403, `rôle CRM : ${path} refusé`)
+  assert((await req('/api/crm/agents', { cookie: admin })).data.rows.some((a) => a.email === 'crm@test.ma'), 'rôle CRM : suivi dans la performance des agents')
+
   /* --- Désactivation --- */
   await req(`/api/crm/users/${agent2.id}`, { method: 'PATCH', cookie: admin, body: { status: 'suspended' } })
   assert((await req('/api/crm/me', { cookie: a2 })).status === 401, 'compte suspendu : session coupée')

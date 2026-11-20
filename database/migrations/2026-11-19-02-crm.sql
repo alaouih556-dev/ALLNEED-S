@@ -14,7 +14,7 @@ begin;
 -- 1. Nouveau rôle « agent » (CRM) et invitations de type « crm »
 alter table public.v46_users drop constraint if exists v46_users_role_check;
 alter table public.v46_users add constraint v46_users_role_check
-  check (role in ('admin','concierge','dirigeant','manager','collaborateur','prestataire','commercial','sales','agent'));
+  check (role in ('admin','concierge','dirigeant','manager','collaborateur','prestataire','commercial','sales','agent','crm'));
 
 alter table public.v46_invitations drop constraint if exists v46_invitations_kind_check;
 alter table public.v46_invitations add constraint v46_invitations_kind_check

@@ -1,22 +1,29 @@
 {
   "users": [
     {
+      "crm": {
+        "zoneIds": [],
+        "campaignIds": [],
+        "databaseIds": [],
+        "permissions": null
+      },
+      "phone": "",
+      "status": "active",
+      "updatedAt": "2026-11-19T20:49:59.301Z",
+      "lastLoginAt": "2026-11-20T10:36:29.641Z",
       "id": "admin-95f24f67ce9cd0fd",
       "email": "alaouih556@gmail.com",
-      "role": "admin",
-      "orgIds": [
-        "*"
-      ],
+      "role": "crm",
+      "orgIds": [],
       "sectors": [],
-      "name": "Administrateur ALLNEEDS",
+      "name": "Administrateur",
       "active": true,
       "passwordHash": "scrypt$d44af90e603ac00db2e136775645f566$63666288043fbddbb3df7a6324ace842f52681568f9f2000607b52bb982816132a24c223bb4d5e56e1e2962f68744ff20551f40c5a4039b03f9ae8112c9a70e5",
       "passwordConfigured": true,
-      "permissions": [
-        "*"
-      ]
+      "permissions": []
     },
     {
+      "lastLoginAt": "2026-11-20T11:04:03.763Z",
       "id": "admin-18a88e259ea915f7",
       "email": "allneedsadmin@gmail.com",
       "role": "admin",
@@ -31,13 +38,261 @@
       "permissions": [
         "*"
       ]
+    },
+    {
+      "id": "usr-01191e219ff59af2a052",
+      "email": "test.admin@allneeds.test",
+      "name": "Test Administrateur",
+      "phone": "",
+      "role": "admin",
+      "orgIds": [
+        "*"
+      ],
+      "sectors": [],
+      "active": true,
+      "status": "active",
+      "passwordHash": "scrypt$0789ba4cb2429d83f5872fbc9f9c55a0$ec6d2b5b4a2c2a26315e3acd2ea58655bf2ddbc81a778f332e2c8a09eb86ec6eff8e5c62bdbd106f6a318d6c8cc2ed5b55dfbb6b4861c20c1e65af3b8e316ca1",
+      "passwordConfigured": true,
+      "permissions": [
+        "*"
+      ],
+      "createdAt": "2026-11-20T11:04:03.776Z",
+      "createdBy": "admin-18a88e259ea915f7",
+      "crm": {
+        "databaseIds": [],
+        "campaignIds": [],
+        "zoneIds": [],
+        "permissions": null
+      },
+      "lastLoginAt": "2026-11-20T13:44:01.408Z"
+    },
+    {
+      "id": "usr-97d464013cd0dc6bbfb1",
+      "email": "test.agent@allneeds.test",
+      "name": "Test Agent CRM",
+      "phone": "",
+      "role": "agent",
+      "orgIds": [],
+      "sectors": [],
+      "active": true,
+      "status": "active",
+      "passwordHash": "scrypt$fb566073c4b1e9d5eca41950243187ca$6d05158c390cbc04d40808a05d3e65fbb118b67836c75f1b3d24c2fbb39505a9097c7ab2849f239d170b75b586e7d6697e74401e2982dbbe86e74fd44f470305",
+      "passwordConfigured": true,
+      "permissions": [],
+      "createdAt": "2026-11-20T11:04:03.836Z",
+      "createdBy": "admin-18a88e259ea915f7",
+      "crm": {
+        "databaseIds": [],
+        "campaignIds": [],
+        "zoneIds": [],
+        "permissions": null
+      },
+      "lastLoginAt": "2026-11-20T13:44:01.942Z"
+    },
+    {
+      "id": "usr-d641916f868ef20bc4bf",
+      "email": "test.crm@allneeds.test",
+      "name": "Test CRM (+ Sales Presentation)",
+      "phone": "",
+      "role": "crm",
+      "orgIds": [],
+      "sectors": [],
+      "active": true,
+      "status": "active",
+      "passwordHash": "scrypt$51ab0b99bcc99b3239ccd1c65d15587b$25438dc633dcc288efadb54333d7a8de27221fe8a3db626c66f836654d722e9d273f7303dc9d20267a3bcc7b9362d9e1eeac322ed3102e9fd21bc75dd4e2d812",
+      "passwordConfigured": true,
+      "permissions": [],
+      "createdAt": "2026-11-20T11:04:03.892Z",
+      "createdBy": "admin-18a88e259ea915f7",
+      "crm": {
+        "databaseIds": [],
+        "campaignIds": [],
+        "zoneIds": [],
+        "permissions": null
+      },
+      "lastLoginAt": "2026-11-20T13:44:02.063Z"
+    },
+    {
+      "id": "usr-2ef94b66944bb76e3b76",
+      "email": "test.concierge@allneeds.test",
+      "role": "concierge",
+      "orgIds": [
+        "org-71066c4641370eed"
+      ],
+      "sectors": [
+        "sante"
+      ],
+      "name": "Test Concierge",
+      "active": true,
+      "passwordHash": "scrypt$f13a6f606c9179f3c439422b9a5b700b$81d19078e9ca5401025beb82575817c207635a2314a41747f3c65b410b930c7ca53a6eabdd6e4bbf42c5852337fa2e71e4aa93c9bd9d051403c9030b44817df9",
+      "passwordConfigured": true,
+      "permissions": [],
+      "lastLoginAt": "2026-11-20T13:44:02.608Z"
+    },
+    {
+      "id": "usr-2c5666b577677b423056",
+      "email": "test.sales@allneeds.test",
+      "role": "sales",
+      "orgIds": [],
+      "sectors": [],
+      "name": "Test Commercial",
+      "active": true,
+      "passwordHash": "scrypt$c7cf365c913617ba8c54a17e7103938c$edeae07c2e03ae1d5d23810888f7ea7ebcc498519e9a6f76fd6d6ba4f1957d73d3ab140c76c3b18f8241160ea4076e5bf5ff1c25eda63653eb3e1c8cedab7ecd",
+      "passwordConfigured": true,
+      "permissions": [],
+      "lastLoginAt": "2026-11-20T13:44:02.716Z"
+    },
+    {
+      "id": "usr-b12940dde481d4705ce5",
+      "email": "test.dirigeant@allneeds.test",
+      "role": "dirigeant",
+      "orgIds": [
+        "org-71066c4641370eed"
+      ],
+      "sectors": [],
+      "name": "Test Dirigeant",
+      "active": true,
+      "passwordHash": "scrypt$f104fb70e2ae5b935b053d2bd73cce11$023843ba68183f70acd008e73a72caa090b1244d867d63e4df99345d6aaaf06c98c2ae3dcb42bc483b3d72e359a0e4a716b2541f1e770b2a31051e6750f69a71",
+      "passwordConfigured": true,
+      "permissions": [
+        "actions",
+        "missions",
+        "documents",
+        "messages",
+        "results",
+        "team"
+      ],
+      "lastLoginAt": "2026-11-20T13:46:27.307Z"
+    },
+    {
+      "id": "usr-df2b151f4683b54a95e5",
+      "email": "test.manager@allneeds.test",
+      "role": "manager",
+      "orgIds": [
+        "org-71066c4641370eed"
+      ],
+      "sectors": [],
+      "name": "Test Manager",
+      "active": true,
+      "passwordHash": "scrypt$c60dca314a2dedc2a41c8b6a72884e2d$e581619335aaf96f06b7ff697086654c382a047cdedd66a4d49c1d16ae90e1345c320aba64eac331023ba635702e6db6167c6dab828739816d9a2c4bfbd2688a",
+      "passwordConfigured": true,
+      "permissions": [
+        "actions",
+        "missions",
+        "documents",
+        "messages",
+        "results"
+      ],
+      "lastLoginAt": "2026-11-20T13:44:03.010Z"
+    },
+    {
+      "id": "usr-49a38341367937958ee1",
+      "email": "test.collaborateur@allneeds.test",
+      "role": "collaborateur",
+      "orgIds": [
+        "org-71066c4641370eed"
+      ],
+      "sectors": [],
+      "name": "Test Collaborateur",
+      "active": true,
+      "passwordHash": "scrypt$f980c5d6e8471cdf947b05b73b19975f$fc40aecd22a62bac2de771fea50158ade000295fffdf728fd0a79f574376b0dbc0d852d9aa88d8b5ecce049445104a861637697d0799b58aebab14eee1d75c63",
+      "passwordConfigured": true,
+      "permissions": [
+        "actions",
+        "missions",
+        "documents",
+        "messages",
+        "results"
+      ],
+      "lastLoginAt": "2026-11-20T13:44:03.115Z"
     }
   ],
-  "orgs": [],
+  "orgs": [
+    {
+      "id": "org-71066c4641370eed",
+      "name": "Cabinet Test ALLNEEDS",
+      "sector": "sante",
+      "active": true,
+      "modules": {
+        "diagnostic": true,
+        "besoins": false,
+        "missions": false,
+        "rendezVous": false,
+        "documents": false,
+        "messages": false,
+        "devis": false,
+        "prestataires": false,
+        "abonnement": false,
+        "notifications": false,
+        "equipe": false,
+        "results": false
+      },
+      "saas": {
+        "subscriptionActive": false,
+        "enabled": false,
+        "startDate": null,
+        "endDate": null,
+        "plan": null
+      },
+      "slug": "cabinet-test-allneeds",
+      "city": "Rabat",
+      "contactName": "Test Dirigeant",
+      "contactRole": "Cabinet",
+      "contactEmail": "test.dirigeant@allneeds.test",
+      "contactPhone": ""
+    }
+  ],
   "diagnostics": [],
   "needs": [],
   "consents": [],
-  "registrations": [],
+  "registrations": [
+    {
+      "id": "reg-12f50f695359f7377760",
+      "orgName": "Cabinet Test ALLNEEDS",
+      "name": "Test Dirigeant",
+      "email": "test.dirigeant@allneeds.test",
+      "phone": "",
+      "sector": "sante",
+      "city": "Rabat",
+      "workspaceProfile": "Cabinet",
+      "appointmentDate": "2026-11-21",
+      "appointmentSlot": "10:00",
+      "appointmentStatus": "demande",
+      "status": "actif",
+      "conciergeId": "usr-2ef94b66944bb76e3b76",
+      "events": [
+        {
+          "id": "evt-6dceba24fb17c9b7",
+          "type": "inscription_recue",
+          "at": "2026-11-20T11:04:07.416Z",
+          "byUserId": null,
+          "note": ""
+        },
+        {
+          "id": "evt-66b9b0aa1e77003d",
+          "type": "concierge_affecte",
+          "at": "2026-11-20T11:04:08.693Z",
+          "byUserId": "admin-18a88e259ea915f7",
+          "note": ""
+        },
+        {
+          "id": "evt-d633d8f2b1451024",
+          "type": "compte_active",
+          "at": "2026-11-20T11:04:09.934Z",
+          "byUserId": "usr-b12940dde481d4705ce5",
+          "note": ""
+        }
+      ],
+      "createdAt": "2026-11-20T11:04:07.416Z",
+      "approvedAt": null,
+      "assignedAt": "2026-11-20T11:04:08.693Z",
+      "activatedAt": "2026-11-20T11:04:09.934Z",
+      "orgId": "org-71066c4641370eed",
+      "userId": "usr-b12940dde481d4705ce5",
+      "ackEmailAt": "2026-11-20T11:04:08.686Z",
+      "ackEmailStatus": "sent"
+    }
+  ],
   "invitations": [
     {
       "id": "inv-0893537d5944a0721ef0",
@@ -62,6 +317,120 @@
       "lastEmailAt": "2026-11-19T16:43:19.84+00:00",
       "lastEmailStatus": "sent",
       "lastEmailError": null
+    },
+    {
+      "id": "inv-21286d9831b318c97d3d",
+      "orgId": null,
+      "email": "test.concierge@allneeds.test",
+      "name": "Test Concierge",
+      "role": "concierge",
+      "permissions": [],
+      "kind": "concierge",
+      "metadata": {
+        "sectors": [
+          "sante"
+        ],
+        "assignedOrgIds": []
+      },
+      "tokenHash": "51d00ec4b2456f6d09d38f80c6e662535922e36e9ca857b30cb66d89bdd44d5b",
+      "createdBy": "admin-18a88e259ea915f7",
+      "createdAt": "2026-11-20T11:04:03.946Z",
+      "expiresAt": "2026-11-22T11:04:03.946Z",
+      "usedAt": "2026-11-20T11:04:06.066Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-11-20T11:04:06.017Z",
+      "lastEmailStatus": "sent"
+    },
+    {
+      "id": "inv-d5042364483a919a23be",
+      "orgId": null,
+      "email": "test.sales@allneeds.test",
+      "name": "Test Commercial",
+      "role": "sales",
+      "permissions": [],
+      "kind": "sales",
+      "metadata": {},
+      "tokenHash": "54b14b9c4947722c1a82b23f34afaa2c5e76016c55609931e80cb8a21dfcd39e",
+      "createdBy": "admin-18a88e259ea915f7",
+      "createdAt": "2026-11-20T11:04:06.071Z",
+      "expiresAt": "2026-11-22T11:04:06.071Z",
+      "usedAt": "2026-11-20T11:04:07.410Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-11-20T11:04:07.371Z",
+      "lastEmailStatus": "sent"
+    },
+    {
+      "id": "inv-eea57d36d488fc668c4c",
+      "orgId": "org-71066c4641370eed",
+      "email": "test.dirigeant@allneeds.test",
+      "name": "Test Dirigeant",
+      "role": "dirigeant",
+      "permissions": [
+        "actions",
+        "missions",
+        "documents",
+        "messages",
+        "results",
+        "team"
+      ],
+      "kind": "owner",
+      "metadata": {},
+      "tokenHash": "78dc58116498e25fde1b70fbbc7891d0d8c93056b7b00362ea62f604038d2316",
+      "createdBy": "admin-18a88e259ea915f7",
+      "createdAt": "2026-11-20T11:04:08.693Z",
+      "expiresAt": "2026-11-22T11:04:08.693Z",
+      "usedAt": "2026-11-20T11:04:09.934Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-11-20T11:04:09.895Z",
+      "lastEmailStatus": "sent"
+    },
+    {
+      "id": "inv-640c7c61877e5029f685",
+      "orgId": "org-71066c4641370eed",
+      "email": "test.manager@allneeds.test",
+      "name": "Test Manager",
+      "role": "manager",
+      "permissions": [
+        "actions",
+        "missions",
+        "documents",
+        "messages",
+        "results"
+      ],
+      "kind": "team",
+      "metadata": {},
+      "tokenHash": "41e9137287e854d48d401b2cfb34f9da8a532cdd549f0b61d3b2455dc4bcab67",
+      "createdBy": "usr-b12940dde481d4705ce5",
+      "createdAt": "2026-11-20T11:04:09.987Z",
+      "expiresAt": "2026-11-22T11:04:09.987Z",
+      "usedAt": "2026-11-20T11:04:11.163Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-11-20T11:04:11.112Z",
+      "lastEmailStatus": "sent"
+    },
+    {
+      "id": "inv-c53d55f34c4d5c99efbf",
+      "orgId": "org-71066c4641370eed",
+      "email": "test.collaborateur@allneeds.test",
+      "name": "Test Collaborateur",
+      "role": "collaborateur",
+      "permissions": [
+        "actions",
+        "missions",
+        "documents",
+        "messages",
+        "results"
+      ],
+      "kind": "team",
+      "metadata": {},
+      "tokenHash": "769f99ddc79643474c502684d0021847a36f1ec6d167931deff2bfbe511e1f2d",
+      "createdBy": "usr-b12940dde481d4705ce5",
+      "createdAt": "2026-11-20T11:04:11.168Z",
+      "expiresAt": "2026-11-22T11:04:11.168Z",
+      "usedAt": "2026-11-20T11:04:12.494Z",
+      "revokedAt": null,
+      "lastEmailAt": "2026-11-20T11:04:12.446Z",
+      "lastEmailStatus": "sent"
     }
   ],
   "missions": [],
@@ -73,589 +442,306 @@
   "notifications": [
     {
       "id": "ntf-b6e97ce17612d267f10f",
-      "userId": "admin-95f24f67ce9cd0fd",
-      "orgId": null,
-      "type": "crm.appointment.created",
-      "title": "Nouveau rendez-vous",
-      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "meta": {
         "appointmentId": "rdv-8d17d8fb4cc51d3457"
       },
-      "readAt": null,
+      "type": "crm.appointment.created",
+      "orgId": null,
+      "title": "Nouveau rendez-vous",
+      "readAt": "2026-11-19T20:51:48.020Z",
+      "userId": "admin-95f24f67ce9cd0fd",
+      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "createdAt": "2026-11-19T19:15:00.728Z"
     },
     {
       "id": "ntf-8d795a9808e8e629b42f",
-      "userId": "admin-95f24f67ce9cd0fd",
-      "orgId": null,
-      "type": "crm.callback.reminder",
-      "title": "Rappel à effectuer",
-      "message": "Rappeler aa (+325513151215) à 20:14.",
       "meta": {
         "contactId": "ct-4bd6e3b4cff7c9352d"
       },
-      "readAt": null,
+      "type": "crm.callback.reminder",
+      "orgId": null,
+      "title": "Rappel à effectuer",
+      "readAt": "2026-11-19T20:51:48.020Z",
+      "userId": "admin-95f24f67ce9cd0fd",
+      "message": "Rappeler aa (+325513151215) à 20:14.",
       "createdAt": "2026-11-19T19:16:47.327Z"
     },
     {
       "id": "ntf-b7066642ee2ef2208f3e",
-      "userId": "admin-18a88e259ea915f7",
-      "orgId": null,
-      "type": "crm.callback.reminder",
-      "title": "Rappel à effectuer",
-      "message": "Rappeler aa (+325513151215) à 20:14.",
       "meta": {
         "contactId": "ct-4bd6e3b4cff7c9352d"
       },
+      "type": "crm.callback.reminder",
+      "orgId": null,
+      "title": "Rappel à effectuer",
       "readAt": "2026-11-19T19:21:47.711Z",
+      "userId": "admin-18a88e259ea915f7",
+      "message": "Rappeler aa (+325513151215) à 20:14.",
       "createdAt": "2026-11-19T19:16:47.327Z"
     },
     {
       "id": "ntf-bf07a8c3b4c45aa9ba59",
-      "userId": "admin-95f24f67ce9cd0fd",
-      "orgId": null,
-      "type": "crm.appointment.confirmed",
-      "title": "Rendez-vous confirmé",
-      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "meta": {
         "appointmentId": "rdv-8d17d8fb4cc51d3457"
       },
-      "readAt": null,
+      "type": "crm.appointment.confirmed",
+      "orgId": null,
+      "title": "Rendez-vous confirmé",
+      "readAt": "2026-11-19T20:51:48.020Z",
+      "userId": "admin-95f24f67ce9cd0fd",
+      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "createdAt": "2026-11-19T19:17:32.244Z"
     },
     {
       "id": "ntf-bdaa6d35ae4d3ea79c63",
-      "userId": "admin-95f24f67ce9cd0fd",
-      "orgId": null,
-      "type": "crm.appointment.confirmed",
-      "title": "Rendez-vous confirmé",
-      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "meta": {
         "appointmentId": "rdv-8d17d8fb4cc51d3457"
       },
-      "readAt": null,
+      "type": "crm.appointment.confirmed",
+      "orgId": null,
+      "title": "Rendez-vous confirmé",
+      "readAt": "2026-11-19T20:51:48.020Z",
+      "userId": "admin-95f24f67ce9cd0fd",
+      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "createdAt": "2026-11-19T19:17:38.607Z"
     },
     {
       "id": "ntf-375c54657dfa61130de9",
-      "userId": "admin-95f24f67ce9cd0fd",
-      "orgId": null,
-      "type": "crm.appointment.cancelled",
-      "title": "Rendez-vous annulé",
-      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "meta": {
         "appointmentId": "rdv-8d17d8fb4cc51d3457"
       },
-      "readAt": null,
+      "type": "crm.appointment.cancelled",
+      "orgId": null,
+      "title": "Rendez-vous annulé",
+      "readAt": "2026-11-19T20:51:48.020Z",
+      "userId": "admin-95f24f67ce9cd0fd",
+      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "createdAt": "2026-11-19T19:17:43.308Z"
     },
     {
       "id": "ntf-f914fa99b29aa29c72d7",
-      "userId": "admin-95f24f67ce9cd0fd",
-      "orgId": null,
-      "type": "crm.appointment.confirmed",
-      "title": "Rendez-vous confirmé",
-      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "meta": {
         "appointmentId": "rdv-8d17d8fb4cc51d3457"
       },
-      "readAt": null,
+      "type": "crm.appointment.confirmed",
+      "orgId": null,
+      "title": "Rendez-vous confirmé",
+      "readAt": "2026-11-19T20:51:48.020Z",
+      "userId": "admin-95f24f67ce9cd0fd",
+      "message": "Rendez-vous · aa · 2026-11-20 10:00",
       "createdAt": "2026-11-19T19:21:24.931Z"
+    },
+    {
+      "id": "ntf-7d585b3445c4ef290989",
+      "userId": "usr-01191e219ff59af2a052",
+      "orgId": null,
+      "type": "crm.user.created",
+      "title": "Bienvenue dans le CRM",
+      "message": "Votre compte CRM a été créé.",
+      "meta": {},
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:03.828Z"
+    },
+    {
+      "id": "ntf-5f83f7cf46fc6cc49c11",
+      "userId": "usr-97d464013cd0dc6bbfb1",
+      "orgId": null,
+      "type": "crm.user.created",
+      "title": "Bienvenue dans le CRM",
+      "message": "Votre compte CRM a été créé.",
+      "meta": {},
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:03.887Z"
+    },
+    {
+      "id": "ntf-13ec1301a5259b7a2922",
+      "userId": "usr-d641916f868ef20bc4bf",
+      "orgId": null,
+      "type": "crm.user.created",
+      "title": "Bienvenue dans le CRM",
+      "message": "Votre compte CRM a été créé.",
+      "meta": {},
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:03.941Z"
+    },
+    {
+      "id": "ntf-759ffc9dc9c3524c9c92",
+      "userId": "admin-18a88e259ea915f7",
+      "orgId": null,
+      "type": "inscription_nouvelle",
+      "title": "Nouvelle inscription à traiter",
+      "message": "Cabinet Test ALLNEEDS · Test Dirigeant · sante · créneau 2026-11-21 10:00.",
+      "meta": {
+        "registrationId": "reg-12f50f695359f7377760"
+      },
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:07.416Z"
+    },
+    {
+      "id": "ntf-3a0ca80970f00fcc2901",
+      "userId": "usr-01191e219ff59af2a052",
+      "orgId": null,
+      "type": "inscription_nouvelle",
+      "title": "Nouvelle inscription à traiter",
+      "message": "Cabinet Test ALLNEEDS · Test Dirigeant · sante · créneau 2026-11-21 10:00.",
+      "meta": {
+        "registrationId": "reg-12f50f695359f7377760"
+      },
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:07.416Z"
+    },
+    {
+      "id": "ntf-8d149cdd1120cf532956",
+      "userId": "usr-2ef94b66944bb76e3b76",
+      "orgId": "org-71066c4641370eed",
+      "type": "nouvelle_entreprise",
+      "title": "Nouvelle entreprise attribuée",
+      "message": "Cabinet Test ALLNEEDS — Test Dirigeant (sante). Créneau demandé : 2026-11-21 10:00.",
+      "meta": {},
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:09.896Z"
+    },
+    {
+      "id": "ntf-4cf8e99099282d9248f6",
+      "userId": "usr-b12940dde481d4705ce5",
+      "orgId": "org-71066c4641370eed",
+      "type": "bienvenue",
+      "title": "Bienvenue sur ALLNEEDS",
+      "message": "Votre compte est actif. Vous pouvez désormais démarrer votre diagnostic depuis votre espace.",
+      "meta": {},
+      "readAt": null,
+      "createdAt": "2026-11-20T11:04:09.934Z"
+    },
+    {
+      "id": "ntf-cb47244982b8638a3fb3",
+      "userId": "usr-2ef94b66944bb76e3b76",
+      "orgId": "org-71066c4641370eed",
+      "type": "saas_subscription_requested",
+      "title": "Demande SaaS à valider",
+      "message": "Cabinet Test ALLNEEDS demande l’abonnement SaaS à 445 MAD/mois.",
+      "meta": {
+        "requestType": "saas",
+        "requestId": "ssub-568b266945f2c7409b98f27d",
+        "orgId": "org-71066c4641370eed"
+      },
+      "readAt": null,
+      "createdAt": "2026-11-20T13:40:30.454Z"
     }
   ],
   "needsSubscriptions": [],
-  "saasSubscriptions": [],
+  "saasSubscriptions": [
+    {
+      "id": "ssub-568b266945f2c7409b98f27d",
+      "orgId": "org-71066c4641370eed",
+      "organizationId": "org-71066c4641370eed",
+      "planCode": "SAAS_445",
+      "planName": "SaaS ALLNEEDS",
+      "price": 445,
+      "currency": "MAD",
+      "period": "mois",
+      "status": "pending",
+      "requestedAt": "2026-11-20T13:40:30.451Z",
+      "requestedBy": "usr-df2b151f4683b54a95e5",
+      "requestedByName": "Test Manager",
+      "decidedAt": null,
+      "decidedBy": null,
+      "decisionReason": null,
+      "createdAt": "2026-11-20T13:40:30.451Z",
+      "updatedAt": "2026-11-20T13:40:30.451Z"
+    }
+  ],
   "conversations": [],
-  "crmDatabases": [
-    {
-      "id": "db-4724349a5dd06a7248",
-      "name": "Asae",
-      "description": "",
-      "source": "",
-      "status": "draft",
-      "campaignId": null,
-      "zoneId": null,
-      "createdBy": "admin-18a88e259ea915f7",
-      "createdAt": "2026-11-19T19:14:04.864Z",
-      "updatedAt": "2026-11-19T19:14:04.864Z",
-      "importedAt": null,
-      "history": [
-        {
-          "at": "2026-11-19T19:14:04.864Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Création"
-        }
-      ]
-    }
-  ],
-  "crmContacts": [
-    {
-      "id": "ct-4bd6e3b4cff7c9352d",
-      "databaseId": "db-4724349a5dd06a7248",
-      "campaignId": null,
-      "agentId": null,
-      "callStatus": "completed",
-      "lastContactAt": "2026-11-19T19:25:13.827Z",
-      "archived": false,
-      "createdAt": "2026-11-19T19:14:49.125Z",
-      "updatedAt": "2026-11-19T19:25:13.827Z",
-      "createdBy": "admin-18a88e259ea915f7",
-      "noteLog": [],
-      "firstName": "aa",
-      "lastName": "",
-      "address": "",
-      "city": "",
-      "region": "",
-      "postalCode": "",
-      "country": "",
-      "notes": "",
-      "phone": "+325513151215",
-      "phone2": "",
-      "email": "",
-      "lat": 32.222661,
-      "lng": -8.005518,
-      "tags": [],
-      "status": "completed",
-      "nextCallbackAt": "2026-11-26T19:23:00.000Z",
-      "fullName": "aa",
-      "appointmentStatus": "confirmed",
-      "locationSource": "manual",
-      "callbackNotifiedFor": null
-    }
-  ],
-  "crmCalls": [
-    {
-      "id": "call-e7172dabe56816c6a4",
-      "contactId": "ct-4bd6e3b4cff7c9352d",
-      "agentId": "admin-18a88e259ea915f7",
-      "phone": "+325513151215",
-      "at": "2026-11-19T19:15:29.124Z",
-      "durationSec": null,
-      "status": "no_answer",
-      "result": "",
-      "notes": "",
-      "callbackAt": null,
-      "campaignId": null,
-      "databaseId": "db-4724349a5dd06a7248",
-      "appointmentId": null,
-      "recordingUrl": null,
-      "createdAt": "2026-11-19T19:15:29.124Z",
-      "createdBy": "admin-18a88e259ea915f7"
-    },
-    {
-      "id": "call-af2ee35654a412e4b3",
-      "contactId": "ct-4bd6e3b4cff7c9352d",
-      "agentId": "admin-18a88e259ea915f7",
-      "phone": "+325513151215",
-      "at": "2026-11-19T19:16:55.146Z",
-      "durationSec": null,
-      "status": "answered",
-      "result": "",
-      "notes": "",
-      "callbackAt": null,
-      "campaignId": null,
-      "databaseId": "db-4724349a5dd06a7248",
-      "appointmentId": null,
-      "recordingUrl": null,
-      "createdAt": "2026-11-19T19:16:55.146Z",
-      "createdBy": "admin-18a88e259ea915f7"
-    },
-    {
-      "id": "call-89a57283af7873d22c",
-      "contactId": "ct-4bd6e3b4cff7c9352d",
-      "agentId": "admin-18a88e259ea915f7",
-      "phone": "+325513151215",
-      "at": "2026-11-19T19:25:13.827Z",
-      "durationSec": null,
-      "status": "completed",
-      "result": "",
-      "notes": "",
-      "callbackAt": null,
-      "campaignId": null,
-      "databaseId": "db-4724349a5dd06a7248",
-      "appointmentId": null,
-      "recordingUrl": null,
-      "createdAt": "2026-11-19T19:25:13.827Z",
-      "createdBy": "admin-18a88e259ea915f7"
-    }
-  ],
-  "crmAppointments": [
-    {
-      "id": "rdv-8d17d8fb4cc51d3457",
-      "title": "Rendez-vous · aa",
-      "contactId": "ct-4bd6e3b4cff7c9352d",
-      "phone": "+325513151215",
-      "agentId": null,
-      "date": "2026-11-20",
-      "start": "10:00",
-      "end": "11:00",
-      "address": "",
-      "city": "",
-      "region": "",
-      "lat": null,
-      "lng": null,
-      "type": "Rendez-vous commercial",
-      "status": "confirmed",
-      "notes": "",
-      "campaignId": null,
-      "databaseId": "db-4724349a5dd06a7248",
-      "createdBy": "admin-18a88e259ea915f7",
-      "createdAt": "2026-11-19T19:15:00.727Z",
-      "updatedAt": "2026-11-19T19:21:24.929Z",
-      "history": [
-        {
-          "at": "2026-11-19T19:15:00.727Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Création"
-        },
-        {
-          "at": "2026-11-19T19:17:22.208Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Modification"
-        },
-        {
-          "at": "2026-11-19T19:17:26.940Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : À confirmer → Réalisé"
-        },
-        {
-          "at": "2026-11-19T19:17:29.788Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Réalisé → Absent"
-        },
-        {
-          "at": "2026-11-19T19:17:32.244Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Absent → Confirmé"
-        },
-        {
-          "at": "2026-11-19T19:17:34.828Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Confirmé → Absent"
-        },
-        {
-          "at": "2026-11-19T19:17:38.607Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Absent → Confirmé"
-        },
-        {
-          "at": "2026-11-19T19:17:43.304Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Confirmé → Annulé"
-        },
-        {
-          "at": "2026-11-19T19:17:47.570Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Annulé → Réalisé"
-        },
-        {
-          "at": "2026-11-19T19:21:21.702Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Réalisé → Absent"
-        },
-        {
-          "at": "2026-11-19T19:21:24.929Z",
-          "by": "admin-18a88e259ea915f7",
-          "byName": "Administrateur ALLNEEDS",
-          "action": "Statut : Absent → Confirmé"
-        }
-      ]
-    }
-  ],
+  "crmDatabases": [],
+  "crmContacts": [],
+  "crmCalls": [],
+  "crmAppointments": [],
   "crmCampaigns": [],
   "crmZones": [],
   "crmActivity": [
     {
-      "id": "act-365bc53d2fa4a78123",
-      "at": "2026-11-19T19:14:04.864Z",
+      "at": "2026-11-19T20:49:01.409Z",
+      "id": "act-5f58bbfb4d9939a874",
+      "action": "user.updated",
       "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "database.assigned",
-      "entityType": "database",
-      "entityId": "db-4724349a5dd06a7248",
-      "details": {
-        "agentIds": []
-      }
-    },
-    {
-      "id": "act-0e3f600bbb2f942af4",
-      "at": "2026-11-19T19:14:04.864Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "database.created",
-      "entityType": "database",
-      "entityId": "db-4724349a5dd06a7248",
-      "details": {
-        "name": "Asae"
-      }
-    },
-    {
-      "id": "act-452d425c7bb3d1bb32",
-      "at": "2026-11-19T19:14:49.127Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "contact.created",
-      "entityType": "contact",
-      "entityId": "ct-4bd6e3b4cff7c9352d",
-      "details": {
-        "name": "aa"
-      }
-    },
-    {
-      "id": "act-e924c95ee99b0858ce",
-      "at": "2026-11-19T19:15:00.728Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.created",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "contactId": "ct-4bd6e3b4cff7c9352d",
-        "date": "2026-11-20"
-      }
-    },
-    {
-      "id": "act-184e5cde3382816448",
-      "at": "2026-11-19T19:15:29.124Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "call.recorded",
-      "entityType": "call",
-      "entityId": "call-e7172dabe56816c6a4",
-      "details": {
-        "contactId": "ct-4bd6e3b4cff7c9352d",
-        "status": "no_answer"
-      }
-    },
-    {
-      "id": "act-1a1439565b1147124d",
-      "at": "2026-11-19T19:15:58.036Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "contact.updated",
-      "entityType": "contact",
-      "entityId": "ct-4bd6e3b4cff7c9352d",
       "details": {
         "fields": [
-          "status"
+          "name",
+          "phone",
+          "email",
+          "role",
+          "status",
+          "databaseIds",
+          "campaignIds",
+          "zoneIds",
+          "permissions"
         ]
-      }
+      },
+      "entityId": "admin-95f24f67ce9cd0fd",
+      "userName": "Administrateur ALLNEEDS",
+      "entityType": "user"
     },
     {
-      "id": "act-54204cd959f43f39be",
-      "at": "2026-11-19T19:16:08.046Z",
+      "at": "2026-11-19T20:49:59.301Z",
+      "id": "act-ce83635455e8d5b2bb",
+      "action": "user.updated",
       "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "contact.updated",
-      "entityType": "contact",
-      "entityId": "ct-4bd6e3b4cff7c9352d",
       "details": {
         "fields": [
-          "location"
+          "name",
+          "phone",
+          "email",
+          "role",
+          "status",
+          "databaseIds",
+          "campaignIds",
+          "zoneIds",
+          "permissions"
         ]
+      },
+      "entityId": "admin-95f24f67ce9cd0fd",
+      "userName": "Administrateur ALLNEEDS",
+      "entityType": "user"
+    },
+    {
+      "id": "act-a91fc666ff3939a6f3",
+      "at": "2026-11-20T11:04:03.828Z",
+      "userId": "admin-18a88e259ea915f7",
+      "userName": "Administrateur ALLNEEDS",
+      "action": "user.created",
+      "entityType": "user",
+      "entityId": "usr-01191e219ff59af2a052",
+      "details": {
+        "email": "test.admin@allneeds.test",
+        "role": "admin",
+        "mode": "password"
       }
     },
     {
-      "id": "act-2322acef95e9928e03",
-      "at": "2026-11-19T19:16:23.677Z",
+      "id": "act-ce02063b462698f56a",
+      "at": "2026-11-20T11:04:03.887Z",
       "userId": "admin-18a88e259ea915f7",
       "userName": "Administrateur ALLNEEDS",
-      "action": "contact.updated",
-      "entityType": "contact",
-      "entityId": "ct-4bd6e3b4cff7c9352d",
+      "action": "user.created",
+      "entityType": "user",
+      "entityId": "usr-97d464013cd0dc6bbfb1",
       "details": {
-        "fields": [
-          "nextCallbackAt"
-        ]
+        "email": "test.agent@allneeds.test",
+        "role": "agent",
+        "mode": "password"
       }
     },
     {
-      "id": "act-778ae8228fb6b69292",
-      "at": "2026-11-19T19:16:55.146Z",
+      "id": "act-9899eb229671c17160",
+      "at": "2026-11-20T11:04:03.941Z",
       "userId": "admin-18a88e259ea915f7",
       "userName": "Administrateur ALLNEEDS",
-      "action": "call.recorded",
-      "entityType": "call",
-      "entityId": "call-af2ee35654a412e4b3",
+      "action": "user.created",
+      "entityType": "user",
+      "entityId": "usr-d641916f868ef20bc4bf",
       "details": {
-        "contactId": "ct-4bd6e3b4cff7c9352d",
-        "status": "answered"
-      }
-    },
-    {
-      "id": "act-1e57b89f1a6f35eb62",
-      "at": "2026-11-19T19:17:22.208Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": []
-      }
-    },
-    {
-      "id": "act-6dacbb30bb612fcb34",
-      "at": "2026-11-19T19:17:26.940Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : À confirmer → Réalisé"
-        ]
-      }
-    },
-    {
-      "id": "act-db1baa6eeb19da4a97",
-      "at": "2026-11-19T19:17:29.788Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Réalisé → Absent"
-        ]
-      }
-    },
-    {
-      "id": "act-f726f4d743ca1b3c44",
-      "at": "2026-11-19T19:17:32.244Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Absent → Confirmé"
-        ]
-      }
-    },
-    {
-      "id": "act-9954f2b6adf7fcf3e9",
-      "at": "2026-11-19T19:17:34.828Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Confirmé → Absent"
-        ]
-      }
-    },
-    {
-      "id": "act-0da4a9c438b91a431a",
-      "at": "2026-11-19T19:17:38.607Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Absent → Confirmé"
-        ]
-      }
-    },
-    {
-      "id": "act-01fa23ad37a31b1f4a",
-      "at": "2026-11-19T19:17:43.308Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.cancelled",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Confirmé → Annulé"
-        ]
-      }
-    },
-    {
-      "id": "act-e915cee6434e92898d",
-      "at": "2026-11-19T19:17:47.570Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Annulé → Réalisé"
-        ]
-      }
-    },
-    {
-      "id": "act-2164b8031e9971ab9e",
-      "at": "2026-11-19T19:21:21.710Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Réalisé → Absent"
-        ]
-      }
-    },
-    {
-      "id": "act-01e96671f8e4089f31",
-      "at": "2026-11-19T19:21:24.931Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "appointment.updated",
-      "entityType": "appointment",
-      "entityId": "rdv-8d17d8fb4cc51d3457",
-      "details": {
-        "changes": [
-          "Statut : Absent → Confirmé"
-        ]
-      }
-    },
-    {
-      "id": "act-db7da28e59fcf966bf",
-      "at": "2026-11-19T19:24:00.523Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "contact.updated",
-      "entityType": "contact",
-      "entityId": "ct-4bd6e3b4cff7c9352d",
-      "details": {
-        "fields": [
-          "nextCallbackAt"
-        ]
-      }
-    },
-    {
-      "id": "act-c2233d620b2204c508",
-      "at": "2026-11-19T19:25:13.828Z",
-      "userId": "admin-18a88e259ea915f7",
-      "userName": "Administrateur ALLNEEDS",
-      "action": "call.recorded",
-      "entityType": "call",
-      "entityId": "call-89a57283af7873d22c",
-      "details": {
-        "contactId": "ct-4bd6e3b4cff7c9352d",
-        "status": "completed"
+        "email": "test.crm@allneeds.test",
+        "role": "crm",
+        "mode": "password"
       }
     }
   ],
@@ -663,56 +749,12 @@
   "crmSettings": [
     {
       "id": "settings",
-      "general": {
-        "crmName": "ALLNEEDS CRM",
-        "defaultCountry": "Maroc",
-        "timezone": "Africa/Casablanca",
-        "currency": "MAD"
-      },
-      "appointments": {
-        "defaultDurationMin": 60,
-        "types": [
-          "Diagnostic",
-          "Rendez-vous commercial",
-          "Visite sur site",
-          "Visio",
-          "Suivi"
-        ],
-        "agentsCanCreate": true,
-        "workdayStart": "08:00",
-        "workdayEnd": "19:00"
-      },
       "calls": {
-        "callbackReminderMinutes": 15,
+        "inactivityAlertDays": 3,
         "requireNotesOnFailure": false,
-        "inactivityAlertDays": 3
-      },
-      "campaigns": {
-        "types": [
-          "Prospection",
-          "Relance",
-          "Fidélisation",
-          "Événement"
-        ],
-        "defaultGoalAppointments": 20
-      },
-      "imports": {
-        "duplicateKey": "phone_or_email",
-        "defaultStrategy": "skip",
-        "maxRows": 20000
+        "callbackReminderMinutes": 15
       },
       "labels": {
-        "contact": {
-          "new": "Nouveau",
-          "not_contacted": "Non contacté",
-          "contacted": "Contacté",
-          "interested": "Intéressé",
-          "not_interested": "Pas intéressé",
-          "callback_requested": "Rappel demandé",
-          "appointment_booked": "RDV pris",
-          "invalid_number": "Numéro invalide",
-          "completed": "Terminé"
-        },
         "call": {
           "new": "Nouveau",
           "called": "Appelé",
@@ -726,6 +768,17 @@
           "appointment_booked": "RDV pris",
           "completed": "Terminé"
         },
+        "contact": {
+          "new": "Nouveau",
+          "not_contacted": "Non contacté",
+          "contacted": "Contacté",
+          "interested": "Intéressé",
+          "not_interested": "Pas intéressé",
+          "callback_requested": "Rappel demandé",
+          "appointment_booked": "RDV pris",
+          "invalid_number": "Numéro invalide",
+          "completed": "Terminé"
+        },
         "appointment": {
           "pending": "À confirmer",
           "confirmed": "Confirmé",
@@ -735,7 +788,78 @@
           "no_show": "Absent"
         }
       },
+      "general": {
+        "crmName": "ALLNEEDS CRM",
+        "currency": "MAD",
+        "timezone": "Africa/Casablanca",
+        "defaultCountry": "Maroc"
+      },
+      "imports": {
+        "maxRows": 20000,
+        "duplicateKey": "phone_or_email",
+        "defaultStrategy": "skip"
+      },
+      "campaigns": {
+        "types": [
+          "Prospection",
+          "Relance",
+          "Fidélisation",
+          "Événement"
+        ],
+        "defaultGoalAppointments": 20
+      },
+      "updatedAt": null,
+      "updatedBy": null,
+      "appointments": {
+        "types": [
+          "Diagnostic",
+          "Rendez-vous commercial",
+          "Visite sur site",
+          "Visio",
+          "Suivi"
+        ],
+        "workdayEnd": "19:00",
+        "workdayStart": "08:00",
+        "agentsCanCreate": true,
+        "defaultDurationMin": 60
+      },
+      "integrations": {
+        "geocoding": "disabled",
+        "telephony": "none"
+      },
+      "notifications": {
+        "agent.alert": true,
+        "user.created": true,
+        "import.failed": true,
+        "campaign.started": true,
+        "import.completed": true,
+        "callback.reminder": true,
+        "campaign.assigned": true,
+        "contacts.assigned": true,
+        "database.assigned": true,
+        "campaign.completed": true,
+        "appointment.created": true,
+        "appointment.cancelled": true,
+        "appointment.confirmed": true,
+        "appointment.rescheduled": true
+      },
       "rolePermissions": {
+        "crm": [
+          "dashboard.view",
+          "contacts.view",
+          "contacts.create",
+          "contacts.edit",
+          "contacts.export",
+          "calls.create",
+          "calls.edit",
+          "appointments.view",
+          "appointments.create",
+          "appointments.edit",
+          "map.view",
+          "campaigns.view",
+          "reports.view",
+          "notifications.view"
+        ],
         "agent": [
           "dashboard.view",
           "contacts.view",
@@ -752,29 +876,7 @@
           "reports.view",
           "notifications.view"
         ]
-      },
-      "notifications": {
-        "appointment.created": true,
-        "appointment.confirmed": true,
-        "appointment.cancelled": true,
-        "appointment.rescheduled": true,
-        "callback.reminder": true,
-        "database.assigned": true,
-        "contacts.assigned": true,
-        "campaign.assigned": true,
-        "campaign.started": true,
-        "campaign.completed": true,
-        "user.created": true,
-        "agent.alert": true,
-        "import.completed": true,
-        "import.failed": true
-      },
-      "integrations": {
-        "geocoding": "disabled",
-        "telephony": "none"
-      },
-      "updatedAt": null,
-      "updatedBy": null
+      }
     }
   ]
 }

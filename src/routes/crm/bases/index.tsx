@@ -93,7 +93,7 @@ export function DatabaseModal({ database, onClose, onSaved }: { database: Databa
       setBusy(false)
     }
   }
-  const agents = (lookups?.agents || []).filter((a) => a.role === 'agent')
+  const agents = (lookups?.agents || []).filter((a) => a.role !== 'admin')
   return (
     <Modal open onClose={onClose} title={database ? `Modifier · ${database.name}` : 'Nouvelle base de contacts'} size="lg">
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void save(false) }}>

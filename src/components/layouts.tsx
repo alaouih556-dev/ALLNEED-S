@@ -187,7 +187,7 @@ function buildAdminNav(): NavItem[] {
 }
 
 /** Navigation CRM : chaque entrée n'apparaît que si le serveur accorde la permission correspondante. */
-function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string): NavItem[] {
+function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string, salesAccess = false): NavItem[] {
   const has = (p: string) => perms.includes(p)
   const items: Array<NavItem & { perm?: string }> = [
     { group: 'Pilotage', label: 'Tableau de bord', to: '/crm' as any, icon: <LayoutDashboard className="h-4 w-4" />, perm: 'dashboard.view' },
@@ -201,6 +201,7 @@ function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string): NavIte
     { group: 'Activité', label: 'Carte géographique', to: '/crm/carte' as any, icon: <MapPinned className="h-4 w-4" />, perm: 'map.view' },
     { group: 'Développement', label: 'Campagnes', to: '/crm/campagnes' as any, icon: <Megaphone className="h-4 w-4" />, perm: 'campaigns.view' },
     { group: 'Développement', label: 'Rapports', to: '/crm/rapports' as any, icon: <LineChart className="h-4 w-4" />, perm: 'reports.view' },
+    ...(salesAccess ? [{ group: 'Développement', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> }] : []),
     { group: 'Compte', label: 'Notifications', to: '/crm/notifications' as any, icon: <Bell className="h-4 w-4" /> },
     { group: 'Compte', label: 'Réglages', to: '/crm/reglages' as any, icon: <Settings className="h-4 w-4" />, perm: 'settings.manage' },
     ...(isAdmin ? [{ group: 'Compte', label: 'Administration ALLNEEDS', to: '/admin' as any, icon: <Home className="h-4 w-4" /> }] : []),
@@ -252,7 +253,7 @@ export function AppShell({
     id: auth.user.id,
     name: auth.user.name,
     email: auth.user.email,
-    roleLabel: auth.user.role === 'admin' ? 'Administrateur' : auth.user.role === 'concierge' ? 'Concierge' : auth.user.role === 'agent' ? 'Agent CRM' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
+    roleLabel: auth.user.role === 'admin' ? 'Administrateur' : auth.user.role === 'concierge' ? 'Concierge' : auth.user.role === 'agent' ? 'Agent CRM' : auth.user.role === 'crm' ? 'CRM' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
   } : user
 
   const unread = auth.status === 'authenticated' ? 0 : state.threads.reduce((acc, t) => acc + t.unread, 0)
@@ -260,7 +261,7 @@ export function AppShell({
   const clientOrg = auth.status === 'authenticated' ? auth.user?.organization : state.orgs.find((org) => org.id === user.orgId)
   const modules = clientModules(auth.user?.organization ?? null)
   const saasAccess = orgSaasActive(auth.user?.organization ?? null)
-  const nav = variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
+  const nav = variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id, canAccessSalesPresentation(auth.user)) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
   const current = [...nav].sort((a, b) => String(b.to).length - String(a.to).length).find((item) => {
     const to = String(item.to).replace(/\/$/, '')
     return pathname === to || pathname === `${to}/` || (to.split('/').length > 2 && pathname.startsWith(`${to}/`))

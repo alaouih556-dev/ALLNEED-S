@@ -39,7 +39,7 @@ create table if not exists public.v46_users (
   organization_id text references public.v46_organizations(id) on delete cascade,
   email text not null,
   name text not null default '',
-  role text not null check (role in ('admin','concierge','dirigeant','manager','collaborateur','prestataire','commercial','sales','agent')),
+  role text not null check (role in ('admin','concierge','dirigeant','manager','collaborateur','prestataire','commercial','sales','agent','crm')),
   active boolean not null default true,
   password_hash text,
   password_configured boolean not null default false,

@@ -30,7 +30,7 @@ const AuthContext = createContext<AuthState | null>(null)
 /** Espace de travail ouvert par défaut pour un rôle (null si aucun espace n’existe). */
 export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | '/sales-presentation' | '/crm' | null {
   if (role === 'admin') return '/admin'
-  if (role === 'agent') return '/crm'
+  if (role === 'agent' || role === 'crm') return '/crm'
   if (role === 'sales') return '/sales-presentation'
   if (role === 'concierge') return '/concierge'
   if (role === 'prestataire') return '/expert'
@@ -47,7 +47,7 @@ export const SALES_PERMISSION = 'sales_presentation'
  */
 export function canAccessSalesPresentation(user?: Pick<AuthUser, 'role' | 'permissions' | 'active'> | null) {
   if (!user || user.active === false) return false
-  if (user.role === 'admin' || user.role === 'sales') return true
+  if (user.role === 'admin' || user.role === 'sales' || user.role === 'crm') return true
   return user.role === 'concierge' && (user.permissions ?? []).includes(SALES_PERMISSION)
 }
 
@@ -75,6 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  // Garde la session active : rafraîchissement discret toutes les 15 minutes et au retour sur l'onglet.
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    const keepAlive = () => { if (document.visibilityState === 'visible') void fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then((r) => { if (r.status === 401) void refresh() }).catch(() => undefined) }
+    const timer = window.setInterval(keepAlive, 15 * 60 * 1000)
+    document.addEventListener('visibilitychange', keepAlive)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', keepAlive) }
+  }, [status, refresh])
 
   const login = useCallback(async (email: string, password: string) => {
     let response: Response

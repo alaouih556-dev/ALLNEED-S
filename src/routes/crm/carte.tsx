@@ -202,7 +202,7 @@ function ZoneEditor({ zone, draft, setDraft, onCancel, onSaved }: { zone: Zone |
         <Field label="Villes" hint="Séparées par des virgules : les contacts de ces villes font partie de la zone."><Input value={form.cities} onChange={(e) => set('cities', e.target.value)} list="crm-zone-cities" /></Field>
         <datalist id="crm-zone-cities">{(lookups?.cities || []).map((c) => <option key={c} value={c} />)}</datalist>
         <Field label="Régions"><Input value={form.regions} onChange={(e) => set('regions', e.target.value)} /></Field>
-        <Field label="Agents"><MultiPick options={(lookups?.agents || []).filter((a) => a.role === 'agent')} value={form.agentIds} onChange={(v) => set('agentIds', v)} empty="Aucun agent." /></Field>
+        <Field label="Agents"><MultiPick options={(lookups?.agents || []).filter((a) => a.role !== 'admin')} value={form.agentIds} onChange={(v) => set('agentIds', v)} empty="Aucun agent." /></Field>
         <Field label="Bases"><MultiPick options={lookups?.databases || []} value={form.databaseIds} onChange={(v) => set('databaseIds', v)} empty="Aucune base." /></Field>
         <Field label="Campagnes"><MultiPick options={lookups?.campaigns || []} value={form.campaignIds} onChange={(v) => set('campaignIds', v)} empty="Aucune campagne." /></Field>
         <Field label="Description"><Textarea rows={2} value={form.description} onChange={(e) => set('description', e.target.value)} maxLength={500} /></Field>

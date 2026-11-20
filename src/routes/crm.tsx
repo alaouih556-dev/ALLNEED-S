@@ -17,7 +17,7 @@ function CrmLayout() {
   const auth = useAuth()
   if (auth.status === 'loading') return <GateMessage title="Vérification de votre session" detail="Nous vérifions votre accès avant d’ouvrir le CRM." />
   if (auth.status !== 'authenticated') return <GateMessage title="Connexion requise" detail="Le CRM est réservé à l’équipe ALLNEEDS."><Link to="/connexion"><Button>Se connecter</Button></Link></GateMessage>
-  if (!['admin', 'agent'].includes(auth.user?.role || '')) return <GateMessage title="Accès non autorisé" detail="Le CRM est réservé aux administrateurs et aux agents." />
+  if (!['admin', 'agent', 'crm'].includes(auth.user?.role || '')) return <GateMessage title="Accès non autorisé" detail="Le CRM est réservé aux administrateurs, aux agents et aux comptes CRM." />
   return (
     <CrmProvider>
       <AppShell variant="crm">

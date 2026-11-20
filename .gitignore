@@ -8,3 +8,6 @@ backup*/
 
 # Seeds locaux contenant des empreintes de mot de passe
 database/*.local.sql
+
+# Identifiants des comptes de test (générés localement)
+test-accounts.local.md

@@ -102,7 +102,7 @@ export function CampaignModal({ campaign, onClose, onSaved }: { campaign: Campai
         <Field label="Description"><Textarea rows={2} value={form.description} onChange={(e) => set('description', e.target.value)} maxLength={2000} /></Field>
         <div className="grid gap-4 lg:grid-cols-3">
           <Field label="Bases"><MultiPick options={lookups?.databases || []} value={form.databaseIds} onChange={(v) => set('databaseIds', v)} empty="Aucune base." /></Field>
-          <Field label="Agents"><MultiPick options={(lookups?.agents || []).filter((a) => a.role === 'agent')} value={form.agentIds} onChange={(v) => set('agentIds', v)} empty="Aucun agent." /></Field>
+          <Field label="Agents"><MultiPick options={(lookups?.agents || []).filter((a) => a.role !== 'admin')} value={form.agentIds} onChange={(v) => set('agentIds', v)} empty="Aucun agent." /></Field>
           <Field label="Zones"><MultiPick options={lookups?.zones || []} value={form.zoneIds} onChange={(v) => set('zoneIds', v)} empty="Aucune zone." /></Field>
         </div>
         <div className="flex justify-end gap-2 border-t border-ink-100 pt-4"><Button type="button" variant="ghost" onClick={onClose}>Annuler</Button><Button type="submit" disabled={busy}>{busy ? 'Enregistrement…' : campaign ? 'Enregistrer' : 'Créer la campagne'}</Button></div>
