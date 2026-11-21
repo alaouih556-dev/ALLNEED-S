@@ -18,7 +18,7 @@ import { LAUNCH_OFFER, SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalo
 import { cn } from '@/lib/utils'
 import { clearSelectedSector, useSelectedSector } from '@/lib/sector-filter'
 import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
-import { Badge, Button, Card } from '@/components/ui'
+import { Badge, Card } from '@/components/ui'
 import type { FeatureRow, MissionCode, Sector } from '@/types'
 import { LanguageSwitch } from '@/i18n/LanguageSwitch'
 

@@ -1,6 +1,6 @@
-import React,{useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {ArrowRight,Building2,CheckCircle2,ClipboardCheck,FileText,Send,ShieldAlert,Stethoscope,Target,TrendingUp,UsersRound} from 'lucide-react';
-import {computeDiagnostic,isVisible} from '@/lib/diagnostic360';
+import {computeDiagnostic} from '@/lib/diagnostic360';
 import type { DiagnosticQuestion } from './diagnosticData';
 import { PACKS, type SectorKey, type SectorPack } from './packs';
 
@@ -174,5 +174,4 @@ function QuestionCard({q,a,onChange,readOnly=false,staff=false}:{q:DiagnosticQue
   </details>
  </article>
 }
-function VoletSummary({v,stat,answers,format,questions}:{v:number;stat:any;answers:any;format:string;questions:DiagnosticQuestion[]}){const fmt2=format.startsWith('Express')?'Express':'Complet';const qs=questions.filter(function(q){return Number(q.id[0])===v&&isVisible(q,fmt2)});const forces=qs.filter(function(q){return q.internal&&(answers[q.id]?.score||0)>=4}).map(function(q){return q.id});const weak=qs.filter(function(q){return q.internal&&(answers[q.id]?.score||0)>0&&(answers[q.id]?.score||0)<=2}).map(function(q){return q.id});const zeros=qs.filter(function(q){return (answers[q.id]?.score||0)===0}).map(function(q){return q.id});return <><div className="volet-summary"><strong>Volet {v}</strong><span>Interne : {stat.internal.total} / {stat.internal.max}</span><span>Moyenne (hors 0) : {fmt(stat.internal.avg)} / 5</span><span>Indice : {fmt(stat.internal.index)} %</span><span>Couverture : {stat.internal.coverage} / {stat.internal.pool}</span><span>Externe : {stat.external.total} / {stat.external.max}</span><span>Couverture : {stat.external.coverage} / {stat.external.pool}</span><span>Conclusif : {stat.conclusive?'oui':'non'}</span></div><div className="volet-detail"><span><b>Type haute interne :</b> N�� notǸs 4–5 → Forces {forces.length?`(${forces.join(', ')})`:''}</span><span><b>Type basse interne :</b> N�� notǸs 1–2 → Faiblesses {weak.length?`(${weak.join(', ')})`:''}</span><span><b>N�� à 0 :</b> {zeros.join(', ')||'aucun'}</span><small>Indice (%) = somme des notes ÷ (5 × nombre notǸes) × 100. {fmt2==='Express'?'Format Express : indice indicatif, volets non classǸs entre eux.':''}</small></div></>}
 function SynthesisBlock({title,help,items}:{title:string;help:string;items:string[]}){return <div className="synthesis-block"><div><h4>{title}</h4><p>{help}</p></div><ol>{[0,1,2].map(i=><li key={i}>{items[i]||'—'}</li>)}</ol></div>}

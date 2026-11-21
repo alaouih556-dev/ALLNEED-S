@@ -31,7 +31,6 @@ import {
   Network,
   Receipt,
   RefreshCcw,
-  Settings2,
   FileSearch,
   UserRound,
   UserRoundCog,

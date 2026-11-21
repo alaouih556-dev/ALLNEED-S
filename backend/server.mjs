@@ -39,6 +39,8 @@ const emptyDb = () => ({
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const remoteStoreEnabled = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)
+// En production le disque de l'hébergeur est temporaire : sans Supabase, toutes les données seraient perdues au redémarrage.
+if (isProduction && !remoteStoreEnabled) throw new Error('SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont obligatoires en production.')
 let remoteSaveQueue = Promise.resolve()
 
 function normalizeDb(input) {
@@ -67,8 +69,14 @@ async function remoteRequest(path, init = {}) {
 }
 
 async function remoteRows(table) {
-  const response = await remoteRequest(`${table}?select=*`)
-  return response.json()
+  // Supabase plafonne chaque réponse (1000 lignes par défaut) : on lit page par page jusqu'à une page vide.
+  const rows = []
+  for (;;) {
+    const response = await remoteRequest(`${table}?select=*&order=id.asc&limit=1000&offset=${rows.length}`)
+    const page = await response.json()
+    if (!page.length) return rows
+    rows.push(...page)
+  }
 }
 
 /*

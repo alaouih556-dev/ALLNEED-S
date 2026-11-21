@@ -1,0 +1,27 @@
+# Backend ALLNEEDS sur Render. Une seule instance : les données sont gardées en mémoire puis synchronisées vers Supabase.
+services:
+  - type: web
+    name: allneeds-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    numInstances: 1
+    buildCommand: node --version
+    startCommand: npm run backend:start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: ALLNEEDS_FRONTEND_ORIGIN
+        value: https://allneed-s.vercel.app
+      - key: ALLNEEDS_PUBLIC_URL
+        value: https://allneed-s.vercel.app
+      - key: ALLNEEDS_SESSION_SECRET
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
