@@ -9,7 +9,9 @@ import { SALES_PRESENTATION } from './sales-presentation.mjs'
 import { createCrm, CRM_COLLECTIONS } from './crm.mjs'
 
 const scrypt = promisify(scryptCallback)
-const ROOT = process.env.ALLNEEDS_DATA_DIR || join(process.cwd(), 'backend', 'data')
+// Vercel : pas de disque durable, chaque requête relit et écrit directement Supabase.
+const serverless = Boolean(process.env.VERCEL)
+const ROOT = process.env.ALLNEEDS_DATA_DIR || (serverless ? '/tmp/allneeds' : join(process.cwd(), 'backend', 'data'))
 const DB_PATH = join(ROOT, 'db.json')
 const AUDIT_PATH = join(ROOT, 'audit.jsonl')
 const COOKIE_NAME = 'allneeds_session'
@@ -22,7 +24,7 @@ const FRONTEND_ORIGIN = (process.env.ALLNEEDS_FRONTEND_ORIGIN || 'http://127.0.0
 // Origines autorisées : ALLNEEDS_FRONTEND_ORIGIN + liste CORS_ORIGINS (séparées par des virgules)
 const ALLOWED_ORIGINS = new Set([FRONTEND_ORIGIN, ...(process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean)])
 const isAllowedOrigin = (origin) => ALLOWED_ORIGINS.has(origin)
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = serverless || process.env.NODE_ENV === 'production'
 const sessionSecret = process.env.ALLNEEDS_SESSION_SECRET || (!isProduction ? randomBytes(32).toString('base64url') : '')
 
 if (sessionSecret.length < 32) throw new Error('ALLNEEDS_SESSION_SECRET doit contenir au moins 32 caractères en production.')
@@ -69,13 +71,14 @@ async function remoteRequest(path, init = {}) {
 }
 
 async function remoteRows(table) {
-  // Supabase plafonne chaque réponse (1000 lignes par défaut) : on lit page par page jusqu'à une page vide.
+  // Supabase plafonne chaque réponse : on lit page par page jusqu'au total annoncé.
   const rows = []
   for (;;) {
-    const response = await remoteRequest(`${table}?select=*&order=id.asc&limit=1000&offset=${rows.length}`)
+    const response = await remoteRequest(`${table}?select=*&order=id.asc&limit=1000&offset=${rows.length}`, { headers: { prefer: 'count=exact' } })
     const page = await response.json()
-    if (!page.length) return rows
     rows.push(...page)
+    const total = Number(response.headers.get('content-range')?.split('/')[1])
+    if (!page.length || (Number.isFinite(total) && rows.length >= total)) return rows
   }
 }
 
@@ -102,7 +105,7 @@ const COLLECTION_TABLES = {
   needsSubscriptions: 'v46_needs_subscriptions', saasSubscriptions: 'v46_saas_subscriptions', conversations: 'v46_conversations',
 }
 
-async function loadDb() {
+async function loadDb(includeCrm = true) {
   if (!remoteStoreEnabled) return localLoadDb()
   try {
     const [orgRows,userRows,assignmentRows,inviteRows,...collectionRows] = await Promise.all([
@@ -115,12 +118,10 @@ async function loadDb() {
     data.users = userRows.map((row) => ({ ...(row.metadata || {}), id: row.id, email: row.email, role: row.role, orgIds: row.role === 'admin' ? ['*'] : row.role === 'concierge' ? (assignments.get(row.id) || []) : row.organization_id ? [row.organization_id] : [], sectors: row.sectors || [], name: row.name, active: row.active !== false, passwordHash: row.password_hash, passwordConfigured: row.password_configured === true, permissions: row.permissions || [] }))
     data.invitations = inviteRows.map((row) => ({ ...(row.metadata || {}), id: row.id, orgId: row.organization_id, email: row.email, name: row.name, role: row.role, permissions: row.permissions || [], kind: row.kind, metadata: row.invitation_metadata || {}, tokenHash: row.token_hash, createdBy: row.created_by, createdAt: row.created_at, expiresAt: row.expires_at, usedAt: row.used_at, revokedAt: row.revoked_at, lastEmailAt: row.last_email_at, lastEmailStatus: row.last_email_status, lastEmailError: row.last_email_error }))
     Object.keys(COLLECTION_TABLES).forEach((key,index) => { data[key] = collectionRows[index].map((row) => row.payload || { id: row.id, orgId: row.organization_id }) })
-    // CRM : tables chargées une fois, puis synchronisées de façon incrémentale (seules les lignes modifiées partent).
-    const crmRows = await Promise.all(Object.values(CRM_COLLECTIONS).map(remoteRowsOptional))
-    Object.entries(CRM_COLLECTIONS).forEach(([key, table], index) => {
-      data[key] = crmRows[index].map((row) => row.payload || { id: row.id })
-      crmSynced.set(table, new Map(data[key].map((item) => [item.id, JSON.stringify(item)])))
-    })
+    if (includeCrm) {
+      const crmRows = await Promise.all(Object.values(CRM_COLLECTIONS).map(remoteRowsOptional))
+      Object.keys(CRM_COLLECTIONS).forEach((key, index) => { data[key] = crmRows[index].map((row) => row.payload || { id: row.id }) })
+    }
     return normalizeDb(data)
   } catch (error) {
     if (isProduction) throw error
@@ -129,58 +130,76 @@ async function loadDb() {
   }
 }
 
-/** Dernier état envoyé à Supabase pour chaque ligne CRM (id → JSON), pour n'envoyer que les différences. */
-const crmSynced = new Map()
-async function syncCrmTable(table, items) {
-  const previous = crmSynced.get(table) || new Map()
-  const current = new Map(items.filter((item) => item?.id).map((item) => [item.id, JSON.stringify(item)]))
+/** Lignes attendues dans Supabase, table par table, parents avant enfants. */
+function buildRemoteRows(data, includeCrm) {
+  const tables = new Map()
+  tables.set('v46_organizations', data.orgs.map((org) => ({ id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active !== false, modules: org.modules || {}, metadata: Object.fromEntries(Object.entries(org).filter(([key]) => !['id','name','slug','sector','active','modules'].includes(key))) })))
+  tables.set('v46_users', data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent','crm'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) })))
+  tables.set('v46_concierge_organizations', data.users.filter((user) => user.role === 'concierge').flatMap((user) => (user.orgIds || []).filter((id) => id !== '*').map((orgId) => ({ id: `${user.id}:${orgId}`, concierge_user_id: user.id, organization_id: orgId }))))
+  tables.set('v46_invitations', data.invitations.map((inv) => ({ id: inv.id, organization_id: inv.orgId || null, email: inv.email, name: inv.name || '', role: inv.role, permissions: inv.permissions || [], kind: inv.kind, invitation_metadata: inv.metadata || {}, token_hash: inv.tokenHash, created_by: inv.createdBy || null, created_at: inv.createdAt, expires_at: inv.expiresAt, used_at: inv.usedAt || null, revoked_at: inv.revokedAt || null, last_email_at: inv.lastEmailAt || null, last_email_status: inv.lastEmailStatus || null, last_email_error: inv.lastEmailError || null, metadata: {} })))
+  for (const [key, table] of Object.entries(COLLECTION_TABLES)) {
+    tables.set(table, (data[key] || []).filter((item) => item?.id).map((item) => ({ id: item.id, organization_id: item.orgId || null, payload: item })))
+  }
+  if (includeCrm) {
+    for (const [key, table] of Object.entries(CRM_COLLECTIONS)) {
+      tables.set(table, (data[key] || []).filter((item) => item?.id).map((item) => ({ id: item.id, organization_id: null, payload: item })))
+    }
+  }
+  return tables
+}
+
+const rowsById = (rows) => new Map(rows.map((row) => [row.id, JSON.stringify(row)]))
+const baselineFrom = (tables) => new Map([...tables].map(([table, rows]) => [table, rowsById(rows)]))
+
+async function upsertRows(table, current, previous) {
   const changed = []
-  for (const [id, value] of current) if (previous.get(id) !== value) changed.push({ id, organization_id: null, payload: JSON.parse(value) })
+  for (const [id, value] of current) if (previous.get(id) !== value) changed.push(JSON.parse(value))
+  for (let i = 0; i < changed.length; i += 500) {
+    await remoteRequest(`${table}?on_conflict=id`, { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(changed.slice(i, i + 500)) })
+  }
+}
+
+async function deleteRows(table, current, previous) {
   const gone = [...previous.keys()].filter((id) => !current.has(id))
-  for (let i = 0; i < changed.length; i += 500) await upsertTable(table, changed.slice(i, i + 500))
-  for (let i = 0; i < gone.length; i += 100) await remoteRequest(`${table}?id=in.(${gone.slice(i, i + 100).map((id) => `"${encodeURIComponent(id)}"`).join(',')})`, { method: 'DELETE' })
-  crmSynced.set(table, current)
-}
-
-async function upsertTable(table, rows) {
-  if (rows.length) await remoteRequest(`${table}?on_conflict=id`, { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(rows) })
-}
-async function pruneTable(table, rows) {
-  const remote = await remoteRows(table)
-  const wanted = new Set(rows.map((row) => row.id))
-  for (const row of remote) if (row.id && !wanted.has(row.id)) await remoteRequest(`${table}?id=eq.${encodeURIComponent(row.id)}`, { method: 'DELETE' })
-}
-async function syncTable(table, rows) { await upsertTable(table, rows); await pruneTable(table, rows) }
-
-async function syncRemote(data) {
-  const orgRows = data.orgs.map((org) => ({ id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active !== false, modules: org.modules || {}, metadata: Object.fromEntries(Object.entries(org).filter(([key]) => !['id','name','slug','sector','active','modules'].includes(key))) }))
-  const userRows = data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent','crm'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) }))
-  const assignmentRows = data.users.filter((user) => user.role === 'concierge').flatMap((user) => (user.orgIds || []).filter((id) => id !== '*').map((orgId) => ({ id: `${user.id}:${orgId}`, concierge_user_id: user.id, organization_id: orgId })))
-  const inviteRows = data.invitations.map((inv) => ({ id: inv.id, organization_id: inv.orgId || null, email: inv.email, name: inv.name || '', role: inv.role, permissions: inv.permissions || [], kind: inv.kind, invitation_metadata: inv.metadata || {}, token_hash: inv.tokenHash, created_by: inv.createdBy || null, created_at: inv.createdAt, expires_at: inv.expiresAt, used_at: inv.usedAt || null, revoked_at: inv.revokedAt || null, last_email_at: inv.lastEmailAt || null, last_email_status: inv.lastEmailStatus || null, last_email_error: inv.lastEmailError || null, metadata: {} }))
-  // Insert/update parents first, then children. Deletions are pruned in reverse dependency order.
-  await upsertTable('v46_organizations', orgRows)
-  await upsertTable('v46_users', userRows)
-  await syncTable('v46_concierge_organizations', assignmentRows)
-  await syncTable('v46_invitations', inviteRows)
-  for (const [key,table] of Object.entries(COLLECTION_TABLES)) {
-    const rows = (data[key] || []).filter((item) => item?.id).map((item) => ({ id: item.id, organization_id: item.orgId || null, payload: item }))
-    await syncTable(table, rows)
+  for (let i = 0; i < gone.length; i += 100) {
+    const ids = gone.slice(i, i + 100).map((id) => `"${encodeURIComponent(id)}"`).join(',')
+    await remoteRequest(`${table}?id=in.(${ids})`, { method: 'DELETE' })
   }
-  await pruneTable('v46_users', userRows)
-  await pruneTable('v46_organizations', orgRows)
+}
+
+/**
+ * Applique seulement la différence avec le dernier état lu : une ligne créée ailleurs
+ * (autre instance, autre poste) n'est jamais supprimée parce qu'elle manque en mémoire.
+ */
+async function applyRemoteRows(tables) {
+  const crmTables = new Set(Object.values(CRM_COLLECTIONS))
+  const entries = [...tables].map(([table, rows]) => ({ table, current: rowsById(rows), previous: remoteBaseline.get(table) || new Map() }))
+  const core = entries.filter((entry) => !crmTables.has(entry.table))
+  for (const { table, current, previous } of core) await upsertRows(table, current, previous)
+  for (const { table, current, previous } of [...core].reverse()) await deleteRows(table, current, previous)
+  for (const { table, current } of core) remoteBaseline.set(table, current)
   // CRM en dernier : une table CRM absente (migration non appliquée) ne bloque pas le reste de la synchronisation.
-  for (const [key, table] of Object.entries(CRM_COLLECTIONS)) await syncCrmTable(table, data[key] || [])
-}
-
-function saveDb(data) {
-  const snapshot = normalizeDb(data)
-  writeFileSync(DB_PATH, JSON.stringify(snapshot, null, 2), { mode: 0o600 })
-  if (remoteStoreEnabled) {
-    remoteSaveQueue = remoteSaveQueue.then(() => syncRemote(snapshot)).catch((error) => console.error('ERREUR PERSISTANCE SUPABASE:', error.message))
+  for (const { table, current, previous } of entries.filter((entry) => crmTables.has(entry.table))) {
+    await upsertRows(table, current, previous)
+    await deleteRows(table, current, previous)
+    remoteBaseline.set(table, current)
   }
 }
 
-let db = await loadDb()
+let pendingCommit = false
+function saveDb(data) {
+  normalizeDb(data)
+  if (serverless) { pendingCommit = true; return }
+  writeFileSync(DB_PATH, JSON.stringify(data, null, 2), { mode: 0o600 })
+  if (remoteStoreEnabled) {
+    const tables = buildRemoteRows(data, true)
+    remoteSaveQueue = remoteSaveQueue.then(() => applyRemoteRows(tables)).catch((error) => console.error('ERREUR PERSISTANCE SUPABASE:', error.message))
+  }
+}
+
+let loadedCrm = !serverless
+let db = await loadDb(loadedCrm)
+let remoteBaseline = remoteStoreEnabled ? baselineFrom(buildRemoteRows(db, loadedCrm)) : new Map()
 const DEFAULT_MODULES = { diagnostic: true, besoins: true, missions: true, rendezVous: true, documents: true, messages: true, devis: true, prestataires: true, abonnement: true, notifications: true, equipe: true, results: true }
 const ORGANIZATION_DEFAULT_MODULES = { diagnostic: true, besoins: false, missions: false, rendezVous: false, documents: false, messages: false, devis: false, prestataires: false, abonnement: false, notifications: false, equipe: false, results: false }
 const DEFAULT_SAAS = { subscriptionActive: false, enabled: false, startDate: null, endDate: null, plan: null }
@@ -492,13 +511,6 @@ function mapLegacyRegistrationStatus(status) {
   }
 }
 
-for (const org of db.orgs) { org.saas = { ...DEFAULT_SAAS, ...(org.saas || {}) } }
-for (const org of db.orgs) { org.active ??= true; org.modules = { ...DEFAULT_MODULES, ...(org.modules || {}) }; org.slug ??= org.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || org.id }
-for (const user of db.users) { user.active ??= true; user.permissions ??= []; user.passwordConfigured ??= Boolean(user.passwordHash) }
-for (const reg of db.registrations) { reg.status = mapLegacyRegistrationStatus(reg.status); if (!Array.isArray(reg.events)) reg.events = []; reg.conciergeId ??= null; reg.appointmentStatus ??= 'demande' }
-for (const offer of db.offers) offer.status = normalizeOfferStatus(offer.status) || 'draft'
-for (const mission of db.missions) mission.status = normalizeMissionStatus(mission.status) || 'a_faire'
-
 const bootstrapEmail = (process.env.ALLNEEDS_ADMIN_EMAIL || '').trim().toLowerCase()
 const bootstrapPassword = process.env.ALLNEEDS_ADMIN_PASSWORD || ''
 if (!db.users.some((user) => user.role === 'admin') && bootstrapEmail && bootstrapPassword.length >= 12) {
@@ -548,7 +560,11 @@ const json = (res, code, body, headers = {}) => {
   res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', ...headers })
   res.end(JSON.stringify(body))
 }
-const audit = (event, detail) => appendFileSync(AUDIT_PATH, JSON.stringify({ ts: new Date().toISOString(), event, ...detail }) + '\n', { mode: 0o600 })
+const audit = (event, detail) => {
+  const line = JSON.stringify({ ts: new Date().toISOString(), event, ...detail })
+  if (serverless) console.log(line)
+  else appendFileSync(AUDIT_PATH, line + '\n', { mode: 0o600 })
+}
 const safeUser = ({ passwordHash: _passwordHash, ...user }) => user
 
 async function readBody(req) {
@@ -1105,18 +1121,36 @@ function markLoginFailure(key) {
 }
 function clearLoginFailures(key) { failures.delete(key) }
 
-// Réparation au démarrage : placée ici car elle dépend des constantes de statuts déclarées plus haut.
-let repairedNeedWorkflow = false
-for (const need of db.needs) {
-  if (normalizeNeedStatus(need.status) === 'en_attente_client' && transmittedProposalsFor(need.id).length === 0) {
-    need.status = 'en_recherche'
-    need.updatedAt = new Date().toISOString()
-    repairedNeedWorkflow = true
+/** Remet les données au format courant, après chaque lecture. */
+function prepareDb() {
+  for (const org of db.orgs) { org.saas = { ...DEFAULT_SAAS, ...(org.saas || {}) } }
+  for (const org of db.orgs) { org.active ??= true; org.modules = { ...DEFAULT_MODULES, ...(org.modules || {}) }; org.slug ??= org.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || org.id }
+  for (const user of db.users) { user.active ??= true; user.permissions ??= []; user.passwordConfigured ??= Boolean(user.passwordHash) }
+  for (const reg of db.registrations) { reg.status = mapLegacyRegistrationStatus(reg.status); if (!Array.isArray(reg.events)) reg.events = []; reg.conciergeId ??= null; reg.appointmentStatus ??= 'demande' }
+  for (const offer of db.offers) offer.status = normalizeOfferStatus(offer.status) || 'draft'
+  for (const mission of db.missions) mission.status = normalizeMissionStatus(mission.status) || 'a_faire'
+  for (const need of db.needs) {
+    if (normalizeNeedStatus(need.status) === 'en_attente_client' && transmittedProposalsFor(need.id).length === 0) {
+      need.status = 'en_recherche'
+      need.updatedAt = new Date().toISOString()
+      if (!serverless) pendingRepairSave = true
+    }
   }
 }
-if (repairedNeedWorkflow) saveDb(db)
+let pendingRepairSave = false
+prepareDb()
+if (pendingRepairSave) saveDb(db)
+if (serverless) await commitRemote()
 
-const server = createServer(async (req, res) => {
+async function commitRemote() {
+  if (!pendingCommit) return
+  pendingCommit = false
+  await applyRemoteRows(buildRemoteRows(db, loadedCrm))
+}
+
+const clientIp = (req) => (serverless ? String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() : '') || req.socket.remoteAddress || 'unknown'
+
+async function routeRequest(req, res) {
   const url = new URL(req.url, 'http://localhost')
   const startedAt = Date.now()
   res.on('finish', () => console.log(`${req.method} ${url.pathname} ${res.statusCode} ${Date.now()-startedAt}ms`))
@@ -1143,7 +1177,7 @@ const server = createServer(async (req, res) => {
       const body = await readBody(req)
       const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
       const password = typeof body.password === 'string' ? body.password : ''
-      const key = `${req.socket.remoteAddress ?? 'unknown'}:${email}`
+      const key = `${clientIp(req)}:${email}`
       if (loginThrottled(key)) return json(res, 429, { error: 'trop de tentatives, réessayez dans 15 minutes' }, cors)
       const user = db.users.find((item) => item.email?.toLowerCase() === email && item.active !== false)
       let valid = false
@@ -1158,7 +1192,7 @@ const server = createServer(async (req, res) => {
       if (valid) { const failure = accessFailure(user); if (failure) return json(res, 403, { error: failure, code: 'ACCOUNT_DISABLED' }, cors) }
       if (!valid) {
         markLoginFailure(key)
-        audit('auth.login.denied', { email: email.slice(0, 160), ip: req.socket.remoteAddress ?? 'unknown' })
+        audit('auth.login.denied', { email: email.slice(0, 160), ip: clientIp(req) })
         return json(res, 401, { error: 'adresse e-mail ou mot de passe incorrect' }, cors)
       }
       if (user.status === 'suspended' || user.status === 'inactive') { audit('auth.login.denied', { email: email.slice(0, 160), reason: user.status }); return json(res, 403, { error: 'compte désactivé', code: 'ACCOUNT_DISABLED' }, cors) }
@@ -2733,8 +2767,65 @@ const server = createServer(async (req, res) => {
     if (status === 500) audit('server.error', { path: url.pathname, message: String(error.message || error).slice(0, 240) })
     return json(res, status, { error: status === 500 ? 'erreur serveur' : error.message })
   }
-})
+}
 
-const port = Number(process.env.PORT || 8787)
-server.listen(port, () => console.log(`ALLNEEDS backend sur http://127.0.0.1:${port}`))
-export default server
+/* ------------------------------------------------------------------ */
+/* Vercel : chaque requête lit Supabase, puis enregistre AVANT de répondre */
+/* ------------------------------------------------------------------ */
+let lastReminderRun = 0
+async function processServerless(req, res) {
+  const { pathname } = new URL(req.url, 'http://localhost')
+  if (req.method === 'OPTIONS' || pathname === '/api/health') return routeRequest(req, res)
+
+  const writeHead = res.writeHead.bind(res)
+  const end = res.end.bind(res)
+  const fail = (message) => {
+    res.writeHead = writeHead
+    res.end = end
+    res.removeHeader('set-cookie')
+    writeHead(503, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+    end(JSON.stringify({ error: message }))
+  }
+  try {
+    loadedCrm = pathname.startsWith('/api/crm/')
+    const fresh = await loadDb(loadedCrm)
+    Object.assign(db, fresh)
+    prepareDb()
+    remoteBaseline = baselineFrom(buildRemoteRows(db, loadedCrm))
+    pendingCommit = false
+  } catch (error) {
+    console.error('Lecture Supabase impossible:', error.message)
+    return fail('service momentanément indisponible, réessayez')
+  }
+
+  let head = null
+  let body = []
+  res.writeHead = (...args) => { head = args; return res }
+  res.end = (...args) => { body = args; return res }
+  try {
+    if (loadedCrm && Date.now() - lastReminderRun > 60000) { lastReminderRun = Date.now(); crm.runCallbackReminders() }
+    await routeRequest(req, res)
+    await commitRemote()
+  } catch (error) {
+    console.error('Enregistrement Supabase impossible:', error.message)
+    return fail('enregistrement impossible, réessayez')
+  }
+  res.writeHead = writeHead
+  res.end = end
+  if (head) writeHead(...head)
+  end(...body)
+}
+
+// Une instance traite une requête à la fois : `db` est partagé le temps d'une requête.
+let serverlessQueue = Promise.resolve()
+export function handleServerless(req, res) {
+  const run = serverlessQueue.then(() => processServerless(req, res))
+  serverlessQueue = run.catch(() => {})
+  return run
+}
+
+if (!serverless) {
+  const server = createServer(routeRequest)
+  const port = Number(process.env.PORT || 8787)
+  server.listen(port, () => console.log(`ALLNEEDS backend sur http://127.0.0.1:${port}`))
+}

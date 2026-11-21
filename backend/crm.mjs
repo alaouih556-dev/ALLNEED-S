@@ -644,8 +644,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     }
     if (changed) saveDb(db)
   }
-  const reminderTimer = setInterval(runCallbackReminders, 60000)
-  reminderTimer.unref?.()
+  // Sur Vercel il n'y a pas de processus permanent : les rappels sont lancés par les requêtes CRM.
+  if (!process.env.VERCEL) setInterval(runCallbackReminders, 60000).unref?.()
 
   /* ---------- Géocodage (opt-in, déclenché par un administrateur) ---------- */
   async function geocodeOne(rec) {
@@ -1528,5 +1528,5 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     if (!z.shape && !(z.cities || []).length && !(z.regions || []).length) throw httpError(400, 'définissez une zone sur la carte, ou au moins une ville ou une région')
   }
 
-  return { handle, isCrmUser, permissionsOf }
+  return { handle, isCrmUser, permissionsOf, runCallbackReminders }
 }
