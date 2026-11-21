@@ -498,15 +498,6 @@ for (const user of db.users) { user.active ??= true; user.permissions ??= []; us
 for (const reg of db.registrations) { reg.status = mapLegacyRegistrationStatus(reg.status); if (!Array.isArray(reg.events)) reg.events = []; reg.conciergeId ??= null; reg.appointmentStatus ??= 'demande' }
 for (const offer of db.offers) offer.status = normalizeOfferStatus(offer.status) || 'draft'
 for (const mission of db.missions) mission.status = normalizeMissionStatus(mission.status) || 'a_faire'
-let repairedNeedWorkflow = false
-for (const need of db.needs) {
-  if (normalizeNeedStatus(need.status) === 'en_attente_client' && transmittedProposalsFor(need.id).length === 0) {
-    need.status = 'en_recherche'
-    need.updatedAt = new Date().toISOString()
-    repairedNeedWorkflow = true
-  }
-}
-if (repairedNeedWorkflow) saveDb(db)
 
 const bootstrapEmail = (process.env.ALLNEEDS_ADMIN_EMAIL || '').trim().toLowerCase()
 const bootstrapPassword = process.env.ALLNEEDS_ADMIN_PASSWORD || ''
@@ -1113,6 +1104,17 @@ function markLoginFailure(key) {
   failures.set(key, [...(failures.get(key) ?? []), Date.now()])
 }
 function clearLoginFailures(key) { failures.delete(key) }
+
+// Réparation au démarrage : placée ici car elle dépend des constantes de statuts déclarées plus haut.
+let repairedNeedWorkflow = false
+for (const need of db.needs) {
+  if (normalizeNeedStatus(need.status) === 'en_attente_client' && transmittedProposalsFor(need.id).length === 0) {
+    need.status = 'en_recherche'
+    need.updatedAt = new Date().toISOString()
+    repairedNeedWorkflow = true
+  }
+}
+if (repairedNeedWorkflow) saveDb(db)
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
