@@ -6,21 +6,22 @@ import {
   CalendarCheck,
   Check,
   CheckCircle2,
-  HeartPulse,
   Landmark,
   Receipt,
+  Sparkles,
   Star,
   Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FaqList } from '@/components/marketing'
+import { SECTORS_CONFIG } from '@/lib/sectors'
 
 /* ------------------------------------------------------------------ */
 /* Contenu                                                            */
 /* ------------------------------------------------------------------ */
 
 const HERO = {
-  title: 'Votre structure de santé peut mieux fonctionner.',
+  title: 'Votre structure peut mieux fonctionner.',
   highlight: 'Identifions vos priorités.',
   lead:
     'Un diagnostic gratuit de 30 min pour comprendre votre organisation et définir vos prochaines priorités, lors d’un rendez-vous dédié.',
@@ -42,7 +43,7 @@ const POURQUOI = [
   },
   {
     title: 'Un cadre qui respecte votre profession',
-    detail: 'Communication informative, aucune promesse médicale, aucun conseil clinique.',
+    detail: 'Communication informative, aucune promesse irréaliste, aucun conseil hors de notre périmètre.',
   },
   {
     title: 'Un seul interlocuteur',
@@ -59,21 +60,21 @@ const STATS = [
 
 const AXES: { title: string; detail: string; question: string; icon: ReactNode }[] = [
   {
-    title: 'Patients et développement',
-    detail: 'Parcours patient, rendez-vous, relance, suivi.',
-    question: 'Mon agenda est rempli comme je le souhaite.',
+    title: 'Clients et développement',
+    detail: 'Parcours client, demandes, relance, suivi.',
+    question: 'Mon activité est aussi remplie que je le souhaite.',
     icon: <CalendarCheck />,
   },
   {
     title: 'Visibilité et confiance',
     detail: 'Présence en ligne informative, avis, image de la structure.',
-    question: 'Mes patients me trouvent facilement en ligne et me font confiance.',
+    question: 'Mes clients me trouvent facilement en ligne et me font confiance.',
     icon: <Star />,
   },
   {
     title: 'Équipe et organisation',
-    detail: 'Rôles, accueil, protocoles, outils de suivi.',
-    question: 'Chacun connaît son rôle à l’accueil, sans me solliciter.',
+    detail: 'Rôles, accueil, procédures, outils de suivi.',
+    question: 'Chacun connaît son rôle, sans me solliciter.',
     icon: <Users />,
   },
   {
@@ -108,7 +109,7 @@ const OFFRES = [
     code: 'PRO',
     verb: 'Structurer',
     note: 'Mission de structuration · paiement unique',
-    included: ['Construire vos parcours et protocoles', 'Renforcer votre visibilité', 'Installer vos outils de pilotage'],
+    included: ['Construire vos parcours et procédures', 'Renforcer votre visibilité', 'Installer vos outils de pilotage'],
   },
   {
     code: 'PERFORMANCE',
@@ -128,16 +129,16 @@ const ABONNEMENTS = [
 const LAUNCH = {
   title: 'Offre de lancement',
   detail: '20 % de remise pour les 10 premiers clients qui souscrivent Pro ou Performance.',
-  condition: 'Les abonnements Accès Santé sont exclus de l’offre de lancement.',
+  condition: 'Les abonnements ALLNEEDS Accès sont exclus de l’offre de lancement.',
 }
 
 const ENGAGEMENTS = [
   'Diagnostic gratuit de 30 min, sur rendez-vous et sans engagement.',
   'Confidentialité de vos échanges et de vos données d’organisation.',
-  'Aucune donnée de dossier patient n’est requise ni consultée.',
+  'Aucune donnée nominative n’est requise ni consultée.',
   'Un compte-rendu structuré avec vos 3 priorités.',
   'Un accompagnement professionnel par un interlocuteur unique.',
-  'Une communication informative, sans promesse médicale.',
+  'Une communication informative, sans promesse irréaliste.',
 ]
 
 const FAQ = [
@@ -155,7 +156,7 @@ const FAQ = [
   },
   {
     q: 'Quelles informations dois-je fournir ?',
-    a: 'Uniquement des informations d’organisation : agenda, accueil, équipe, charges. Aucun dossier patient. Vos documents sont conservés 90 jours si aucune suite n’est donnée.',
+    a: 'Uniquement des informations d’organisation : activité, accueil, équipe, charges. Aucune donnée nominative. Vos documents sont conservés 90 jours si aucune suite n’est donnée.',
   },
 ]
 
@@ -177,7 +178,7 @@ function ProductPreview() {
           <div className="mk-window-row">
             <strong className="mk-h4">Les 5 axes passés en revue</strong>
             <span className="mk-chip blue">
-              <HeartPulse /> Santé
+              <Sparkles /> 7 secteurs
             </span>
           </div>
           <ul className="mk-axis-list">
@@ -358,7 +359,7 @@ function MiniQuestionnaire() {
 /* Page                                                               */
 /* ------------------------------------------------------------------ */
 
-export function SanteLanding() {
+export function HomeLanding() {
   return (
     <div className="mk">
       {/* Hero */}
@@ -366,7 +367,7 @@ export function SanteLanding() {
         <div className="mk-wrap mk-hero-grid">
           <div className="mk-hero-copy">
             <span className="mk-pill">
-              <HeartPulse /> ALLNEEDS
+              <Sparkles /> ALLNEEDS
             </span>
             <h1 className="mk-h1">
               {HERO.title} <span className="mk-hl">{HERO.highlight}</span>
@@ -392,10 +393,34 @@ export function SanteLanding() {
         </div>
       </section>
 
+      {/* Secteurs */}
+      <section className="sx-home-band mk-bg-dark" aria-labelledby="home-sectors-title">
+        <div className="mk-wrap">
+          <div className="sx-home-band-head">
+            <div>
+              <p className="mk-eyebrow">Votre secteur</p>
+              <h2 id="home-sectors-title">Une approche adaptée à votre métier.</h2>
+            </div>
+            <Link to="/secteurs" className="sx-home-all">Voir tous les secteurs <ArrowRight /></Link>
+          </div>
+          <nav className="sx-home-sectors" aria-label="Nos secteurs">
+            {SECTORS_CONFIG.map((sector) => {
+              const Icon = sector.icon
+              return (
+                <Link key={sector.slug} to="/secteurs/$sector" params={{ sector: sector.slug }} className="sx-home-sector">
+                  <span className="ic"><Icon /></span>
+                  <strong>{sector.label.fr}</strong>
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+      </section>
+
       {/* Chiffres clés */}
       <section className="mk-sec-sm mk-bg-white">
         <div className="mk-wrap">
-          <p className="mk-eyebrow">Diagnostic 360° · Cabinets · Centres · Laboratoires · Paramédical</p>
+          <p className="mk-eyebrow">Diagnostic 360° · 7 secteurs d’activité</p>
           <div className="mk-stats" style={{ marginTop: 24 }}>
             {STATS.map((s) => (
               <div key={s.label} className="mk-stat">
@@ -533,7 +558,7 @@ export function SanteLanding() {
               Trouver, vérifier et suivre vos prestataires.
             </h2>
             <p className="mk-body">
-              L’abonnement Accès Santé vous donne accès à un réseau de prestataires vérifiés, selon votre rythme. Les
+              L’abonnement ALLNEEDS Accès vous donne accès à un réseau de prestataires vérifiés, selon votre rythme. Les
               détails des formules et des abonnements sont communiqués lors d’un échange.
             </p>
           </div>
@@ -556,11 +581,11 @@ export function SanteLanding() {
               <BadgeCheck className="h-4 w-4" /> Un cadre qui respecte votre profession
             </p>
             <p className="mk-quote">
-              Nous n’intervenons <span className="mk-hl">jamais</span> sur l’acte médical.
+              Nous ne remplaçons <span className="mk-hl">jamais</span> vos experts métier.
             </p>
             <p className="mk-lead">
-              Aucun accès aux dossiers patients : seulement des données d’organisation. Une communication informative,
-              sans promesse médicale. Un seul interlocuteur, un périmètre clair dès le départ.
+              Aucun accès à vos données nominatives : seulement des données d’organisation. Une communication informative,
+              sans promesse irréaliste. Un seul interlocuteur, un périmètre clair dès le départ.
             </p>
           </div>
           <ul className="mk-commit">

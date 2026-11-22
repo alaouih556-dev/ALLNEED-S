@@ -1,4 +1,4 @@
-import { isSectorActive, SINGLE_SECTOR } from '@/lib/active-sectors'
+import { isSectorActive } from '@/lib/active-sectors'
 import { Compass, GraduationCap, HeartPulse, ArrowRight } from 'lucide-react'
 import { Card } from '@/components/ui'
 import type { Sector } from '@/types'
@@ -56,7 +56,7 @@ export function SectorChoice({
       <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-ink-950">{title}</h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">{description}</p>
 
-      <div className={`mt-6 grid gap-4 ${SINGLE_SECTOR ? 'md:max-w-md' : 'md:grid-cols-3'}`}>
+      <div className={'mt-6 grid gap-4 md:grid-cols-3'}>
         {SECTORS.filter(({ id }) => isSectorActive(id)).map(({ id, name, audience, detail, icon: Icon, color }) => (
           <button
             key={id}

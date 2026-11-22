@@ -34,7 +34,7 @@ import { isDiagnosticSubmitted } from '@/lib/diagnostic-status'
 import { readDiagnosticDraft } from '@/lib/diagnostic-draft'
 import { toSector } from '@/lib/parcours'
 import { clientModules, type AccessModule } from '@/lib/access'
-import { SECTOR_LABEL } from '@/data/catalog'
+import { getSectorLabel, isDiagnosticPending } from '@/lib/sectors'
 import type { SectorKey } from '@/features/health360/packs'
 import { DocumentsPanel } from '@/features/documents/DocumentsPanel'
 import { longDate } from '@/lib/format'
@@ -100,7 +100,9 @@ function ClientHome() {
   /** Index de l'étape en cours dans JOURNEY. */
   const stage = offerActive ? 4 : published ? 3 : submitted ? 2 : 1
 
+  const diagnosticPending = isDiagnosticPending(org?.sector)
   const next = useMemo<{ tone: KitTone; icon: ReactNode; eyebrow: string; title: string; text: string; meta?: string; cta?: string; to?: string; progress?: number }>(() => {
+    if (diagnosticPending) return { tone: 'indigo', icon: <Sparkles size={20} />, eyebrow: 'Questionnaire en préparation', title: 'Votre diagnostic sectoriel arrive bientôt', text: 'Votre Account Manager vous contacte pour préparer votre premier échange.' }
     if (offerActive) return { tone: 'emerald', icon: <Handshake size={20} />, eyebrow: 'Accompagnement en cours', title: 'Suivez vos missions et vos résultats', text: 'Votre offre est active. Retrouvez l’avancement des missions, vos documents et vos échanges avec ALLNEEDS.', cta: modules.missions ? 'Voir mes missions' : 'Voir mon offre', to: modules.missions ? '/app/missions' : '/app/offres' }
     if (offerPending) return { tone: 'sky', icon: <Receipt size={20} />, eyebrow: 'Offre proposée', title: 'Une offre vous attend', text: 'Votre Account Manager vous a proposé un accompagnement adapté à votre rapport. Consultez-la pour l’accepter ou poser vos questions.', cta: 'Voir l’offre', to: '/app/offres' }
     if (published) return { tone: 'teal', icon: <FileSearch size={20} />, eyebrow: 'Rapport disponible', title: 'Découvrez votre rapport de diagnostic', meta: `Publié le ${longDate(info.publishedAt!)}`, text: 'Vos priorités et recommandations sont prêtes, ainsi que les offres adaptées à votre établissement.', cta: 'Lire mon rapport', to: '/app/diagnostics' }
@@ -108,7 +110,7 @@ function ClientHome() {
     if (questionsDone) return { tone: 'indigo', icon: <ClipboardCheck size={20} />, eyebrow: 'Dernière étape', title: 'Envoyez votre diagnostic', text: 'Toutes les questions sont renseignées. Relisez votre synthèse puis envoyez-la à ALLNEEDS pour lancer l’analyse.', cta: 'Finaliser et envoyer', to: '/app/diagnostic-auto', progress: 1 }
     if (started) return { tone: 'indigo', icon: <ClipboardCheck size={20} />, eyebrow: 'Diagnostic commencé', title: 'Reprenez votre diagnostic', text: 'Vos réponses sont enregistrées automatiquement : reprenez où vous en étiez.', cta: 'Continuer mon diagnostic', to: '/app/diagnostic-auto', progress: draft?.total ? (draft.answered ?? 0) / draft.total : 0 }
     return { tone: 'indigo', icon: <ClipboardCheck size={20} />, eyebrow: 'Première étape', title: 'Réalisez votre diagnostic 360°', text: 'Une question à la fois, à votre rythme : vos réponses sont enregistrées au fur et à mesure. C’est le point de départ de votre accompagnement.', cta: 'Commencer mon diagnostic', to: '/app/diagnostic-auto', progress: 0 }
-  }, [offerActive, offerPending, published, submitted, questionsDone, started, draft, info.publishedAt, info.submittedAt, modules.missions])
+  }, [diagnosticPending, offerActive, offerPending, published, submitted, questionsDone, started, draft, info.publishedAt, info.submittedAt, modules.missions])
 
   const spaces: Array<{ key: string; to: string; label: string; text: string; icon: ReactNode; tone: KitTone; open: boolean; lock: string }> = [
     { key: 'rapport', to: '/app/diagnostics', label: 'Rapport de diagnostic', text: 'Priorités et recommandations', icon: <FileSearch size={16} />, tone: 'teal', open: submitted, lock: 'Après l’envoi du diagnostic' },
@@ -130,7 +132,7 @@ function ClientHome() {
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
   const concierge = org?.concierge ?? null
   const companyName = org?.name ?? orgName
-  const sectorLabel = sectorKey ? SECTOR_LABEL[sectorKey as keyof typeof SECTOR_LABEL] ?? org?.sector : org?.sector
+  const sectorLabel = getSectorLabel(org?.sector ?? sector)
 
   return (
     <div className="cl-home">

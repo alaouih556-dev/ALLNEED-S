@@ -1,20 +1,20 @@
-import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
 import { useEffect, useRef, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, ArrowRight, Building2, Clock3, GraduationCap, HeartPulse, MapPin, Phone, Plane, Sprout, TrendingUp, Video, type LucideIcon } from 'lucide-react'
-import { ACCESS_OFFERS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
+import { ArrowLeft, ArrowRight, Building2, Clock3, MapPin, Phone, Sprout, TrendingUp, Video, type LucideIcon } from 'lucide-react'
+import { ACCESS_OFFERS } from '@/data/catalog'
 import { AuthLayout } from '@/components/AuthLayout'
 import { Note } from '@/components/marketing'
 import { Checkbox, Field, Input } from '@/components/ui'
-import { cn } from '@/lib/utils'
-import type { AccessTier, Sector } from '@/types'
+import { SECTORS_CONFIG, getSector, type SectorSlug } from '@/lib/sectors'
+import type { AccessTier } from '@/types'
 
 export const Route = createFileRoute('/inscription')({
-  validateSearch: (search: Record<string, unknown>): { offre?: AccessTier } => {
+  validateSearch: (search: Record<string, unknown>): { offre?: AccessTier; secteur?: SectorSlug } => {
     const value = search.offre ? String(search.offre).toUpperCase() : null
     const valid = ACCESS_OFFERS.some((o) => o.tier === value)
-    // Omit the key when there is no valid offer, otherwise the router writes "?offre=null" into every link.
-    return valid ? { offre: value as AccessTier } : {}
+    const sector = getSector(search.secteur)
+    // Omit invalid keys, otherwise the router writes "?offre=null" into every link.
+    return { ...(valid ? { offre: value as AccessTier } : {}), ...(sector ? { secteur: sector.slug } : {}) }
   },
   component: InscriptionPage,
   head: () => ({
@@ -43,34 +43,12 @@ const FORMATS: { value: Format; label: string; icon: LucideIcon }[] = [
   { value: 'telephone', label: 'Téléphone', icon: Phone },
 ]
 
-const SECTOR_ICON: Record<Sector, LucideIcon> = { enseignement: GraduationCap, sante: HeartPulse, tourisme: Plane }
-
-const WORKSPACE_PROFILES: Record<Sector, { value: string; label: string; description: string }[]> = {
-  enseignement: [
-    { value: 'ecole', label: 'École / établissement scolaire', description: 'Inscriptions, élèves, familles, équipe et paiements.' },
-    { value: 'creche', label: 'Crèche / maternelle', description: 'Admissions, familles, présence, équipe et facturation.' },
-    { value: 'formation', label: 'Centre de formation', description: 'Inscriptions, sessions, apprenants, formateurs et règlements.' },
-  ],
-  sante: [
-    { value: 'cabinet', label: 'Cabinet', description: 'Patients, rendez-vous, praticiens, paiements et charges.' },
-    { value: 'centre', label: 'Centre de santé', description: 'Accueil, planning multi-praticiens, équipe, paiements et suivi.' },
-    { value: 'laboratoire', label: 'Laboratoire', description: 'Accueil, dossiers, équipe, encaissements et organisation.' },
-  ],
-  tourisme: [
-    { value: 'hebergement', label: 'Hébergement', description: 'Réservations, chambres, check-in/out, ménage et paiements.' },
-    { value: 'restauration', label: 'Restauration', description: 'Tables, menus, ingrédients, stock, commandes et caisse.' },
-    { value: 'activites', label: 'Activités', description: 'Planning, capacités, réservations, participants et paiements.' },
-    { value: 'transport', label: 'Transport', description: 'Véhicules, chauffeurs, trajets, réservations et disponibilités.' },
-    { value: 'agence', label: 'Agence de voyage', description: 'Dossiers, voyageurs, hébergement, repas, activités, transport et marge.' },
-  ],
-}
-
 function InscriptionPage() {
-  const { offre: offreFromUrl } = Route.useSearch()
+  const { offre: offreFromUrl, secteur: sectorFromUrl } = Route.useSearch()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
-    situation: 'entreprise_existante' as Situation, org: '', kind: '', sector: DEFAULT_SECTOR as Sector, workspaceProfile: WORKSPACE_PROFILES[DEFAULT_SECTOR][0].value, city: '', size: '',
+    situation: 'entreprise_existante' as Situation, org: '', kind: '', sector: (sectorFromUrl ?? '') as SectorSlug | '', workspaceProfile: sectorFromUrl ? getSector(sectorFromUrl)!.establishmentTypes[0].value : '', city: '', size: '',
     name: '', role: '', email: '', phone: '', appointmentDate: '', appointmentSlot: APPOINTMENT_SLOTS[0], appointmentFormat: 'visio' as Format, accept: false,
   })
   const [error, setError] = useState('')
@@ -86,8 +64,11 @@ function InscriptionPage() {
   }, [step])
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) { setForm((v) => ({ ...v, [key]: value })) }
-  function setSector(sector: Sector) { setForm((v) => ({ ...v, sector, workspaceProfile: WORKSPACE_PROFILES[sector][0].value })) }
+  function setSector(sector: SectorSlug) { setForm((v) => ({ ...v, sector, workspaceProfile: getSector(sector)!.establishmentTypes[0].value })) }
+  useEffect(() => { if (sectorFromUrl) setSector(sectorFromUrl) }, [sectorFromUrl])
+  const selectedSector = getSector(form.sector)
   function validate(current: number) {
+    if (current === 0 && !form.sector) return 'Choisissez votre secteur.'
     if (current === 0 && !form.org.trim()) return 'Indiquez le nom de votre établissement.'
     if (current === 1 && (!form.name.trim() || !form.email.includes('@'))) return 'Nom et adresse e-mail valides sont nécessaires.'
     if (current === 2 && !form.appointmentDate) return 'Choisissez la date de votre rendez-vous.'
@@ -129,6 +110,7 @@ function InscriptionPage() {
 
   return <AuthLayout
     wide
+    sector={selectedSector}
     title="Commençons par votre réalité."
     subtitle="Quelques repères pour préparer votre échange et vous orienter vers le bon parcours. Votre demande sera transmise à ALLNEEDS ; après validation, vous recevrez un lien pour créer votre mot de passe."
     footer={<>Déjà client ? <Link to="/connexion">Se connecter</Link></>}
@@ -158,39 +140,40 @@ function InscriptionPage() {
           </div>
         </div>
 
-        {SINGLE_SECTOR ? null : <div>
-          <div className="mk-q-label"><strong>Votre secteur</strong></div>
-          <div className="mk-chips" role="group" aria-label="Secteur">
-            {SECTOR_ORDER.map((sector) => {
-              const Icon = SECTOR_ICON[sector]
+        <div>
+          <div className="mk-q-label"><strong>Dans quel secteur travaillez-vous ?</strong><span>Le reste du formulaire s’adapte à votre choix.</span></div>
+          <div className="mk-choices sx-sector-choices" role="group" aria-label="Secteur">
+            {SECTORS_CONFIG.map((sector) => {
+              const Icon = sector.icon
               return (
-                <button key={sector} type="button" className="mk-chip-btn" aria-pressed={form.sector === sector} onClick={() => setSector(sector)}>
-                  <Icon /> {SECTOR_LABEL[sector]}
+                <button key={sector.slug} type="button" className="mk-choice" aria-pressed={form.sector === sector.slug} onClick={() => setSector(sector.slug)}>
+                  <span className="ic"><Icon /></span>
+                  <strong>{sector.label.fr}</strong>
                 </button>
               )
             })}
           </div>
-        </div>}
+        </div>
 
-        <div>
+        {selectedSector ? <div>
           <div className="mk-q-label"><strong>Quel type d’établissement dirigez-vous ?</strong><span>Cela nous aide à adapter la conversation à votre métier.</span></div>
           <div className="mk-choices">
-            {WORKSPACE_PROFILES[form.sector].map((profile) => (
-              <button key={profile.value} type="button" className="mk-choice" aria-pressed={form.workspaceProfile === profile.value} onClick={() => set('workspaceProfile', profile.value)}>
-                <strong>{profile.label}</strong>
-                <span>{profile.description}</span>
+            {selectedSector.establishmentTypes.map((type) => (
+              <button key={type.value} type="button" className="mk-choice" aria-pressed={form.workspaceProfile === type.value} onClick={() => set('workspaceProfile', type.value)}>
+                <strong>{type.title.fr}</strong>
+                <span>{type.description.fr}</span>
               </button>
             ))}
           </div>
-        </div>
+        </div> : null}
 
-        <Field label="Nom de l’établissement" required><Input value={form.org} onChange={(e) => set('org', e.target.value)} placeholder="École Al Amal" autoComplete="organization" /></Field>
+        <Field label="Nom de l’établissement" required><Input value={form.org} onChange={(e) => set('org', e.target.value)} placeholder={selectedSector?.placeholders.name.fr ?? 'Nom de votre établissement'} autoComplete="organization" /></Field>
         <div className="mk-row-3">
-          <Field label="Type de structure"><Input value={form.kind} onChange={(e) => set('kind', e.target.value)} placeholder="École privée" /></Field>
-          <Field label="Ville"><Input value={form.city} onChange={(e) => set('city', e.target.value)} placeholder="Casablanca" autoComplete="address-level2" /></Field>
-          <Field label="Effectif"><Input value={form.size} onChange={(e) => set('size', e.target.value)} placeholder="18 salariés" /></Field>
+          <Field label="Type de structure"><Input value={form.kind} onChange={(e) => set('kind', e.target.value)} placeholder={selectedSector?.placeholders.type.fr ?? 'Type de structure'} /></Field>
+          <Field label="Ville"><Input value={form.city} onChange={(e) => set('city', e.target.value)} placeholder={selectedSector?.placeholders.city.fr ?? 'Casablanca'} autoComplete="address-level2" /></Field>
+          <Field label="Effectif"><Input value={form.size} onChange={(e) => set('size', e.target.value)} placeholder={selectedSector?.placeholders.headcount.fr ?? '10 salariés'} /></Field>
         </div>
-        <Note>Nous ne demandons aucune donnée nominative d’élève, de patient ou de client pour ce premier échange.</Note>
+        <Note>{selectedSector?.privacy.fr ?? 'Nous ne demandons aucune donnée nominative pour ce premier échange.'}</Note>
       </> : null}
 
       {step === 1 ? <>
@@ -235,8 +218,8 @@ function InscriptionPage() {
             {[
               ['Situation', SITUATIONS.find((x) => x.value === form.situation)?.recap, 0],
               ['Établissement', form.org, 0],
-              ['Secteur', SECTOR_LABEL[form.sector], 0],
-              ['Espace métier', WORKSPACE_PROFILES[form.sector].find((x) => x.value === form.workspaceProfile)?.label, 0],
+              ['Secteur', selectedSector?.label.fr, 0],
+              ['Type d’établissement', selectedSector?.establishmentTypes.find((x) => x.value === form.workspaceProfile)?.title.fr, 0],
               ['Contact', form.name, 1],
               ['Rendez-vous', `${form.appointmentDate} · ${form.appointmentSlot} · ${FORMATS.find((x) => x.value === form.appointmentFormat)?.label}`, 2],
               ['ALLNEEDS ACCÈS', 'À choisir après création du compte', null],

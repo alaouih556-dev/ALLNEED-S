@@ -26,7 +26,7 @@ create table if not exists public.v46_organizations (
   id text primary key,
   name text not null,
   slug text not null unique,
-  sector text not null check (sector in ('sante','enseignement','tourisme')),
+  sector text not null check (sector in ('sante','enseignement','tourisme','commerce-distribution','industrie-production','btp-immobilier','services-artisanat')),
   active boolean not null default true,
   modules jsonb not null default '{}'::jsonb,
   metadata jsonb not null default '{}'::jsonb,

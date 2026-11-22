@@ -7,6 +7,8 @@ import { Button, Card } from '@/components/ui'
 import { useAuth, type AuthUser } from '@/features/auth/AuthContext'
 import { blockedModuleForPath, clientModules, isDiagnosticGuardedPath, isSaasRoute, orgSaasActive } from '@/lib/access'
 import { useDiagnosticStatus } from '@/features/diagnostic/useDiagnosticStatus'
+import { DiagnosticPending } from '@/features/parcours/DiagnosticPending'
+import { isDiagnosticPending } from '@/lib/sectors'
 
 type Workspace='client'|'admin'|'concierge'|'expert'
 
@@ -49,6 +51,7 @@ function ClientWorkspaceGate({auth,children}:{auth:ReturnType<typeof useAuth>;ch
 function ClientAccessGate({org,path,children}:{org:AuthUser['organization'] & {id:string};path:string;children:ReactNode}){
   const { completed, loading, error } = useDiagnosticStatus(org.id)
   const guarded = isDiagnosticGuardedPath(path)
+  if(guarded && isDiagnosticPending(org.sector)) return <DiagnosticPending/>
 
   if(guarded && !completed){
     if(loading) return <GateMessage title="Vérification de votre parcours" detail="Nous vérifions votre diagnostic avant d’ouvrir cette page."/>

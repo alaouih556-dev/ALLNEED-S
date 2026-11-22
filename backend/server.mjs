@@ -8,6 +8,7 @@ import tls from 'node:tls'
 import { SALES_PRESENTATION } from './sales-presentation.mjs'
 import { createCrm, CRM_COLLECTIONS } from './crm.mjs'
 import { createOrganization, positionOf, isCrmManagerPosition } from './organization.mjs'
+import { resolveSector, sectorLabel } from './sectors.mjs'
 
 const scrypt = promisify(scryptCallback)
 // Vercel : pas de disque durable, chaque requête relit et écrit directement Supabase.
@@ -1061,8 +1062,8 @@ function pushRegistrationEvent(reg, type, { byUserId = null, note = '' } = {}) {
 }
 
 function registrationAckHtml(reg) {
-  const sectorLabel = { sante: 'Santé', enseignement: 'Enseignement', tourisme: 'Tourisme' }[reg.sector] || reg.sector || ''
-  return `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0f172a"><h2>ALLNEEDS</h2><p>Bonjour ${htmlEscape(reg.name || '')},</p><p>Nous avons bien reçu votre demande pour <strong>${htmlEscape(reg.orgName || '')}</strong>.</p><ul><li>Secteur : ${htmlEscape(sectorLabel)}</li><li>Créneau demandé : ${htmlEscape(reg.appointmentDate || '—')} ${htmlEscape(reg.appointmentSlot || '')}</li><li>Contact : ${htmlEscape(reg.name || '')} · ${htmlEscape(reg.phone || '')}</li></ul><p>Un Account Manager ALLNEEDS va être affecté à votre dossier et prendra contact avec vous pour confirmer le créneau.</p><p><strong>Prochaine étape :</strong> dès l’affectation de votre Account Manager, vous recevrez un e-mail contenant un lien personnel pour créer votre mot de passe et activer votre compte.</p><p style="color:#64748b;font-size:13px">Si vous n’êtes pas à l’origine de cette demande, ignorez simplement ce message.</p></div>`
+  const regSectorLabel = sectorLabel(reg.sector)
+  return `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0f172a"><h2>ALLNEEDS</h2><p>Bonjour ${htmlEscape(reg.name || '')},</p><p>Nous avons bien reçu votre demande pour <strong>${htmlEscape(reg.orgName || '')}</strong>.</p><ul><li>Secteur : ${htmlEscape(regSectorLabel)}</li><li>Créneau demandé : ${htmlEscape(reg.appointmentDate || '—')} ${htmlEscape(reg.appointmentSlot || '')}</li><li>Contact : ${htmlEscape(reg.name || '')} · ${htmlEscape(reg.phone || '')}</li></ul><p>Un Account Manager ALLNEEDS va être affecté à votre dossier et prendra contact avec vous pour confirmer le créneau.</p><p><strong>Prochaine étape :</strong> dès l’affectation de votre Account Manager, vous recevrez un e-mail contenant un lien personnel pour créer votre mot de passe et activer votre compte.</p><p style="color:#64748b;font-size:13px">Si vous n’êtes pas à l’origine de cette demande, ignorez simplement ce message.</p></div>`
 }
 
 async function sendRegistrationAckEmail(reg) {
@@ -1084,7 +1085,7 @@ function organizationSlug(name) {
 function ensureOrgForRegistration(reg) {
   let org = reg.orgId ? db.orgs.find((item) => item.id === reg.orgId) : null
   if (org) return org
-  org = { id: `org-${randomBytes(8).toString('hex')}`, name: reg.orgName, sector: reg.sector, active: true, modules: { ...ORGANIZATION_DEFAULT_MODULES }, saas: { ...DEFAULT_SAAS }, slug: organizationSlug(reg.orgName), city: reg.city || '', contactName: reg.name || '', contactRole: reg.workspaceProfile || '', contactEmail: reg.email || '', contactPhone: reg.phone || '' }
+  org = { id: `org-${randomBytes(8).toString('hex')}`, name: reg.orgName, sector: reg.sector, sectorSlug: resolveSector(reg.sector)?.slug, active: true, modules: { ...ORGANIZATION_DEFAULT_MODULES }, saas: { ...DEFAULT_SAAS }, slug: organizationSlug(reg.orgName), city: reg.city || '', contactName: reg.name || '', contactRole: reg.workspaceProfile || '', contactEmail: reg.email || '', contactPhone: reg.phone || '' }
   db.orgs.push(org)
   reg.orgId = org.id
   return org
@@ -1221,16 +1222,17 @@ async function routeRequest(req, res) {
       const email = allowedText(body.email, 200, 'e-mail').toLowerCase()
       if (!email.includes('@')) return json(res, 400, { error: 'e-mail invalide' }, cors)
       if (db.users.some((u) => u.email?.toLowerCase() === email) || db.registrations.some((r) => r.email === email && r.status !== 'refusee')) return json(res, 409, { error: 'une demande existe déjà pour cet e-mail' }, cors)
-      const sector = allowedText(body.sector, 40, 'secteur')
-      if (!['sante','enseignement','tourisme'].includes(sector)) return json(res, 400, { error: 'secteur invalide' }, cors)
+      const resolvedSector = resolveSector(allowedText(body.sector, 60, 'secteur'))
+      if (!resolvedSector) return json(res, 400, { error: 'secteur invalide' }, cors)
+      const { key: sector, slug: sectorSlug } = resolvedSector
       const appointmentDate = String(body.appointmentDate || '').slice(0,40)
       const appointmentSlot = String(body.appointmentSlot || '').slice(0,80)
       if (!appointmentDate || !appointmentSlot) return json(res, 400, { error: 'créneau (date et heure) requis' }, cors)
       const now = new Date().toISOString()
-      const record = { id: `reg-${randomBytes(10).toString('hex')}`, orgName: allowedText(body.orgName, 180, 'établissement'), name: allowedText(body.name, 160, 'contact'), email, phone: String(body.phone || '').slice(0,60), sector, city: String(body.city || '').slice(0,120), workspaceProfile: String(body.workspaceProfile || '').slice(0,120), appointmentDate, appointmentSlot, appointmentStatus: 'demande', status: 'demande_recue', conciergeId: null, events: [{ id: `evt-${randomBytes(8).toString('hex')}`, type: 'inscription_recue', at: now, byUserId: null, note: '' }], createdAt: now, approvedAt: null, assignedAt: null, activatedAt: null, orgId: null, userId: null, ackEmailAt: null, ackEmailStatus: null }
+      const record = { id: `reg-${randomBytes(10).toString('hex')}`, orgName: allowedText(body.orgName, 180, 'établissement'), name: allowedText(body.name, 160, 'contact'), email, phone: String(body.phone || '').slice(0,60), sector, sectorSlug, city: String(body.city || '').slice(0,120), workspaceProfile: String(body.workspaceProfile || '').slice(0,120), appointmentDate, appointmentSlot, appointmentStatus: 'demande', status: 'demande_recue', conciergeId: null, events: [{ id: `evt-${randomBytes(8).toString('hex')}`, type: 'inscription_recue', at: now, byUserId: null, note: '' }], createdAt: now, approvedAt: null, assignedAt: null, activatedAt: null, orgId: null, userId: null, ackEmailAt: null, ackEmailStatus: null }
       db.registrations.push(record)
       audit('registration.create', { id: record.id, email: record.email })
-      notifyAdmins({ type: 'inscription_nouvelle', title: 'Nouvelle inscription à traiter', message: `${record.orgName} · ${record.name} · ${record.sector} · créneau ${appointmentDate} ${appointmentSlot}.`, meta: { registrationId: record.id } })
+      notifyAdmins({ type: 'inscription_nouvelle', title: 'Nouvelle inscription à traiter', message: `${record.orgName} · ${record.name} · ${sectorLabel(record.sector)} · créneau ${appointmentDate} ${appointmentSlot}.`, meta: { registrationId: record.id } })
       const delivery = await sendRegistrationAckEmail(record)
       saveDb(db)
       return json(res, 201, { id: record.id, status: record.status, delivery }, cors)
@@ -1437,8 +1439,8 @@ async function routeRequest(req, res) {
       if (user.role !== 'concierge') return json(res,403,{error:'Account Manager requis'},cors)
       const body = await readBody(req)
       const name = allowedText(body.name,180,'nom de l’entreprise')
-      const sector = String(body.sector || '')
-      if (!['sante','enseignement','tourisme'].includes(sector)) return json(res,400,{error:'secteur invalide'},cors)
+      const sector = resolveSector(String(body.sector || ''))?.key
+      if (!sector) return json(res,400,{error:'secteur invalide'},cors)
       if (Array.isArray(user.sectors) && user.sectors.length && !user.sectors.includes(sector)) return json(res,403,{error:'secteur hors de votre périmètre'},cors)
       const baseSlug = organizationSlug(name)
       const slug = db.orgs.some((item) => item.slug === baseSlug) ? `${baseSlug}-${randomBytes(3).toString('hex')}` : baseSlug
@@ -1519,13 +1521,13 @@ async function routeRequest(req, res) {
       if (!adminOnly(user,res,cors)) return
       const body=await readBody(req); const email=allowedText(body.email,200,'e-mail').toLowerCase(); if(!email.includes('@'))return json(res,400,{error:'e-mail invalide'},cors)
       if(db.users.some((u)=>u.email?.toLowerCase()===email))return json(res,409,{error:'cet e-mail possède déjà un compte'},cors)
-      const sectors=Array.isArray(body.sectors)?body.sectors.filter((x)=>['sante','enseignement','tourisme'].includes(x)):[]
+      const sectors=Array.isArray(body.sectors)?body.sectors.map((x)=>resolveSector(x)?.key).filter(Boolean):[]
       const assignedOrgIds=Array.isArray(body.assignedOrgIds)?body.assignedOrgIds.filter((id)=>db.orgs.some((o)=>o.id===id)):[]
       const {invitation,token}=createInvitation({email,name:allowedText(body.name,160,'nom'),role:'concierge',permissions:[],createdBy:user.id,kind:'concierge',metadata:{sectors,assignedOrgIds}})
       const delivery=await sendInvitationEmail(invitation,token); audit('concierge.invite',{by:user.id,email}); const {tokenHash,...publicInvitation}=invitation; return json(res,201,{invitation:publicInvitation,delivery},cors)
     }
     const conciergeUserRoute=url.pathname.match(/^\/api\/admin\/account-managers\/([^/]+)$/)
-    if(conciergeUserRoute&&req.method==='PATCH'){if(!adminOnly(user,res,cors))return;const member=db.users.find((u)=>u.id===conciergeUserRoute[1]&&u.role==='concierge');if(!member)return json(res,404,{error:'Account Manager introuvable'},cors);const body=await readBody(req);if(typeof body.active==='boolean')member.active=body.active;if(Array.isArray(body.sectors))member.sectors=body.sectors.filter((x)=>['sante','enseignement','tourisme'].includes(x));if(Array.isArray(body.orgIds))member.orgIds=body.orgIds.filter((id)=>db.orgs.some((o)=>o.id===id));saveDb(db);audit('concierge.update',{by:user.id,member:member.id});return json(res,200,safeUser(member),cors)}
+    if(conciergeUserRoute&&req.method==='PATCH'){if(!adminOnly(user,res,cors))return;const member=db.users.find((u)=>u.id===conciergeUserRoute[1]&&u.role==='concierge');if(!member)return json(res,404,{error:'Account Manager introuvable'},cors);const body=await readBody(req);if(typeof body.active==='boolean')member.active=body.active;if(Array.isArray(body.sectors))member.sectors=body.sectors.map((x)=>resolveSector(x)?.key).filter(Boolean);if(Array.isArray(body.orgIds))member.orgIds=body.orgIds.filter((id)=>db.orgs.some((o)=>o.id===id));saveDb(db);audit('concierge.update',{by:user.id,member:member.id});return json(res,200,safeUser(member),cors)}
 
     if (req.method === 'GET' && url.pathname === '/api/admin/registrations') {
       if (!adminOnly(user, res, cors)) return

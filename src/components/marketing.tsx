@@ -7,17 +7,14 @@ import {
   Check,
   CheckCircle2,
   Info,
-  GraduationCap,
-  HeartPulse,
   Menu,
-  Plane,
   Plus,
   X,
 } from 'lucide-react'
-import { LAUNCH_OFFER, SECTORS, SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
+import { LAUNCH_OFFER } from '@/data/catalog'
 import { cn } from '@/lib/utils'
 import { clearSelectedSector, useSelectedSector } from '@/lib/sector-filter'
-import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
+import { SECTORS_CONFIG, type SectorSlug } from '@/lib/sectors'
 import { Badge, Card } from '@/components/ui'
 import type { FeatureRow, MissionCode, Sector } from '@/types'
 import { LanguageSwitch } from '@/i18n/LanguageSwitch'
@@ -45,7 +42,7 @@ export function LaunchBanner() {
 /* ------------------------------------------------------------------ */
 
 const BASE_PUBLIC_LINKS = [
-  { label: SINGLE_SECTOR ? SECTOR_LABEL[DEFAULT_SECTOR] : 'Nos secteurs', to: '/secteurs' },
+  { label: 'Univers', to: '/univers' },
   { label: 'À propos', to: '/a-propos' },
   { label: 'FAQ', to: '/faq' },
 ] as const
@@ -137,7 +134,6 @@ export function PublicHeader() {
 /* ------------------------------------------------------------------ */
 
 export function PublicFooter() {
-  const selectedSector = useSelectedSector()
   return (
     <footer className="mk mk-footer">
       <div className="mk-wrap">
@@ -167,10 +163,10 @@ export function PublicFooter() {
           <div>
             <h3>Secteurs</h3>
             <ul>
-              {(selectedSector ? [selectedSector] : SECTOR_ORDER).map((sector) => (
-                <li key={sector}>
-                  <Link to="/secteurs/$sector" params={{ sector }}>
-                    {SECTOR_LABEL[sector]}
+              {SECTORS_CONFIG.map((sector) => (
+                <li key={sector.slug}>
+                  <Link to="/secteurs/$sector" params={{ sector: sector.slug }}>
+                    {sector.label.fr}
                   </Link>
                 </li>
               ))}
@@ -210,7 +206,7 @@ export function PublicFooter() {
         </div>
 
         <div className="mk-footer-bottom">
-          <p>© {new Date().getFullYear()} ALLNEEDS · {SECTOR_ORDER.map((s) => SECTOR_LABEL[s]).join(' · ')}</p>
+          <p>© {new Date().getFullYear()} ALLNEEDS</p>
           <p>
             ALLNEEDS ne fournit pas de conseil juridique, fiscal ou comptable et ne négocie pas pour le compte du
             membre.
@@ -218,39 +214,6 @@ export function PublicFooter() {
         </div>
       </div>
     </footer>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* Sector switcher                                                     */
-/* ------------------------------------------------------------------ */
-
-const SECTOR_ICONS: Record<Sector, ReactNode> = {
-  enseignement: <GraduationCap className="h-4 w-4" />,
-  sante: <HeartPulse className="h-4 w-4" />,
-  tourisme: <Plane className="h-4 w-4" />,
-}
-
-export function SectorTabs({ active }: { active?: Sector }) {
-  return (
-    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-      {SECTOR_ORDER.map((sector) => (
-        <Link
-          key={sector}
-          to="/secteurs/$sector"
-          params={{ sector }}
-          className={cn(
-            'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition',
-            active === sector
-              ? 'border-ink-950 bg-ink-950 text-white'
-              : 'border-ink-200 bg-white text-ink-600 hover:border-ink-400 hover:text-ink-950',
-          )}
-        >
-          {SECTOR_ICONS[sector]}
-          {SECTOR_LABEL[sector]}
-        </Link>
-      ))}
-    </div>
   )
 }
 
@@ -490,7 +453,7 @@ export function CtaBand({
 }: {
   title: string
   description: string
-  primary?: { label: string; to: LinkProps['to'] }
+  primary?: { label: string; to: LinkProps['to']; search?: { secteur?: string } }
   secondary?: { label: string; to: LinkProps['to'] } | null
   /** Replaces the default launch-offer label above the title. */
   eyebrow?: string
@@ -513,7 +476,7 @@ export function CtaBand({
           ) : null}
         </div>
         <div className="mk-cta-actions">
-          <Link to={primary.to} className="mk-btn mk-btn-cyan">
+          <Link to={primary.to} search={primary.search as never} className="mk-btn mk-btn-cyan">
             {primary.label}
             <ArrowRight />
           </Link>
@@ -541,11 +504,7 @@ export function HighlightGrid({ items }: { items: { title: string; detail: strin
   )
 }
 
-export function sectorName(sector: Sector) {
-  return SECTORS[sector].name
-}
-
-function PublicNavigationLink({to,sector,children,className,onClick,activeProps}:{to:string;sector:Sector|null;children:ReactNode;className?:string;onClick?:()=>void;activeProps?:{className:string}}){
+function PublicNavigationLink({to,sector,children,className,onClick,activeProps}:{to:string;sector:SectorSlug|null;children:ReactNode;className?:string;onClick?:()=>void;activeProps?:{className:string}}){
  const handleClick=()=>{
   if(to==='/') clearSelectedSector()
   onClick?.()

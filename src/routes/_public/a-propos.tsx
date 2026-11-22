@@ -1,8 +1,12 @@
-import { DEFAULT_SECTOR } from '@/lib/active-sectors'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, ClipboardList, FileCheck2, Network, PackageCheck, ShieldCheck, Users } from 'lucide-react'
-import { SECTORS } from '@/data/catalog'
 import { CtaBand, PageHero } from '@/components/marketing'
+
+const PRINCIPLES = [
+  { title: 'Votre structure d’abord', detail: 'Nous partons de votre organisation, pas d’un catalogue de services.' },
+  { title: 'Un cadre qui respecte votre profession', detail: 'Communication informative, aucune promesse irréaliste, aucun conseil hors de notre périmètre.' },
+  { title: 'Un seul interlocuteur', detail: 'Nous mobilisons les compétences nécessaires, vous n’avez pas à chercher dix prestataires.' },
+]
 
 export const Route = createFileRoute('/_public/a-propos')({
   component: AProposPage,
@@ -121,7 +125,7 @@ function AProposPage() {
             <h2 className="mk-h2">Trois raisons qui reviennent dans chaque mission.</h2>
           </div>
           <div className="mk-steps">
-            {SECTORS[DEFAULT_SECTOR].reasons.map((reason, i) => (
+            {PRINCIPLES.map((reason, i) => (
               <div key={reason.title} className="mk-step">
                 <span className="n">0{i + 1}</span>
                 <h3 className="mk-h3">{reason.title}</h3>

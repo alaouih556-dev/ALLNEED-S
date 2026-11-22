@@ -1,7 +1,8 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
+import { SECTOR_PAGES } from '@/data/sector-pages'
+import { SECTORS_CONFIG, getSector } from '@/lib/sectors'
 import { FaqList, CtaBand, PageHero } from '@/components/marketing'
 import { useSelectedSector } from '@/lib/sector-filter'
 
@@ -22,7 +23,7 @@ export const Route = createFileRoute('/_public/faq')({
 const GENERALES = [
   {
     q: 'À qui s’adresse ALLNEEDS ?',
-    a: 'Aux dirigeants de structures de santé (cabinets, centres, cliniques, laboratoires) qui veulent mieux organiser leurs priorités et décider de la suite à partir de leur quotidien.',
+    a: 'Aux dirigeants d’entreprises et d’établissements de nos 7 secteurs qui veulent mieux organiser leurs priorités et décider de la suite à partir de leur quotidien.',
   },
   {
     q: 'Que se passe-t-il pendant le premier échange ?',
@@ -46,12 +47,6 @@ const GENERALES = [
   },
 ]
 
-const SECTOR_FAQ = {
-  enseignement: [{ q: 'Le diagnostic porte-t-il sur la pédagogie ?', a: 'Non. Il concerne l’organisation de l’établissement, les admissions, les échanges avec les familles et les besoins opérationnels.' }],
-  sante: [{ q: 'Le diagnostic porte-t-il sur les soins ?', a: 'Non. Il concerne l’organisation, l’accueil et les besoins opérationnels de votre structure.' }],
-  tourisme: [{ q: 'Faut-il remplacer nos outils de réservation ?', a: 'Non. Le premier échange part de vos outils, canaux et habitudes actuels.' }],
-}
-
 const RESUME = [
   { n: '01', t: 'Un état des lieux', d: 'Les forces et les points de blocage de votre situation.' },
   { n: '02', t: 'Trois priorités', d: 'Des sujets concrets pour orienter vos décisions.' },
@@ -70,7 +65,7 @@ function FaqPage() {
   const filtered = useMemo(() => {
     const all = [
       { group: 'Général', items: GENERALES },
-      ...(selectedSector ? [{ group: SECTOR_LABEL[selectedSector], items: SECTOR_FAQ[selectedSector] }] : SECTOR_ORDER.map((sector) => ({ group: SECTOR_LABEL[sector], items: SECTOR_FAQ[sector] }))),
+      ...(selectedSector ? [getSector(selectedSector)!] : SECTORS_CONFIG).map((sector) => ({ group: sector.label.fr, items: SECTOR_PAGES[sector.slug].faq })),
     ]
     if (!query.trim()) return all
     const q = query.toLowerCase()

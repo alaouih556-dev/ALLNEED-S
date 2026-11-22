@@ -1,31 +1,40 @@
 import { useEffect, useState } from 'react'
-import type { Sector } from '@/types'
-import { ACTIVE_SECTORS } from '@/lib/active-sectors'
+import { getSector, type SectorSlug } from '@/lib/sectors'
 
 const KEY = 'allneeds-public-sector'
 const EVENT = 'allneeds:sector-changed'
-const VALID: Sector[] = ACTIVE_SECTORS
 
-export function readSelectedSector(): Sector | null {
+export function readSelectedSector(): SectorSlug | null {
   if (typeof window === 'undefined') return null
-  const value = window.localStorage.getItem(KEY)
-  return VALID.includes(value as Sector) ? (value as Sector) : null
+  try {
+    return getSector(window.localStorage.getItem(KEY))?.slug ?? null
+  } catch {
+    return null
+  }
 }
 
-export function selectSector(sector: Sector) {
+export function selectSector(sector: SectorSlug) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(KEY, sector)
+  try {
+    window.localStorage.setItem(KEY, sector)
+  } catch {
+    /* stockage indisponible */
+  }
   window.dispatchEvent(new CustomEvent(EVENT, { detail: sector }))
 }
 
 export function clearSelectedSector() {
   if (typeof window === 'undefined') return
-  window.localStorage.removeItem(KEY)
+  try {
+    window.localStorage.removeItem(KEY)
+  } catch {
+    /* stockage indisponible */
+  }
   window.dispatchEvent(new CustomEvent(EVENT, { detail: null }))
 }
 
 export function useSelectedSector() {
-  const [sector, setSector] = useState<Sector | null>(() => readSelectedSector())
+  const [sector, setSector] = useState<SectorSlug | null>(() => readSelectedSector())
 
   useEffect(() => {
     const sync = () => setSector(readSelectedSector())

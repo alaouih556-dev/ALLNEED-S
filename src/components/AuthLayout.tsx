@@ -1,4 +1,4 @@
-import { SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
+import { SECTORS_CONFIG, type SectorConfig } from '@/lib/sectors'
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, ClipboardCheck, Network, ShieldCheck } from 'lucide-react'
@@ -17,12 +17,15 @@ export function AuthLayout({
   children,
   footer,
   wide = false,
+  sector = null,
 }: {
   title: string
   subtitle: string
   children: ReactNode
   footer?: ReactNode
   wide?: boolean
+  /** Secteur choisi : remplace le rappel général dans le panneau sombre. */
+  sector?: SectorConfig | null
 }) {
   return (
     <>
@@ -47,7 +50,9 @@ export function AuthLayout({
 
         <aside className="mk-auth-aside" aria-label="Le premier échange ALLNEEDS">
           <div className="mk-auth-aside-inner">
-            <span className="mk-pill" style={{ justifySelf: 'start' }}>{SECTOR_ORDER.length > 1 ? `Une plateforme · ${SECTOR_ORDER.length} secteurs` : `ALLNEEDS · ${SECTOR_LABEL[SECTOR_ORDER[0]]}`}</span>
+            <span className="mk-pill" style={{ justifySelf: 'start' }}>
+              {sector ? <>ALLNEEDS · <span style={{ textTransform: 'uppercase' }}>{sector.label.fr}</span></> : 'Une plateforme · 7 secteurs'}
+            </span>
             <h2>
               En 2h15, passons du trop-plein à <span className="mk-hl">un cap clair.</span>
             </h2>
@@ -69,8 +74,8 @@ export function AuthLayout({
               ))}
             </ol>
             <div className="mk-auth-tags">
-              {SECTOR_ORDER.map((s) => SECTOR_LABEL[s]).map((sector) => (
-                <span key={sector}>{sector}</span>
+              {(sector ? [sector] : SECTORS_CONFIG).map((item) => (
+                <span key={item.slug}>{item.label.fr}</span>
               ))}
             </div>
           </div>

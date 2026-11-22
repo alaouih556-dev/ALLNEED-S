@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/features/auth/AuthContext'
+import { DiagnosticPending } from '@/features/parcours/DiagnosticPending'
+import { isDiagnosticPending } from '@/lib/sectors'
 import { titles } from './model'
 import './workspace.css'
 import { Diagnostic360 } from '@/features/health360/Diagnostic360'
@@ -52,6 +54,8 @@ export function Diagnostic() {
     justCompletedRef.current = false
     synthesisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [showSynthesis])
+
+  if (isDiagnosticPending(auth.user?.organization?.sector)) return <DiagnosticPending />
 
   if (!sector) {
     return (

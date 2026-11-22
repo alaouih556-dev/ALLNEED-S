@@ -1,4 +1,5 @@
 import { ACTIVE_SECTORS } from '@/lib/active-sectors'
+import { SECTOR_LABEL_BY_KEY } from '@/lib/sectors'
 import type { AccessOffer, LaunchOffer, MissionCode, MissionOffer, Sector, SectorContent } from '@/types'
 
 export const LAUNCH_OFFER: LaunchOffer = {
@@ -1440,11 +1441,8 @@ export const ALL_SECTORS: Sector[] = ['enseignement', 'sante', 'tourisme']
 /** Secteurs affichés dans l’interface (voir src/lib/active-sectors.ts). */
 export const SECTOR_ORDER: Sector[] = ACTIVE_SECTORS
 
-export const SECTOR_LABEL: Record<Sector, string> = {
-  enseignement: 'Enseignement',
-  sante: 'Santé',
-  tourisme: 'Tourisme',
-}
+/** Libellés par clé stockée : les 7 secteurs, y compris ceux sans questionnaire. */
+export const SECTOR_LABEL: Record<Sector, string> & Record<string, string> = SECTOR_LABEL_BY_KEY as Record<Sector, string> & Record<string, string>
 
 export const MISSION_LABEL: Record<MissionCode, string> = {
   STARTER: 'STARTER',

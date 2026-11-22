@@ -16,6 +16,21 @@
   ],
   "redirects": [
     {
+      "source": "/secteurs/tourisme",
+      "destination": "/secteurs/tourisme-hotellerie-restauration",
+      "permanent": true
+    },
+    {
+      "source": "/secteurs/enseignement",
+      "destination": "/secteurs/enseignement-prive",
+      "permanent": true
+    },
+    {
+      "source": "/sante",
+      "destination": "/secteurs/sante",
+      "permanent": true
+    },
+    {
       "source": "/concierge",
       "destination": "/account-manager",
       "permanent": true

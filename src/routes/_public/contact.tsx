@@ -1,8 +1,7 @@
-import { DEFAULT_SECTOR, SINGLE_SECTOR } from '@/lib/active-sectors'
+import { SECTORS_CONFIG, getSector, type SectorSlug } from '@/lib/sectors'
 import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, CheckCircle2, GraduationCap, HeartPulse, LogIn, MessageSquare, Plane, PlayCircle, CalendarCheck, type LucideIcon } from 'lucide-react'
-import { SECTOR_LABEL, SECTOR_ORDER } from '@/data/catalog'
+import { ArrowRight, CheckCircle2, LogIn, MessageSquare, PlayCircle, CalendarCheck, type LucideIcon } from 'lucide-react'
 import { useDemo } from '@/store/store'
 import { Field, Input, Textarea } from '@/components/ui'
 import { Note, PageHero } from '@/components/marketing'
@@ -17,8 +16,6 @@ export const Route = createFileRoute('/_public/contact')({
     ],
   }),
 })
-
-const SECTOR_ICON: Record<Sector, LucideIcon> = { enseignement: GraduationCap, sante: HeartPulse, tourisme: Plane }
 
 const SUBJECTS = ['Question avant de m’engager', 'Le diagnostic', 'Les offres et les prix', 'Autre demande']
 
@@ -36,7 +33,7 @@ function ContactPage() {
     org: '',
     email: '',
     phone: '',
-    sector: DEFAULT_SECTOR as Sector,
+    sector: 'sante' as SectorSlug,
     subject: SUBJECTS[0],
     message: '',
   })
@@ -55,7 +52,7 @@ function ContactPage() {
         org: form.org,
         email: form.email,
         phone: form.phone,
-        sector: form.sector,
+        sector: getSector(form.sector)!.key as Sector,
         city: '',
         message: `[${form.subject}] ${form.message}`,
         budget: '',
@@ -115,19 +112,19 @@ function ContactPage() {
                   </Field>
                 </div>
 
-                {SINGLE_SECTOR ? null : <div>
+                <div>
                   <div className="mk-q-label"><strong>Votre secteur</strong></div>
                   <div className="mk-chips" role="group" aria-label="Secteur">
-                    {SECTOR_ORDER.map((sector) => {
-                      const Icon = SECTOR_ICON[sector]
+                    {SECTORS_CONFIG.map((sector) => {
+                      const Icon = sector.icon
                       return (
-                        <button key={sector} type="button" className="mk-chip-btn" aria-pressed={form.sector === sector} onClick={() => set('sector', sector)}>
-                          <Icon /> {SECTOR_LABEL[sector]}
+                        <button key={sector.slug} type="button" className="mk-chip-btn" aria-pressed={form.sector === sector.slug} onClick={() => set('sector', sector.slug)}>
+                          <Icon /> {sector.label.fr}
                         </button>
                       )
                     })}
                   </div>
-                </div>}
+                </div>
 
                 <div>
                   <div className="mk-q-label"><strong>Objet</strong></div>

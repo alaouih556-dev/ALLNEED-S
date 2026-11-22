@@ -30,6 +30,7 @@ import { Route as PublicDiagnosticRouteImport } from './routes/_public/diagnosti
 import { Route as PublicFaqRouteImport } from './routes/_public/faq'
 import { Route as PublicSanteRouteImport } from './routes/_public/sante'
 import { Route as PublicTarifsRouteImport } from './routes/_public/tarifs'
+import { Route as PublicUniversRouteImport } from './routes/_public/univers'
 import { Route as AccountManagerIndexRouteImport } from './routes/account-manager/index'
 import { Route as AccountManagerBesoinsRouteImport } from './routes/account-manager/besoins'
 import { Route as AccountManagerDiagnosticSanteRouteImport } from './routes/account-manager/diagnostic-sante'
@@ -97,9 +98,6 @@ import { Route as OrganisationPermissionsRouteImport } from './routes/organisati
 import { Route as OrganisationTachesRouteImport } from './routes/organisation/taches'
 import { Route as PublicSecteursIndexRouteImport } from './routes/_public/secteurs/index'
 import { Route as PublicSecteursSectorRouteImport } from './routes/_public/secteurs/$sector'
-import { Route as PublicSecteursEnseignementRouteImport } from './routes/_public/secteurs/enseignement'
-import { Route as PublicSecteursSanteRouteImport } from './routes/_public/secteurs/sante'
-import { Route as PublicSecteursTourismeRouteImport } from './routes/_public/secteurs/tourisme'
 import { Route as AccountManagerDiagnosticsIndexRouteImport } from './routes/account-manager/diagnostics/index'
 import { Route as AccountManagerDiagnosticsIdRouteImport } from './routes/account-manager/diagnostics/$id'
 import { Route as AccountManagerEntreprisesIndexRouteImport } from './routes/account-manager/entreprises/index'
@@ -233,6 +231,11 @@ const PublicSanteRoute = PublicSanteRouteImport.update({
 const PublicTarifsRoute = PublicTarifsRouteImport.update({
   id: '/tarifs',
   path: '/tarifs',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicUniversRoute = PublicUniversRouteImport.update({
+  id: '/univers',
+  path: '/univers',
   getParentRoute: () => PublicRoute,
 } as any)
 const AccountManagerIndexRoute = AccountManagerIndexRouteImport.update({
@@ -575,22 +578,6 @@ const PublicSecteursSectorRoute = PublicSecteursSectorRouteImport.update({
   path: '/secteurs/$sector',
   getParentRoute: () => PublicRoute,
 } as any)
-const PublicSecteursEnseignementRoute =
-  PublicSecteursEnseignementRouteImport.update({
-    id: '/secteurs/enseignement',
-    path: '/secteurs/enseignement',
-    getParentRoute: () => PublicRoute,
-  } as any)
-const PublicSecteursSanteRoute = PublicSecteursSanteRouteImport.update({
-  id: '/secteurs/sante',
-  path: '/secteurs/sante',
-  getParentRoute: () => PublicRoute,
-} as any)
-const PublicSecteursTourismeRoute = PublicSecteursTourismeRouteImport.update({
-  id: '/secteurs/tourisme',
-  path: '/secteurs/tourisme',
-  getParentRoute: () => PublicRoute,
-} as any)
 const AccountManagerDiagnosticsIndexRoute =
   AccountManagerDiagnosticsIndexRouteImport.update({
     id: '/',
@@ -772,6 +759,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof PublicFaqRoute
   '/sante': typeof PublicSanteRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/univers': typeof PublicUniversRoute
   '/account-manager/besoins': typeof AccountManagerBesoinsRoute
   '/account-manager/diagnostic-sante': typeof AccountManagerDiagnosticSanteRoute
   '/account-manager/diagnostics': typeof AccountManagerDiagnosticsRouteWithChildren
@@ -838,9 +826,6 @@ export interface FileRoutesByFullPath {
   '/expert/': typeof ExpertIndexRoute
   '/organisation/': typeof OrganisationIndexRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
-  '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
-  '/secteurs/sante': typeof PublicSecteursSanteRoute
-  '/secteurs/tourisme': typeof PublicSecteursTourismeRoute
   '/account-manager/diagnostics/$id': typeof AccountManagerDiagnosticsIdRoute
   '/account-manager/entreprises/$id': typeof AccountManagerEntreprisesIdRoute
   '/account-manager/entreprises/nouvelle': typeof AccountManagerEntreprisesNouvelleRoute
@@ -887,6 +872,7 @@ export interface FileRoutesByTo {
   '/faq': typeof PublicFaqRoute
   '/sante': typeof PublicSanteRoute
   '/tarifs': typeof PublicTarifsRoute
+  '/univers': typeof PublicUniversRoute
   '/account-manager/besoins': typeof AccountManagerBesoinsRoute
   '/account-manager/diagnostic-sante': typeof AccountManagerDiagnosticSanteRoute
   '/account-manager/documents': typeof AccountManagerDocumentsRoute
@@ -953,9 +939,6 @@ export interface FileRoutesByTo {
   '/expert': typeof ExpertIndexRoute
   '/organisation': typeof OrganisationIndexRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
-  '/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
-  '/secteurs/sante': typeof PublicSecteursSanteRoute
-  '/secteurs/tourisme': typeof PublicSecteursTourismeRoute
   '/account-manager/diagnostics/$id': typeof AccountManagerDiagnosticsIdRoute
   '/account-manager/entreprises/$id': typeof AccountManagerEntreprisesIdRoute
   '/account-manager/entreprises/nouvelle': typeof AccountManagerEntreprisesNouvelleRoute
@@ -1010,6 +993,7 @@ export interface FileRoutesById {
   '/_public/faq': typeof PublicFaqRoute
   '/_public/sante': typeof PublicSanteRoute
   '/_public/tarifs': typeof PublicTarifsRoute
+  '/_public/univers': typeof PublicUniversRoute
   '/account-manager/besoins': typeof AccountManagerBesoinsRoute
   '/account-manager/diagnostic-sante': typeof AccountManagerDiagnosticSanteRoute
   '/account-manager/diagnostics': typeof AccountManagerDiagnosticsRouteWithChildren
@@ -1077,9 +1061,6 @@ export interface FileRoutesById {
   '/expert/': typeof ExpertIndexRoute
   '/organisation/': typeof OrganisationIndexRoute
   '/_public/secteurs/$sector': typeof PublicSecteursSectorRoute
-  '/_public/secteurs/enseignement': typeof PublicSecteursEnseignementRoute
-  '/_public/secteurs/sante': typeof PublicSecteursSanteRoute
-  '/_public/secteurs/tourisme': typeof PublicSecteursTourismeRoute
   '/account-manager/diagnostics/$id': typeof AccountManagerDiagnosticsIdRoute
   '/account-manager/entreprises/$id': typeof AccountManagerEntreprisesIdRoute
   '/account-manager/entreprises/nouvelle': typeof AccountManagerEntreprisesNouvelleRoute
@@ -1135,6 +1116,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/sante'
     | '/tarifs'
+    | '/univers'
     | '/account-manager/besoins'
     | '/account-manager/diagnostic-sante'
     | '/account-manager/diagnostics'
@@ -1201,9 +1183,6 @@ export interface FileRouteTypes {
     | '/expert/'
     | '/organisation/'
     | '/secteurs/$sector'
-    | '/secteurs/enseignement'
-    | '/secteurs/sante'
-    | '/secteurs/tourisme'
     | '/account-manager/diagnostics/$id'
     | '/account-manager/entreprises/$id'
     | '/account-manager/entreprises/nouvelle'
@@ -1250,6 +1229,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/sante'
     | '/tarifs'
+    | '/univers'
     | '/account-manager/besoins'
     | '/account-manager/diagnostic-sante'
     | '/account-manager/documents'
@@ -1316,9 +1296,6 @@ export interface FileRouteTypes {
     | '/expert'
     | '/organisation'
     | '/secteurs/$sector'
-    | '/secteurs/enseignement'
-    | '/secteurs/sante'
-    | '/secteurs/tourisme'
     | '/account-manager/diagnostics/$id'
     | '/account-manager/entreprises/$id'
     | '/account-manager/entreprises/nouvelle'
@@ -1372,6 +1349,7 @@ export interface FileRouteTypes {
     | '/_public/faq'
     | '/_public/sante'
     | '/_public/tarifs'
+    | '/_public/univers'
     | '/account-manager/besoins'
     | '/account-manager/diagnostic-sante'
     | '/account-manager/diagnostics'
@@ -1439,9 +1417,6 @@ export interface FileRouteTypes {
     | '/expert/'
     | '/organisation/'
     | '/_public/secteurs/$sector'
-    | '/_public/secteurs/enseignement'
-    | '/_public/secteurs/sante'
-    | '/_public/secteurs/tourisme'
     | '/account-manager/diagnostics/$id'
     | '/account-manager/entreprises/$id'
     | '/account-manager/entreprises/nouvelle'
@@ -1638,6 +1613,13 @@ declare module '@tanstack/react-router' {
       path: '/tarifs'
       fullPath: '/tarifs'
       preLoaderRoute: typeof PublicTarifsRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/univers': {
+      id: '/_public/univers'
+      path: '/univers'
+      fullPath: '/univers'
+      preLoaderRoute: typeof PublicUniversRouteImport
       parentRoute: typeof PublicRoute
     }
     '/account-manager/': {
@@ -2109,27 +2091,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicSecteursSectorRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_public/secteurs/enseignement': {
-      id: '/_public/secteurs/enseignement'
-      path: '/secteurs/enseignement'
-      fullPath: '/secteurs/enseignement'
-      preLoaderRoute: typeof PublicSecteursEnseignementRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/secteurs/sante': {
-      id: '/_public/secteurs/sante'
-      path: '/secteurs/sante'
-      fullPath: '/secteurs/sante'
-      preLoaderRoute: typeof PublicSecteursSanteRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/secteurs/tourisme': {
-      id: '/_public/secteurs/tourisme'
-      path: '/secteurs/tourisme'
-      fullPath: '/secteurs/tourisme'
-      preLoaderRoute: typeof PublicSecteursTourismeRouteImport
-      parentRoute: typeof PublicRoute
-    }
     '/account-manager/diagnostics/': {
       id: '/account-manager/diagnostics/'
       path: '/'
@@ -2352,11 +2313,9 @@ interface PublicRouteChildren {
   PublicFaqRoute: typeof PublicFaqRoute
   PublicSanteRoute: typeof PublicSanteRoute
   PublicTarifsRoute: typeof PublicTarifsRoute
+  PublicUniversRoute: typeof PublicUniversRoute
   PublicIndexRoute: typeof PublicIndexRoute
   PublicSecteursSectorRoute: typeof PublicSecteursSectorRoute
-  PublicSecteursEnseignementRoute: typeof PublicSecteursEnseignementRoute
-  PublicSecteursSanteRoute: typeof PublicSecteursSanteRoute
-  PublicSecteursTourismeRoute: typeof PublicSecteursTourismeRoute
   PublicSecteursIndexRoute: typeof PublicSecteursIndexRoute
 }
 
@@ -2369,11 +2328,9 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicFaqRoute: PublicFaqRoute,
   PublicSanteRoute: PublicSanteRoute,
   PublicTarifsRoute: PublicTarifsRoute,
+  PublicUniversRoute: PublicUniversRoute,
   PublicIndexRoute: PublicIndexRoute,
   PublicSecteursSectorRoute: PublicSecteursSectorRoute,
-  PublicSecteursEnseignementRoute: PublicSecteursEnseignementRoute,
-  PublicSecteursSanteRoute: PublicSecteursSanteRoute,
-  PublicSecteursTourismeRoute: PublicSecteursTourismeRoute,
   PublicSecteursIndexRoute: PublicSecteursIndexRoute,
 }
 

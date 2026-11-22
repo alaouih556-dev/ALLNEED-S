@@ -5,8 +5,7 @@ import { PageHeader } from '@/components/layouts'
 import { Alert, Button, Input } from '@/components/ui'
 import { Initial, Panel } from '@/components/admin-kit'
 import { useAuth } from '@/features/auth/AuthContext'
-import { toSector } from '@/lib/parcours'
-import { SECTOR_LABEL } from '@/data/catalog'
+import { getSectorLabel } from '@/lib/sectors'
 import { longDate } from '@/lib/format'
 
 export const Route = createFileRoute('/app/parametres')({
@@ -82,8 +81,7 @@ function ProfilePage() {
     }
   }
 
-  const sectorKey = toSector(org?.sector) as keyof typeof SECTOR_LABEL | null
-  const sectorLabel = sectorKey ? SECTOR_LABEL[sectorKey] : org?.sector
+  const sectorLabel = getSectorLabel(org?.sector)
   const lastLogin = (user as { lastLoginAt?: string } | null)?.lastLoginAt
 
   return (

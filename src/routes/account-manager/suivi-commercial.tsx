@@ -27,7 +27,7 @@ function ConciergeCommercial() {
     const openOpp = opportunities.find((item) => item.orgId === org.id && !['acceptee', 'refusee'].includes(item.status))
     const completedCode = completedMission?.code
     const planCode = completedCode === 'PRO' ? 'PERFORMANCE' : completedCode === 'PERFORMANCE' ? null : 'PRO'
-    const offer = planCode ? PLANS[org.sector].find((plan) => plan.code === planCode) : undefined
+    const offer = planCode ? PLANS[org.sector]?.find((plan) => plan.code === planCode) : undefined
     const blocker = !publishedDiagnostic ? pendingDiagnostic ? 'Le diagnostic doit être vérifié et restitué avant de recommander une mission.' : 'Réalisez le diagnostic avec le dirigeant : aucune piste complémentaire ne doit être déduite sans constats validés.' : activeMission ? `La mission « ${activeMission.title} » n’est pas terminée. Assurez son résultat avant d’ouvrir une vente additionnelle.` : !offer ? 'La dernière mission PERFORMANCE est terminée. Faites d’abord le bilan avec le client et attendez un nouveau besoin exprimé.' : null
     const signal = publishedDiagnostic?.priorities.slice(0, 3) ?? []
     const question = offer?.code === 'PERFORMANCE'

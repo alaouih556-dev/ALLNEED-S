@@ -27,7 +27,8 @@ import { ValidationRequests } from '@/components/ValidationRequests'
 import { AreaChart, BarList, DonutChart, Legend, Sparkline, StageBar } from '@/components/charts'
 import { Avatar } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { isSectorActive, SINGLE_SECTOR } from '@/lib/active-sectors'
+import { isSectorActive } from '@/lib/active-sectors'
+import { getSectorLabel } from '@/lib/sectors'
 
 export const Route = createFileRoute('/admin/')({ component: AdminDashboard, head: () => ({ meta: [{ title: 'Tableau de bord — ALLNEEDS' }] }) })
 
@@ -206,12 +207,7 @@ function AdminDashboard() {
 
     const sectorCounts = new Map<string, number>()
     for (const o of orgs) sectorCounts.set(o.sector ?? 'autre', (sectorCounts.get(o.sector ?? 'autre') ?? 0) + 1)
-    const statusSlices = [
-      { label: 'Comptes actifs', value: orgs.filter((o) => o.active !== false && !o.saas?.subscriptionActive).length, color: 'var(--an-accent-2)' },
-      { label: 'Actifs avec SaaS', value: orgs.filter((o) => o.active !== false && o.saas?.subscriptionActive).length, color: 'var(--an-accent)' },
-      { label: 'Désactivés', value: orgs.filter((o) => o.active === false).length, color: '#cbd5e1' },
-    ]
-    const sectorSlices = SINGLE_SECTOR ? statusSlices : [...sectorCounts.entries()].map(([k, value]) => ({ label: (SECTORS[k] ?? OTHER_SECTOR).label, color: (SECTORS[k] ?? OTHER_SECTOR).color, value })).sort((a, b) => b.value - a.value)
+    const sectorSlices = [...sectorCounts.entries()].map(([k, value]) => ({ label: getSectorLabel(k), color: (SECTORS[k] ?? OTHER_SECTOR).color, value })).sort((a, b) => b.value - a.value)
 
     const diagStages = [
       { label: 'Brouillon', value: diagnostics.filter((d) => !d.status || d.status === 'brouillon').length, color: '#cbd5e1' },
@@ -377,8 +373,8 @@ function AdminDashboard() {
         <div className="an-panel">
           <div className="an-panel-head">
             <div>
-              <h2>{SINGLE_SECTOR ? 'Comptes clients Santé' : 'Répartition par secteur'}</h2>
-              <p>{SINGLE_SECTOR ? 'Statut des entreprises clientes' : 'Entreprises clientes enregistrées'}</p>
+              <h2>Répartition par secteur</h2>
+              <p>Entreprises clientes enregistrées</p>
             </div>
           </div>
           <div className="flex flex-col items-center gap-6 p-5 sm:flex-row xl:flex-col 2xl:flex-row">

@@ -8,7 +8,7 @@ try {
   const wrap = (el) => renderToString(React.createElement(DemoStoreProvider, null, el))
   const { PACKS } = await server.ssrLoadModule('/src/features/health360/packs.ts')
   for (const [key, pack] of Object.entries(PACKS)) {
-    for (const expect of ['FAIRE LE POINT', 'Commencer le diagnostic', 'question']) {
+    for (const expect of ['DIAGNOSTIC 360°', 'Commencer le diagnostic', 'question']) {
       // @ts-ignore
       const { Diagnostic360 } = await server.ssrLoadModule('/src/features/health360/Diagnostic360.tsx')
       const html = wrap(React.createElement(Diagnostic360, { sector: key }))

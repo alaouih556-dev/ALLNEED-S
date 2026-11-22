@@ -3,7 +3,8 @@ import { Building2, Copy, Mail, Pencil, Power, RefreshCcw, Send, UserPlus, Users
 import { PageHeader } from '@/components/layouts'
 import { Alert, Avatar, Badge, Button, Checkbox, Field, Input, Modal } from '@/components/ui'
 import { EmptyBox, MiniStat, Panel, Rows, SearchBox, StatGrid, Toolbar, matches } from '@/components/admin-kit'
-import { ACTIVE_SECTORS, SINGLE_SECTOR, isSectorActive } from '@/lib/active-sectors'
+import { isSectorActive } from '@/lib/active-sectors'
+import { SECTOR_KEYS } from '@/lib/sectors'
 import { SECTOR_LABEL } from '@/data/catalog'
 import { cn } from '@/lib/utils'
 
@@ -169,8 +170,7 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
     if (!valid) return
     setBusy(true); setError('')
     try {
-      // Le concierge est autorisé sur les secteurs actifs (aujourd’hui : Santé).
-      const sectors = ACTIVE_SECTORS
+      const sectors = SECTOR_KEYS
       const r = await fetch('/api/admin/account-managers', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name.trim(), email: email.trim(), sectors, assignedOrgIds: orgIds }) })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Création impossible')
@@ -220,7 +220,7 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
           <p className="mb-2 text-xs font-semibold text-ink-700">Entreprises à suivre <span className="font-normal text-ink-400">(facultatif)</span></p>
           <OrgPicker orgs={orgs} value={orgIds} onChange={setOrgIds} />
         </div>
-        {!SINGLE_SECTOR ? <p className="text-xs text-ink-500">Secteurs autorisés : {ACTIVE_SECTORS.map((s) => SECTOR_LABEL[s]).join(', ')}</p> : null}
+        <p className="text-xs text-ink-500">Secteurs autorisés : <span>tous les secteurs</span></p>
         {error ? <Alert tone="danger">{error}</Alert> : null}
         <div className="flex justify-end gap-2 border-t border-ink-100 pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>Annuler</Button>
@@ -241,18 +241,16 @@ function smtpReason(error?: string) {
 
 function PerimeterModal({ concierge, orgs, onClose, onSave }: { concierge: Concierge; orgs: Org[]; onClose: () => void; onSave: (body: Record<string, unknown>) => Promise<void> }) {
   const [orgIds, setOrgIds] = useState<string[]>(concierge.orgIds ?? [])
-  const [sectors, setSectors] = useState<string[]>(concierge.sectors?.length ? concierge.sectors : ACTIVE_SECTORS)
+  const [sectors, setSectors] = useState<string[]>(concierge.sectors?.length ? concierge.sectors : SECTOR_KEYS)
   const [busy, setBusy] = useState(false)
   return (
     <Modal open onClose={onClose} title={`Périmètre de ${concierge.name}`} description="Choisissez les entreprises que cet Account Manager peut suivre.">
       <div className="space-y-4">
         <OrgPicker orgs={orgs} value={orgIds} onChange={setOrgIds} />
-        {!SINGLE_SECTOR ? (
-          <div>
+        <div>
             <p className="mb-2 text-xs font-semibold text-ink-700">Secteurs autorisés</p>
-            <div className="flex flex-wrap gap-4">{ACTIVE_SECTORS.map((s) => <Checkbox key={s} label={SECTOR_LABEL[s]} checked={sectors.includes(s)} onChange={(e) => setSectors(e.target.checked ? [...new Set([...sectors, s])] : sectors.filter((x) => x !== s))} />)}</div>
-          </div>
-        ) : null}
+            <div className="flex flex-wrap gap-4">{SECTOR_KEYS.map((s) => <Checkbox key={s} label={SECTOR_LABEL[s]} checked={sectors.includes(s)} onChange={(e) => setSectors(e.target.checked ? [...new Set([...sectors, s])] : sectors.filter((x) => x !== s))} />)}</div>
+        </div>
         <div className="flex justify-end gap-2 border-t border-ink-100 pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>Annuler</Button>
           <Button disabled={busy} onClick={async () => { setBusy(true); await onSave({ orgIds: [...new Set([...(concierge.orgIds ?? []).filter((id) => !orgs.some((o) => o.id === id)), ...orgIds])], sectors: [...new Set([...(concierge.sectors ?? []).filter((s) => !isSectorActive(s)), ...sectors])] }); setBusy(false) }}>{busy ? 'Enregistrement…' : 'Enregistrer'}</Button>

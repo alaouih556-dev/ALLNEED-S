@@ -31,7 +31,8 @@
     "test:phase6": "node scripts/test-phase6.mjs",
     "test:sales": "node scripts/test-sales-access.mjs",
     "test:crm": "node scripts/test-crm.mjs",
-    "test:org": "node scripts/test-organization.mjs"
+    "test:org": "node scripts/test-organization.mjs",
+    "test:sectors": "node scripts/test-sectors.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.39",

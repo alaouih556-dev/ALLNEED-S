@@ -1,34 +1,10 @@
 import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
-import { AlertTriangle, ArrowRight, Check, FileCheck2, GraduationCap, HeartPulse, Plane, ShieldCheck } from 'lucide-react'
-import { SECTOR_LABEL } from '@/data/catalog'
+import { AlertTriangle, ArrowRight, Check, FileCheck2, ShieldCheck } from 'lucide-react'
+import { SECTOR_PAGES } from '@/data/sector-pages'
 import { CtaBand, FaqList } from '@/components/marketing'
-import type { Sector } from '@/types'
+import type { SectorConfig } from '@/lib/sectors'
 import { selectSector } from '@/lib/sector-filter'
-
-const STORIES: Record<Sector, { headline: string; tension: string; symptoms: string[]; guardrail: string; faq: { q: string; a: string }[] }> = {
-  enseignement: {
-    headline: 'Quand les familles attendent une réponse et que tout remonte à la direction.',
-    tension: 'Admissions, relances, rentrée : les sujets s’enchaînent et reposent souvent sur les mêmes personnes. Il devient difficile de savoir quelle action débloquera vraiment la situation.',
-    symptoms: ['Des demandes d’information suivies dans plusieurs outils.', 'Des relances faites au dernier moment.', 'Des rôles et consignes qui manquent de clarté pour l’équipe.'],
-    guardrail: 'Nous parlons d’organisation, d’admissions et d’échanges avec les familles, pas de pédagogie. Les données nominatives d’élèves restent dans votre établissement.',
-    faq: [{q:'Le diagnostic porte-t-il sur la pédagogie ?',a:'Non. Il concerne l’organisation, les admissions, les échanges avec les familles, les outils et les besoins opérationnels.'},{q:'Faut-il transmettre des données d’élèves ?',a:'Non. Les processus peuvent être examinés sans recevoir de données nominatives.'},{q:'Que vais-je obtenir ?',a:'Une synthèse de la situation, les points d’appui et de blocage, puis trois priorités recommandées.'}],
-  },
-  sante: {
-    headline: 'Quand l’accueil et l’organisation prennent le temps du soin.',
-    tension: 'Appels, rendez-vous, annulations et imprévus sollicitent l’équipe toute la journée. Un regard extérieur aide à distinguer les irritants quotidiens des vrais leviers d’organisation.',
-    symptoms: ['Des créneaux qui restent vides malgré les demandes.', 'Des annulations et relances difficiles à suivre.', 'Des rôles d’accueil et d’administration qui se chevauchent.'],
-    guardrail: 'Le diagnostic porte sur l’organisation et l’administratif. Il ne concerne pas l’acte médical et ne nécessite aucun dossier patient nominatif.',
-    faq: [{q:'Avez-vous besoin des dossiers patients ?',a:'Non. Nous travaillons à partir d’éléments d’organisation et de volumes, sans donnée patient nominative.'},{q:'Intervenez-vous sur les soins ?',a:'Non. Le diagnostic concerne l’organisation, l’accueil et les besoins opérationnels.'},{q:'Que vais-je obtenir ?',a:'Une synthèse des constats et trois priorités recommandées pour votre structure.'}],
-  },
-  tourisme: {
-    headline: 'Quand les réservations et les messages se croisent au cœur de la saison.',
-    tension: 'Les demandes arrivent sur plusieurs canaux, les réponses s’accumulent et les périodes fortes approchent. Avant d’ajouter un outil, il faut voir où les occasions se perdent.',
-    symptoms: ['Des demandes dispersées entre plusieurs canaux.', 'Des réponses et relances difficiles à coordonner.', 'Une haute saison qui approche sans plan partagé.'],
-    guardrail: 'Le diagnostic part de vos canaux, de votre saisonnalité et de vos outils actuels. Il n’impose pas le remplacement de votre système de réservation.',
-    faq: [{q:'Devez-vous changer mon outil de réservation ?',a:'Non. Le premier échange commence par vos outils et vos habitudes actuels.'},{q:'Cela concerne-t-il la restauration et les expériences ?',a:'Oui. Les questions sont adaptées à votre activité touristique.'},{q:'Que vais-je obtenir ?',a:'Une synthèse des points de friction et trois priorités recommandées.'}],
-  },
-}
 
 const METHOD = [
   { title: 'On écoute', detail: 'Votre activité, vos objectifs et les échéances qui approchent.' },
@@ -42,23 +18,22 @@ const TAKEAWAYS = [
   { icon: Check, title: '3 priorités', detail: 'Des axes à valider ensemble avant toute suite.' },
 ]
 
-const SECTOR_ICON = { enseignement: GraduationCap, sante: HeartPulse, tourisme: Plane } as const
-
-export function SectorPage({ sector }: { sector: Sector }) {
-  useEffect(() => { selectSector(sector) }, [sector])
-  const story = STORIES[sector]
-  const Icon = SECTOR_ICON[sector]
+export function SectorPage({ sector }: { sector: SectorConfig }) {
+  useEffect(() => { selectSector(sector.slug) }, [sector.slug])
+  const story = SECTOR_PAGES[sector.slug]
+  const Icon = sector.icon
+  const signup = { secteur: sector.slug }
 
   return (
     <div className="mk">
       <section className="mk-hero mk-bg-ink">
         <div className="mk-wrap mk-hero-grid">
           <div className="mk-hero-copy">
-            <span className="mk-pill"><Icon /> Une réalité métier · ALLNEEDS {SECTOR_LABEL[sector]}</span>
+            <span className="mk-pill"><Icon /> Une réalité métier · ALLNEEDS <span>{sector.label.fr}</span></span>
             <h1 className="mk-h1" style={{ fontSize: 'clamp(2.3rem,4vw,3.7rem)' }}>{story.headline}</h1>
             <p className="mk-lead" style={{ maxWidth: 580 }}>{story.tension}</p>
             <div className="mk-cta-row">
-              <Link to="/inscription" className="mk-btn mk-btn-cyan">
+              <Link to="/inscription" search={signup} className="mk-btn mk-btn-cyan">
                 Faire le point gratuitement <ArrowRight />
               </Link>
               <a href="#methode" className="mk-btn mk-btn-line-light">Comment ça se passe</a>
@@ -103,7 +78,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
             <p className="mk-eyebrow">Vous repartez avec</p>
             <h2 className="mk-h2">De la clarté, même si vous vous arrêtez là.</h2>
             <p className="mk-lead">La valeur du diagnostic ne dépend pas d’une mission ensuite. Vous repartez avec une lecture utile pour décider.</p>
-            <Link to="/inscription" className="mk-link">Choisir mon créneau <ArrowRight /></Link>
+            <Link to="/inscription" search={signup} className="mk-link">Choisir mon créneau <ArrowRight /></Link>
           </div>
           <div style={{ display: 'grid', gap: 16 }}>
             {TAKEAWAYS.map(({ icon: ItemIcon, title, detail }) => (
@@ -138,7 +113,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
             </div>
           </div>
           <div style={{ display: 'grid', gap: 12 }}>
-            <p className="mk-eyebrow">Questions fréquentes · {SECTOR_LABEL[sector]}</p>
+            <p className="mk-eyebrow">Questions fréquentes · <span>{sector.label.fr}</span></p>
             <FaqList items={story.faq} />
           </div>
         </div>
@@ -148,7 +123,7 @@ export function SectorPage({ sector }: { sector: Sector }) {
         eyebrow="Le premier pas"
         title="Votre situation mérite un vrai temps de recul."
         description="Réservez un échange offert d’environ 2h15. Vous gardez la liberté de décider après."
-        primary={{ label: 'Choisir mon créneau', to: '/inscription' }}
+        primary={{ label: 'Choisir mon créneau', to: '/inscription', search: signup }}
         secondary={{ label: 'Nous contacter', to: '/contact' }}
         showOffer={false}
       />
