@@ -169,6 +169,39 @@ create index if not exists v46_org_tasks_team_idx on public.v46_org_tasks ((payl
 create index if not exists v46_org_tasks_assignee_idx on public.v46_org_tasks ((payload->>'assigneeId'));
 
 -- ---------------------------------------------------------------------
+-- Studio IA et demandes de sites web
+-- ---------------------------------------------------------------------
+do $$
+declare t text;
+begin
+  foreach t in array array['v46_managed_files','v46_website_requests','v46_website_events','v46_website_deliveries','v46_website_revisions','v46_website_notes','v46_website_imports','v46_magnific_generations'] loop
+    execute format('create table if not exists public.%I (
+      id text primary key,
+      organization_id text references public.v46_organizations(id) on delete set null,
+      payload jsonb not null default ''{}''::jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )', t);
+    execute format('create index if not exists %I on public.%I (organization_id)', t || '_org_idx', t);
+    execute format('drop trigger if exists %I on public.%I', t || '_updated_at', t);
+    execute format('create trigger %I before update on public.%I for each row execute function public.allneeds_set_updated_at()', t || '_updated_at', t);
+  end loop;
+end $$;
+create index if not exists v46_website_requests_status_idx on public.v46_website_requests ((payload->>'status'));
+create index if not exists v46_website_requests_developer_idx on public.v46_website_requests ((payload->>'developerId'));
+create index if not exists v46_website_events_request_idx on public.v46_website_events ((payload->>'requestId'));
+create index if not exists v46_magnific_generations_owner_idx on public.v46_magnific_generations ((payload->>'ownerId'));
+
+do $$
+begin
+  if to_regclass('storage.buckets') is not null then
+    insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+    values ('allneeds-private', 'allneeds-private', false, 52428800, array['image/jpeg','image/png','image/webp','video/mp4','video/webm','video/quicktime','audio/mpeg','audio/wav','audio/mp4','audio/ogg','application/octet-stream'])
+    on conflict (id) do update set public = false;
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------------
 -- RLS + service_role uniquement
 -- ---------------------------------------------------------------------
 
@@ -181,6 +214,7 @@ begin
     'v46_missions','v46_offers','v46_documents','v46_messages','v46_appointments','v46_quotes',
     'v46_notifications','v46_needs_subscriptions','v46_saas_subscriptions','v46_conversations',
     'v46_org_tasks','v46_org_strategies','v46_org_settings',
+    'v46_managed_files','v46_website_requests','v46_website_events','v46_website_deliveries','v46_website_revisions','v46_website_notes','v46_website_imports','v46_magnific_generations',
     'v46_crm_databases','v46_crm_contacts','v46_crm_calls','v46_crm_appointments','v46_crm_campaigns','v46_crm_zones','v46_crm_activity','v46_crm_imports','v46_crm_settings'
   ] loop
     execute format('alter table public.%I enable row level security', t);

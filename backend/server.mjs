@@ -10,6 +10,10 @@ import { createCrm, CRM_COLLECTIONS } from './crm.mjs'
 import { createOrganization, positionOf, isCrmManagerPosition } from './organization.mjs'
 import { resolveSector, sectorLabel } from './sectors.mjs'
 import { createAccounts } from './accounts.mjs'
+import { createStorage } from './storage.mjs'
+import { createProjectAccess } from './project-access.mjs'
+import { createWebsites } from './websites.mjs'
+import { createMagnific } from './magnific.mjs'
 
 const scrypt = promisify(scryptCallback)
 // Vercel : pas de disque durable, chaque requête relit et écrit directement Supabase.
@@ -34,12 +38,19 @@ if (sessionSecret.length < 32) throw new Error('ALLNEEDS_SESSION_SECRET doit con
 if (!process.env.ALLNEEDS_SESSION_SECRET) console.warn('Session secret temporaire : les sessions expireront au redémarrage du serveur.')
 mkdirSync(ROOT, { recursive: true })
 
+/** Studio IA et demandes de sites web. */
+const PROJECT_TABLES = {
+  managedFiles: 'v46_managed_files', websiteRequests: 'v46_website_requests', websiteEvents: 'v46_website_events', websiteDeliveries: 'v46_website_deliveries',
+  websiteRevisions: 'v46_website_revisions', websiteNotes: 'v46_website_notes', websiteImports: 'v46_website_imports', magnificGenerations: 'v46_magnific_generations',
+}
+
 const emptyDb = () => ({
   users: [], orgs: [], diagnostics: [], needs: [], consents: [], registrations: [], invitations: [],
   missions: [], offers: [], documents: [], messages: [], meetings: [], quotes: [], notifications: [],
   needsSubscriptions: [], saasSubscriptions: [], conversations: [],
   orgTasks: [], orgStrategies: [], orgSettings: [],
   crmDatabases: [], crmContacts: [], crmCalls: [], crmAppointments: [], crmCampaigns: [], crmZones: [], crmActivity: [], crmImports: [], crmSettings: [],
+  ...Object.fromEntries(Object.keys(PROJECT_TABLES).map((key) => [key, []])),
 })
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
@@ -51,7 +62,7 @@ let remoteSaveQueue = Promise.resolve()
 
 function normalizeDb(input) {
   const data = input && typeof input === 'object' ? input : emptyDb()
-  for (const key of ['users','orgs','diagnostics','needs','consents','registrations','invitations','missions','offers','documents','messages','meetings','quotes','notifications','needsSubscriptions','saasSubscriptions','conversations','orgTasks','orgStrategies','orgSettings', ...Object.keys(CRM_COLLECTIONS)]) if (!Array.isArray(data[key])) data[key] = []
+  for (const key of ['users','orgs','diagnostics','needs','consents','registrations','invitations','missions','offers','documents','messages','meetings','quotes','notifications','needsSubscriptions','saasSubscriptions','conversations','orgTasks','orgStrategies','orgSettings', ...Object.keys(PROJECT_TABLES), ...Object.keys(CRM_COLLECTIONS)]) if (!Array.isArray(data[key])) data[key] = []
   return data
 }
 
@@ -108,6 +119,7 @@ const COLLECTION_TABLES = {
   registrations: 'v46_registrations', diagnostics: 'v46_diagnostics', needs: 'v46_needs', consents: 'v46_diagnostic_consents', missions: 'v46_missions', offers: 'v46_offers', documents: 'v46_documents', messages: 'v46_messages', meetings: 'v46_appointments', quotes: 'v46_quotes', notifications: 'v46_notifications',
   needsSubscriptions: 'v46_needs_subscriptions', saasSubscriptions: 'v46_saas_subscriptions', conversations: 'v46_conversations',
   orgTasks: 'v46_org_tasks', orgStrategies: 'v46_org_strategies', orgSettings: 'v46_org_settings',
+  ...PROJECT_TABLES,
 }
 
 async function loadDb(includeCrm = true) {
@@ -851,7 +863,7 @@ function requireModuleAccess(user, res, cors, moduleName) {
 /** Compte renvoyé au navigateur : une seule définition pour la connexion et /api/me. */
 function accountPayload(user) {
   const org = orgForUser(user)
-  return { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }
+  return { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), tools: projectAccess.toolsFor(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }
 }
 
 const isCrmAccount = (user) => ['admin', 'agent', 'crm'].includes(user.role) || isCrmManagerPosition(user)
@@ -1123,6 +1135,10 @@ async function hashPassword(password) { const salt = randomBytes(16).toString('h
 const crm = createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification, isCrmManagerPosition })
 const organization = createOrganization({ db, saveDb, json, readBody, audit, createInvitation, sendInvitationEmail, pushNotification })
 const accounts = createAccounts({ db, saveDb, json, readBody, audit, organization, crm, canAccessSalesPresentation, salesPermission: SALES_PERMISSION, ownerPermissions: OWNER_PERMISSIONS, moduleKeys: Object.keys(DEFAULT_MODULES), defaultModules: DEFAULT_MODULES })
+const projectAccess = createProjectAccess({ db, accessFailure })
+const projectStorage = createStorage({ supabaseUrl: SUPABASE_URL, serviceKey: SUPABASE_SERVICE_ROLE_KEY, localRoot: ROOT })
+const websites = createWebsites({ db, saveDb, json, readBody, audit, access: projectAccess, storage: projectStorage, pushNotification, notifyAdmins, appOrigin: process.env.ALLNEEDS_PUBLIC_URL || FRONTEND_ORIGIN })
+const magnific = createMagnific({ db, saveDb, json, readBody, audit, access: projectAccess, storage: projectStorage, persistNow: async () => { if (serverless) await commitRemote(); else await remoteSaveQueue } })
 
 const failures = new Map()
 function loginThrottled(key) {
@@ -1330,13 +1346,16 @@ async function routeRequest(req, res) {
     // Tant que l'utilisateur utilise l'application, sa session est prolongée : pas de déconnexion automatique.
     res.setHeader('set-cookie', cookie(issueSession(user), SESSION_TTL_SECONDS))
     // Un compte commercial n'accède qu'à la présentation : tout le reste est refusé côté serveur.
-    const isOrgApi = url.pathname.startsWith('/api/org/') || url.pathname.startsWith('/api/notifications')
+    // Studio et sites web : ouverts ici, puis filtrés rôle par rôle dans leurs propres modules.
+    const isOrgApi = url.pathname.startsWith('/api/org/') || url.pathname.startsWith('/api/notifications') || /^\/api\/(websites|studio)(\/|$)/.test(url.pathname)
     if (user.role === SALES_ROLE && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à la présentation commerciale' }, cors)
     // Un agent CRM n'accède qu'aux routes du CRM, filtrées par ses permissions et son périmètre.
     if (user.role === 'agent' && !isOrgApi && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé au CRM' }, cors)
     // Rôle « CRM » : uniquement le CRM et la présentation commerciale.
     if (user.role === 'crm' && !isOrgApi && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé au CRM et à la présentation commerciale' }, cors)
     if (user.role === 'staff' && !isOrgApi && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à votre espace' }, cors)
+    if (await websites.handle(req, res, url, user, cors)) return
+    if (await magnific.handle(req, res, url, user, cors)) return
     if (await accounts.handle(req, res, url, user, cors)) return
     if (await organization.handle(req, res, url, user, cors)) return
     if (await crm.handle(req, res, url, user, cors)) return

@@ -45,6 +45,9 @@ import {
   Megaphone,
   Settings,
   Activity,
+  Globe2,
+  Hammer,
+  Plus,
 } from 'lucide-react'
 import { useDemo } from '@/store/store'
 import { canAccessSalesPresentation, useAuth, type AuthUser } from '@/features/auth/AuthContext'
@@ -55,6 +58,7 @@ import { cn } from '@/lib/utils'
 import { THEMES, useWorkspaceTheme, type ThemeMode } from '@/lib/theme'
 import { Avatar } from '@/components/ui'
 import { LanguageSwitch } from '@/i18n/LanguageSwitch'
+import { ProjectBell } from '@/features/projects/shell'
 
 /* ------------------------------------------------------------------ */
 /* Toaster                                                             */
@@ -248,6 +252,23 @@ function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string, salesAc
   return items.filter((i) => !i.perm || has(i.perm)).map(({ perm: _perm, ...rest }) => rest)
 }
 
+/** Studio IA et sites web : mêmes entrées dans tous les espaces, selon les droits renvoyés par le serveur. */
+function withProjectTools(nav: NavItem[], user: AuthUser | null): NavItem[] {
+  const tools = user?.tools
+  if (!tools) return nav
+  const group = 'Studio & sites web'
+  const items: NavItem[] = []
+  if (tools.studio) items.push({ group, label: 'Studio IA', to: '/studio-ia' as any, icon: <Sparkles className="h-4 w-4" /> })
+  if (tools.websiteAdmin) items.push({ group, label: 'Demandes de sites', to: '/admin/sites-web' as any, icon: <Globe2 className="h-4 w-4" /> })
+  if (tools.websites) {
+    items.push({ group, label: 'Créer un site', to: '/sites-web/nouveau' as any, icon: <Plus className="h-4 w-4" /> })
+    if (!tools.websiteAdmin) items.push({ group, label: 'Mes sites', to: '/sites-web/mes-sites' as any, icon: <Globe2 className="h-4 w-4" /> })
+  }
+  if (tools.developer) items.push({ group, label: 'Mes sites à réaliser', to: '/developpeur/sites-web' as any, icon: <Hammer className="h-4 w-4" /> })
+  const preview = nav.findIndex((item) => item.group === PREVIEW_GROUP)
+  return preview < 0 ? [...nav, ...items] : [...nav.slice(0, preview), ...items, ...nav.slice(preview)]
+}
+
 /* ------------------------------------------------------------------ */
 /* App shell                                                           */
 /* ------------------------------------------------------------------ */
@@ -302,7 +323,7 @@ export function AppShell({
   const clientOrg = auth.status === 'authenticated' ? auth.user?.organization : state.orgs.find((org) => org.id === user.orgId)
   const modules = clientModules(auth.user?.organization ?? null)
   const saasAccess = orgSaasActive(auth.user?.organization ?? null)
-  const nav = variant === 'org' ? buildOrgNav(org?.me ?? null, auth.user) : variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id, canAccessSalesPresentation(auth.user)) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
+  const nav = withProjectTools(variant === 'org' ? buildOrgNav(org?.me ?? null, auth.user) : variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id, canAccessSalesPresentation(auth.user)) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess), auth.user)
   const current = [...nav].sort((a, b) => String(b.to).length - String(a.to).length).find((item) => {
     const to = String(item.to).replace(/\/$/, '')
     return pathname === to || pathname === `${to}/` || (to.split('/').length > 2 && pathname.startsWith(`${to}/`))
@@ -417,9 +438,11 @@ export function AppShell({
               </Link>
             ) : null}
 
+            <ProjectBell />
+
             {variant === 'client' && modules.messages ? (
               <Link to="/app/messages" className="an-icon-btn relative" aria-label="Messages">
-                <Bell size={17} />
+                <MessageSquare size={17} />
                 {unread > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" /> : null}
               </Link>
             ) : null}

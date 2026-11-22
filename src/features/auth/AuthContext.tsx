@@ -15,6 +15,7 @@ export interface AuthUser {
   permissions?: string[]
   orgPosition?: { level: string; departmentId: string | null; teamId: string | null; strategyManager: boolean } | null
   crmAccess?: boolean
+  tools?: { studio: boolean; websites: boolean; developer: boolean; websiteAdmin: boolean }
   sectors?: Array<'sante' | 'enseignement' | 'tourisme'>
   organization?: { id:string; name:string; slug:string; sector?:string; city?:string; kind?:string; size?:string; contactName?:string; contactRole?:string; contactEmail?:string; contactPhone?:string; concierge?: { name:string; email:string } | null; active:boolean; modules:Record<string,boolean>; saas?: { subscriptionActive?:boolean; enabled?:boolean; startDate?:string|null; endDate?:string|null; plan?:string|null } | null } | null
 }

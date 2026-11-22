@@ -16,11 +16,14 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as CreerMotDePasseRouteImport } from './routes/creer-mot-de-passe'
 import { Route as CrmRouteImport } from './routes/crm'
+import { Route as DeveloppeurRouteImport } from './routes/developpeur'
 import { Route as ExpertRouteImport } from './routes/expert'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OrganisationRouteImport } from './routes/organisation'
 import { Route as SalesPresentationRouteImport } from './routes/sales-presentation'
+import { Route as SitesWebRouteImport } from './routes/sites-web'
+import { Route as StudioIaRouteImport } from './routes/studio-ia'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAProposRouteImport } from './routes/_public/a-propos'
 import { Route as PublicConditionsRouteImport } from './routes/_public/conditions'
@@ -82,6 +85,7 @@ import { Route as CrmRapportsRouteImport } from './routes/crm/rapports'
 import { Route as CrmReglagesRouteImport } from './routes/crm/reglages'
 import { Route as CrmRendezVousRouteImport } from './routes/crm/rendez-vous'
 import { Route as CrmUtilisateursRouteImport } from './routes/crm/utilisateurs'
+import { Route as DeveloppeurIndexRouteImport } from './routes/developpeur/index'
 import { Route as EntrepriseSlugRouteImport } from './routes/entreprise/$slug'
 import { Route as ExpertIndexRouteImport } from './routes/expert/index'
 import { Route as ExpertAgendaRouteImport } from './routes/expert/agenda'
@@ -97,6 +101,10 @@ import { Route as OrganisationComptesRouteImport } from './routes/organisation/c
 import { Route as OrganisationMembresRouteImport } from './routes/organisation/membres'
 import { Route as OrganisationPermissionsRouteImport } from './routes/organisation/permissions'
 import { Route as OrganisationTachesRouteImport } from './routes/organisation/taches'
+import { Route as SitesWebIndexRouteImport } from './routes/sites-web/index'
+import { Route as SitesWebIdRouteImport } from './routes/sites-web/$id'
+import { Route as SitesWebMesSitesRouteImport } from './routes/sites-web/mes-sites'
+import { Route as SitesWebNouveauRouteImport } from './routes/sites-web/nouveau'
 import { Route as PublicSecteursIndexRouteImport } from './routes/_public/secteurs/index'
 import { Route as PublicSecteursSectorRouteImport } from './routes/_public/secteurs/$sector'
 import { Route as AccountManagerDiagnosticsIndexRouteImport } from './routes/account-manager/diagnostics/index'
@@ -112,6 +120,8 @@ import { Route as AdminDiagnosticsIdRouteImport } from './routes/admin/diagnosti
 import { Route as AdminDiagnosticsReelRouteImport } from './routes/admin/diagnostics/reel'
 import { Route as AdminMissionsIndexRouteImport } from './routes/admin/missions/index'
 import { Route as AdminPrestatairesIndexRouteImport } from './routes/admin/prestataires/index'
+import { Route as AdminSitesWebIndexRouteImport } from './routes/admin/sites-web/index'
+import { Route as AdminSitesWebIdRouteImport } from './routes/admin/sites-web/$id'
 import { Route as AppBesoinsIndexRouteImport } from './routes/app/besoins/index'
 import { Route as AppBesoinsIdRouteImport } from './routes/app/besoins/$id'
 import { Route as AppMissionsIndexRouteImport } from './routes/app/missions/index'
@@ -125,6 +135,8 @@ import { Route as CrmCampagnesIndexRouteImport } from './routes/crm/campagnes/in
 import { Route as CrmCampagnesIdRouteImport } from './routes/crm/campagnes/$id'
 import { Route as CrmContactsIndexRouteImport } from './routes/crm/contacts/index'
 import { Route as CrmContactsIdRouteImport } from './routes/crm/contacts/$id'
+import { Route as DeveloppeurSitesWebIndexRouteImport } from './routes/developpeur/sites-web/index'
+import { Route as DeveloppeurSitesWebIdRouteImport } from './routes/developpeur/sites-web/$id'
 import { Route as OrganisationEquipesTeamIdRouteImport } from './routes/organisation/equipes/$teamId'
 import { Route as OrganisationServicesDepartmentIdRouteImport } from './routes/organisation/services/$departmentId'
 import { Route as OrganisationStrategiesIndexRouteImport } from './routes/organisation/strategies/index'
@@ -164,6 +176,11 @@ const CrmRoute = CrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeveloppeurRoute = DeveloppeurRouteImport.update({
+  id: '/developpeur',
+  path: '/developpeur',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExpertRoute = ExpertRouteImport.update({
   id: '/expert',
   path: '/expert',
@@ -187,6 +204,16 @@ const OrganisationRoute = OrganisationRouteImport.update({
 const SalesPresentationRoute = SalesPresentationRouteImport.update({
   id: '/sales-presentation',
   path: '/sales-presentation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitesWebRoute = SitesWebRouteImport.update({
+  id: '/sites-web',
+  path: '/sites-web',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioIaRoute = StudioIaRouteImport.update({
+  id: '/studio-ia',
+  path: '/studio-ia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
@@ -499,6 +526,11 @@ const CrmUtilisateursRoute = CrmUtilisateursRouteImport.update({
   path: '/utilisateurs',
   getParentRoute: () => CrmRoute,
 } as any)
+const DeveloppeurIndexRoute = DeveloppeurIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DeveloppeurRoute,
+} as any)
 const EntrepriseSlugRoute = EntrepriseSlugRouteImport.update({
   id: '/entreprise/$slug',
   path: '/entreprise/$slug',
@@ -573,6 +605,26 @@ const OrganisationTachesRoute = OrganisationTachesRouteImport.update({
   id: '/taches',
   path: '/taches',
   getParentRoute: () => OrganisationRoute,
+} as any)
+const SitesWebIndexRoute = SitesWebIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SitesWebRoute,
+} as any)
+const SitesWebIdRoute = SitesWebIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SitesWebRoute,
+} as any)
+const SitesWebMesSitesRoute = SitesWebMesSitesRouteImport.update({
+  id: '/mes-sites',
+  path: '/mes-sites',
+  getParentRoute: () => SitesWebRoute,
+} as any)
+const SitesWebNouveauRoute = SitesWebNouveauRouteImport.update({
+  id: '/nouveau',
+  path: '/nouveau',
+  getParentRoute: () => SitesWebRoute,
 } as any)
 const PublicSecteursIndexRoute = PublicSecteursIndexRouteImport.update({
   id: '/secteurs/',
@@ -654,6 +706,16 @@ const AdminPrestatairesIndexRoute = AdminPrestatairesIndexRouteImport.update({
   path: '/prestataires/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSitesWebIndexRoute = AdminSitesWebIndexRouteImport.update({
+  id: '/sites-web/',
+  path: '/sites-web/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSitesWebIdRoute = AdminSitesWebIdRouteImport.update({
+  id: '/sites-web/$id',
+  path: '/sites-web/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppBesoinsIndexRoute = AppBesoinsIndexRouteImport.update({
   id: '/besoins/',
   path: '/besoins/',
@@ -719,6 +781,17 @@ const CrmContactsIdRoute = CrmContactsIdRouteImport.update({
   path: '/contacts/$id',
   getParentRoute: () => CrmRoute,
 } as any)
+const DeveloppeurSitesWebIndexRoute =
+  DeveloppeurSitesWebIndexRouteImport.update({
+    id: '/sites-web/',
+    path: '/sites-web/',
+    getParentRoute: () => DeveloppeurRoute,
+  } as any)
+const DeveloppeurSitesWebIdRoute = DeveloppeurSitesWebIdRouteImport.update({
+  id: '/sites-web/$id',
+  path: '/sites-web/$id',
+  getParentRoute: () => DeveloppeurRoute,
+} as any)
 const OrganisationEquipesTeamIdRoute =
   OrganisationEquipesTeamIdRouteImport.update({
     id: '/equipes/$teamId',
@@ -752,11 +825,14 @@ export interface FileRoutesByFullPath {
   '/connexion': typeof ConnexionRoute
   '/creer-mot-de-passe': typeof CreerMotDePasseRoute
   '/crm': typeof CrmRouteWithChildren
+  '/developpeur': typeof DeveloppeurRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
   '/organisation': typeof OrganisationRouteWithChildren
   '/sales-presentation': typeof SalesPresentationRoute
+  '/sites-web': typeof SitesWebRouteWithChildren
+  '/studio-ia': typeof StudioIaRoute
   '/a-propos': typeof PublicAProposRoute
   '/conditions': typeof PublicConditionsRoute
   '/contact': typeof PublicContactRoute
@@ -826,12 +902,17 @@ export interface FileRoutesByFullPath {
   '/organisation/membres': typeof OrganisationMembresRoute
   '/organisation/permissions': typeof OrganisationPermissionsRoute
   '/organisation/taches': typeof OrganisationTachesRoute
+  '/sites-web/$id': typeof SitesWebIdRoute
+  '/sites-web/mes-sites': typeof SitesWebMesSitesRoute
+  '/sites-web/nouveau': typeof SitesWebNouveauRoute
   '/account-manager/': typeof AccountManagerIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/crm/': typeof CrmIndexRoute
+  '/developpeur/': typeof DeveloppeurIndexRoute
   '/expert/': typeof ExpertIndexRoute
   '/organisation/': typeof OrganisationIndexRoute
+  '/sites-web/': typeof SitesWebIndexRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/account-manager/diagnostics/$id': typeof AccountManagerDiagnosticsIdRoute
   '/account-manager/entreprises/$id': typeof AccountManagerEntreprisesIdRoute
@@ -839,6 +920,7 @@ export interface FileRoutesByFullPath {
   '/admin/clients/$id': typeof AdminClientsIdRoute
   '/admin/diagnostics/$id': typeof AdminDiagnosticsIdRoute
   '/admin/diagnostics/reel': typeof AdminDiagnosticsReelRoute
+  '/admin/sites-web/$id': typeof AdminSitesWebIdRoute
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
   '/app/tourisme/$branch': typeof AppTourismeBranchRoute
@@ -846,6 +928,7 @@ export interface FileRoutesByFullPath {
   '/crm/bases/$id': typeof CrmBasesIdRoute
   '/crm/campagnes/$id': typeof CrmCampagnesIdRoute
   '/crm/contacts/$id': typeof CrmContactsIdRoute
+  '/developpeur/sites-web/$id': typeof DeveloppeurSitesWebIdRoute
   '/organisation/equipes/$teamId': typeof OrganisationEquipesTeamIdRoute
   '/organisation/services/$departmentId': typeof OrganisationServicesDepartmentIdRoute
   '/organisation/strategies/$id': typeof OrganisationStrategiesIdRoute
@@ -857,12 +940,14 @@ export interface FileRoutesByFullPath {
   '/admin/diagnostics/': typeof AdminDiagnosticsIndexRoute
   '/admin/missions/': typeof AdminMissionsIndexRoute
   '/admin/prestataires/': typeof AdminPrestatairesIndexRoute
+  '/admin/sites-web/': typeof AdminSitesWebIndexRoute
   '/app/besoins/': typeof AppBesoinsIndexRoute
   '/app/missions/': typeof AppMissionsIndexRoute
   '/crm/agents/': typeof CrmAgentsIndexRoute
   '/crm/bases/': typeof CrmBasesIndexRoute
   '/crm/campagnes/': typeof CrmCampagnesIndexRoute
   '/crm/contacts/': typeof CrmContactsIndexRoute
+  '/developpeur/sites-web/': typeof DeveloppeurSitesWebIndexRoute
   '/organisation/strategies/': typeof OrganisationStrategiesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -871,6 +956,7 @@ export interface FileRoutesByTo {
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
   '/sales-presentation': typeof SalesPresentationRoute
+  '/studio-ia': typeof StudioIaRoute
   '/a-propos': typeof PublicAProposRoute
   '/conditions': typeof PublicConditionsRoute
   '/contact': typeof PublicContactRoute
@@ -939,13 +1025,18 @@ export interface FileRoutesByTo {
   '/organisation/membres': typeof OrganisationMembresRoute
   '/organisation/permissions': typeof OrganisationPermissionsRoute
   '/organisation/taches': typeof OrganisationTachesRoute
+  '/sites-web/$id': typeof SitesWebIdRoute
+  '/sites-web/mes-sites': typeof SitesWebMesSitesRoute
+  '/sites-web/nouveau': typeof SitesWebNouveauRoute
   '/': typeof PublicIndexRoute
   '/account-manager': typeof AccountManagerIndexRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/crm': typeof CrmIndexRoute
+  '/developpeur': typeof DeveloppeurIndexRoute
   '/expert': typeof ExpertIndexRoute
   '/organisation': typeof OrganisationIndexRoute
+  '/sites-web': typeof SitesWebIndexRoute
   '/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/account-manager/diagnostics/$id': typeof AccountManagerDiagnosticsIdRoute
   '/account-manager/entreprises/$id': typeof AccountManagerEntreprisesIdRoute
@@ -953,6 +1044,7 @@ export interface FileRoutesByTo {
   '/admin/clients/$id': typeof AdminClientsIdRoute
   '/admin/diagnostics/$id': typeof AdminDiagnosticsIdRoute
   '/admin/diagnostics/reel': typeof AdminDiagnosticsReelRoute
+  '/admin/sites-web/$id': typeof AdminSitesWebIdRoute
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
   '/app/tourisme/$branch': typeof AppTourismeBranchRoute
@@ -960,6 +1052,7 @@ export interface FileRoutesByTo {
   '/crm/bases/$id': typeof CrmBasesIdRoute
   '/crm/campagnes/$id': typeof CrmCampagnesIdRoute
   '/crm/contacts/$id': typeof CrmContactsIdRoute
+  '/developpeur/sites-web/$id': typeof DeveloppeurSitesWebIdRoute
   '/organisation/equipes/$teamId': typeof OrganisationEquipesTeamIdRoute
   '/organisation/services/$departmentId': typeof OrganisationServicesDepartmentIdRoute
   '/organisation/strategies/$id': typeof OrganisationStrategiesIdRoute
@@ -971,12 +1064,14 @@ export interface FileRoutesByTo {
   '/admin/diagnostics': typeof AdminDiagnosticsIndexRoute
   '/admin/missions': typeof AdminMissionsIndexRoute
   '/admin/prestataires': typeof AdminPrestatairesIndexRoute
+  '/admin/sites-web': typeof AdminSitesWebIndexRoute
   '/app/besoins': typeof AppBesoinsIndexRoute
   '/app/missions': typeof AppMissionsIndexRoute
   '/crm/agents': typeof CrmAgentsIndexRoute
   '/crm/bases': typeof CrmBasesIndexRoute
   '/crm/campagnes': typeof CrmCampagnesIndexRoute
   '/crm/contacts': typeof CrmContactsIndexRoute
+  '/developpeur/sites-web': typeof DeveloppeurSitesWebIndexRoute
   '/organisation/strategies': typeof OrganisationStrategiesIndexRoute
 }
 export interface FileRoutesById {
@@ -988,11 +1083,14 @@ export interface FileRoutesById {
   '/connexion': typeof ConnexionRoute
   '/creer-mot-de-passe': typeof CreerMotDePasseRoute
   '/crm': typeof CrmRouteWithChildren
+  '/developpeur': typeof DeveloppeurRouteWithChildren
   '/expert': typeof ExpertRouteWithChildren
   '/inscription': typeof InscriptionRoute
   '/onboarding': typeof OnboardingRoute
   '/organisation': typeof OrganisationRouteWithChildren
   '/sales-presentation': typeof SalesPresentationRoute
+  '/sites-web': typeof SitesWebRouteWithChildren
+  '/studio-ia': typeof StudioIaRoute
   '/_public/a-propos': typeof PublicAProposRoute
   '/_public/conditions': typeof PublicConditionsRoute
   '/_public/contact': typeof PublicContactRoute
@@ -1062,13 +1160,18 @@ export interface FileRoutesById {
   '/organisation/membres': typeof OrganisationMembresRoute
   '/organisation/permissions': typeof OrganisationPermissionsRoute
   '/organisation/taches': typeof OrganisationTachesRoute
+  '/sites-web/$id': typeof SitesWebIdRoute
+  '/sites-web/mes-sites': typeof SitesWebMesSitesRoute
+  '/sites-web/nouveau': typeof SitesWebNouveauRoute
   '/_public/': typeof PublicIndexRoute
   '/account-manager/': typeof AccountManagerIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/crm/': typeof CrmIndexRoute
+  '/developpeur/': typeof DeveloppeurIndexRoute
   '/expert/': typeof ExpertIndexRoute
   '/organisation/': typeof OrganisationIndexRoute
+  '/sites-web/': typeof SitesWebIndexRoute
   '/_public/secteurs/$sector': typeof PublicSecteursSectorRoute
   '/account-manager/diagnostics/$id': typeof AccountManagerDiagnosticsIdRoute
   '/account-manager/entreprises/$id': typeof AccountManagerEntreprisesIdRoute
@@ -1076,6 +1179,7 @@ export interface FileRoutesById {
   '/admin/clients/$id': typeof AdminClientsIdRoute
   '/admin/diagnostics/$id': typeof AdminDiagnosticsIdRoute
   '/admin/diagnostics/reel': typeof AdminDiagnosticsReelRoute
+  '/admin/sites-web/$id': typeof AdminSitesWebIdRoute
   '/app/besoins/$id': typeof AppBesoinsIdRoute
   '/app/missions/$id': typeof AppMissionsIdRoute
   '/app/tourisme/$branch': typeof AppTourismeBranchRoute
@@ -1083,6 +1187,7 @@ export interface FileRoutesById {
   '/crm/bases/$id': typeof CrmBasesIdRoute
   '/crm/campagnes/$id': typeof CrmCampagnesIdRoute
   '/crm/contacts/$id': typeof CrmContactsIdRoute
+  '/developpeur/sites-web/$id': typeof DeveloppeurSitesWebIdRoute
   '/organisation/equipes/$teamId': typeof OrganisationEquipesTeamIdRoute
   '/organisation/services/$departmentId': typeof OrganisationServicesDepartmentIdRoute
   '/organisation/strategies/$id': typeof OrganisationStrategiesIdRoute
@@ -1094,12 +1199,14 @@ export interface FileRoutesById {
   '/admin/diagnostics/': typeof AdminDiagnosticsIndexRoute
   '/admin/missions/': typeof AdminMissionsIndexRoute
   '/admin/prestataires/': typeof AdminPrestatairesIndexRoute
+  '/admin/sites-web/': typeof AdminSitesWebIndexRoute
   '/app/besoins/': typeof AppBesoinsIndexRoute
   '/app/missions/': typeof AppMissionsIndexRoute
   '/crm/agents/': typeof CrmAgentsIndexRoute
   '/crm/bases/': typeof CrmBasesIndexRoute
   '/crm/campagnes/': typeof CrmCampagnesIndexRoute
   '/crm/contacts/': typeof CrmContactsIndexRoute
+  '/developpeur/sites-web/': typeof DeveloppeurSitesWebIndexRoute
   '/organisation/strategies/': typeof OrganisationStrategiesIndexRoute
 }
 export interface FileRouteTypes {
@@ -1112,11 +1219,14 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/creer-mot-de-passe'
     | '/crm'
+    | '/developpeur'
     | '/expert'
     | '/inscription'
     | '/onboarding'
     | '/organisation'
     | '/sales-presentation'
+    | '/sites-web'
+    | '/studio-ia'
     | '/a-propos'
     | '/conditions'
     | '/contact'
@@ -1186,12 +1296,17 @@ export interface FileRouteTypes {
     | '/organisation/membres'
     | '/organisation/permissions'
     | '/organisation/taches'
+    | '/sites-web/$id'
+    | '/sites-web/mes-sites'
+    | '/sites-web/nouveau'
     | '/account-manager/'
     | '/admin/'
     | '/app/'
     | '/crm/'
+    | '/developpeur/'
     | '/expert/'
     | '/organisation/'
+    | '/sites-web/'
     | '/secteurs/$sector'
     | '/account-manager/diagnostics/$id'
     | '/account-manager/entreprises/$id'
@@ -1199,6 +1314,7 @@ export interface FileRouteTypes {
     | '/admin/clients/$id'
     | '/admin/diagnostics/$id'
     | '/admin/diagnostics/reel'
+    | '/admin/sites-web/$id'
     | '/app/besoins/$id'
     | '/app/missions/$id'
     | '/app/tourisme/$branch'
@@ -1206,6 +1322,7 @@ export interface FileRouteTypes {
     | '/crm/bases/$id'
     | '/crm/campagnes/$id'
     | '/crm/contacts/$id'
+    | '/developpeur/sites-web/$id'
     | '/organisation/equipes/$teamId'
     | '/organisation/services/$departmentId'
     | '/organisation/strategies/$id'
@@ -1217,12 +1334,14 @@ export interface FileRouteTypes {
     | '/admin/diagnostics/'
     | '/admin/missions/'
     | '/admin/prestataires/'
+    | '/admin/sites-web/'
     | '/app/besoins/'
     | '/app/missions/'
     | '/crm/agents/'
     | '/crm/bases/'
     | '/crm/campagnes/'
     | '/crm/contacts/'
+    | '/developpeur/sites-web/'
     | '/organisation/strategies/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1231,6 +1350,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/onboarding'
     | '/sales-presentation'
+    | '/studio-ia'
     | '/a-propos'
     | '/conditions'
     | '/contact'
@@ -1299,13 +1419,18 @@ export interface FileRouteTypes {
     | '/organisation/membres'
     | '/organisation/permissions'
     | '/organisation/taches'
+    | '/sites-web/$id'
+    | '/sites-web/mes-sites'
+    | '/sites-web/nouveau'
     | '/'
     | '/account-manager'
     | '/admin'
     | '/app'
     | '/crm'
+    | '/developpeur'
     | '/expert'
     | '/organisation'
+    | '/sites-web'
     | '/secteurs/$sector'
     | '/account-manager/diagnostics/$id'
     | '/account-manager/entreprises/$id'
@@ -1313,6 +1438,7 @@ export interface FileRouteTypes {
     | '/admin/clients/$id'
     | '/admin/diagnostics/$id'
     | '/admin/diagnostics/reel'
+    | '/admin/sites-web/$id'
     | '/app/besoins/$id'
     | '/app/missions/$id'
     | '/app/tourisme/$branch'
@@ -1320,6 +1446,7 @@ export interface FileRouteTypes {
     | '/crm/bases/$id'
     | '/crm/campagnes/$id'
     | '/crm/contacts/$id'
+    | '/developpeur/sites-web/$id'
     | '/organisation/equipes/$teamId'
     | '/organisation/services/$departmentId'
     | '/organisation/strategies/$id'
@@ -1331,12 +1458,14 @@ export interface FileRouteTypes {
     | '/admin/diagnostics'
     | '/admin/missions'
     | '/admin/prestataires'
+    | '/admin/sites-web'
     | '/app/besoins'
     | '/app/missions'
     | '/crm/agents'
     | '/crm/bases'
     | '/crm/campagnes'
     | '/crm/contacts'
+    | '/developpeur/sites-web'
     | '/organisation/strategies'
   id:
     | '__root__'
@@ -1347,11 +1476,14 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/creer-mot-de-passe'
     | '/crm'
+    | '/developpeur'
     | '/expert'
     | '/inscription'
     | '/onboarding'
     | '/organisation'
     | '/sales-presentation'
+    | '/sites-web'
+    | '/studio-ia'
     | '/_public/a-propos'
     | '/_public/conditions'
     | '/_public/contact'
@@ -1421,13 +1553,18 @@ export interface FileRouteTypes {
     | '/organisation/membres'
     | '/organisation/permissions'
     | '/organisation/taches'
+    | '/sites-web/$id'
+    | '/sites-web/mes-sites'
+    | '/sites-web/nouveau'
     | '/_public/'
     | '/account-manager/'
     | '/admin/'
     | '/app/'
     | '/crm/'
+    | '/developpeur/'
     | '/expert/'
     | '/organisation/'
+    | '/sites-web/'
     | '/_public/secteurs/$sector'
     | '/account-manager/diagnostics/$id'
     | '/account-manager/entreprises/$id'
@@ -1435,6 +1572,7 @@ export interface FileRouteTypes {
     | '/admin/clients/$id'
     | '/admin/diagnostics/$id'
     | '/admin/diagnostics/reel'
+    | '/admin/sites-web/$id'
     | '/app/besoins/$id'
     | '/app/missions/$id'
     | '/app/tourisme/$branch'
@@ -1442,6 +1580,7 @@ export interface FileRouteTypes {
     | '/crm/bases/$id'
     | '/crm/campagnes/$id'
     | '/crm/contacts/$id'
+    | '/developpeur/sites-web/$id'
     | '/organisation/equipes/$teamId'
     | '/organisation/services/$departmentId'
     | '/organisation/strategies/$id'
@@ -1453,12 +1592,14 @@ export interface FileRouteTypes {
     | '/admin/diagnostics/'
     | '/admin/missions/'
     | '/admin/prestataires/'
+    | '/admin/sites-web/'
     | '/app/besoins/'
     | '/app/missions/'
     | '/crm/agents/'
     | '/crm/bases/'
     | '/crm/campagnes/'
     | '/crm/contacts/'
+    | '/developpeur/sites-web/'
     | '/organisation/strategies/'
   fileRoutesById: FileRoutesById
 }
@@ -1470,11 +1611,14 @@ export interface RootRouteChildren {
   ConnexionRoute: typeof ConnexionRoute
   CreerMotDePasseRoute: typeof CreerMotDePasseRoute
   CrmRoute: typeof CrmRouteWithChildren
+  DeveloppeurRoute: typeof DeveloppeurRouteWithChildren
   ExpertRoute: typeof ExpertRouteWithChildren
   InscriptionRoute: typeof InscriptionRoute
   OnboardingRoute: typeof OnboardingRoute
   OrganisationRoute: typeof OrganisationRouteWithChildren
   SalesPresentationRoute: typeof SalesPresentationRoute
+  SitesWebRoute: typeof SitesWebRouteWithChildren
+  StudioIaRoute: typeof StudioIaRoute
   EntrepriseSlugRoute: typeof EntrepriseSlugRoute
 }
 
@@ -1529,6 +1673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CrmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/developpeur': {
+      id: '/developpeur'
+      path: '/developpeur'
+      fullPath: '/developpeur'
+      preLoaderRoute: typeof DeveloppeurRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/expert': {
       id: '/expert'
       path: '/expert'
@@ -1562,6 +1713,20 @@ declare module '@tanstack/react-router' {
       path: '/sales-presentation'
       fullPath: '/sales-presentation'
       preLoaderRoute: typeof SalesPresentationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sites-web': {
+      id: '/sites-web'
+      path: '/sites-web'
+      fullPath: '/sites-web'
+      preLoaderRoute: typeof SitesWebRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio-ia': {
+      id: '/studio-ia'
+      path: '/studio-ia'
+      fullPath: '/studio-ia'
+      preLoaderRoute: typeof StudioIaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/': {
@@ -1991,6 +2156,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CrmUtilisateursRouteImport
       parentRoute: typeof CrmRoute
     }
+    '/developpeur/': {
+      id: '/developpeur/'
+      path: '/'
+      fullPath: '/developpeur/'
+      preLoaderRoute: typeof DeveloppeurIndexRouteImport
+      parentRoute: typeof DeveloppeurRoute
+    }
     '/entreprise/$slug': {
       id: '/entreprise/$slug'
       path: '/entreprise/$slug'
@@ -2095,6 +2267,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/organisation/taches'
       preLoaderRoute: typeof OrganisationTachesRouteImport
       parentRoute: typeof OrganisationRoute
+    }
+    '/sites-web/': {
+      id: '/sites-web/'
+      path: '/'
+      fullPath: '/sites-web/'
+      preLoaderRoute: typeof SitesWebIndexRouteImport
+      parentRoute: typeof SitesWebRoute
+    }
+    '/sites-web/$id': {
+      id: '/sites-web/$id'
+      path: '/$id'
+      fullPath: '/sites-web/$id'
+      preLoaderRoute: typeof SitesWebIdRouteImport
+      parentRoute: typeof SitesWebRoute
+    }
+    '/sites-web/mes-sites': {
+      id: '/sites-web/mes-sites'
+      path: '/mes-sites'
+      fullPath: '/sites-web/mes-sites'
+      preLoaderRoute: typeof SitesWebMesSitesRouteImport
+      parentRoute: typeof SitesWebRoute
+    }
+    '/sites-web/nouveau': {
+      id: '/sites-web/nouveau'
+      path: '/nouveau'
+      fullPath: '/sites-web/nouveau'
+      preLoaderRoute: typeof SitesWebNouveauRouteImport
+      parentRoute: typeof SitesWebRoute
     }
     '/_public/secteurs/': {
       id: '/_public/secteurs/'
@@ -2201,6 +2401,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPrestatairesIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sites-web/': {
+      id: '/admin/sites-web/'
+      path: '/sites-web'
+      fullPath: '/admin/sites-web/'
+      preLoaderRoute: typeof AdminSitesWebIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sites-web/$id': {
+      id: '/admin/sites-web/$id'
+      path: '/sites-web/$id'
+      fullPath: '/admin/sites-web/$id'
+      preLoaderRoute: typeof AdminSitesWebIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/besoins/': {
       id: '/app/besoins/'
       path: '/besoins'
@@ -2291,6 +2505,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/crm/contacts/$id'
       preLoaderRoute: typeof CrmContactsIdRouteImport
       parentRoute: typeof CrmRoute
+    }
+    '/developpeur/sites-web/': {
+      id: '/developpeur/sites-web/'
+      path: '/sites-web'
+      fullPath: '/developpeur/sites-web/'
+      preLoaderRoute: typeof DeveloppeurSitesWebIndexRouteImport
+      parentRoute: typeof DeveloppeurRoute
+    }
+    '/developpeur/sites-web/$id': {
+      id: '/developpeur/sites-web/$id'
+      path: '/sites-web/$id'
+      fullPath: '/developpeur/sites-web/$id'
+      preLoaderRoute: typeof DeveloppeurSitesWebIdRouteImport
+      parentRoute: typeof DeveloppeurRoute
     }
     '/organisation/equipes/$teamId': {
       id: '/organisation/equipes/$teamId'
@@ -2425,11 +2653,13 @@ interface AdminRouteChildren {
   AdminClientsIdRoute: typeof AdminClientsIdRoute
   AdminDiagnosticsIdRoute: typeof AdminDiagnosticsIdRoute
   AdminDiagnosticsReelRoute: typeof AdminDiagnosticsReelRoute
+  AdminSitesWebIdRoute: typeof AdminSitesWebIdRoute
   AdminBesoinsIndexRoute: typeof AdminBesoinsIndexRoute
   AdminClientsIndexRoute: typeof AdminClientsIndexRoute
   AdminDiagnosticsIndexRoute: typeof AdminDiagnosticsIndexRoute
   AdminMissionsIndexRoute: typeof AdminMissionsIndexRoute
   AdminPrestatairesIndexRoute: typeof AdminPrestatairesIndexRoute
+  AdminSitesWebIndexRoute: typeof AdminSitesWebIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -2448,11 +2678,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminClientsIdRoute: AdminClientsIdRoute,
   AdminDiagnosticsIdRoute: AdminDiagnosticsIdRoute,
   AdminDiagnosticsReelRoute: AdminDiagnosticsReelRoute,
+  AdminSitesWebIdRoute: AdminSitesWebIdRoute,
   AdminBesoinsIndexRoute: AdminBesoinsIndexRoute,
   AdminClientsIndexRoute: AdminClientsIndexRoute,
   AdminDiagnosticsIndexRoute: AdminDiagnosticsIndexRoute,
   AdminMissionsIndexRoute: AdminMissionsIndexRoute,
   AdminPrestatairesIndexRoute: AdminPrestatairesIndexRoute,
+  AdminSitesWebIndexRoute: AdminSitesWebIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -2557,6 +2789,22 @@ const CrmRouteChildren: CrmRouteChildren = {
 
 const CrmRouteWithChildren = CrmRoute._addFileChildren(CrmRouteChildren)
 
+interface DeveloppeurRouteChildren {
+  DeveloppeurIndexRoute: typeof DeveloppeurIndexRoute
+  DeveloppeurSitesWebIdRoute: typeof DeveloppeurSitesWebIdRoute
+  DeveloppeurSitesWebIndexRoute: typeof DeveloppeurSitesWebIndexRoute
+}
+
+const DeveloppeurRouteChildren: DeveloppeurRouteChildren = {
+  DeveloppeurIndexRoute: DeveloppeurIndexRoute,
+  DeveloppeurSitesWebIdRoute: DeveloppeurSitesWebIdRoute,
+  DeveloppeurSitesWebIndexRoute: DeveloppeurSitesWebIndexRoute,
+}
+
+const DeveloppeurRouteWithChildren = DeveloppeurRoute._addFileChildren(
+  DeveloppeurRouteChildren,
+)
+
 interface ExpertRouteChildren {
   ExpertAgendaRoute: typeof ExpertAgendaRoute
   ExpertClientsRoute: typeof ExpertClientsRoute
@@ -2612,6 +2860,24 @@ const OrganisationRouteWithChildren = OrganisationRoute._addFileChildren(
   OrganisationRouteChildren,
 )
 
+interface SitesWebRouteChildren {
+  SitesWebIdRoute: typeof SitesWebIdRoute
+  SitesWebMesSitesRoute: typeof SitesWebMesSitesRoute
+  SitesWebNouveauRoute: typeof SitesWebNouveauRoute
+  SitesWebIndexRoute: typeof SitesWebIndexRoute
+}
+
+const SitesWebRouteChildren: SitesWebRouteChildren = {
+  SitesWebIdRoute: SitesWebIdRoute,
+  SitesWebMesSitesRoute: SitesWebMesSitesRoute,
+  SitesWebNouveauRoute: SitesWebNouveauRoute,
+  SitesWebIndexRoute: SitesWebIndexRoute,
+}
+
+const SitesWebRouteWithChildren = SitesWebRoute._addFileChildren(
+  SitesWebRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   PublicRoute: PublicRouteWithChildren,
   AccountManagerRoute: AccountManagerRouteWithChildren,
@@ -2620,11 +2886,14 @@ const rootRouteChildren: RootRouteChildren = {
   ConnexionRoute: ConnexionRoute,
   CreerMotDePasseRoute: CreerMotDePasseRoute,
   CrmRoute: CrmRouteWithChildren,
+  DeveloppeurRoute: DeveloppeurRouteWithChildren,
   ExpertRoute: ExpertRouteWithChildren,
   InscriptionRoute: InscriptionRoute,
   OnboardingRoute: OnboardingRoute,
   OrganisationRoute: OrganisationRouteWithChildren,
   SalesPresentationRoute: SalesPresentationRoute,
+  SitesWebRoute: SitesWebRouteWithChildren,
+  StudioIaRoute: StudioIaRoute,
   EntrepriseSlugRoute: EntrepriseSlugRoute,
 }
 export const routeTree = rootRouteImport
