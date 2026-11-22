@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 export interface AuthUser {
   id: string
@@ -50,7 +50,7 @@ export const SALES_PERMISSION = 'sales_presentation'
 export function canAccessSalesPresentation(user?: Pick<AuthUser, 'role' | 'permissions' | 'active'> | null) {
   if (!user || user.active === false) return false
   if (user.role === 'admin' || user.role === 'sales' || user.role === 'crm') return true
-  return user.role === 'concierge' && (user.permissions ?? []).includes(SALES_PERMISSION)
+  return ['concierge', 'staff'].includes(user.role) && (user.permissions ?? []).includes(SALES_PERMISSION)
 }
 
 async function readError(response: Response) {
@@ -58,17 +58,28 @@ async function readError(response: Response) {
   return body.error || 'La connexion a échoué. Réessayez.'
 }
 
+async function fetchAccount() {
+  const response = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
+  if (!response.ok) throw new Error('Session absente')
+  return await response.json() as AuthUser
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthState['status']>('loading')
   const [user, setUser] = useState<AuthUser | null>(null)
 
+  // Seule la dernière opération de session peut modifier l'état : une réponse tardive n'écrase jamais une connexion.
+  const sessionRequest = useRef(0)
+
   const refresh = useCallback(async () => {
+    const request = ++sessionRequest.current
     try {
-      const response = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
-      if (!response.ok) throw new Error('Session absente')
-      setUser(await response.json() as AuthUser)
+      const account = await fetchAccount()
+      if (request !== sessionRequest.current) return
+      setUser(account)
       setStatus('authenticated')
     } catch {
+      if (request !== sessionRequest.current) return
       setUser(null)
       setStatus('anonymous')
     }
@@ -100,13 +111,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Le service de connexion est indisponible. Démarrez le serveur ALLNEEDS puis réessayez.')
     }
     if (!response.ok) throw new Error(await readError(response))
+    const request = ++sessionRequest.current
     const result = await response.json() as { user: AuthUser }
-    setUser(result.user)
-    setStatus('authenticated')
-    return result.user
+    // Même source qu'un rechargement de page : tous les droits sont présents avant d'ouvrir l'espace.
+    const account = await fetchAccount().catch(() => result.user)
+    if (request === sessionRequest.current) {
+      setUser(account)
+      setStatus('authenticated')
+    }
+    return account
   }, [])
 
   const logout = useCallback(async () => {
+    sessionRequest.current++
     try {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
     } finally {

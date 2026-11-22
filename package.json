@@ -32,7 +32,8 @@
     "test:sales": "node scripts/test-sales-access.mjs",
     "test:crm": "node scripts/test-crm.mjs",
     "test:org": "node scripts/test-organization.mjs",
-    "test:sectors": "node scripts/test-sectors.mjs"
+    "test:sectors": "node scripts/test-sectors.mjs",
+    "test:accounts": "node scripts/test-accounts.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.39",

@@ -169,8 +169,9 @@ function buildOrgNav(me: OrgMe | null, user: AuthUser | null): NavItem[] {
   const items: NavItem[] = []
   const adminGroup = me.position.level === 'pdg' ? 'Direction' : 'Administration'
   if (me.position.level === 'pdg') items.push({ group: 'Direction', label: 'Vue d’ensemble', to: '/organisation' as any, icon: <LayoutDashboard className="h-4 w-4" /> })
+  if (user?.role === 'admin') items.push({ group: adminGroup, label: 'Comptes & accès', to: '/organisation/comptes' as any, icon: <UserRoundCog className="h-4 w-4" /> })
   if (has('members.view')) items.push({ group: adminGroup, label: 'Membres', to: '/organisation/membres' as any, icon: <UsersRound className="h-4 w-4" /> })
-  if (has('settings.manage')) items.push({ group: adminGroup, label: 'Permissions', to: '/organisation/permissions' as any, icon: <BadgeCheck className="h-4 w-4" /> })
+  if (has('settings.manage')) items.push({ group: adminGroup, label: 'Permissions par niveau', to: '/organisation/permissions' as any, icon: <BadgeCheck className="h-4 w-4" /> })
   for (const department of me.departments) {
     if (has('department.view')) items.push({ group: department.name, label: 'Tableau de bord', to: `/organisation/services/${department.id}` as any, icon: <BarChart3 className="h-4 w-4" /> })
     for (const team of department.teams) items.push({ group: department.name, label: team.name, to: `/organisation/equipes/${team.id}` as any, icon: TEAM_ICONS[team.id] ?? <UsersRound className="h-4 w-4" /> })
@@ -199,6 +200,7 @@ const PREVIEW_GROUP = 'En préparation'
 function buildAdminNav(): NavItem[] {
   return [
     { group: 'Organisation', label: 'Vue d’ensemble', to: '/organisation' as any, icon: <Network className="h-4 w-4" /> },
+    { group: 'Organisation', label: 'Comptes & accès', to: '/organisation/comptes' as any, icon: <UserRoundCog className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Back-office', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'CRM', to: '/crm' as any, icon: <PhoneCall className="h-4 w-4" /> },

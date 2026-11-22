@@ -117,6 +117,8 @@ export function createOrganization({ db, saveDb, json, readBody, audit, createIn
     const p = positionOf(user)
     if (!p) return []
     if (p.level === 'pdg') return [...PERMISSIONS, 'org.overview', 'settings.manage']
+    // Réglage individuel défini par le PDG : il remplace les droits du niveau.
+    if (Array.isArray(user.orgPermissions)) return user.orgPermissions.filter((perm) => PERMISSIONS.includes(perm))
     const granted = new Set(orgSettings().levelPermissions[p.level] || [])
     if (p.strategyManager) for (const perm of STRATEGY_MANAGER_PERMISSIONS) granted.add(perm)
     return [...granted]

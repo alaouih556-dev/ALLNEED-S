@@ -93,6 +93,7 @@ import { Route as ExpertPerformanceRouteImport } from './routes/expert/performan
 import { Route as ExpertProfilRouteImport } from './routes/expert/profil'
 import { Route as ExpertPropositionsRouteImport } from './routes/expert/propositions'
 import { Route as OrganisationIndexRouteImport } from './routes/organisation/index'
+import { Route as OrganisationComptesRouteImport } from './routes/organisation/comptes'
 import { Route as OrganisationMembresRouteImport } from './routes/organisation/membres'
 import { Route as OrganisationPermissionsRouteImport } from './routes/organisation/permissions'
 import { Route as OrganisationTachesRouteImport } from './routes/organisation/taches'
@@ -553,6 +554,11 @@ const OrganisationIndexRoute = OrganisationIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OrganisationRoute,
 } as any)
+const OrganisationComptesRoute = OrganisationComptesRouteImport.update({
+  id: '/comptes',
+  path: '/comptes',
+  getParentRoute: () => OrganisationRoute,
+} as any)
 const OrganisationMembresRoute = OrganisationMembresRouteImport.update({
   id: '/membres',
   path: '/membres',
@@ -816,6 +822,7 @@ export interface FileRoutesByFullPath {
   '/expert/performance': typeof ExpertPerformanceRoute
   '/expert/profil': typeof ExpertProfilRoute
   '/expert/propositions': typeof ExpertPropositionsRoute
+  '/organisation/comptes': typeof OrganisationComptesRoute
   '/organisation/membres': typeof OrganisationMembresRoute
   '/organisation/permissions': typeof OrganisationPermissionsRoute
   '/organisation/taches': typeof OrganisationTachesRoute
@@ -928,6 +935,7 @@ export interface FileRoutesByTo {
   '/expert/performance': typeof ExpertPerformanceRoute
   '/expert/profil': typeof ExpertProfilRoute
   '/expert/propositions': typeof ExpertPropositionsRoute
+  '/organisation/comptes': typeof OrganisationComptesRoute
   '/organisation/membres': typeof OrganisationMembresRoute
   '/organisation/permissions': typeof OrganisationPermissionsRoute
   '/organisation/taches': typeof OrganisationTachesRoute
@@ -1050,6 +1058,7 @@ export interface FileRoutesById {
   '/expert/performance': typeof ExpertPerformanceRoute
   '/expert/profil': typeof ExpertProfilRoute
   '/expert/propositions': typeof ExpertPropositionsRoute
+  '/organisation/comptes': typeof OrganisationComptesRoute
   '/organisation/membres': typeof OrganisationMembresRoute
   '/organisation/permissions': typeof OrganisationPermissionsRoute
   '/organisation/taches': typeof OrganisationTachesRoute
@@ -1173,6 +1182,7 @@ export interface FileRouteTypes {
     | '/expert/performance'
     | '/expert/profil'
     | '/expert/propositions'
+    | '/organisation/comptes'
     | '/organisation/membres'
     | '/organisation/permissions'
     | '/organisation/taches'
@@ -1285,6 +1295,7 @@ export interface FileRouteTypes {
     | '/expert/performance'
     | '/expert/profil'
     | '/expert/propositions'
+    | '/organisation/comptes'
     | '/organisation/membres'
     | '/organisation/permissions'
     | '/organisation/taches'
@@ -1406,6 +1417,7 @@ export interface FileRouteTypes {
     | '/expert/performance'
     | '/expert/profil'
     | '/expert/propositions'
+    | '/organisation/comptes'
     | '/organisation/membres'
     | '/organisation/permissions'
     | '/organisation/taches'
@@ -2056,6 +2068,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganisationIndexRouteImport
       parentRoute: typeof OrganisationRoute
     }
+    '/organisation/comptes': {
+      id: '/organisation/comptes'
+      path: '/comptes'
+      fullPath: '/organisation/comptes'
+      preLoaderRoute: typeof OrganisationComptesRouteImport
+      parentRoute: typeof OrganisationRoute
+    }
     '/organisation/membres': {
       id: '/organisation/membres'
       path: '/membres'
@@ -2566,6 +2585,7 @@ const ExpertRouteWithChildren =
   ExpertRoute._addFileChildren(ExpertRouteChildren)
 
 interface OrganisationRouteChildren {
+  OrganisationComptesRoute: typeof OrganisationComptesRoute
   OrganisationMembresRoute: typeof OrganisationMembresRoute
   OrganisationPermissionsRoute: typeof OrganisationPermissionsRoute
   OrganisationTachesRoute: typeof OrganisationTachesRoute
@@ -2577,6 +2597,7 @@ interface OrganisationRouteChildren {
 }
 
 const OrganisationRouteChildren: OrganisationRouteChildren = {
+  OrganisationComptesRoute: OrganisationComptesRoute,
   OrganisationMembresRoute: OrganisationMembresRoute,
   OrganisationPermissionsRoute: OrganisationPermissionsRoute,
   OrganisationTachesRoute: OrganisationTachesRoute,

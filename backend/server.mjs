@@ -9,6 +9,7 @@ import { SALES_PRESENTATION } from './sales-presentation.mjs'
 import { createCrm, CRM_COLLECTIONS } from './crm.mjs'
 import { createOrganization, positionOf, isCrmManagerPosition } from './organization.mjs'
 import { resolveSector, sectorLabel } from './sectors.mjs'
+import { createAccounts } from './accounts.mjs'
 
 const scrypt = promisify(scryptCallback)
 // Vercel : pas de disque durable, chaque requête relit et écrit directement Supabase.
@@ -812,7 +813,7 @@ const SALES_ALLOWED_API = [/^\/api\/sales\//]
 function canAccessSalesPresentation(user) {
   if (!user || user.active === false) return false
   if (user.role === 'admin' || user.role === SALES_ROLE || user.role === 'crm') return true
-  return user.role === 'concierge' && Array.isArray(user.permissions) && user.permissions.includes(SALES_PERMISSION)
+  return ['concierge', 'staff'].includes(user.role) && Array.isArray(user.permissions) && user.permissions.includes(SALES_PERMISSION)
 }
 
 function allowedText(value, maximum, field) {
@@ -845,6 +846,12 @@ function requireModuleAccess(user, res, cors, moduleName) {
   if (!failure) return true
   json(res, 403, { error: failure, code: 'ACCESS_DISABLED', module: moduleName || null }, cors)
   return false
+}
+
+/** Compte renvoyé au navigateur : une seule définition pour la connexion et /api/me. */
+function accountPayload(user) {
+  const org = orgForUser(user)
+  return { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }
 }
 
 const isCrmAccount = (user) => ['admin', 'agent', 'crm'].includes(user.role) || isCrmManagerPosition(user)
@@ -1115,6 +1122,7 @@ function scopedNeeds(user) {
 async function hashPassword(password) { const salt = randomBytes(16).toString('hex'); return `scrypt$${salt}$${(await scrypt(password, salt, 64)).toString('hex')}` }
 const crm = createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification, isCrmManagerPosition })
 const organization = createOrganization({ db, saveDb, json, readBody, audit, createInvitation, sendInvitationEmail, pushNotification })
+const accounts = createAccounts({ db, saveDb, json, readBody, audit, organization, crm, canAccessSalesPresentation, salesPermission: SALES_PERMISSION, ownerPermissions: OWNER_PERMISSIONS, moduleKeys: Object.keys(DEFAULT_MODULES), defaultModules: DEFAULT_MODULES })
 
 const failures = new Map()
 function loginThrottled(key) {
@@ -1206,7 +1214,7 @@ async function routeRequest(req, res) {
       clearLoginFailures(key)
       user.lastLoginAt = new Date().toISOString(); saveDb(db)
       audit('auth.login.ok', { by: user.id })
-      const org = orgForUser(user); return json(res, 200, { user: { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null } }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
+      return json(res, 200, { user: accountPayload(user) }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
 
     if (req.method === 'POST' && url.pathname === '/api/auth/logout') {
@@ -1280,9 +1288,8 @@ async function routeRequest(req, res) {
     if (req.method === 'GET' && url.pathname === '/api/me') {
       const user = sessionUser(req)
       if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
-      const org = orgForUser(user)
       // Session glissante : chaque visite repousse l'expiration, l'utilisateur actif reste connecté.
-      return json(res, 200, { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
+      return json(res, 200, accountPayload(user), { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
 
     /* ------------------------------------------------------------------ */
@@ -1329,7 +1336,8 @@ async function routeRequest(req, res) {
     if (user.role === 'agent' && !isOrgApi && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé au CRM' }, cors)
     // Rôle « CRM » : uniquement le CRM et la présentation commerciale.
     if (user.role === 'crm' && !isOrgApi && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé au CRM et à la présentation commerciale' }, cors)
-    if (user.role === 'staff' && !isOrgApi && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé à votre espace' }, cors)
+    if (user.role === 'staff' && !isOrgApi && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à votre espace' }, cors)
+    if (await accounts.handle(req, res, url, user, cors)) return
     if (await organization.handle(req, res, url, user, cors)) return
     if (await crm.handle(req, res, url, user, cors)) return
 
@@ -2798,7 +2806,7 @@ async function processServerless(req, res) {
     end(JSON.stringify({ error: message }))
   }
   try {
-    loadedCrm = pathname.startsWith('/api/crm/') || /^\/api\/org\/(overview|departments|teams)/.test(pathname)
+    loadedCrm = pathname.startsWith('/api/crm/') || /^\/api\/org\/(overview|departments|teams|accounts)/.test(pathname)
     const fresh = await loadDb(loadedCrm)
     Object.assign(db, fresh)
     prepareDb()
