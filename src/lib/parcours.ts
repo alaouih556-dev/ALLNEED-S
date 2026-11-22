@@ -17,8 +17,8 @@ export interface ParcoursStep {
 
 export const PARCOURS_STEPS: ParcoursStep[] = [
   { id: 'diagnostic', label: 'Diagnostic', hint: 'Comprendre la situation' },
-  { id: 'preparation', label: 'Préparation', hint: 'Documents et demande concierge' },
-  { id: 'rendezvous', label: 'Rendez-vous', hint: 'Échange avec votre concierge' },
+  { id: 'preparation', label: 'Préparation', hint: 'Documents et demande Account Manager' },
+  { id: 'rendezvous', label: 'Rendez-vous', hint: 'Échange avec votre Account Manager' },
   { id: 'restitution', label: 'Restitution', hint: 'Vos priorités validées' },
   { id: 'offre', label: 'Offre', hint: 'Niveau d’accompagnement' },
   { id: 'activation', label: 'Activation', hint: 'Modules débloqués' },

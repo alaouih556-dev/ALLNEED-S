@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, CheckCircle2, CircleAlert, Clock3, FileCheck2, Handshake, Search } from 'lucide-react'
 import { MiniStat, StatGrid } from '@/components/admin-kit'
-import { ConciergeGuard, ConciergeHeading, OrgIdentity, ScopedEmpty } from '@/features/concierge/ScopedSection'
+import { ConciergeGuard, ConciergeHeading, OrgIdentity, ScopedEmpty } from '@/features/account-manager/ScopedSection'
 import { conciergeScope, useDemo } from '@/store/store'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useOperationalNeeds } from '@/features/operations/useOperationalNeeds'
@@ -10,7 +10,7 @@ import { Alert, Badge, Button, Card, Progress, Select } from '@/components/ui'
 import { NEED_FLOW, NEED_STATUS, URGENCY, normalizeNeedStatus } from '@/lib/status'
 import type { Need, NeedStatus } from '@/types'
 
-export const Route = createFileRoute('/concierge/besoins')({ component: ConciergeNeeds })
+export const Route = createFileRoute('/account-manager/besoins')({ component: ConciergeNeeds })
 
 type Filter = 'a_suivre' | 'urgents' | 'decision' | 'tous'
 
@@ -84,11 +84,11 @@ function ConciergeNeeds() {
       const next = guidance(item)
       const index = phase(item.status)
       const closed = isClosed(item.status)
-      return <Card key={item.id} className={`concierge-need-card ${item.urgency === 'haute' && !closed ? 'is-urgent' : ''}`}>
+      return <Card key={item.id} className={`Account Manager-need-card ${item.urgency === 'haute' && !closed ? 'is-urgent' : ''}`}>
         <div className="concierge-need-head"><div><OrgIdentity orgId={item.orgId}/><h3>{item.title}</h3><p>{item.categoryLabel} · {item.location}</p></div><div className="concierge-need-badges"><Badge tone={urgency.tone}>{urgency.label === 'Haute' && !closed ? 'À traiter en priorité' : urgency.label}</Badge><Badge tone={status.tone}>{status.label}</Badge></div></div>
         <div className="concierge-need-flow" aria-label="Avancement de la demande">{['Cadrer', 'Rechercher', 'Choisir', 'Démarrer'].map((step, stepIndex) => <div key={step} className={stepIndex < index ? 'is-done' : stepIndex === index ? 'is-current' : ''}><span>{stepIndex < index ? <CheckCircle2 size={13}/> : String(stepIndex + 1).padStart(2, '0')}</span><small>{step}</small></div>)}</div>
         <div className="concierge-need-work"><div className="concierge-next-work"><small>VOTRE PROCHAIN GESTE</small><strong>{next.title}</strong><p>{next.detail}</p></div><div className="concierge-outcome-pair"><div><small>LE CLIENT Y GAGNE</small><p>{next.client}</p></div><div><small>ALLNEEDS Y GAGNE</small><p>{next.allneeds}</p></div></div></div>
-        <div className="concierge-need-footer"><div><strong>{company?.contactName ?? 'Contact à confirmer'}</strong><small>{item.assignedTo ? `Suivi interne : ${item.assignedTo}` : 'Suivi interne à attribuer'}</small><small>{operations.live ? `${item.candidateIds.length} proposition(s) · ${item.quoteIds.length} devis` : `${item.candidateIds.length} prestataire${item.candidateIds.length === 1 ? '' : 's'} · ${item.quoteIds.length} devis`}</small></div><div className="concierge-need-actions"><Select aria-label={`Mettre à jour l’étape de ${item.title}`} value={normalizeNeedStatus(item.status) ?? item.status} onChange={(event) => { const status = event.target.value as NeedStatus; const label = `Étape mise à jour par le concierge : ${(NEED_STATUS[status] ?? NEED_STATUS.nouveau).label}`; if (auth.status === 'authenticated') void operations.setStatus(item.id, status, label).catch((cause) => dispatch({ type: 'TOAST_ADD', toast: { title: 'Étape non enregistrée', description: cause instanceof Error ? cause.message : 'Réessayez.', tone: 'warning' } })); else dispatch({ type: 'NEED_SET_STATUS', id: item.id, status, label }) }}>{[...NEED_FLOW, 'annule' as const].map((value) => <option key={value} value={value}>{(NEED_STATUS[value] ?? NEED_STATUS.nouveau).label}</option>)}</Select><Link to={'/concierge/entreprises/$id' as any} params={{ id: item.orgId } as any}>{next.action} <ArrowRight size={14}/></Link></div></div>
+        <div className="concierge-need-footer"><div><strong>{company?.contactName ?? 'Contact à confirmer'}</strong><small>{item.assignedTo ? `Suivi interne : ${item.assignedTo}` : 'Suivi interne à attribuer'}</small><small>{operations.live ? `${item.candidateIds.length} proposition(s) · ${item.quoteIds.length} devis` : `${item.candidateIds.length} prestataire${item.candidateIds.length === 1 ? '' : 's'} · ${item.quoteIds.length} devis`}</small></div><div className="concierge-need-actions"><Select aria-label={`Mettre à jour l’étape de ${item.title}`} value={normalizeNeedStatus(item.status) ?? item.status} onChange={(event) => { const status = event.target.value as NeedStatus; const label = `Étape mise à jour par l’Account Manager : ${(NEED_STATUS[status] ?? NEED_STATUS.nouveau).label}`; if (auth.status === 'authenticated') void operations.setStatus(item.id, status, label).catch((cause) => dispatch({ type: 'TOAST_ADD', toast: { title: 'Étape non enregistrée', description: cause instanceof Error ? cause.message : 'Réessayez.', tone: 'warning' } })); else dispatch({ type: 'NEED_SET_STATUS', id: item.id, status, label }) }}>{[...NEED_FLOW, 'annule' as const].map((value) => <option key={value} value={value}>{(NEED_STATUS[value] ?? NEED_STATUS.nouveau).label}</option>)}</Select><Link to={'/account-manager/entreprises/$id' as any} params={{ id: item.orgId } as any}>{next.action} <ArrowRight size={14}/></Link></div></div>
       </Card>
     })}{!visible.length ? <ScopedEmpty icon={<CheckCircle2 size={20}/>} title={items.length ? 'Aucun besoin pour ce filtre' : 'Aucun besoin pour le moment'} description={items.length ? 'Choisissez un autre filtre ci-dessus.' : 'Les besoins déposés par vos entreprises apparaîtront ici, avec la prochaine étape à mener.'}/> : null}</div>
   </div></ConciergeGuard>

@@ -1837,3 +1837,47 @@ a.cl-space:hover{border-color:color-mix(in srgb,var(--an-accent) 35%,white);tran
 .an-main section.dg-card.dg-card-soft{background:color-mix(in srgb,var(--an-accent) 5%,var(--an-surface,#fff))!important}
 .dg-hero-facts b{white-space:nowrap}
 @media (max-width:640px){.dg-hero-facts span{min-width:0;padding:10px 8px}.dg-hero-facts b{font-size:17px}}
+
+/* ===== V60 — Organisation : services, équipes, tâches, stratégies, permissions ===== */
+.og-bar{height:7px;border-radius:999px;background:var(--an-line);overflow:hidden}
+.og-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--an-accent),var(--an-accent-2));transition:width .3s}
+.og-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;padding:14px}
+.og-kpis>div{display:grid;gap:2px;padding:10px 12px;border-radius:12px;background:var(--an-surface-2)}
+.og-kpis strong{font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--an-text)}
+.og-kpis span{font-size:11.5px;color:var(--an-muted)}
+.og-kpis{gap:8px}
+.og-teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;padding:16px}
+.og-team{display:grid;gap:10px;align-content:start;padding:16px;border-radius:14px;border:1px solid var(--an-line);background:var(--an-surface);transition:.15s}
+.og-team:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--an-accent) 40%,var(--an-line));box-shadow:var(--an-shadow)}
+.og-team strong{font-size:14px;line-height:1.35;color:var(--an-text)}
+.og-team small{font-size:12px;line-height:1.5;color:var(--an-muted)}
+.og-team-meta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:var(--an-muted)}
+.og-team-meta span{display:inline-flex;align-items:center;gap:4px}
+.og-board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(196px,1fr);gap:12px;padding:16px;overflow-x:auto}
+.og-column{display:grid;gap:10px;align-content:start;min-width:0;padding:10px;border-radius:14px;background:var(--an-surface-2)}
+.og-column>header{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 4px;font-size:12px;font-weight:700;color:var(--an-muted)}
+.og-task{display:grid;gap:8px;padding:12px;border-radius:12px;border:1px solid var(--an-line);background:var(--an-surface)}
+.og-task h3{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--an-text);overflow-wrap:anywhere}
+.og-task p{font-size:12px;line-height:1.5;color:var(--an-muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.og-task dl{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--an-muted)}
+.og-task dl>div{display:inline-flex;align-items:center;gap:4px}
+.og-task dl>.is-late{color:#dc2626;font-weight:700}
+.og-link-tag{justify-self:start;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;color:var(--an-accent);background:color-mix(in srgb,var(--an-accent) 10%,transparent)}
+.og-task-actions{display:flex;align-items:center;gap:6px}
+.og-task-actions select{height:32px;font-size:12px;padding:0 8px}
+.og-icon{display:grid;place-items:center;flex-shrink:0;width:32px;height:32px;border-radius:9px;border:1px solid var(--an-line);background:var(--an-surface);color:var(--an-muted);transition:.15s}
+.og-icon:hover{color:var(--an-accent);border-color:color-mix(in srgb,var(--an-accent) 40%,var(--an-line))}
+.og-icon.is-danger:hover{color:#dc2626;border-color:#fca5a5}
+.og-resp{display:grid;gap:8px;padding:18px 20px}
+.og-resp li{position:relative;padding-left:16px;font-size:13px;color:var(--an-text-2)}
+.og-resp li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:999px;background:var(--an-accent)}
+.og-matrix{width:100%;min-width:680px;border-collapse:collapse}
+.og-matrix th,.og-matrix td{padding:11px 16px;border-bottom:1px solid var(--an-line);text-align:center}
+.og-matrix thead th{font-size:11.5px;font-weight:800;color:var(--an-muted)}
+.og-matrix th:first-child{text-align:left}
+.og-matrix tbody th strong{display:block;font-size:13px;color:var(--an-text)}
+.og-matrix tbody th small{font-size:11.5px;font-weight:400;color:var(--an-muted)}
+.og-matrix input{width:17px;height:17px;accent-color:var(--an-accent);cursor:pointer}
+.an-shell[data-mode="dark"] .og-task-actions select{background:var(--an-surface-2);color:var(--an-text);border-color:var(--an-line)}
+.an-shell[data-mode="dark"] .og-task dl>.is-late{color:#f87171}
+@media (max-width:760px){.og-board{grid-auto-flow:row;grid-auto-columns:auto;overflow:visible}.og-column:not(:has(.og-task)){display:none}}

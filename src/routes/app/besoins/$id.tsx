@@ -145,7 +145,7 @@ function BesoinDetail() {
               <div className="divide-y divide-ink-50">
                 {proposals.loading ? <CardBody><p className="text-sm text-ink-500">Chargement des propositions…</p></CardBody> : null}
                 {!proposals.loading && liveProposals.length === 0 ? (
-                  <CardBody><p className="text-sm text-ink-500">Les propositions sont en cours de préparation par votre concierge. Vous recevrez une notification dès qu’elles sont disponibles.</p></CardBody>
+                  <CardBody><p className="text-sm text-ink-500">Les propositions sont en cours de préparation par votre Account Manager. Vous recevrez une notification dès qu’elles sont disponibles.</p></CardBody>
                 ) : null}
                 {liveProposals.map((proposal) => {
                   const meta = PROPOSAL_STATUS_META[proposal.status] ?? PROPOSAL_STATUS_META.proposee
@@ -258,7 +258,7 @@ function BesoinDetail() {
                         <p className="font-display text-lg text-ink-950">{proposal.amount != null ? money(proposal.amount) : '—'}</p>
                       </div>
                       {best != null && proposal.amount === best ? <Badge tone="success" className="mt-1">Meilleur prix</Badge> : null}
-                      {proposal.recommended ? <p className="mt-1 text-xs text-brand-700">Recommandée par votre concierge</p> : null}
+                      {proposal.recommended ? <p className="mt-1 text-xs text-brand-700">Recommandée par votre Account Manager</p> : null}
                     </div>
                   )
                 })}

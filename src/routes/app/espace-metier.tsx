@@ -56,7 +56,7 @@ function Metier() {
   const status = {
     locked: { icon: <LockKeyhole size={22} />, tone: 'is-locked', badge: <Badge tone="neutral">Non demandé</Badge>, title: 'Votre espace métier est verrouillé', text: 'Demandez l’abonnement SaaS de votre secteur. Les outils et leur lien restent verrouillés jusqu’à la validation par ALLNEEDS.' },
     pending: { icon: <Clock3 size={22} />, tone: 'is-pending', badge: <Badge tone="warning">En attente de validation</Badge>, title: 'Votre demande est en cours de validation', text: 'ALLNEEDS vérifie votre demande. Le lien d’accès apparaîtra sur cette page dès qu’elle sera validée : aucune autre action n’est nécessaire.' },
-    refused: { icon: <XCircle size={22} />, tone: 'is-refused', badge: <Badge tone="danger">Demande refusée</Badge>, title: 'Votre demande n’a pas été validée', text: refused?.reason || 'Vous pouvez envoyer une nouvelle demande ou contacter votre concierge.' },
+    refused: { icon: <XCircle size={22} />, tone: 'is-refused', badge: <Badge tone="danger">Demande refusée</Badge>, title: 'Votre demande n’a pas été validée', text: refused?.reason || 'Vous pouvez envoyer une nouvelle demande ou contacter votre Account Manager.' },
     active: { icon: sector === 'sante' ? <HeartPulse size={22} /> : <ShieldCheck size={22} />, tone: 'is-active', badge: <Badge tone="success">Accès autorisé</Badge>, title: sector === 'sante' ? 'Votre espace métier Santé est disponible' : 'Votre espace métier est activé', text: sector === 'sante' ? 'Le portail ALLNEEDS conserve votre diagnostic, vos priorités et votre pilotage. La gestion métier Santé se fait dans son SaaS séparé.' : 'Votre accès métier a été validé par ALLNEEDS.' },
   }[stage]
 
@@ -117,7 +117,7 @@ function Metier() {
                 </Button>
               )}
               {concierge?.email && stage !== 'active' ? (
-                <a href={`mailto:${concierge.email}`}><Button variant="outline"><Mail size={15} />Contacter mon concierge</Button></a>
+                <a href={`mailto:${concierge.email}`}><Button variant="outline"><Mail size={15} />Contacter mon Account Manager</Button></a>
               ) : null}
             </div>
           </div>
@@ -129,7 +129,7 @@ function Metier() {
             <ul className="em-list">
               <li><Check size={15} />Abonnement mensuel, distinct de votre offre d’accompagnement.</li>
               <li><Check size={15} />Le lien d’accès s’affiche sur cette page après validation par ALLNEEDS.</li>
-              <li><Check size={15} />Votre concierge répond à vos questions avant et après l’activation.</li>
+              <li><Check size={15} />Votre Account Manager répond à vos questions avant et après l’activation.</li>
             </ul>
           </div>
         </Panel>

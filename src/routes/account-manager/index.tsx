@@ -25,7 +25,7 @@ import { EmptyBox, Initial, LoadingRows, MiniStat, Panel, Rows, StatGrid, toneCl
 import { canAccessSalesPresentation, useAuth } from '@/features/auth/AuthContext'
 import { ValidationRequests } from '@/components/ValidationRequests'
 
-export const Route = createFileRoute('/concierge/')({ component: ConciergeDashboard })
+export const Route = createFileRoute('/account-manager/')({ component: ConciergeDashboard })
 
 type Org = {
   id: string
@@ -72,8 +72,8 @@ function ConciergeDashboard() {
     setError('')
     try {
       const [o, r] = await Promise.all([
-        fetch('/api/concierge/orgs', { credentials: 'same-origin', cache: 'no-store' }),
-        fetch('/api/concierge/registrations', { credentials: 'same-origin', cache: 'no-store' }),
+        fetch('/api/account-manager/orgs', { credentials: 'same-origin', cache: 'no-store' }),
+        fetch('/api/account-manager/registrations', { credentials: 'same-origin', cache: 'no-store' }),
       ])
       const ob = await o.json()
       if (!o.ok) throw new Error(ob.error || 'Chargement impossible')
@@ -90,7 +90,7 @@ function ConciergeDashboard() {
     if (auth.status === 'authenticated' && auth.user?.role === 'concierge') void load()
   }, [auth.status, auth.user?.id, auth.user?.role, load])
 
-  const firstName = (auth.user?.name || '').split(' ')[0] || 'Concierge'
+  const firstName = (auth.user?.name || '').split(' ')[0] || 'Account Manager'
   const salesAccess = canAccessSalesPresentation(auth.user)
 
   const stats = useMemo(() => {
@@ -104,10 +104,10 @@ function ConciergeDashboard() {
 
   const tasks = useMemo<Task[]>(() => {
     const list: Task[] = []
-    for (const o of stats.toAnalyse) list.push({ id: `d-${o.id}`, tone: 'amber', icon: <FileSearch size={16} />, title: `Analyser le diagnostic de ${o.name}`, detail: 'Lire les réponses, préparer la restitution puis la publier.', to: '/concierge/diagnostics', cta: 'Analyser' })
-    for (const r of stats.slots) list.push({ id: `s-${r.id}`, tone: 'sky', icon: <CalendarClock size={16} />, title: `Confirmer le créneau de ${r.orgName || r.name || 'l’entreprise'}`, detail: [r.appointmentDate, r.appointmentSlot].filter(Boolean).join(' · ') || 'Créneau demandé à confirmer avec le client.', to: r.orgId ? '/concierge/entreprises/$id' : '/concierge/entreprises', params: r.orgId ? { id: r.orgId } : undefined, cta: 'Confirmer' })
-    for (const o of orgs) if (o.restitutionPublished && !o.offerStatus) list.push({ id: `o-${o.id}`, tone: 'teal', icon: <Send size={16} />, title: `Proposer la suite à ${o.name}`, detail: 'La restitution est publiée : présenter l’offre adaptée aux priorités.', to: '/concierge/suivi-commercial', cta: 'Préparer' })
-    for (const o of orgs) if (!o.diagnosticStatus) list.push({ id: `n-${o.id}`, tone: 'slate', icon: <ClipboardCheck size={16} />, title: `Relancer ${o.name} pour son diagnostic`, detail: 'Le questionnaire n’a pas encore été envoyé par le client.', to: '/concierge/entreprises/$id', params: { id: o.id }, cta: 'Ouvrir' })
+    for (const o of stats.toAnalyse) list.push({ id: `d-${o.id}`, tone: 'amber', icon: <FileSearch size={16} />, title: `Analyser le diagnostic de ${o.name}`, detail: 'Lire les réponses, préparer la restitution puis la publier.', to: '/account-manager/diagnostics', cta: 'Analyser' })
+    for (const r of stats.slots) list.push({ id: `s-${r.id}`, tone: 'sky', icon: <CalendarClock size={16} />, title: `Confirmer le créneau de ${r.orgName || r.name || 'l’entreprise'}`, detail: [r.appointmentDate, r.appointmentSlot].filter(Boolean).join(' · ') || 'Créneau demandé à confirmer avec le client.', to: r.orgId ? '/account-manager/entreprises/$id' : '/account-manager/entreprises', params: r.orgId ? { id: r.orgId } : undefined, cta: 'Confirmer' })
+    for (const o of orgs) if (o.restitutionPublished && !o.offerStatus) list.push({ id: `o-${o.id}`, tone: 'teal', icon: <Send size={16} />, title: `Proposer la suite à ${o.name}`, detail: 'La restitution est publiée : présenter l’offre adaptée aux priorités.', to: '/account-manager/suivi-commercial', cta: 'Préparer' })
+    for (const o of orgs) if (!o.diagnosticStatus) list.push({ id: `n-${o.id}`, tone: 'slate', icon: <ClipboardCheck size={16} />, title: `Relancer ${o.name} pour son diagnostic`, detail: 'Le questionnaire n’a pas encore été envoyé par le client.', to: '/account-manager/entreprises/$id', params: { id: o.id }, cta: 'Ouvrir' })
     return list.slice(0, 6)
   }, [orgs, stats])
 
@@ -129,7 +129,7 @@ function ConciergeDashboard() {
         }
         actions={
           <>
-            <Link to="/concierge/entreprises/nouvelle"><Button size="sm"><Plus size={14} />Ajouter une entreprise</Button></Link>
+            <Link to="/account-manager/entreprises/nouvelle"><Button size="sm"><Plus size={14} />Ajouter une entreprise</Button></Link>
             {salesAccess ? <Link to={'/sales-presentation' as any}><Button size="sm" variant="outline"><Presentation size={14} />Sales Presentation</Button></Link> : null}
             <Button size="sm" variant="outline" onClick={() => void load()}><RefreshCcw size={14} />Actualiser</Button>
           </>
@@ -139,10 +139,10 @@ function ConciergeDashboard() {
       {error ? <Alert tone="danger" className="mb-5">{error}</Alert> : null}
 
       <StatGrid>
-        <MiniStat icon={<Building2 size={18} />} tone="indigo" label="Entreprises suivies" value={loading ? '–' : orgs.length} hint={`${stats.published.length} restitution(s) publiée(s)`} onClick={() => void navigate({ to: '/concierge/entreprises' as any })} />
-        <MiniStat icon={<Gauge size={18} />} tone="amber" label="Diagnostics à analyser" value={loading ? '–' : stats.toAnalyse.length} hint="À lire puis restituer" onClick={() => void navigate({ to: '/concierge/diagnostics' as any })} />
-        <MiniStat icon={<Inbox size={18} />} tone="sky" label="Besoins clients" value={loading ? '–' : stats.needs} hint="Dans votre portefeuille" onClick={() => void navigate({ to: '/concierge/besoins' as any })} />
-        <MiniStat icon={<Briefcase size={18} />} tone="emerald" label="Missions" value={loading ? '–' : stats.missions} hint="Engagées après une offre" onClick={() => void navigate({ to: '/concierge/missions' as any })} />
+        <MiniStat icon={<Building2 size={18} />} tone="indigo" label="Entreprises suivies" value={loading ? '–' : orgs.length} hint={`${stats.published.length} restitution(s) publiée(s)`} onClick={() => void navigate({ to: '/account-manager/entreprises' as any })} />
+        <MiniStat icon={<Gauge size={18} />} tone="amber" label="Diagnostics à analyser" value={loading ? '–' : stats.toAnalyse.length} hint="À lire puis restituer" onClick={() => void navigate({ to: '/account-manager/diagnostics' as any })} />
+        <MiniStat icon={<Inbox size={18} />} tone="sky" label="Besoins clients" value={loading ? '–' : stats.needs} hint="Dans votre portefeuille" onClick={() => void navigate({ to: '/account-manager/besoins' as any })} />
+        <MiniStat icon={<Briefcase size={18} />} tone="emerald" label="Missions" value={loading ? '–' : stats.missions} hint="Engagées après une offre" onClick={() => void navigate({ to: '/account-manager/missions' as any })} />
       </StatGrid>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -170,11 +170,11 @@ function ConciergeDashboard() {
         <Panel title="Raccourcis" description="Vos outils de suivi au quotidien.">
           <div className="grid gap-2 p-4">
             {[
-              { to: '/concierge/diagnostics', icon: <Gauge size={16} />, tone: 'amber', label: 'Diagnostics', text: 'Analyser et restituer' },
-              { to: '/concierge/besoins', icon: <Inbox size={16} />, tone: 'sky', label: 'Besoins', text: 'Faire avancer les demandes' },
-              { to: '/concierge/rendez-vous', icon: <CalendarClock size={16} />, tone: 'teal', label: 'Rendez-vous', text: 'Préparer les échanges' },
-              { to: '/concierge/documents', icon: <FileText size={16} />, tone: 'emerald', label: 'Documents', text: 'Pièces des entreprises' },
-              { to: '/concierge/messages', icon: <MessageSquare size={16} />, tone: 'indigo', label: 'Messages', text: 'Répondre aux clients' },
+              { to: '/account-manager/diagnostics', icon: <Gauge size={16} />, tone: 'amber', label: 'Diagnostics', text: 'Analyser et restituer' },
+              { to: '/account-manager/besoins', icon: <Inbox size={16} />, tone: 'sky', label: 'Besoins', text: 'Faire avancer les demandes' },
+              { to: '/account-manager/rendez-vous', icon: <CalendarClock size={16} />, tone: 'teal', label: 'Rendez-vous', text: 'Préparer les échanges' },
+              { to: '/account-manager/documents', icon: <FileText size={16} />, tone: 'emerald', label: 'Documents', text: 'Pièces des entreprises' },
+              { to: '/account-manager/messages', icon: <MessageSquare size={16} />, tone: 'indigo', label: 'Messages', text: 'Répondre aux clients' },
             ].map((q) => (
               <Link key={q.to} to={q.to as any} className="cg-shortcut">
                 <span className={`cg-task-icon ${toneClass(q.tone as KitTone)}`}>{q.icon}</span>
@@ -193,7 +193,7 @@ function ConciergeDashboard() {
         className="mt-5"
         title="Votre portefeuille"
         description="Les entreprises qui vous sont attribuées et l’étape où elles en sont."
-        action={<Link to="/concierge/entreprises" className="cg-link">Tout voir<ArrowRight size={14} /></Link>}
+        action={<Link to="/account-manager/entreprises" className="cg-link">Tout voir<ArrowRight size={14} /></Link>}
       >
         {loading ? <LoadingRows /> : null}
         {!loading && !orgs.length ? (
@@ -201,7 +201,7 @@ function ConciergeDashboard() {
             icon={<Building2 size={20} />}
             title="Aucune entreprise attribuée"
             text="L’administrateur ALLNEEDS peut vous en attribuer, ou vous pouvez ajouter une nouvelle relation client."
-            action={<Link to="/concierge/entreprises/nouvelle"><Button size="sm"><Plus size={14} />Ajouter une entreprise</Button></Link>}
+            action={<Link to="/account-manager/entreprises/nouvelle"><Button size="sm"><Plus size={14} />Ajouter une entreprise</Button></Link>}
           />
         ) : null}
         <Rows>
@@ -209,7 +209,7 @@ function ConciergeDashboard() {
             const stage = orgStage(org)
             return (
               <li key={org.id}>
-                <Link to={'/concierge/entreprises/$id' as any} params={{ id: org.id } as any} className="cg-org-row">
+                <Link to={'/account-manager/entreprises/$id' as any} params={{ id: org.id } as any} className="cg-org-row">
                   <Initial name={org.name} tone="indigo" />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold text-ink-950 sm:truncate">{org.name}</span>

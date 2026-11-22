@@ -1,6 +1,8 @@
 {
   "functions": {
-    "api/index.mjs": { "maxDuration": 60 }
+    "api/index.mjs": {
+      "maxDuration": 60
+    }
   },
   "rewrites": [
     {
@@ -10,6 +12,23 @@
     {
       "source": "/((?!assets/|api/).*)",
       "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/concierge",
+      "destination": "/account-manager",
+      "permanent": true
+    },
+    {
+      "source": "/concierge/:path*",
+      "destination": "/account-manager/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/admin/concierges",
+      "destination": "/admin/account-managers",
+      "permanent": true
     }
   ]
 }

@@ -21,7 +21,7 @@ export function AdminClientDocuments({ orgId }: { orgId: string }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-ink-950">Documents de l’entreprise</h3>
-          <p className="mt-0.5 text-xs text-ink-500">Ajoutés par ALLNEEDS ou le concierge affecté. Rendez-les visibles au client.</p>
+          <p className="mt-0.5 text-xs text-ink-500">Ajoutés par ALLNEEDS ou l’Account Manager affecté. Rendez-les visibles au client.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading}>
           <RefreshCcw size={13} />

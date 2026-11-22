@@ -24,7 +24,7 @@ export function AdminRealConcierges() {
   async function load() {
     setError('')
     try {
-      const r = await fetch('/api/admin/concierges', { credentials: 'same-origin', cache: 'no-store' })
+      const r = await fetch('/api/admin/account-managers', { credentials: 'same-origin', cache: 'no-store' })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Chargement impossible')
       setData({ ...b, orgs: (b.orgs ?? []).filter((o: Org) => isSectorActive(o.sector)) })
@@ -38,7 +38,7 @@ export function AdminRealConcierges() {
 
   async function patch(id: string, body: Record<string, unknown>) {
     setError('')
-    const r = await fetch(`/api/admin/concierges/${id}`, { method: 'PATCH', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    const r = await fetch(`/api/admin/account-managers/${id}`, { method: 'PATCH', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
     const b = await r.json()
     if (!r.ok) { setError(b.error || 'Modification impossible'); return false }
     await load()
@@ -53,16 +53,16 @@ export function AdminRealConcierges() {
     <>
       <PageHeader
         eyebrow="Équipe"
-        title="Concierges"
-        description="Les concierges accompagnent les clients. Invitez-les, puis choisissez les entreprises qu’ils suivent."
+        title="Account Managers"
+        description="Les Account Managers accompagnent les clients. Invitez-les, puis choisissez les entreprises qu’ils suivent."
         actions={<>
           <Button variant="outline" size="sm" onClick={() => { setLoading(true); void load() }}><RefreshCcw size={14} className={cn(loading && 'animate-spin')} />Actualiser</Button>
-          <Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus size={14} />Inviter un concierge</Button>
+          <Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus size={14} />Inviter un Account Manager</Button>
         </>}
       />
 
       <StatGrid>
-        <MiniStat icon={<UsersRound size={18} />} tone="indigo" label="Concierges actifs" value={active.length} />
+        <MiniStat icon={<UsersRound size={18} />} tone="indigo" label="Account Managers actifs" value={active.length} />
         <MiniStat icon={<Send size={18} />} tone="amber" label="Invitations en attente" value={data.pending.length} />
         <MiniStat icon={<Building2 size={18} />} tone="sky" label="Entreprises suivies" value={new Set(active.flatMap((c) => c.orgIds ?? [])).size} hint={`sur ${data.orgs.length}`} />
         <MiniStat icon={<Power size={18} />} tone="slate" label="Comptes désactivés" value={data.concierges.length - active.length} />
@@ -96,7 +96,7 @@ export function AdminRealConcierges() {
           <SearchBox value={query} onChange={setQuery} placeholder="Nom ou e-mail…" />
         </Toolbar>
         {!loading && !visible.length ? (
-          <EmptyBox icon={<UsersRound size={20} />} title="Aucun concierge" text="Invitez votre premier concierge : il recevra un e-mail pour créer son mot de passe." action={<Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus size={14} />Inviter un concierge</Button>} />
+          <EmptyBox icon={<UsersRound size={20} />} title="Aucun Account Manager" text="Invitez votre premier Account Manager : il recevra un e-mail pour créer son mot de passe." action={<Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus size={14} />Inviter un Account Manager</Button>} />
         ) : null}
         <Rows>
           {visible.map((c) => {
@@ -171,7 +171,7 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
     try {
       // Le concierge est autorisé sur les secteurs actifs (aujourd’hui : Santé).
       const sectors = ACTIVE_SECTORS
-      const r = await fetch('/api/admin/concierges', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name.trim(), email: email.trim(), sectors, assignedOrgIds: orgIds }) })
+      const r = await fetch('/api/admin/account-managers', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name.trim(), email: email.trim(), sectors, assignedOrgIds: orgIds }) })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Création impossible')
       const sent = email.trim()
@@ -200,7 +200,7 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
           <div>
             <p className="mb-2 text-xs font-semibold text-ink-700">Lien personnel de création du mot de passe (valable 48 h, usage unique)</p>
             <code className="block break-all rounded-xl border border-ink-100 bg-ink-50 p-3 text-xs" data-no-translate>{fallback.setupUrl}</code>
-            <p className="mt-2 text-xs text-ink-500">Transmettez-le au concierge par un canal sûr (WhatsApp, SMS…). Ne le partagez avec personne d’autre.</p>
+            <p className="mt-2 text-xs text-ink-500">Transmettez-le à l’Account Manager par un canal sûr (WhatsApp, SMS…). Ne le partagez avec personne d’autre.</p>
           </div>
           <div className="flex justify-end gap-2 border-t border-ink-100 pt-4">
             <Button type="button" variant="outline" onClick={() => { void navigator.clipboard?.writeText(fallback.setupUrl).then(() => setCopied(true)) }}><Copy size={14} />{copied ? 'Lien copié' : 'Copier le lien'}</Button>
@@ -212,7 +212,7 @@ function InviteModal({ open, orgs, onClose, onDone }: { open: boolean; orgs: Org
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Inviter un concierge" description="Il recevra un e-mail pour créer son mot de passe.">
+    <Modal open={open} onClose={onClose} title="Inviter un Account Manager" description="Il recevra un e-mail pour créer son mot de passe.">
       <form onSubmit={submit} className="space-y-4">
         <Field label="Nom complet" required><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Prénom Nom" autoFocus /></Field>
         <Field label="E-mail" required><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nom@allneeds.ma" /></Field>
@@ -244,7 +244,7 @@ function PerimeterModal({ concierge, orgs, onClose, onSave }: { concierge: Conci
   const [sectors, setSectors] = useState<string[]>(concierge.sectors?.length ? concierge.sectors : ACTIVE_SECTORS)
   const [busy, setBusy] = useState(false)
   return (
-    <Modal open onClose={onClose} title={`Périmètre de ${concierge.name}`} description="Choisissez les entreprises que ce concierge peut suivre.">
+    <Modal open onClose={onClose} title={`Périmètre de ${concierge.name}`} description="Choisissez les entreprises que cet Account Manager peut suivre.">
       <div className="space-y-4">
         <OrgPicker orgs={orgs} value={orgIds} onChange={setOrgIds} />
         {!SINGLE_SECTOR ? (

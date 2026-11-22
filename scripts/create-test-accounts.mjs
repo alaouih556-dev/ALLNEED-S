@@ -67,10 +67,10 @@ let conciergeId = null
 {
   const email = `test.concierge@${DOMAIN}`, password = newPassword()
   try {
-    const r = await call('/api/admin/concierges', { method: 'POST', cookie: admin, body: { name: 'Test Concierge', email, sectors: ['sante'], assignedOrgIds: [] } })
-    if (r.status === 409) { exists('concierge', 'Concierge', email, '/concierge'); conciergeId = (await call('/api/admin/concierges', { cookie: admin })).data.concierges?.find((c) => c.email === email)?.id }
+    const r = await call('/api/admin/account-managers', { method: 'POST', cookie: admin, body: { name: 'Test Concierge', email, sectors: ['sante'], assignedOrgIds: [] } })
+    if (r.status === 409) { exists('concierge', 'Concierge', email, '/account-manager'); conciergeId = (await call('/api/admin/account-managers', { cookie: admin })).data.concierges?.find((c) => c.email === email)?.id }
     else if (r.status !== 201) throw new Error(r.data.error || `erreur ${r.status}`)
-    else { conciergeId = (await setPassword(r.data.delivery.setupUrl, password)).id; done('concierge', 'Concierge', email, password, '/concierge') }
+    else { conciergeId = (await setPassword(r.data.delivery.setupUrl, password)).id; done('concierge', 'Concierge', email, password, '/account-manager') }
   } catch (e) { fail('Concierge', e) }
 }
 

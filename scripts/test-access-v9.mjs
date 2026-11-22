@@ -4,7 +4,7 @@ const store = read('src/store/store.tsx')
 const workspace = read('src/features/saas/Workspace.tsx')
 const nav = read('src/components/layouts.tsx')
 const signup = read('src/routes/inscription.tsx')
-const detail = read('src/routes/concierge/entreprises/$id.tsx')
+const detail = read('src/routes/account-manager/entreprises/$id.tsx')
 const required = [
   [store.includes('saasAccessByOrg'), 'saasAccessByOrg'],
   [store.includes('conciergeScope'), 'conciergeScope'],

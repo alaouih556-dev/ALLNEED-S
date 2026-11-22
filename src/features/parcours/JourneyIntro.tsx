@@ -17,7 +17,7 @@ const PROMISES = [
   },
   {
     icon: MessagesSquare,
-    title: 'Un concierge',
+    title: 'Un Account Manager',
     detail: 'Une personne identifiée lit votre demande et vous recontacte pour caler un point.',
   },
   {
@@ -59,7 +59,7 @@ export function JourneyIntro({
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-200 sm:text-base">
             Votre parcours ALLNEEDS tient en cinq temps : un diagnostic court, la préparation de vos
-            documents, un rendez-vous avec votre concierge, une restitution de vos priorités, puis le
+            documents, un rendez-vous avec votre Account Manager, une restitution de vos priorités, puis le
             niveau d’accompagnement qui vous convient.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">

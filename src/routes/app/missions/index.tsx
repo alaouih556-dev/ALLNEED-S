@@ -70,7 +70,7 @@ function MissionsPage() {
       ) : null}
 
       {missions.length === 0 ? (
-        <EmptyState icon={<Briefcase className="h-5 w-5" />} title="Vos missions vont bientôt apparaître" description="Votre concierge prépare les premières missions de votre accompagnement." />
+        <EmptyState icon={<Briefcase className="h-5 w-5" />} title="Vos missions vont bientôt apparaître" description="Votre Account Manager prépare les premières missions de votre accompagnement." />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {missions.map((mission, index) => {

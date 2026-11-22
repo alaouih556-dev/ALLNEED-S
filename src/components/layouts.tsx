@@ -47,9 +47,10 @@ import {
   Activity,
 } from 'lucide-react'
 import { useDemo } from '@/store/store'
-import { canAccessSalesPresentation, useAuth } from '@/features/auth/AuthContext'
+import { canAccessSalesPresentation, useAuth, type AuthUser } from '@/features/auth/AuthContext'
 import { useCrmOptional } from '@/features/crm/core'
 import { clientModules, orgSaasActive, type AccessModule } from '@/lib/access'
+import { useOrgOptional, type OrgMe } from '@/features/organization/core'
 import { cn } from '@/lib/utils'
 import { THEMES, useWorkspaceTheme, type ThemeMode } from '@/lib/theme'
 import { Avatar } from '@/components/ui'
@@ -146,18 +147,50 @@ function buildClientNav(
 
 function buildConciergeNav(salesAccess = false): NavItem[] {
   return [
-    { group: 'Portefeuille', label: 'Mon portefeuille', to: '/concierge' as any, icon: <LayoutDashboard className="h-4 w-4" /> },
-    { group: 'Portefeuille', label: 'Entreprises suivies', to: '/concierge/entreprises' as any, icon: <Building2 className="h-4 w-4" /> },
-    { group: 'Suivi', label: 'Besoins', to: '/concierge/besoins' as any, icon: <Inbox className="h-4 w-4" /> },
-    { group: 'Suivi', label: 'Diagnostics', to: '/concierge/diagnostics' as any, icon: <Gauge className="h-4 w-4" /> },
-    { group: 'Suivi', label: 'Missions', to: '/concierge/missions' as any, icon: <Briefcase className="h-4 w-4" /> },
-    { group: 'Développement client', label: 'Offres complémentaires', to: '/concierge/suivi-commercial' as any, icon: <BarChart3 className="h-4 w-4" /> },
-    { group: 'Coordination', label: 'Prestataires', to: '/concierge/prestataires' as any, icon: <Network className="h-4 w-4" /> },
-    { group: 'Coordination', label: 'Rendez-vous', to: '/concierge/rendez-vous' as any, icon: <CalendarDays className="h-4 w-4" /> },
-    { group: 'Coordination', label: 'Documents', to: '/concierge/documents' as any, icon: <FileText className="h-4 w-4" /> },
-    { group: 'Coordination', label: 'Messages', to: '/concierge/messages' as any, icon: <MessageSquare className="h-4 w-4" /> },
+    { group: 'Organisation', label: 'Mon équipe', to: '/organisation' as any, icon: <Network className="h-4 w-4" /> },
+    { group: 'Portefeuille', label: 'Mon portefeuille', to: '/account-manager' as any, icon: <LayoutDashboard className="h-4 w-4" /> },
+    { group: 'Portefeuille', label: 'Entreprises suivies', to: '/account-manager/entreprises' as any, icon: <Building2 className="h-4 w-4" /> },
+    { group: 'Suivi', label: 'Besoins', to: '/account-manager/besoins' as any, icon: <Inbox className="h-4 w-4" /> },
+    { group: 'Suivi', label: 'Diagnostics', to: '/account-manager/diagnostics' as any, icon: <Gauge className="h-4 w-4" /> },
+    { group: 'Suivi', label: 'Missions', to: '/account-manager/missions' as any, icon: <Briefcase className="h-4 w-4" /> },
+    { group: 'Développement client', label: 'Offres complémentaires', to: '/account-manager/suivi-commercial' as any, icon: <BarChart3 className="h-4 w-4" /> },
+    { group: 'Coordination', label: 'Prestataires', to: '/account-manager/prestataires' as any, icon: <Network className="h-4 w-4" /> },
+    { group: 'Coordination', label: 'Rendez-vous', to: '/account-manager/rendez-vous' as any, icon: <CalendarDays className="h-4 w-4" /> },
+    { group: 'Coordination', label: 'Documents', to: '/account-manager/documents' as any, icon: <FileText className="h-4 w-4" /> },
+    { group: 'Coordination', label: 'Messages', to: '/account-manager/messages' as any, icon: <MessageSquare className="h-4 w-4" /> },
     ...(salesAccess ? [{ group: 'Développement client', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> }] : []),
   ]
+}
+
+/** Navigation de l'organisation : uniquement les services, équipes et outils du périmètre de l'utilisateur. */
+function buildOrgNav(me: OrgMe | null, user: AuthUser | null): NavItem[] {
+  if (!me) return []
+  const has = (perm: string) => me.permissions.includes(perm)
+  const items: NavItem[] = []
+  const adminGroup = me.position.level === 'pdg' ? 'Direction' : 'Administration'
+  if (me.position.level === 'pdg') items.push({ group: 'Direction', label: 'Vue d’ensemble', to: '/organisation' as any, icon: <LayoutDashboard className="h-4 w-4" /> })
+  if (has('members.view')) items.push({ group: adminGroup, label: 'Membres', to: '/organisation/membres' as any, icon: <UsersRound className="h-4 w-4" /> })
+  if (has('settings.manage')) items.push({ group: adminGroup, label: 'Permissions', to: '/organisation/permissions' as any, icon: <BadgeCheck className="h-4 w-4" /> })
+  for (const department of me.departments) {
+    if (has('department.view')) items.push({ group: department.name, label: 'Tableau de bord', to: `/organisation/services/${department.id}` as any, icon: <BarChart3 className="h-4 w-4" /> })
+    for (const team of department.teams) items.push({ group: department.name, label: team.name, to: `/organisation/equipes/${team.id}` as any, icon: TEAM_ICONS[team.id] ?? <UsersRound className="h-4 w-4" /> })
+    if (department.id === 'marketing' && has('strategies.view')) items.push({ group: department.name, label: 'Plans & objectifs', to: '/organisation/strategies' as any, icon: <LineChart className="h-4 w-4" /> })
+  }
+  items.push({ group: 'Mon travail', label: me.position.level === 'pdg' ? 'Toutes les tâches' : 'Mes tâches', to: '/organisation/taches' as any, icon: <ClipboardList className="h-4 w-4" /> })
+  if (user?.crmAccess) items.push({ group: 'Outils', label: 'CRM', to: '/crm' as any, icon: <PhoneCall className="h-4 w-4" /> })
+  if (user?.role === 'concierge') items.push({ group: 'Outils', label: 'Espace Account Manager', to: '/account-manager' as any, icon: <Briefcase className="h-4 w-4" /> })
+  if (canAccessSalesPresentation(user)) items.push({ group: 'Outils', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> })
+  if (me.position.level === 'pdg') items.push({ group: 'Outils', label: 'Back-office clients', to: '/admin' as any, icon: <Building2 className="h-4 w-4" /> })
+  return items
+}
+
+const TEAM_ICONS: Record<string, ReactNode> = {
+  'dev-ai': <Activity className="h-4 w-4" />,
+  community: <MessageSquare className="h-4 w-4" />,
+  design: <FileText className="h-4 w-4" />,
+  strategies: <Gauge className="h-4 w-4" />,
+  teleprospection: <PhoneCall className="h-4 w-4" />,
+  'account-manager': <Briefcase className="h-4 w-4" />,
 }
 
 /** Groupe replié en bas du menu : pages encore basées sur des données de démonstration. */
@@ -165,7 +198,8 @@ const PREVIEW_GROUP = 'En préparation'
 
 function buildAdminNav(): NavItem[] {
   return [
-    { group: 'Pilotage', label: 'Tableau de bord', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
+    { group: 'Organisation', label: 'Vue d’ensemble', to: '/organisation' as any, icon: <Network className="h-4 w-4" /> },
+    { group: 'Pilotage', label: 'Back-office', to: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Sales Presentation', to: '/sales-presentation' as any, icon: <Presentation className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'CRM', to: '/crm' as any, icon: <PhoneCall className="h-4 w-4" /> },
     { group: 'Clients', label: 'Inscriptions', to: '/admin/inscriptions' as any, icon: <ClipboardCheck className="h-4 w-4" /> },
@@ -175,7 +209,7 @@ function buildAdminNav(): NavItem[] {
     { group: 'Commercial', label: 'Abonnements Besoins', to: '/admin/abonnements' as any, icon: <RefreshCcw className="h-4 w-4" /> },
     { group: 'Commercial', label: 'Besoins', to: '/admin/besoins', icon: <Inbox className="h-4 w-4" /> },
     { group: 'Commercial', label: 'Missions', to: '/admin/missions', icon: <Briefcase className="h-4 w-4" /> },
-    { group: 'Équipe', label: 'Concierges', to: '/admin/concierges' as any, icon: <UserRoundCog className="h-4 w-4" /> },
+    { group: 'Équipe', label: 'Account Managers', to: '/admin/account-managers' as any, icon: <UserRoundCog className="h-4 w-4" /> },
     { group: 'Équipe', label: 'Accès commerciaux', to: '/admin/commerciaux' as any, icon: <BadgeCheck className="h-4 w-4" /> },
     { group: 'Équipe', label: 'Grille STARTER', to: '/admin/grille', icon: <ClipboardList className="h-4 w-4" /> },
     { group: PREVIEW_GROUP, label: 'Pipeline', to: '/admin/pipeline', icon: <BarChart3 className="h-4 w-4" /> },
@@ -192,6 +226,7 @@ function buildAdminNav(): NavItem[] {
 function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string, salesAccess = false): NavItem[] {
   const has = (p: string) => perms.includes(p)
   const items: Array<NavItem & { perm?: string }> = [
+    { group: 'Organisation', label: 'Mon équipe', to: '/organisation' as any, icon: <Network className="h-4 w-4" /> },
     { group: 'Pilotage', label: 'Tableau de bord', to: '/crm' as any, icon: <LayoutDashboard className="h-4 w-4" />, perm: 'dashboard.view' },
     { group: 'Équipe', label: 'Utilisateurs', to: '/crm/utilisateurs' as any, icon: <UsersRound className="h-4 w-4" />, perm: 'users.manage' },
     { group: 'Équipe', label: 'Agents', to: '/crm/agents' as any, icon: <UserRoundCog className="h-4 w-4" />, perm: 'agents.view' },
@@ -216,8 +251,9 @@ function buildCrmNav(perms: string[], isAdmin: boolean, userId?: string, salesAc
 /* ------------------------------------------------------------------ */
 
 const VARIANT_META = {
+  org: { label: 'Organisation', badge: 'Organisation', palette: 'indigo' },
   admin: { label: 'Administration', badge: 'Admin', palette: 'indigo' },
-  concierge: { label: 'Concierge', badge: 'Concierge', palette: 'ocean' },
+  concierge: { label: 'Account Manager', badge: 'Account Manager', palette: 'ocean' },
   crm: { label: 'CRM', badge: 'CRM', palette: 'violet' },
   client: { label: 'Espace client', badge: 'Client', palette: 'allneeds' },
 } as const
@@ -235,10 +271,11 @@ export function AppShell({
   variant,
 }: {
   children: ReactNode
-  variant: 'client' | 'admin' | 'concierge' | 'crm'
+  variant: 'client' | 'admin' | 'concierge' | 'crm' | 'org'
 }) {
   const { state, user } = useDemo()
   const crm = useCrmOptional()
+  const org = useOrgOptional()
   const auth = useAuth()
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -255,7 +292,7 @@ export function AppShell({
     id: auth.user.id,
     name: auth.user.name,
     email: auth.user.email,
-    roleLabel: auth.user.role === 'admin' ? 'Administrateur' : auth.user.role === 'concierge' ? 'Concierge' : auth.user.role === 'agent' ? 'Agent CRM' : auth.user.role === 'crm' ? 'CRM' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
+    roleLabel: auth.user.role === 'admin' ? 'PDG' : auth.user.role === 'staff' ? (org?.me?.position.levelLabel ?? 'Équipe interne') : auth.user.role === 'concierge' ? 'Account Manager' : auth.user.role === 'agent' ? 'Agent CRM' : auth.user.role === 'crm' ? 'CRM' : auth.user.role === 'manager' ? 'Responsable' : auth.user.role === 'collaborateur' ? 'Collaborateur' : user.roleLabel,
   } : user
 
   const unread = auth.status === 'authenticated' ? 0 : state.threads.reduce((acc, t) => acc + t.unread, 0)
@@ -263,7 +300,7 @@ export function AppShell({
   const clientOrg = auth.status === 'authenticated' ? auth.user?.organization : state.orgs.find((org) => org.id === user.orgId)
   const modules = clientModules(auth.user?.organization ?? null)
   const saasAccess = orgSaasActive(auth.user?.organization ?? null)
-  const nav = variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id, canAccessSalesPresentation(auth.user)) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
+  const nav = variant === 'org' ? buildOrgNav(org?.me ?? null, auth.user) : variant === 'crm' ? buildCrmNav(crm?.me?.permissions ?? [], Boolean(crm?.me?.isAdmin), crm?.me?.user.id, canAccessSalesPresentation(auth.user)) : variant === 'admin' ? buildAdminNav() : variant === 'concierge' ? buildConciergeNav(canAccessSalesPresentation(auth.user)) : buildClientNav(modules, unread, pendingDocs, saasAccess)
   const current = [...nav].sort((a, b) => String(b.to).length - String(a.to).length).find((item) => {
     const to = String(item.to).replace(/\/$/, '')
     return pathname === to || pathname === `${to}/` || (to.split('/').length > 2 && pathname.startsWith(`${to}/`))
@@ -303,7 +340,7 @@ export function AppShell({
     void navigate({ to: '/' })
   }
 
-  const subtitle = variant === 'crm' ? (crm?.me?.crmName ?? 'CRM') : variant === 'admin' ? 'Pilotage ALLNEEDS' : variant === 'concierge' ? 'Entreprises attribuées' : clientOrg ? `${clientOrg.sector ?? 'Entreprise'} · accès sécurisé` : 'Votre espace ALLNEEDS'
+  const subtitle = variant === 'org' ? (org?.me?.position.levelLabel ?? 'Organisation') : variant === 'crm' ? (crm?.me?.crmName ?? 'CRM') : variant === 'admin' ? 'Pilotage ALLNEEDS' : variant === 'concierge' ? 'Entreprises attribuées' : clientOrg ? `${clientOrg.sector ?? 'Entreprise'} · accès sécurisé` : 'Votre espace ALLNEEDS'
   const orgName = variant === 'client' ? (clientOrg?.name ?? 'Espace client') : null
 
   return (

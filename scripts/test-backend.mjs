@@ -28,10 +28,10 @@ try{
  x=await req('/api/auth/setup-password',{method:'POST',body:{token:teamToken,password:'ManagerPassword!2026'}});assert(x.r.status===200,'team password setup')
  x=await req(`/api/admin/orgs/${orgId}/access`,{method:'PATCH',cookie:adminCookie,body:{modules:{equipe:true}}});assert(x.r.status===200&&x.data.modules.equipe===true,'equipe module enable')
  x=await req('/api/team',{cookie:ownerCookie});assert(x.r.status===200&&x.data.members.length===1,'team list')
- x=await req('/api/admin/concierges',{method:'POST',cookie:adminCookie,body:{name:'Concierge Test',email:'concierge@test.ma',sectors:['tourisme'],assignedOrgIds:[orgId]}});assert(x.r.status===201,'concierge invite');const conciergeToken=new URL(x.data.delivery.setupUrl).searchParams.get('token')
+ x=await req('/api/admin/account-managers',{method:'POST',cookie:adminCookie,body:{name:'Concierge Test',email:'concierge@test.ma',sectors:['tourisme'],assignedOrgIds:[orgId]}});assert(x.r.status===201,'concierge invite');const conciergeToken=new URL(x.data.delivery.setupUrl).searchParams.get('token')
  x=await req('/api/auth/setup-password',{method:'POST',body:{token:conciergeToken,password:'ConciergePassword!2026'}});assert(x.r.status===200,'concierge password setup')
  x=await req('/api/auth/login',{method:'POST',body:{email:'concierge@test.ma',password:'ConciergePassword!2026'}});assert(x.r.status===200,'concierge login');const conciergeCookie=x.cookie
- x=await req('/api/concierge/orgs',{cookie:conciergeCookie});assert(x.r.status===200&&x.data.length===1&&x.data[0].id===orgId,'concierge assigned org access')
+ x=await req('/api/account-manager/orgs',{cookie:conciergeCookie});assert(x.r.status===200&&x.data.length===1&&x.data[0].id===orgId,'concierge assigned org access')
  x=await req(`/api/admin/orgs/${orgId}/access`,{method:'PATCH',cookie:adminCookie,body:{saas:{enabled:true,subscriptionActive:true}}});assert(x.r.status===200&&x.data.saas.subscriptionActive===true&&x.data.saas.enabled===true,'saas subscription toggle')
  x=await req(`/api/admin/orgs/${orgId}/access`,{method:'PATCH',cookie:adminCookie,body:{modules:{besoins:false}}});assert(x.r.status===200&&x.data.modules.besoins===false,'module disable')
  x=await req('/api/needs',{cookie:ownerCookie});assert(x.r.status===403&&x.data.code==='ACCESS_DISABLED','module enforced server side')

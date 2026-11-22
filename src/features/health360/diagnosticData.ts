@@ -821,6 +821,6 @@ export const ADEQUATION_CRITERIA = ['Décideur présent et impliqué','Problème
 export const VERSIONS = [
   ['v4','—','Grille initiale : 40 questions, notation 0–5, qualification commerciale interne.','Fondateur ALLNEEDS'],
   ['v5','05/10/2026','Indice de maîtrise (%) · enjeu et écart pondéré pour les externes · formats Complet et Express · observation terrain · causes racines · plan de suivi J+30/60/90 · cadre de transparence · fiche d’adéquation partagée · calibration.','Fondateur ALLNEEDS'],
-  ['v5.1','05/10/2026','Colonne Commentaire à la place de la preuve · 40 questions réécrites (formulation concrète, repères observables) avec une relance de creusement · questions conciergeries et concierges dans le volet Tourisme · questions de rappel (Santé) et de réinscription (Enseignement).','Fondateur ALLNEEDS'],
+  ['v5.1','05/10/2026','Colonne Commentaire à la place de la preuve · 40 questions réécrites (formulation concrète, repères observables) avec une relance de creusement · questions conciergeries et Account Managers dans le volet Tourisme · questions de rappel (Santé) et de réinscription (Enseignement).','Fondateur ALLNEEDS'],
   ['v5.2','10/10/2026','Ajout d’un 5e axe : la grille passe à 50 questions / 5 axes (7 internes + 3 externes par axe) pour chaque secteur. Contenu du 5e axe encore à valider.','Fondateur ALLNEEDS'],
 ] as const;

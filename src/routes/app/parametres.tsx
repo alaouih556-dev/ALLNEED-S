@@ -99,7 +99,7 @@ function ProfilePage() {
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Panel
           title={<span className="flex items-center gap-2"><UserRound size={16} className="text-[var(--an-accent)]" />Informations personnelles</span>}
-          description="Visibles par votre concierge ALLNEEDS."
+          description="Visibles par votre Account Manager ALLNEEDS."
           action={!editing ? <Button size="sm" variant="outline" onClick={startEdit}><Edit2 size={14} />Modifier</Button> : null}
         >
           {editing ? (
@@ -139,7 +139,7 @@ function ProfilePage() {
         <div className="grid content-start gap-5">
           <Panel
             title={<span className="flex items-center gap-2"><Building2 size={16} className="text-[var(--an-accent)]" />Mon établissement</span>}
-            description="Pour modifier ces informations, contactez votre concierge."
+            description="Pour modifier ces informations, contactez votre Account Manager."
           >
             <Facts rows={[
               ['Établissement', org?.name],
@@ -147,7 +147,7 @@ function ProfilePage() {
               ['Type de structure', org?.kind],
               ['Ville', org?.city],
               ['Taille', org?.size],
-              ['Concierge', org?.concierge?.name || org?.concierge?.email],
+              ['Account Manager', org?.concierge?.name || org?.concierge?.email],
             ]} />
           </Panel>
 
@@ -158,7 +158,7 @@ function ProfilePage() {
               ['Dernière connexion', lastLogin ? longDate(lastLogin) : null],
             ]} />
             <p className="flex items-start gap-2 border-t border-[var(--an-line)] px-5 py-4 text-xs leading-5 text-ink-500">
-              <KeyRound size={14} className="mt-0.5 shrink-0" />Pour changer de mot de passe, demandez un nouveau lien de configuration à votre concierge.
+              <KeyRound size={14} className="mt-0.5 shrink-0" />Pour changer de mot de passe, demandez un nouveau lien de configuration à votre Account Manager.
             </p>
           </Panel>
         </div>

@@ -162,7 +162,7 @@ function BesoinsSubscriptionPage() {
              après validation par ALLNEEDS. Aucune offre d’accompagnement ni abonnement SaaS n’est modifié.
           </p>
         </div>
-        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-ink-400"><Clock3 size={12} /> Un contenu marqué « Contenu à valider » sera précisé par votre concierge.</p>
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-ink-400"><Clock3 size={12} /> Un contenu marqué « Contenu à valider » sera précisé par votre Account Manager.</p>
       </Card>
 
       <Modal
@@ -198,7 +198,7 @@ function BesoinsSubscriptionPage() {
       <Modal open={cancelModal.open} onClose={cancelModal.close} title="Résilier l’abonnement Besoins" description="Le module Besoins sera fermé et vos dépôts impossibles jusqu’à une nouvelle souscription.">
         <div className="space-y-4">
           {actionError ? <Alert tone="danger">{actionError}</Alert> : null}
-          <p className="text-sm text-ink-600">Vos besoins déjà déposés et leur historique restent consultables par votre concierge.</p>
+          <p className="text-sm text-ink-600">Vos besoins déjà déposés et leur historique restent consultables par votre Account Manager.</p>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={cancelModal.close} disabled={submitting}>Annuler</Button>
             <Button variant="danger" disabled={submitting} onClick={() => void run(cancelNeedsSubscription)}>{submitting ? 'Résiliation…' : 'Confirmer la résiliation'}</Button>

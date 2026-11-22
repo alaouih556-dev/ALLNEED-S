@@ -196,13 +196,13 @@ try {
   assert(x.r.status === 403, 'H: PATCH d’une autre entreprise refusé')
 
   // Concierge NON affecté : aucune mission dans son portefeuille, aucun accès.
-  x = await req('/api/concierge/missions', { cookie: conciergeBCookie })
+  x = await req('/api/account-manager/missions', { cookie: conciergeBCookie })
   assert(x.r.status === 200 && !x.data.some((m) => m.id === missionId), 'I: concierge non affecté ne voit pas la mission')
   x = await req(`/api/missions/${missionId}`, { method: 'PATCH', cookie: conciergeBCookie, body: { status: 'en_cours' } })
   assert(x.r.status === 403, 'I: concierge non affecté ne peut pas modifier')
 
   // Concierge affecté : voit la mission + transitions de statut (a_faire -> en_cours -> a_valider_client).
-  x = await req('/api/concierge/missions', { cookie: conciergeACookie })
+  x = await req('/api/account-manager/missions', { cookie: conciergeACookie })
   assert(x.r.status === 200 && x.data.some((m) => m.id === missionId && m.orgName === 'Clinique A'), 'J: concierge affecté voit la mission')
   x = await req(`/api/missions/${missionId}`, { method: 'PATCH', cookie: conciergeACookie, body: { status: 'en_cours', priority: 'haute', instructions: 'Cadrer le périmètre.' } })
   assert(x.r.status === 200 && x.data.status === 'en_cours' && x.data.priority === 'haute' && x.data.instructions === 'Cadrer le périmètre.', 'J: en_cours + champs opérationnels')

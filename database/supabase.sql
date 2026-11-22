@@ -39,7 +39,7 @@ create table if not exists public.v46_users (
   organization_id text references public.v46_organizations(id) on delete cascade,
   email text not null,
   name text not null default '',
-  role text not null check (role in ('admin','concierge','dirigeant','manager','collaborateur','prestataire','commercial','sales','agent','crm')),
+  role text not null check (role in ('admin','concierge','dirigeant','manager','collaborateur','prestataire','commercial','sales','agent','crm','staff')),
   active boolean not null default true,
   password_hash text,
   password_configured boolean not null default false,
@@ -70,7 +70,7 @@ create table if not exists public.v46_invitations (
   name text not null default '',
   role text not null,
   permissions jsonb not null default '[]'::jsonb,
-  kind text not null check (kind in ('owner','team','concierge','sales','crm')),
+  kind text not null check (kind in ('owner','team','concierge','sales','crm','staff')),
   invitation_metadata jsonb not null default '{}'::jsonb,
   token_hash text not null unique,
   created_by text,
@@ -148,6 +148,27 @@ drop trigger if exists v46_users_updated_at on public.v46_users;
 create trigger v46_users_updated_at before update on public.v46_users for each row execute function public.allneeds_set_updated_at();
 
 -- ---------------------------------------------------------------------
+-- Organisation interne : tâches, stratégies marketing, permissions
+-- ---------------------------------------------------------------------
+do $$
+declare t text;
+begin
+  foreach t in array array['v46_org_tasks','v46_org_strategies','v46_org_settings'] loop
+    execute format('create table if not exists public.%I (
+      id text primary key,
+      organization_id text,
+      payload jsonb not null default ''{}''::jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )', t);
+    execute format('drop trigger if exists %I on public.%I', t || '_updated_at', t);
+    execute format('create trigger %I before update on public.%I for each row execute function public.allneeds_set_updated_at()', t || '_updated_at', t);
+  end loop;
+end $$;
+create index if not exists v46_org_tasks_team_idx on public.v46_org_tasks ((payload->>'teamId'));
+create index if not exists v46_org_tasks_assignee_idx on public.v46_org_tasks ((payload->>'assigneeId'));
+
+-- ---------------------------------------------------------------------
 -- RLS + service_role uniquement
 -- ---------------------------------------------------------------------
 
@@ -159,6 +180,7 @@ begin
     'v46_registrations','v46_diagnostics','v46_diagnostic_consents','v46_needs',
     'v46_missions','v46_offers','v46_documents','v46_messages','v46_appointments','v46_quotes',
     'v46_notifications','v46_needs_subscriptions','v46_saas_subscriptions','v46_conversations',
+    'v46_org_tasks','v46_org_strategies','v46_org_settings',
     'v46_crm_databases','v46_crm_contacts','v46_crm_calls','v46_crm_appointments','v46_crm_campaigns','v46_crm_zones','v46_crm_activity','v46_crm_imports','v46_crm_settings'
   ] loop
     execute format('alter table public.%I enable row level security', t);

@@ -70,7 +70,7 @@ export function ConciergeReview({
         <EmptyState
           icon={<MessageSquare className="h-5 w-5" />}
           title="Aucun diagnostic soumis"
-          description="Dès qu’un client envoie sa demande concierge, il apparaît ici avec ses réponses et ses priorités."
+          description="Dès qu’un client envoie sa demande Account Manager, il apparaît ici avec ses réponses et ses priorités."
         />
       </Card>
     )
@@ -105,7 +105,7 @@ export function ConciergeReview({
       <Card className="p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Revue concierge</p>
+            <p className="eyebrow">Revue Account Manager</p>
             <h2 className="mt-3 font-display text-2xl font-bold text-ink-950">
               {request?.company || 'Diagnostic soumis'}
             </h2>

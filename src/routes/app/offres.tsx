@@ -69,7 +69,7 @@ function OffersPage() {
               <h2 className="font-display text-xl font-bold text-ink-950">Les offres apparaîtront après votre restitution</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
                 Les offres d’accompagnement sont disponibles une fois votre restitution validée et publiée par
-                votre concierge. Vous pourrez alors comparer et accepter la formule adaptée à vos priorités.
+                votre Account Manager. Vous pourrez alors comparer et accepter la formule adaptée à vos priorités.
               </p>
               <Link to="/app/diagnostics" className="mt-4 inline-flex">
                 <Button variant="outline">Suivre ma restitution <ArrowRight className="ml-2 h-4 w-4" /></Button>
@@ -131,7 +131,7 @@ function OffersPage() {
                     </p>
                   ) : (
                     <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-amber-800">
-                      <Sparkles size={12} /> Suggestion indicative · à valider par votre concierge
+                      <Sparkles size={12} /> Suggestion indicative · à valider par votre Account Manager
                     </p>
                   )
                 ) : null}
@@ -176,13 +176,13 @@ function OffersPage() {
         <div className="flex items-start gap-3">
           <FileText className="mt-0.5 h-4 w-4 text-ink-400" />
           <p className="text-xs leading-relaxed text-ink-500">
-            Le détail contractuel (périmètre, délais, modalités de paiement) vous est confirmé par votre concierge.
+            Le détail contractuel (périmètre, délais, modalités de paiement) vous est confirmé par votre Account Manager.
             Aucun paiement automatique n’est déclenché depuis cette page. Le catalogue d’accompagnement est distinct
             des abonnements Besoins et du SaaS.
           </p>
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-[11px] text-ink-400">
-          <Clock3 size={12} /> Un contenu de mission marqué « Contenu à valider » sera précisé par votre concierge.
+          <Clock3 size={12} /> Un contenu de mission marqué « Contenu à valider » sera précisé par votre Account Manager.
         </p>
       </Card>
 

@@ -117,7 +117,7 @@ function DocumentsPage() {
         />
       ) : (
         <Alert tone="info" title="Choisissez votre secteur">
-          Sélectionnez d’abord votre secteur depuis le diagnostic pour préparer la demande concierge.
+          Sélectionnez d’abord votre secteur depuis le diagnostic pour préparer la demande Account Manager.
         </Alert>
       )}
     </>

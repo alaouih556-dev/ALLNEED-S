@@ -317,7 +317,7 @@ export function QuestionnaireSante({ orgId: orgIdProp }: { orgId?: string }) {
     setOrgsLoading(true)
     setLocalError('')
     try {
-      const response = await fetch('/api/concierge/orgs', { credentials: 'same-origin', cache: 'no-store' })
+      const response = await fetch('/api/account-manager/orgs', { credentials: 'same-origin', cache: 'no-store' })
       if (!response.ok) throw new Error('Impossible de charger le portefeuille.')
       const rows = (await response.json()) as Array<{ id: string; name: string; sector: string }>
       setOrgs(rows.filter((row) => row.sector === 'sante'))
@@ -532,7 +532,7 @@ export function QuestionnaireSante({ orgId: orgIdProp }: { orgId?: string }) {
           </div>
           <h2 className="font-display text-2xl font-bold text-ink-950 mb-3">Diagnostic Santé</h2>
           <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-600 mb-6">
-            Questionnaire de saisie en rendez-vous : le concierge recueille les réponses du dirigeant, une
+            Questionnaire de saisie en rendez-vous : l’Account Manager recueille les réponses du dirigeant, une
             question à la fois. 25 questions réparties sur 5 axes.
           </p>
           {!orgId ? (
@@ -590,7 +590,7 @@ export function QuestionnaireSante({ orgId: orgIdProp }: { orgId?: string }) {
           </p>
           {diagnosticId ? (
             <div className="flex flex-wrap justify-center gap-3">
-              <Link to="/concierge/diagnostics/$id" params={{ id: diagnosticId }}>
+              <Link to="/account-manager/diagnostics/$id" params={{ id: diagnosticId }}>
                 <Button>Voir l’analyse <ArrowRight className="ml-2 h-4 w-4" /></Button>
               </Link>
               <Button
@@ -798,7 +798,7 @@ export function QuestionnaireSante({ orgId: orgIdProp }: { orgId?: string }) {
                   </button>
                 </div>
 
-                <Field label="Réponse du client · observation concierge">
+                <Field label="Réponse du client · observation Account Manager">
                   <Textarea
                     rows={4}
                     placeholder="Ce que le dirigeant a répondu oralement…"
@@ -851,7 +851,7 @@ export function QuestionnaireSante({ orgId: orgIdProp }: { orgId?: string }) {
                   <p className="mt-1 text-xs italic text-ink-500">Entendu : {interimTranscript}</p>
                 )}
 
-                <Field label="Note privée staff (concierge/admin seulement)">
+                <Field label="Note privée staff (Account Manager/admin seulement)">
                   <Textarea
                     rows={3}
                     placeholder="Constats privés, hypothèses, éléments à vérifier…"

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ConciergeGuard, ConciergeHeading, ScopedEmpty } from '@/features/concierge/ScopedSection'
+import { ConciergeGuard, ConciergeHeading, ScopedEmpty } from '@/features/account-manager/ScopedSection'
 import { Select } from '@/components/ui'
 import { DocumentsPanel } from '@/features/documents/DocumentsPanel'
 import { useDocuments } from '@/lib/documents'
 
-export const Route = createFileRoute('/concierge/documents')({ component: ConciergeDocuments })
+export const Route = createFileRoute('/account-manager/documents')({ component: ConciergeDocuments })
 
 type ScopeOrg = { id: string; name: string }
 
@@ -16,7 +16,7 @@ function ConciergeDocuments() {
 
   useEffect(() => {
     let alive = true
-    fetch('/api/concierge/orgs', { credentials: 'same-origin', cache: 'no-store' })
+    fetch('/api/account-manager/orgs', { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => r.json())
       .then((rows: ScopeOrg[]) => {
         if (!alive) return

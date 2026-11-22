@@ -85,7 +85,7 @@ function AdminSalesAccess() {
 
       <StatGrid>
         <MiniStat icon={<BadgeCheck size={18} />} tone="indigo" label="Comptes commerciaux actifs" value={activeAccounts} hint={`${accounts.length} compte(s) au total`} />
-        <MiniStat icon={<UserRoundCog size={18} />} tone="teal" label="Concierges autorisés" value={conciergesWithAccess} hint={`sur ${concierges.length} concierge(s)`} />
+        <MiniStat icon={<UserRoundCog size={18} />} tone="teal" label="Account Managers autorisés" value={conciergesWithAccess} hint={`sur ${concierges.length} Account Manager(s)`} />
         <MiniStat icon={<Mail size={18} />} tone="amber" label="Invitations en attente" value={data?.pending.length ?? 0} />
         <MiniStat icon={<UsersRound size={18} />} tone="emerald" label="Administrateurs" value="Toujours" hint="Accès inclus avec le rôle admin" />
       </StatGrid>
@@ -104,9 +104,9 @@ function AdminSalesAccess() {
             </Rows>
           </Panel>
 
-          <Panel title="Concierges" description="Accordez l’accès à un concierge sans changer son rôle ni son portefeuille.">
+          <Panel title="Account Managers" description="Accordez l’accès à un Account Manager sans changer son rôle ni son portefeuille.">
             {!data ? <LoadingRows /> : null}
-            {data && !concierges.length ? <EmptyBox icon={<UserRoundCog size={20} />} title="Aucun concierge" /> : null}
+            {data && !concierges.length ? <EmptyBox icon={<UserRoundCog size={20} />} title="Aucun Account Manager" /> : null}
             <Rows>
               {concierges.map((m) => (
                 <MemberRow key={m.id} member={m} busy={busy === m.id} on={m.salesAccess} onToggle={(v) => void toggle(m, v)} labelOn="Accès accordé" labelOff="Sans accès" disabled={!m.active} />

@@ -133,7 +133,7 @@ function AbonnementPage() {
         type: 'TOAST_ADD',
         toast: {
           title: `Formule ${code} sélectionnée`,
-          description: 'Le détail et le devis vous sont confirmés par votre concierge avant tout engagement.',
+          description: 'Le détail et le devis vous sont confirmés par votre Account Manager avant tout engagement.',
           tone: 'success',
         },
       })

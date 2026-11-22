@@ -191,7 +191,7 @@ function csvEscape(v) {
 /* Module                                                              */
 /* ------------------------------------------------------------------ */
 
-export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification }) {
+export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification, isCrmManagerPosition = () => false }) {
   for (const key of Object.keys(CRM_COLLECTIONS)) if (!Array.isArray(db[key])) db[key] = []
 
   function settings() {
@@ -206,8 +206,9 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   }
 
   /* ---------- Rôles, permissions, périmètre ---------- */
-  const isCrmUser = (u) => Boolean(u && CRM_ROLES[u.role])
-  const isCrmAdmin = (u) => Boolean(u && CRM_ROLES[u.role]?.admin)
+  // La direction commerciale et le responsable de la téléprospection administrent le CRM.
+  const isCrmUser = (u) => Boolean(u && (CRM_ROLES[u.role] || isCrmManagerPosition(u)))
+  const isCrmAdmin = (u) => Boolean(u && (CRM_ROLES[u.role]?.admin || isCrmManagerPosition(u)))
   function permissionsOf(u) {
     if (!isCrmUser(u)) return []
     if (isCrmAdmin(u)) return [...AGENT_PERMISSIONS, ...ADMIN_PERMISSIONS]
@@ -226,7 +227,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   const contactById = (x) => db.crmContacts.find((c) => c.id === x)
   const userById = (x) => db.users.find((u) => u.id === x)
   const crmUsers = () => db.users.filter(isCrmUser)
-  const isFieldRole = (u) => Boolean(u && CRM_ROLES[u.role] && !CRM_ROLES[u.role].admin)
+  const isFieldRole = (u) => Boolean(u && CRM_ROLES[u.role] && !isCrmAdmin(u))
   const agents = () => db.users.filter(isFieldRole)
   const campaignOfContact = (c) => c.campaignId || dbById(c.databaseId)?.campaignId || null
 
@@ -671,6 +672,13 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const send = (code, body) => { json(res, code, body, cors); return true }
     const body = ['POST', 'PATCH', 'PUT'].includes(M) ? await readBody(req) : {}
     let m
+
+    // Un responsable CRM n'est pas PDG : il ne peut ni accorder ce rôle, ni agir sur un compte PDG.
+    if (user.role !== 'admin' && path.startsWith('/users')) {
+      const targetId = path.match(/^\/users\/([^/]+)/)?.[1]
+      if (body.role === 'admin') throw httpError(403, 'rôle réservé au PDG')
+      if (M !== 'GET' && targetId && userById(targetId)?.role === 'admin') throw httpError(403, 'compte réservé au PDG')
+    }
 
     /* ---------- Session ---------- */
     if (M === 'GET' && path === '/me') {

@@ -15,8 +15,8 @@ export function RestitutionStatusTimeline({ answered, submittedAt, publishedAt }
   const published = Boolean(publishedAt)
   const steps = [
     { label: 'Diagnostic complété', hint: 'Vos réponses sont enregistrées.', done: answered },
-    { label: 'Diagnostic transmis', hint: 'Envoyé à votre concierge ALLNEEDS.', done: submitted },
-    { label: 'Analyse du concierge', hint: 'Lecture de vos réponses, vérifications et préparation de la restitution.', done: published, active: submitted && !published },
+    { label: 'Diagnostic transmis', hint: 'Envoyé à votre Account Manager ALLNEEDS.', done: submitted },
+    { label: 'Analyse de l’Account Manager', hint: 'Lecture de vos réponses, vérifications et préparation de la restitution.', done: published, active: submitted && !published },
     { label: 'Restitution disponible', hint: 'Vos priorités validées avec le dirigeant.', done: published },
   ]
 

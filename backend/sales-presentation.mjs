@@ -53,7 +53,7 @@ export const SALES_PRESENTATION = Object.freeze({
         { icon: 'shield', title: 'Un cadre qui respecte votre profession', detail: 'Communication informative, aucune promesse médicale, aucun conseil clinique.' },
         { icon: 'user', title: 'Un seul interlocuteur', detail: 'Nous mobilisons les compétences nécessaires : vous n’avez pas à chercher dix prestataires.' },
       ],
-      talkingPoint: 'Insistez sur l’interlocuteur unique : c’est le concierge ALLNEEDS qui suit la structure.',
+      talkingPoint: 'Insistez sur l’interlocuteur unique : c’est l’Account Manager ALLNEEDS qui suit la structure.',
     },
     {
       id: 'fonctionnalites',
@@ -80,7 +80,7 @@ export const SALES_PRESENTATION = Object.freeze({
       title: 'Du premier rendez-vous à l’action, étape par étape.',
       steps: [
         { title: 'Prendre rendez-vous', detail: 'La structure fait sa demande et choisit un créneau pour son diagnostic gratuit.' },
-        { title: 'Un concierge dédié', detail: 'ALLNEEDS affecte un concierge, interlocuteur unique de la structure.' },
+        { title: 'Un Account Manager dédié', detail: 'ALLNEEDS affecte un Account Manager, interlocuteur unique de la structure.' },
         { title: 'Faire le diagnostic', detail: 'Pendant 30 min, nous analysons les enjeux d’organisation de la structure.' },
         { title: 'Recevoir vos priorités', detail: 'Un compte-rendu structuré avec trois priorités et des pistes d’action adaptées.' },
         { title: 'Choisir librement', detail: 'La structure décide de poursuivre ou non, avec l’offre qui lui convient.' },

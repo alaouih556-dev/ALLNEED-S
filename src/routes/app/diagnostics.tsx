@@ -68,7 +68,7 @@ function DiagnosticsPage() {
   const statusText = primary
     ? primary.status === 'restitue'
       ? "Votre restitution est en cours de préparation finale."
-      : 'Votre concierge lit vos réponses et prépare votre restitution.'
+      : 'Votre Account Manager lit vos réponses et prépare votre restitution.'
     : 'Rien à afficher pour l’instant.'
 
   return (
@@ -76,7 +76,7 @@ function DiagnosticsPage() {
       <PageHeader
         eyebrow="Restitution"
         title="Ma restitution"
-        description="Votre restitution n’est affichée qu’une fois validée et publiée par votre concierge, jamais automatiquement après l’envoi du questionnaire."
+        description="Votre restitution n’est affichée qu’une fois validée et publiée par votre Account Manager, jamais automatiquement après l’envoi du questionnaire."
       />
 
       {(recordError || localError) && !restitution ? (
@@ -96,7 +96,7 @@ function DiagnosticsPage() {
           <EmptyState
             icon={<FileText className="h-5 w-5" />}
             title="Votre restitution apparaîtra ici"
-            description="Répondez d’abord à votre questionnaire, puis transmettez-le. Votre concierge vous prépare ensuite une restitution, validée avec vous avant publication."
+            description="Répondez d’abord à votre questionnaire, puis transmettez-le. Votre Account Manager vous prépare ensuite une restitution, validée avec vous avant publication."
             action={
               <Link to="/app/diagnostic-auto">
                 <Button>Ouvrir mon diagnostic</Button>
@@ -133,7 +133,7 @@ function DiagnosticsPage() {
               <p className="mt-2 text-sm leading-relaxed text-ink-600">
                 {statusText}
                 <br />
-                Votre restitution sera disponible ici une fois validée par votre concierge — rien n’est affiché
+                Votre restitution sera disponible ici une fois validée par votre Account Manager — rien n’est affiché
                 automatiquement après l’envoi du questionnaire.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">

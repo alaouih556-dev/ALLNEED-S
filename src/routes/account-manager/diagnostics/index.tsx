@@ -2,13 +2,13 @@ import { isSectorActive } from '@/lib/active-sectors'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight, ArrowUpRight, BadgeCheck, ClipboardList, EyeOff, FileSearch, RefreshCw } from 'lucide-react'
 import { EmptyBox, HowItWorks, Initial, LoadingRows, MiniStat, Panel, Rows, StatGrid } from '@/components/admin-kit'
-import { ConciergeHeading } from '@/features/concierge/ScopedSection'
+import { ConciergeHeading } from '@/features/account-manager/ScopedSection'
 import { useSubmittedDiagnostics } from '@/features/parcours/useDiagnosticRecord'
 import { PACKS, type SectorKey } from '@/features/health360/packs'
 import { diagnosticStaffStatusLabel } from '@/lib/diagnostic-status'
 import { Alert, Badge, Button } from '@/components/ui'
 
-export const Route = createFileRoute('/concierge/diagnostics/')({ component: ConciergeDiagnostics })
+export const Route = createFileRoute('/account-manager/diagnostics/')({ component: ConciergeDiagnostics })
 
 function sectorKey(sector?: string): SectorKey {
   return sector === 'sante' || sector === 'enseignement' || sector === 'tourisme' ? sector : 'sante'
@@ -60,7 +60,7 @@ function ConciergeDiagnostics() {
           <Rows>
             {toAnalyse.map((record) => (
               <li key={record.id}>
-                <Link to="/concierge/diagnostics/$id" params={{ id: record.id }} className="cg-org-row">
+                <Link to="/account-manager/diagnostics/$id" params={{ id: record.id }} className="cg-org-row">
                   <Initial name={companyName(record)} tone="amber" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-ink-950">{companyName(record)}</span>
@@ -79,7 +79,7 @@ function ConciergeDiagnostics() {
           <Rows>
             {published.map((record) => (
               <li key={record.id}>
-                <Link to="/concierge/diagnostics/$id" params={{ id: record.id }} className="cg-org-row">
+                <Link to="/account-manager/diagnostics/$id" params={{ id: record.id }} className="cg-org-row">
                   <Initial name={companyName(record)} tone="emerald" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-ink-950">{companyName(record)}</span>

@@ -66,9 +66,9 @@ export function DiagnosticSubmit({
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
           Vos réponses sont enregistrées pour {companyName || 'votre établissement'}.
           {published ? (
-            <> Votre restitution est disponible : votre concierge vous a préparé vos priorités.</>
+            <> Votre restitution est disponible : votre Account Manager vous a préparé vos priorités.</>
           ) : (
-            <> Votre concierge les analyse avant de vous recontacter.</>
+            <> Votre Account Manager les analyse avant de vous recontacter.</>
           )}
         </p>
 
@@ -124,7 +124,7 @@ export function DiagnosticSubmit({
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
             Ce récapitulatif reprend vos réponses au diagnostic {pack.label}, volet par volet. Il ne contient ni
             note globale, ni priorité, ni plan d’action : l’analyse de votre situation est réalisée ensuite par
-            votre concierge, puis confirmée avec vous.
+            votre Account Manager, puis confirmée avec vous.
           </p>
         </div>
         <Badge tone={completed ? 'success' : 'warning'}>
@@ -186,7 +186,7 @@ export function DiagnosticSubmit({
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-5">
         <p className="text-xs text-ink-500">
-          En envoyant, vous transmettrez uniquement ces réponses à votre concierge ALLNEEDS.
+          En envoyant, vous transmettrez uniquement ces réponses à votre Account Manager ALLNEEDS.
         </p>
         <Button
           onClick={submit}

@@ -51,7 +51,7 @@ type Notification = { id: string; title: string; message?: string; readAt?: stri
 const JOURNEY = [
   { key: 'compte', label: 'Compte créé', hint: 'Votre espace est actif' },
   { key: 'diagnostic', label: 'Diagnostic 360°', hint: 'Vous répondez au questionnaire' },
-  { key: 'analyse', label: 'Analyse', hint: 'Votre concierge étudie vos réponses' },
+  { key: 'analyse', label: 'Analyse', hint: 'Votre Account Manager étudie vos réponses' },
   { key: 'rapport', label: 'Rapport publié', hint: 'Vos priorités et recommandations' },
   { key: 'accompagnement', label: 'Accompagnement', hint: 'Offre acceptée, missions lancées' },
 ] as const
@@ -102,9 +102,9 @@ function ClientHome() {
 
   const next = useMemo<{ tone: KitTone; icon: ReactNode; eyebrow: string; title: string; text: string; meta?: string; cta?: string; to?: string; progress?: number }>(() => {
     if (offerActive) return { tone: 'emerald', icon: <Handshake size={20} />, eyebrow: 'Accompagnement en cours', title: 'Suivez vos missions et vos résultats', text: 'Votre offre est active. Retrouvez l’avancement des missions, vos documents et vos échanges avec ALLNEEDS.', cta: modules.missions ? 'Voir mes missions' : 'Voir mon offre', to: modules.missions ? '/app/missions' : '/app/offres' }
-    if (offerPending) return { tone: 'sky', icon: <Receipt size={20} />, eyebrow: 'Offre proposée', title: 'Une offre vous attend', text: 'Votre concierge vous a proposé un accompagnement adapté à votre rapport. Consultez-la pour l’accepter ou poser vos questions.', cta: 'Voir l’offre', to: '/app/offres' }
+    if (offerPending) return { tone: 'sky', icon: <Receipt size={20} />, eyebrow: 'Offre proposée', title: 'Une offre vous attend', text: 'Votre Account Manager vous a proposé un accompagnement adapté à votre rapport. Consultez-la pour l’accepter ou poser vos questions.', cta: 'Voir l’offre', to: '/app/offres' }
     if (published) return { tone: 'teal', icon: <FileSearch size={20} />, eyebrow: 'Rapport disponible', title: 'Découvrez votre rapport de diagnostic', meta: `Publié le ${longDate(info.publishedAt!)}`, text: 'Vos priorités et recommandations sont prêtes, ainsi que les offres adaptées à votre établissement.', cta: 'Lire mon rapport', to: '/app/diagnostics' }
-    if (submitted) return { tone: 'amber', icon: <Sparkles size={20} />, eyebrow: 'Analyse en cours', title: 'Votre concierge analyse vos réponses', meta: info.submittedAt ? `Envoyé le ${longDate(info.submittedAt)}` : undefined, text: 'Vous serez notifié dès la publication de votre rapport : aucune action n’est requise de votre part.', cta: 'Suivre mon rapport', to: '/app/diagnostics' }
+    if (submitted) return { tone: 'amber', icon: <Sparkles size={20} />, eyebrow: 'Analyse en cours', title: 'Votre Account Manager analyse vos réponses', meta: info.submittedAt ? `Envoyé le ${longDate(info.submittedAt)}` : undefined, text: 'Vous serez notifié dès la publication de votre rapport : aucune action n’est requise de votre part.', cta: 'Suivre mon rapport', to: '/app/diagnostics' }
     if (questionsDone) return { tone: 'indigo', icon: <ClipboardCheck size={20} />, eyebrow: 'Dernière étape', title: 'Envoyez votre diagnostic', text: 'Toutes les questions sont renseignées. Relisez votre synthèse puis envoyez-la à ALLNEEDS pour lancer l’analyse.', cta: 'Finaliser et envoyer', to: '/app/diagnostic-auto', progress: 1 }
     if (started) return { tone: 'indigo', icon: <ClipboardCheck size={20} />, eyebrow: 'Diagnostic commencé', title: 'Reprenez votre diagnostic', text: 'Vos réponses sont enregistrées automatiquement : reprenez où vous en étiez.', cta: 'Continuer mon diagnostic', to: '/app/diagnostic-auto', progress: draft?.total ? (draft.answered ?? 0) / draft.total : 0 }
     return { tone: 'indigo', icon: <ClipboardCheck size={20} />, eyebrow: 'Première étape', title: 'Réalisez votre diagnostic 360°', text: 'Une question à la fois, à votre rythme : vos réponses sont enregistrées au fur et à mesure. C’est le point de départ de votre accompagnement.', cta: 'Commencer mon diagnostic', to: '/app/diagnostic-auto', progress: 0 }
@@ -180,24 +180,24 @@ function ClientHome() {
           </div>
         </section>
 
-        <Panel title="Votre concierge" description="Votre interlocuteur dédié chez ALLNEEDS.">
+        <Panel title="Votre Account Manager" description="Votre interlocuteur dédié chez ALLNEEDS.">
           {concierge ? (
             <div className="p-5">
               <div className="flex items-center gap-3">
                 <Initial name={concierge.name || concierge.email} tone="indigo" size="lg" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-ink-950">{concierge.name || 'Votre concierge'}</p>
+                  <p className="truncate text-sm font-bold text-ink-950">{concierge.name || 'Votre Account Manager'}</p>
                   <p className="truncate text-xs text-ink-500">{concierge.email}</p>
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-6 text-ink-600">Votre concierge vous accompagne à chaque étape : analyse du diagnostic, rapport, offre puis suivi des missions.</p>
+              <p className="mt-4 text-sm leading-6 text-ink-600">Votre Account Manager vous accompagne à chaque étape : analyse du diagnostic, rapport, offre puis suivi des missions.</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {modules.messages ? <Link to="/app/messages"><Button size="sm"><MessageSquare size={14} />Écrire un message</Button></Link> : null}
                 {concierge.email ? <a href={`mailto:${concierge.email}`}><Button size="sm" variant="outline"><Mail size={14} />Envoyer un e-mail</Button></a> : null}
               </div>
             </div>
           ) : (
-            <EmptyBox icon={<UserRound size={20} />} title="Attribution en cours" text="ALLNEEDS vous attribue un concierge dédié. Son nom apparaîtra ici dès qu’il sera affecté à votre établissement." />
+            <EmptyBox icon={<UserRound size={20} />} title="Attribution en cours" text="ALLNEEDS vous attribue un Account Manager dédié. Son nom apparaîtra ici dès qu’il sera affecté à votre établissement." />
           )}
         </Panel>
       </div>

@@ -69,16 +69,16 @@ export function ConciergeRequest({
   }
 
   return (
-    <div className="space-y-6" id="demande-concierge">
+    <div className="space-y-6" id="demande-account-manager">
       <Card className="p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Étape 3 · Demande concierge</p>
+            <p className="eyebrow">Étape 3 · Demande Account Manager</p>
             <h1 className="mt-3 font-display text-2xl font-bold text-ink-950">
               Demandez à être rappelé
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
-              Un concierge lit votre diagnostic {pack.label.toLowerCase()} et vos réponses avant de vous
+              Un Account Manager lit votre diagnostic {pack.label.toLowerCase()} et vos réponses avant de vous
               appeler. Vous fixez vous-même le créneau. Aucun rendez-vous n’est imposé.
             </p>
           </div>
@@ -98,7 +98,7 @@ export function ConciergeRequest({
               Votre demande est enregistrée.
             </p>
             <p className="mt-2 text-sm leading-relaxed text-emerald-900/80">
-              Votre concierge ouvre votre diagnostic, le vérifie, puis vous propose un créneau. Vous
+              Votre Account Manager ouvre votre diagnostic, le vérifie, puis vous propose un créneau. Vous
               recevrez le rendez-vous dans votre espace.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">

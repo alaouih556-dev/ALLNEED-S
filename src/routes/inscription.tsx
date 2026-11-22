@@ -115,10 +115,10 @@ function InscriptionPage() {
   const isLast = step === STEP_LABELS.length - 1
 
   if (submitted) return (
-    <AuthLayout title="Demande envoyée" subtitle="Votre demande est enregistrée et va être affectée à un concierge ALLNEEDS.">
+    <AuthLayout title="Demande envoyée" subtitle="Votre demande est enregistrée et va être affectée à un Account Manager ALLNEEDS.">
       <div className="mk-form">
         <Note tone="success" title="Étape suivante">
-          Un e-mail de confirmation vient de vous être envoyé. Un concierge ALLNEEDS sera affecté à votre dossier et vous recevrez ensuite un lien personnel pour créer votre mot de passe. Le compte ne sera accessible qu’après cette étape.
+          Un e-mail de confirmation vient de vous être envoyé. Un Account Manager ALLNEEDS sera affecté à votre dossier et vous recevrez ensuite un lien personnel pour créer votre mot de passe. Le compte ne sera accessible qu’après cette étape.
         </Note>
         <button type="button" className="mk-btn mk-btn-dark" onClick={() => void navigate({ to: '/connexion' })}>
           Retour à la connexion <ArrowRight />

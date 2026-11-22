@@ -307,7 +307,7 @@ function withActivity(state: DemoState, activity: Omit<DemoActivity, 'id' | 'at'
 
 function activityActor(state: DemoState) {
   if (state.role === 'admin') return { actor: 'Administrateur ALLNEEDS', role: 'Pilotage ALLNEEDS' }
-  if (state.role === 'concierge') return { actor: 'Concierge ALLNEEDS', role: 'Concierge' }
+  if (state.role === 'concierge') return { actor: 'Account Manager ALLNEEDS', role: 'Account Manager' }
   if (state.role === 'client') return { actor: 'Équipe de l’établissement', role: 'Espace client' }
   return { actor: state.providers[0]?.name ?? 'Partenaire', role: 'Partenaire' }
 }
@@ -373,7 +373,7 @@ function reducer(state: DemoState, action: DemoAction): DemoState {
       return { ...state, commercialOpportunities: state.commercialOpportunities.map((item) => item.id === action.id ? { ...item, status: action.status } : item) }
 
     case 'CONCIERGE_CREATE':
-      return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte concierge créé', action.account.email)
+      return withToast({ ...state, concierges: [action.account, ...state.concierges] }, 'Compte Account Manager créé', action.account.email)
 
     case 'CONCIERGE_TOGGLE':
       return { ...state, concierges: state.concierges.map((c) => c.id === action.id ? { ...c, active: !c.active } : c) }
@@ -676,7 +676,7 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<StoreValue>(() => {
     const concierge = state.concierges.find((item) => item.id === state.userId)
     const orgId = state.role === 'client' ? (state.orgs.find((org) => org.id === state.userId)?.id ?? '') : ''
-    const user: AppUser = { id: state.userId, orgId, name: concierge?.name ?? 'Utilisateur ALLNEEDS', email: concierge?.email ?? '', role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction', roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Concierge' : 'Compte entreprise', initials: 'AN' }
+    const user: AppUser = { id: state.userId, orgId, name: concierge?.name ?? 'Utilisateur ALLNEEDS', email: concierge?.email ?? '', role: state.role === 'admin' ? 'admin' : state.role === 'concierge' ? 'concierge' : 'direction', roleLabel: state.role === 'admin' ? 'ALLNEEDS · Administrateur' : state.role === 'concierge' ? 'ALLNEEDS · Account Manager' : 'Compte entreprise', initials: 'AN' }
     return { state, dispatch, user, role: state.role, setRole, orgId }
   }, [state, setRole])
 

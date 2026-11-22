@@ -561,7 +561,7 @@ export function ClientUploadForm({
           {error ? <Alert tone="danger">{error}</Alert> : null}
           {!orgId ? (
             <Alert tone="info" title="Entreprise introuvable">
-              Impossible d’identifier votre entreprise pour le moment. Reconnectez-vous ou contactez votre concierge.
+              Impossible d’identifier votre entreprise pour le moment. Reconnectez-vous ou contactez votre Account Manager.
             </Alert>
           ) : null}
           <div className="flex justify-end">

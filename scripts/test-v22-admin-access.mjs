@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 const store=readFileSync('src/store/store.tsx','utf8')
-const admin=readFileSync('src/routes/admin/concierges.tsx','utf8')
+const admin=readFileSync('src/routes/admin/account-managers.tsx','utf8')
 const client=readFileSync('src/routes/app/espace-metier.tsx','utf8')
 const settings=readFileSync('src/routes/app/parametres.tsx','utf8')
 const access=readFileSync('src/routes/_public/tarifs.tsx','utf8')

@@ -91,7 +91,7 @@ async function loadDashboard(): Promise<{ data: DashboardData; failed: number }>
     apiRequest<unknown>('/api/needs'),
     apiRequest<unknown>('/api/admin/offers'),
     apiRequest<unknown>('/api/admin/needs/subscriptions'),
-    apiRequest<unknown>('/api/admin/concierges'),
+    apiRequest<unknown>('/api/admin/account-managers'),
     apiRequest<unknown>('/api/staff/requests'),
   ])
   const v = (i: number) => (calls[i].status === 'fulfilled' ? (calls[i] as PromiseFulfilledResult<unknown>).value : null)
@@ -291,7 +291,7 @@ function AdminDashboard() {
     { label: 'Inscriptions à traiter', detail: 'Approuver et préparer les accès', value: m.pendingRegs.length, icon: <ClipboardCheck size={17} />, to: '/admin/inscriptions', tone: 'bg-indigo-50 text-indigo-600' },
     { label: 'Diagnostics à relire', detail: 'Analyser et restituer au client', value: m.diagToReview.length, icon: <FileCheck2 size={17} />, to: '/admin/diagnostics/reel', tone: 'bg-amber-50 text-amber-600' },
     { label: 'Demandes à valider', detail: 'Offres, Besoins et accès SaaS', value: m.pendingRequests.length, icon: <Inbox size={17} />, to: '/admin', tone: 'bg-sky-50 text-sky-600', anchor: '#validations' },
-    { label: 'Concierges en attente', detail: 'Activer les comptes de l’équipe', value: m.pendingConcierges.length, icon: <UserRoundCog size={17} />, to: '/admin/concierges', tone: 'bg-teal-50 text-teal-600' },
+    { label: 'Account Managers en attente', detail: 'Activer les comptes de l’équipe', value: m.pendingConcierges.length, icon: <UserRoundCog size={17} />, to: '/admin/account-managers', tone: 'bg-teal-50 text-teal-600' },
   ]
 
   return (
@@ -315,7 +315,7 @@ function AdminDashboard() {
             <div className="an-hero-stat"><small>Chiffre d’affaires offres</small><b>{mad(m.offerRevenue)}</b></div>
             <div className="an-hero-stat"><small>Abonnements Besoins / mois</small><b>{mad(m.mrr)}</b></div>
             <div className="an-hero-stat"><small>Accès SaaS actifs</small><b>{m.saasActive}</b></div>
-            <div className="an-hero-stat"><small>Concierges</small><b>{m.concierges.length}</b></div>
+            <div className="an-hero-stat"><small>Account Managers</small><b>{m.concierges.length}</b></div>
           </div>
         </div>
       </section>
@@ -498,7 +498,7 @@ function AdminDashboard() {
           {[
             ...(canAccessSalesPresentation(auth.user) ? [{ to: '/sales-presentation', label: 'Sales Presentation', detail: 'Présenter ALLNEEDS à un client', icon: <Presentation size={17} /> }] : []),
             { to: '/admin/clients', label: 'Clients & accès', detail: 'Modules et utilisateurs', icon: <Building2 size={17} /> },
-            { to: '/admin/concierges', label: 'Concierges', detail: 'Équipe et affectations', icon: <UserRoundCog size={17} /> },
+            { to: '/admin/account-managers', label: 'Account Managers', detail: 'Équipe et affectations', icon: <UserRoundCog size={17} /> },
             { to: '/admin/offres', label: 'Offres', detail: 'Catalogue et demandes', icon: <Receipt size={17} /> },
             { to: '/admin/abonnements', label: 'Abonnements Besoins', detail: 'Formules mensuelles', icon: <Network size={17} /> },
           ].map((q) => (

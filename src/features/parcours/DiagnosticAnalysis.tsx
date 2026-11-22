@@ -489,7 +489,7 @@ export function DiagnosticAnalysis({
 
               {/* Champs staff (privés) — uniquement pour la question active */}
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Note interne concierge (privée)">
+                <Field label="Note interne Account Manager (privée)">
                   <Textarea
                     rows={2}
                     value={questionNotes[currentQuestion.id] ?? ''}
@@ -499,7 +499,7 @@ export function DiagnosticAnalysis({
                     placeholder="Constats et éléments à vérifier…"
                   />
                 </Field>
-                <Field label="Commentaire concierge (privée)">
+                <Field label="Commentaire Account Manager (privée)">
                   <Textarea
                     rows={2}
                     value={questionComments[currentQuestion.id] ?? ''}
@@ -795,7 +795,7 @@ export function DiagnosticAnalysis({
         open={confirm.open}
         onClose={confirm.close}
         title="Confirmer la publication de cette restitution au client ?"
-        description="La restitution deviendra visible dans l’espace du client. La note interne, le commentaire concierge et les notes par question ne seront jamais transmis ; seuls la synthèse, le commentaire pour le client et les chapitres validés seront visibles."
+        description="La restitution deviendra visible dans l’espace du client. La note interne, le commentaire Account Manager et les notes par question ne seront jamais transmis ; seuls la synthèse, le commentaire pour le client et les chapitres validés seront visibles."
       >
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="ghost" onClick={confirm.close}>
@@ -814,7 +814,7 @@ export function DiagnosticAnalysis({
           Confidentialité
         </p>
         <p className="mt-2 text-sm leading-relaxed text-ink-600">
-          Le client ne voit jamais la note interne, le commentaire concierge, ni les notes par question. La restitution
+          Le client ne voit jamais la note interne, le commentaire Account Manager, ni les notes par question. La restitution
           n’est visible qu’après cette validation explicite, jamais automatiquement à l’envoi du questionnaire.
         </p>
       </Card>
@@ -845,7 +845,7 @@ function TextListField({
 /**
  * Charge un diagnostic (équipe) puis affiche l'espace d'analyse.
  * `orgsUrl` : endpoint qui renvoie la liste des organisations visibles du rôle
- * (ex. /api/concierge/orgs ou /api/admin/orgs).
+ * (ex. /api/account-manager/orgs ou /api/admin/orgs).
  */
 export function DiagnosticRecordWorkspace({
   id,

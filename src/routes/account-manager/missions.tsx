@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { Building2, CalendarClock, CheckCircle2, CircleAlert, ClipboardCheck, Clock3, ListTodo } from 'lucide-react'
 import { LoadingRows, MiniStat, Panel, StatGrid } from '@/components/admin-kit'
-import { ConciergeGuard, ConciergeHeading, ScopedEmpty } from '@/features/concierge/ScopedSection'
+import { ConciergeGuard, ConciergeHeading, ScopedEmpty } from '@/features/account-manager/ScopedSection'
 import { Alert, Badge, Button, Card, Select } from '@/components/ui'
 import { useApiResource } from '@/lib/useApiResource'
 import {
@@ -14,12 +14,12 @@ import {
 } from '@/lib/accompagnement'
 import { longDate } from '@/lib/format'
 
-export const Route = createFileRoute('/concierge/missions')({ component: ConciergeMissions })
+export const Route = createFileRoute('/account-manager/missions')({ component: ConciergeMissions })
 
 type MissionFilter = 'actives' | 'a_faire' | 'en_cours' | 'a_valider_client' | 'terminee'
 
 function ConciergeMissions() {
-  const { data, loading, error, refresh } = useApiResource<Mission[]>('/api/concierge/missions')
+  const { data, loading, error, refresh } = useApiResource<Mission[]>('/api/account-manager/missions')
 
   return (
     <ConciergeGuard>
@@ -28,7 +28,7 @@ function ConciergeMissions() {
           eyebrow="Suivi"
           title="Missions"
           description="Les missions des entreprises qui vous sont attribuées : statut, priorité, échéance et retours client."
-          actions={<Link to={'/concierge/rendez-vous' as any}><Button size="sm" variant="outline"><CalendarClock size={14} />Organiser un point client</Button></Link>}
+          actions={<Link to={'/account-manager/rendez-vous' as any}><Button size="sm" variant="outline"><CalendarClock size={14} />Organiser un point client</Button></Link>}
         />
         {loading ? <Panel><LoadingRows /></Panel> : null}
         {error ? <Alert tone="danger" title="Missions indisponibles">{error}</Alert> : null}
@@ -88,7 +88,7 @@ function MissionsBoard({ missions, onRefresh }: { missions: Mission[]; onRefresh
         {visible.map((mission) => {
           const status = MISSION_STATUS_META[mission.status]
           return (
-            <Card key={mission.id} className={`concierge-mission-card ${mission.status === 'a_valider_client' ? 'is-blocked' : ''}`}>
+            <Card key={mission.id} className={`Account Manager-mission-card ${mission.status === 'a_valider_client' ? 'is-blocked' : ''}`}>
               <header>
                 <div>
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-500"><Building2 size={14} /> {mission.orgName || 'Entreprise'}</span>
@@ -129,7 +129,7 @@ function MissionsBoard({ missions, onRefresh }: { missions: Mission[]; onRefresh
                   </Select></>}
                 </div>
                 <div>
-                  <Link to={'/concierge/entreprises/$id' as any} params={{ id: mission.orgId } as any}><Button size="sm" variant="outline">Ouvrir le suivi client</Button></Link>
+                  <Link to={'/account-manager/entreprises/$id' as any} params={{ id: mission.orgId } as any}><Button size="sm" variant="outline">Ouvrir le suivi client</Button></Link>
                 </div>
               </div>
 

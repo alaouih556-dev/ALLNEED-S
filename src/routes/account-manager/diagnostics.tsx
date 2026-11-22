@@ -1,7 +1,7 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { ConciergeGuard } from '@/features/concierge/ScopedSection'
+import { ConciergeGuard } from '@/features/account-manager/ScopedSection'
 
-export const Route = createFileRoute('/concierge/diagnostics')({
+export const Route = createFileRoute('/account-manager/diagnostics')({
   component: ConciergeDiagnosticsLayout,
 })
 

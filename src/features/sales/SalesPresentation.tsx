@@ -167,7 +167,7 @@ export function SalesPresentation({ content }: { content: PresentationContent })
   }
 
   const isSalesAccount = auth.user?.role === 'sales'
-  const backTo = auth.user?.role === 'admin' ? '/admin' : auth.user?.role === 'concierge' ? '/concierge' : auth.user?.role === 'crm' ? '/crm' : null
+  const backTo = auth.user?.role === 'admin' ? '/admin' : auth.user?.role === 'concierge' ? '/account-manager' : auth.user?.role === 'crm' ? '/crm' : null
   async function quit() {
     if (document.fullscreenElement) await document.exitFullscreen?.().catch(() => undefined)
     await auth.logout()

@@ -7,6 +7,7 @@ import net from 'node:net'
 import tls from 'node:tls'
 import { SALES_PRESENTATION } from './sales-presentation.mjs'
 import { createCrm, CRM_COLLECTIONS } from './crm.mjs'
+import { createOrganization, positionOf, isCrmManagerPosition } from './organization.mjs'
 
 const scrypt = promisify(scryptCallback)
 // Vercel : pas de disque durable, chaque requête relit et écrit directement Supabase.
@@ -35,6 +36,7 @@ const emptyDb = () => ({
   users: [], orgs: [], diagnostics: [], needs: [], consents: [], registrations: [], invitations: [],
   missions: [], offers: [], documents: [], messages: [], meetings: [], quotes: [], notifications: [],
   needsSubscriptions: [], saasSubscriptions: [], conversations: [],
+  orgTasks: [], orgStrategies: [], orgSettings: [],
   crmDatabases: [], crmContacts: [], crmCalls: [], crmAppointments: [], crmCampaigns: [], crmZones: [], crmActivity: [], crmImports: [], crmSettings: [],
 })
 
@@ -47,7 +49,7 @@ let remoteSaveQueue = Promise.resolve()
 
 function normalizeDb(input) {
   const data = input && typeof input === 'object' ? input : emptyDb()
-  for (const key of ['users','orgs','diagnostics','needs','consents','registrations','invitations','missions','offers','documents','messages','meetings','quotes','notifications','needsSubscriptions','saasSubscriptions','conversations', ...Object.keys(CRM_COLLECTIONS)]) if (!Array.isArray(data[key])) data[key] = []
+  for (const key of ['users','orgs','diagnostics','needs','consents','registrations','invitations','missions','offers','documents','messages','meetings','quotes','notifications','needsSubscriptions','saasSubscriptions','conversations','orgTasks','orgStrategies','orgSettings', ...Object.keys(CRM_COLLECTIONS)]) if (!Array.isArray(data[key])) data[key] = []
   return data
 }
 
@@ -103,6 +105,7 @@ async function remoteRowsOptional(table) {
 const COLLECTION_TABLES = {
   registrations: 'v46_registrations', diagnostics: 'v46_diagnostics', needs: 'v46_needs', consents: 'v46_diagnostic_consents', missions: 'v46_missions', offers: 'v46_offers', documents: 'v46_documents', messages: 'v46_messages', meetings: 'v46_appointments', quotes: 'v46_quotes', notifications: 'v46_notifications',
   needsSubscriptions: 'v46_needs_subscriptions', saasSubscriptions: 'v46_saas_subscriptions', conversations: 'v46_conversations',
+  orgTasks: 'v46_org_tasks', orgStrategies: 'v46_org_strategies', orgSettings: 'v46_org_settings',
 }
 
 async function loadDb(includeCrm = true) {
@@ -134,7 +137,7 @@ async function loadDb(includeCrm = true) {
 function buildRemoteRows(data, includeCrm) {
   const tables = new Map()
   tables.set('v46_organizations', data.orgs.map((org) => ({ id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active !== false, modules: org.modules || {}, metadata: Object.fromEntries(Object.entries(org).filter(([key]) => !['id','name','slug','sector','active','modules'].includes(key))) })))
-  tables.set('v46_users', data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent','crm'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) })))
+  tables.set('v46_users', data.users.map((user) => ({ id: user.id, organization_id: ['admin','concierge','prestataire','sales','agent','crm','staff'].includes(user.role) ? null : (user.orgIds?.[0] || null), email: user.email, name: user.name || '', role: user.role, active: user.active !== false, password_hash: user.passwordHash || null, password_configured: user.passwordConfigured === true, permissions: user.permissions || [], sectors: user.sectors || [], metadata: Object.fromEntries(Object.entries(user).filter(([key]) => !['id','organization_id','email','name','role','active','passwordHash','passwordConfigured','permissions','sectors','orgIds'].includes(key))) })))
   tables.set('v46_concierge_organizations', data.users.filter((user) => user.role === 'concierge').flatMap((user) => (user.orgIds || []).filter((id) => id !== '*').map((orgId) => ({ id: `${user.id}:${orgId}`, concierge_user_id: user.id, organization_id: orgId }))))
   tables.set('v46_invitations', data.invitations.map((inv) => ({ id: inv.id, organization_id: inv.orgId || null, email: inv.email, name: inv.name || '', role: inv.role, permissions: inv.permissions || [], kind: inv.kind, invitation_metadata: inv.metadata || {}, token_hash: inv.tokenHash, created_by: inv.createdBy || null, created_at: inv.createdAt, expires_at: inv.expiresAt, used_at: inv.usedAt || null, revoked_at: inv.revokedAt || null, last_email_at: inv.lastEmailAt || null, last_email_status: inv.lastEmailStatus || null, last_email_error: inv.lastEmailError || null, metadata: {} })))
   for (const [key, table] of Object.entries(COLLECTION_TABLES)) {
@@ -218,7 +221,7 @@ const OFFER_CATALOG = [
     code: 'BASIQUE',
     name: 'BASIQUE',
     price: OFFER_PRICES.BASIQUE,
-    summary: 'Structurer les priorités issues du diagnostic et sécuriser les premières actions avec votre concierge.',
+    summary: 'Structurer les priorités issues du diagnostic et sécuriser les premières actions avec votre Account Manager.',
   },
   {
     code: 'PRO',
@@ -801,7 +804,7 @@ const OPERATIONS_ROLES = new Set(['admin', 'concierge'])
 const SALES_ROLE = 'sales'
 // Permission qu'un administrateur peut accorder à un concierge (membre interne) sans changer son rôle.
 const SALES_PERMISSION = 'sales_presentation'
-const STAFF_INVITATION_KINDS = new Set(['concierge', 'sales', 'crm'])
+const STAFF_INVITATION_KINDS = new Set(['concierge', 'sales', 'crm', 'staff'])
 // Seules ces routes restent ouvertes à un compte `sales` (en plus de /api/me et de la déconnexion).
 const SALES_ALLOWED_API = [/^\/api\/sales\//]
 
@@ -818,7 +821,7 @@ function allowedText(value, maximum, field) {
 
 
 function orgForUser(user) {
-  if (!user || ['admin', 'concierge', 'prestataire', 'sales', 'agent', 'crm'].includes(user.role)) return null
+  if (!user || ['admin', 'concierge', 'prestataire', 'sales', 'agent', 'crm', 'staff'].includes(user.role)) return null
   return db.orgs.find((org) => Array.isArray(user.orgIds) && user.orgIds.includes(org.id)) || null
 }
 
@@ -842,6 +845,8 @@ function requireModuleAccess(user, res, cors, moduleName) {
   json(res, 403, { error: failure, code: 'ACCESS_DISABLED', module: moduleName || null }, cors)
   return false
 }
+
+const isCrmAccount = (user) => ['admin', 'agent', 'crm'].includes(user.role) || isCrmManagerPosition(user)
 
 function hashInvitationToken(token) { return createHmac('sha256', sessionSecret).update(`invite:${token}`).digest('hex') }
 function createInvitation({ orgId = null, email, name, role, permissions = [], createdBy, kind = 'team', metadata = {} }) {
@@ -881,7 +886,7 @@ async function smtpCommand(socket, command, expected) {
 function htmlEscape(value='') { return String(value).replace(/[&<>\"]/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch])) }
 function invitationCopy(invitation) {
   if (invitation.kind === 'owner') return { subject: 'Activez votre compte ALLNEEDS', intro: 'Votre entreprise a été validée par ALLNEEDS.' }
-  if (invitation.kind === 'concierge') return { subject: 'Votre accès Concierge ALLNEEDS', intro: 'Votre compte Concierge ALLNEEDS est prêt.' }
+  if (invitation.kind === 'concierge') return { subject: 'Votre accès Account Manager ALLNEEDS', intro: 'Votre compte Account Manager ALLNEEDS est prêt.' }
   if (invitation.kind === 'crm') return { subject: 'Votre accès au CRM ALLNEEDS', intro: 'Votre compte CRM ALLNEEDS est prêt.' }
   if (invitation.kind === 'sales') return { subject: 'Votre accès Présentation commerciale ALLNEEDS', intro: 'Votre accès à la présentation commerciale ALLNEEDS est prêt.' }
   return { subject: 'Invitation à rejoindre votre espace ALLNEEDS', intro: 'Vous avez été invité à rejoindre l’espace ALLNEEDS de votre entreprise.' }
@@ -1057,7 +1062,7 @@ function pushRegistrationEvent(reg, type, { byUserId = null, note = '' } = {}) {
 
 function registrationAckHtml(reg) {
   const sectorLabel = { sante: 'Santé', enseignement: 'Enseignement', tourisme: 'Tourisme' }[reg.sector] || reg.sector || ''
-  return `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0f172a"><h2>ALLNEEDS</h2><p>Bonjour ${htmlEscape(reg.name || '')},</p><p>Nous avons bien reçu votre demande pour <strong>${htmlEscape(reg.orgName || '')}</strong>.</p><ul><li>Secteur : ${htmlEscape(sectorLabel)}</li><li>Créneau demandé : ${htmlEscape(reg.appointmentDate || '—')} ${htmlEscape(reg.appointmentSlot || '')}</li><li>Contact : ${htmlEscape(reg.name || '')} · ${htmlEscape(reg.phone || '')}</li></ul><p>Un concierge ALLNEEDS va être affecté à votre dossier et prendra contact avec vous pour confirmer le créneau.</p><p><strong>Prochaine étape :</strong> dès l’affectation de votre concierge, vous recevrez un e-mail contenant un lien personnel pour créer votre mot de passe et activer votre compte.</p><p style="color:#64748b;font-size:13px">Si vous n’êtes pas à l’origine de cette demande, ignorez simplement ce message.</p></div>`
+  return `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#0f172a"><h2>ALLNEEDS</h2><p>Bonjour ${htmlEscape(reg.name || '')},</p><p>Nous avons bien reçu votre demande pour <strong>${htmlEscape(reg.orgName || '')}</strong>.</p><ul><li>Secteur : ${htmlEscape(sectorLabel)}</li><li>Créneau demandé : ${htmlEscape(reg.appointmentDate || '—')} ${htmlEscape(reg.appointmentSlot || '')}</li><li>Contact : ${htmlEscape(reg.name || '')} · ${htmlEscape(reg.phone || '')}</li></ul><p>Un Account Manager ALLNEEDS va être affecté à votre dossier et prendra contact avec vous pour confirmer le créneau.</p><p><strong>Prochaine étape :</strong> dès l’affectation de votre Account Manager, vous recevrez un e-mail contenant un lien personnel pour créer votre mot de passe et activer votre compte.</p><p style="color:#64748b;font-size:13px">Si vous n’êtes pas à l’origine de cette demande, ignorez simplement ce message.</p></div>`
 }
 
 async function sendRegistrationAckEmail(reg) {
@@ -1107,7 +1112,8 @@ function scopedNeeds(user) {
 }
 
 async function hashPassword(password) { const salt = randomBytes(16).toString('hex'); return `scrypt$${salt}$${(await scrypt(password, salt, 64)).toString('hex')}` }
-const crm = createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification })
+const crm = createCrm({ db, saveDb, json, readBody, audit, hashPassword, createInvitation, sendInvitationEmail, pushNotification, isCrmManagerPosition })
+const organization = createOrganization({ db, saveDb, json, readBody, audit, createInvitation, sendInvitationEmail, pushNotification })
 
 const failures = new Map()
 function loginThrottled(key) {
@@ -1249,9 +1255,9 @@ async function routeRequest(req, res) {
       let user = db.users.find((u) => u.email?.toLowerCase() === inv.email)
       if (user && inv.orgId && Array.isArray(user.orgIds) && user.orgIds.length && !user.orgIds.includes(inv.orgId)) return json(res, 409, { error: 'cet e-mail appartient déjà à un autre compte' }, cors)
       const salt = randomBytes(16).toString('hex'); const hash = await scrypt(password, salt, 64)
-      if (!user) { user = { id: `usr-${randomBytes(10).toString('hex')}`, email: inv.email, role: inv.role, orgIds: inv.kind === 'concierge' ? (inv.metadata?.assignedOrgIds || []) : inv.kind === 'sales' || inv.kind === 'crm' ? [] : [inv.orgId], sectors: inv.metadata?.sectors || [], name: inv.name, active: true, passwordHash: null, passwordConfigured: false, permissions: inv.permissions }; db.users.push(user) }
+      if (!user) { user = { id: `usr-${randomBytes(10).toString('hex')}`, email: inv.email, role: inv.role, orgIds: inv.kind === 'concierge' ? (inv.metadata?.assignedOrgIds || []) : inv.kind === 'sales' || inv.kind === 'crm' || inv.kind === 'staff' ? [] : [inv.orgId], sectors: inv.metadata?.sectors || [], name: inv.name, active: true, passwordHash: null, passwordConfigured: false, permissions: inv.permissions }; db.users.push(user) }
       if (inv.kind === 'crm' && (user.status === 'suspended' || user.status === 'inactive')) return json(res, 403, { error: 'compte CRM désactivé' }, cors)
-      user.passwordHash = `scrypt$${salt}$${hash.toString('hex')}`; user.passwordConfigured = true; if (inv.kind !== 'crm') { user.active = true; user.role = inv.role; user.permissions = inv.permissions }; if (inv.kind === 'concierge') { user.sectors = inv.metadata?.sectors || user.sectors || []; user.orgIds = inv.metadata?.assignedOrgIds || user.orgIds || [] } ; if (inv.kind === 'sales') user.orgIds = [] ; inv.usedAt = new Date().toISOString()
+      user.passwordHash = `scrypt$${salt}$${hash.toString('hex')}`; user.passwordConfigured = true; if (inv.kind !== 'crm') { user.active = true; user.role = inv.role; user.permissions = inv.permissions }; if (inv.kind === 'concierge') { user.sectors = inv.metadata?.sectors || user.sectors || []; user.orgIds = inv.metadata?.assignedOrgIds || user.orgIds || [] } ; if (inv.kind === 'sales') user.orgIds = [] ; if (inv.kind === 'staff') { user.orgIds = []; user.orgPosition = inv.metadata?.orgPosition || null; if (user.role === 'agent') user.crm ||= { databaseIds: [], campaignIds: [], zoneIds: [] } } ; inv.usedAt = new Date().toISOString()
       if (inv.kind === 'owner' && inv.orgId) {
         const reg = db.registrations.find((r) => r.orgId === inv.orgId && r.email?.toLowerCase() === inv.email.toLowerCase())
         if (reg) { reg.status = 'actif'; reg.activatedAt = new Date().toISOString(); reg.userId = user.id; pushRegistrationEvent(reg, 'compte_active', { byUserId: user.id }) }
@@ -1274,7 +1280,7 @@ async function routeRequest(req, res) {
       if (!user) return json(res, 401, { error: 'non authentifié' }, cors)
       const org = orgForUser(user)
       // Session glissante : chaque visite repousse l'expiration, l'utilisateur actif reste connecté.
-      return json(res, 200, { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
+      return json(res, 200, { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '', concierge: assignedConcierge(org.id) } : null }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
 
     /* ------------------------------------------------------------------ */
@@ -1315,11 +1321,14 @@ async function routeRequest(req, res) {
     // Tant que l'utilisateur utilise l'application, sa session est prolongée : pas de déconnexion automatique.
     res.setHeader('set-cookie', cookie(issueSession(user), SESSION_TTL_SECONDS))
     // Un compte commercial n'accède qu'à la présentation : tout le reste est refusé côté serveur.
+    const isOrgApi = url.pathname.startsWith('/api/org/') || url.pathname.startsWith('/api/notifications')
     if (user.role === SALES_ROLE && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé à la présentation commerciale' }, cors)
     // Un agent CRM n'accède qu'aux routes du CRM, filtrées par ses permissions et son périmètre.
-    if (user.role === 'agent' && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé au CRM' }, cors)
+    if (user.role === 'agent' && !isOrgApi && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé au CRM' }, cors)
     // Rôle « CRM » : uniquement le CRM et la présentation commerciale.
-    if (user.role === 'crm' && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé au CRM et à la présentation commerciale' }, cors)
+    if (user.role === 'crm' && !isOrgApi && !url.pathname.startsWith('/api/crm/') && !SALES_ALLOWED_API.some((pattern) => pattern.test(url.pathname))) return json(res, 403, { error: 'accès réservé au CRM et à la présentation commerciale' }, cors)
+    if (user.role === 'staff' && !isOrgApi && !url.pathname.startsWith('/api/crm/')) return json(res, 403, { error: 'accès réservé à votre espace' }, cors)
+    if (await organization.handle(req, res, url, user, cors)) return
     if (await crm.handle(req, res, url, user, cors)) return
 
     if (req.method === 'GET' && url.pathname === '/api/sales/presentation') {
@@ -1360,7 +1369,7 @@ async function routeRequest(req, res) {
       else if (member.role === 'concierge') {
         const others = (member.permissions || []).filter((p) => p !== SALES_PERMISSION)
         member.permissions = body.enabled ? [...others, SALES_PERMISSION] : others
-      } else return json(res, 400, { error: 'seuls les comptes commerciaux et les concierges peuvent recevoir cet accès' }, cors)
+      } else return json(res, 400, { error: 'seuls les comptes commerciaux et les Account Managers peuvent recevoir cet accès' }, cors)
       saveDb(db)
       audit('sales.access.update', { by: user.id, member: member.id, enabled: body.enabled })
       return json(res, 200, { id: member.id, active: member.active !== false, salesAccess: canAccessSalesPresentation(member) }, cors)
@@ -1412,8 +1421,8 @@ async function routeRequest(req, res) {
       }, cors)
     }
 
-    if (req.method === 'GET' && url.pathname === '/api/concierge/orgs') {
-      if (user.role !== 'concierge') return json(res,403,{error:'concierge requis'},cors)
+    if (req.method === 'GET' && url.pathname === '/api/account-manager/orgs') {
+      if (user.role !== 'concierge') return json(res,403,{error:'Account Manager requis'},cors)
       const allowedIds = Array.isArray(user.orgIds) ? user.orgIds : []
       const rows = db.orgs.filter((org)=>allowedIds.includes(org.id) && org.active!==false && (!Array.isArray(user.sectors)||!user.sectors.length||user.sectors.includes(org.sector))).map((org)=>{
         const diagnostic = db.diagnostics.filter((item)=>item.orgId===org.id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))[0] || null
@@ -1424,8 +1433,8 @@ async function routeRequest(req, res) {
       return json(res,200,rows,cors)
     }
 
-    if (req.method === 'POST' && url.pathname === '/api/concierge/orgs') {
-      if (user.role !== 'concierge') return json(res,403,{error:'concierge requis'},cors)
+    if (req.method === 'POST' && url.pathname === '/api/account-manager/orgs') {
+      if (user.role !== 'concierge') return json(res,403,{error:'Account Manager requis'},cors)
       const body = await readBody(req)
       const name = allowedText(body.name,180,'nom de l’entreprise')
       const sector = String(body.sector || '')
@@ -1457,9 +1466,9 @@ async function routeRequest(req, res) {
       return json(res,201,org,cors)
     }
 
-    const conciergeOrgDataRoute = url.pathname.match(/^\/api\/concierge\/orgs\/([^/]+)\/data$/)
+    const conciergeOrgDataRoute = url.pathname.match(/^\/api\/account-manager\/orgs\/([^/]+)\/data$/)
     if (conciergeOrgDataRoute && req.method === 'GET') {
-      if (user.role !== 'concierge') return json(res,403,{error:'concierge requis'},cors)
+      if (user.role !== 'concierge') return json(res,403,{error:'Account Manager requis'},cors)
       const orgId=conciergeOrgDataRoute[1]
       if (!canAccessOrg(user,orgId)) return json(res,403,{error:'entreprise hors de votre périmètre'},cors)
       const org=db.orgs.find((o)=>o.id===orgId)
@@ -1470,15 +1479,15 @@ async function routeRequest(req, res) {
       return json(res,200,{org:{id:org.id,name:org.name,sector:org.sector,city:org.city||'',contactName:org.contactName||'',contactRole:org.contactRole||'',contactEmail:org.contactEmail||'',contactPhone:org.contactPhone||''},registration,collections},cors)
     }
 
-    if (req.method === 'GET' && url.pathname === '/api/concierge/registrations') {
-      if (user.role !== 'concierge') return json(res,403,{error:'concierge requis'},cors)
+    if (req.method === 'GET' && url.pathname === '/api/account-manager/registrations') {
+      if (user.role !== 'concierge') return json(res,403,{error:'Account Manager requis'},cors)
       const rows=db.registrations.filter((reg)=>reg.orgId&&canAccessOrg(user,reg.orgId)).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))
       return json(res,200,rows,cors)
     }
 
-    const conciergeRegistrationAction=url.pathname.match(/^\/api\/concierge\/registrations\/([^/]+)\/(call|validate-slot)$/)
+    const conciergeRegistrationAction=url.pathname.match(/^\/api\/account-manager\/registrations\/([^/]+)\/(call|validate-slot)$/)
     if (conciergeRegistrationAction && req.method === 'POST') {
-      if (user.role !== 'concierge') return json(res,403,{error:'concierge requis'},cors)
+      if (user.role !== 'concierge') return json(res,403,{error:'Account Manager requis'},cors)
       const reg=db.registrations.find((r)=>r.id===conciergeRegistrationAction[1]); if(!reg) return json(res,404,{error:'demande introuvable'},cors)
       if (!reg.orgId || !canAccessOrg(user,reg.orgId)) return json(res,403,{error:'entreprise hors de votre périmètre'},cors)
       const body=await readBody(req)
@@ -1488,7 +1497,7 @@ async function routeRequest(req, res) {
       } else {
         pushRegistrationEvent(reg,'creneau_valide',{byUserId:user.id,note}); reg.appointmentStatus='valide'; reg.appointmentValidatedAt=new Date().toISOString()
         const owner=db.users.find((u)=>u.email?.toLowerCase()===reg.email&&u.orgIds?.includes(reg.orgId))
-        if (owner) pushNotification({userId:owner.id,orgId:reg.orgId,type:'creneau_valide',title:'Votre créneau est confirmé',message:`Votre rendez-vous du ${reg.appointmentDate||''} ${reg.appointmentSlot||''} est confirmé par votre concierge.`})
+        if (owner) pushNotification({userId:owner.id,orgId:reg.orgId,type:'creneau_valide',title:'Votre créneau est confirmé',message:`Votre rendez-vous du ${reg.appointmentDate||''} ${reg.appointmentSlot||''} est confirmé par votre Account Manager.`})
       }
       saveDb(db); audit('registration.concierge.action',{by:user.id,id:reg.id,action:conciergeRegistrationAction[2]})
       return json(res,200,{registration:reg},cors)
@@ -1500,13 +1509,13 @@ async function routeRequest(req, res) {
       return json(res, 200, rows, cors)
     }
 
-    if (req.method === 'GET' && url.pathname === '/api/admin/concierges') {
+    if (req.method === 'GET' && url.pathname === '/api/admin/account-managers') {
       if (!adminOnly(user,res,cors)) return
       const concierges = db.users.filter((u)=>u.role==='concierge').map(safeUser)
       const pending = db.invitations.filter((i)=>i.kind==='concierge'&&!i.usedAt&&!i.revokedAt&&Date.parse(i.expiresAt)>Date.now()).map(({tokenHash,...i})=>i)
       return json(res,200,{concierges,pending,orgs:db.orgs.map(({id,name,sector})=>({id,name,sector}))},cors)
     }
-    if (req.method === 'POST' && url.pathname === '/api/admin/concierges') {
+    if (req.method === 'POST' && url.pathname === '/api/admin/account-managers') {
       if (!adminOnly(user,res,cors)) return
       const body=await readBody(req); const email=allowedText(body.email,200,'e-mail').toLowerCase(); if(!email.includes('@'))return json(res,400,{error:'e-mail invalide'},cors)
       if(db.users.some((u)=>u.email?.toLowerCase()===email))return json(res,409,{error:'cet e-mail possède déjà un compte'},cors)
@@ -1515,8 +1524,8 @@ async function routeRequest(req, res) {
       const {invitation,token}=createInvitation({email,name:allowedText(body.name,160,'nom'),role:'concierge',permissions:[],createdBy:user.id,kind:'concierge',metadata:{sectors,assignedOrgIds}})
       const delivery=await sendInvitationEmail(invitation,token); audit('concierge.invite',{by:user.id,email}); const {tokenHash,...publicInvitation}=invitation; return json(res,201,{invitation:publicInvitation,delivery},cors)
     }
-    const conciergeUserRoute=url.pathname.match(/^\/api\/admin\/concierges\/([^/]+)$/)
-    if(conciergeUserRoute&&req.method==='PATCH'){if(!adminOnly(user,res,cors))return;const member=db.users.find((u)=>u.id===conciergeUserRoute[1]&&u.role==='concierge');if(!member)return json(res,404,{error:'concierge introuvable'},cors);const body=await readBody(req);if(typeof body.active==='boolean')member.active=body.active;if(Array.isArray(body.sectors))member.sectors=body.sectors.filter((x)=>['sante','enseignement','tourisme'].includes(x));if(Array.isArray(body.orgIds))member.orgIds=body.orgIds.filter((id)=>db.orgs.some((o)=>o.id===id));saveDb(db);audit('concierge.update',{by:user.id,member:member.id});return json(res,200,safeUser(member),cors)}
+    const conciergeUserRoute=url.pathname.match(/^\/api\/admin\/account-managers\/([^/]+)$/)
+    if(conciergeUserRoute&&req.method==='PATCH'){if(!adminOnly(user,res,cors))return;const member=db.users.find((u)=>u.id===conciergeUserRoute[1]&&u.role==='concierge');if(!member)return json(res,404,{error:'Account Manager introuvable'},cors);const body=await readBody(req);if(typeof body.active==='boolean')member.active=body.active;if(Array.isArray(body.sectors))member.sectors=body.sectors.filter((x)=>['sante','enseignement','tourisme'].includes(x));if(Array.isArray(body.orgIds))member.orgIds=body.orgIds.filter((id)=>db.orgs.some((o)=>o.id===id));saveDb(db);audit('concierge.update',{by:user.id,member:member.id});return json(res,200,safeUser(member),cors)}
 
     if (req.method === 'GET' && url.pathname === '/api/admin/registrations') {
       if (!adminOnly(user, res, cors)) return
@@ -1559,7 +1568,7 @@ async function routeRequest(req, res) {
       const reg = db.registrations.find((r) => r.id === assignRegistration[1]); if (!reg) return json(res, 404, { error: 'demande introuvable' }, cors)
       const body = await readBody(req)
       const concierge = db.users.find((u) => u.id === body.conciergeId && u.role === 'concierge' && u.active !== false)
-      if (!concierge) return json(res, 400, { error: 'concierge invalide' }, cors)
+      if (!concierge) return json(res, 400, { error: 'Account Manager invalide' }, cors)
       const org = ensureOrgForRegistration(reg)
       if (reg.conciergeId && reg.conciergeId !== concierge.id) {
         const previous = db.users.find((u) => u.id === reg.conciergeId)
@@ -2087,7 +2096,7 @@ async function routeRequest(req, res) {
     }
 
     if (needProposalsRoute && req.method === 'POST') {
-      if (!OPERATIONS_ROLES.has(user.role)) return json(res, 403, { error: 'seul le concierge ou l’administrateur peut proposer un prestataire' }, cors)
+      if (!OPERATIONS_ROLES.has(user.role)) return json(res, 403, { error: 'seul l’Account Manager ou l’administrateur peut proposer un prestataire' }, cors)
       const need = db.needs.find((item) => item.id === needProposalsRoute[1])
       if (!need) return json(res, 404, { error: 'besoin introuvable' }, cors)
       if (!canAccessOrg(user, need.orgId)) return json(res, 403, { error: 'besoin hors de votre périmètre' }, cors)
@@ -2150,7 +2159,7 @@ async function routeRequest(req, res) {
 
     const proposalTransmitRoute = url.pathname.match(/^\/api\/proposals\/([^/]+)\/transmit$/)
     if (proposalTransmitRoute && req.method === 'POST') {
-      if (!OPERATIONS_ROLES.has(user.role)) return json(res, 403, { error: 'seul le concierge ou l’administrateur peut transmettre une proposition' }, cors)
+      if (!OPERATIONS_ROLES.has(user.role)) return json(res, 403, { error: 'seul l’Account Manager ou l’administrateur peut transmettre une proposition' }, cors)
       const proposal = db.quotes.find((item) => item.id === proposalTransmitRoute[1] && item.kind === 'proposition')
       if (!proposal) return json(res, 404, { error: 'proposition introuvable' }, cors)
       if (!canManageOrg(user, proposal.orgId)) return json(res, 403, { error: 'proposition hors de votre périmètre' }, cors)
@@ -2239,7 +2248,7 @@ async function routeRequest(req, res) {
         type: 'besoin_created',
         title: 'Nouveau besoin client',
         message: `${org.name} a déposé un besoin « ${title} ».`,
-        meta: { needId: record.id, orgId, title, category, urgency, link: `/concierge/entreprises/${orgId}` },
+        meta: { needId: record.id, orgId, title, category, urgency, link: `/account-manager/entreprises/${orgId}` },
       })
       audit('need.create', { by: user.id, org: orgId, id: record.id })
       return json(res, 201, record, cors)
@@ -2372,7 +2381,7 @@ async function routeRequest(req, res) {
           return json(res, 200, serializeDiagnosticFor(user, diagnostic), cors)
         }
         const source = body.conciergeRequest && typeof body.conciergeRequest === 'object' && !Array.isArray(body.conciergeRequest) ? body.conciergeRequest : null
-        if (!source) return json(res, 400, { error: 'demande concierge manquante' }, cors)
+        if (!source) return json(res, 400, { error: 'demande Account Manager manquante' }, cors)
         if (diagnostic.conciergeRequestedAt) return json(res, 409, { error: 'demande déjà enregistrée' }, cors)
         const request = {
           company: str(source.company, 160),
@@ -2708,8 +2717,8 @@ async function routeRequest(req, res) {
       return json(res, 200, mission, cors)
     }
 
-    if (req.method === 'GET' && url.pathname === '/api/concierge/missions') {
-      if (user.role !== 'concierge') return json(res, 403, { error: 'concierge requis' }, cors)
+    if (req.method === 'GET' && url.pathname === '/api/account-manager/missions') {
+      if (user.role !== 'concierge') return json(res, 403, { error: 'Account Manager requis' }, cors)
       const allowed = new Set(Array.isArray(user.orgIds) ? user.orgIds : [])
       const countBefore = db.missions.length
       const rows = db.orgs.filter((org) => allowed.has(org.id)).flatMap((org) => {
@@ -2787,7 +2796,7 @@ async function processServerless(req, res) {
     end(JSON.stringify({ error: message }))
   }
   try {
-    loadedCrm = pathname.startsWith('/api/crm/')
+    loadedCrm = pathname.startsWith('/api/crm/') || /^\/api\/org\/(overview|departments|teams)/.test(pathname)
     const fresh = await loadDb(loadedCrm)
     Object.assign(db, fresh)
     prepareDb()

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Building2, CalendarCheck, ClipboardCheck, FileText, FolderOpen, MessageSquare, PhoneCall, Plus, Target } from 'lucide-react'
 import { Alert, Badge, Button, Card, Field, Input, Select, Textarea } from '@/components/ui'
-import { ConciergeGuard } from '@/features/concierge/ScopedSection'
+import { ConciergeGuard } from '@/features/account-manager/ScopedSection'
 import { PageHeader } from '@/components/layouts'
 import { EmptyBox, LoadingRows, MiniStat, Panel, StatGrid } from '@/components/admin-kit'
 
@@ -11,7 +11,7 @@ import { DocumentsPanel } from '@/features/documents/DocumentsPanel'
 import { createNeedProposal, fetchNeedProposals, patchProposal, transmitProposal, PROPOSAL_STATUS_META, type NeedProposal } from '@/lib/besoins'
 import { money } from '@/lib/format'
 
-export const Route = createFileRoute('/concierge/entreprises/$id')({ component: ConciergeCompanyDetail })
+export const Route = createFileRoute('/account-manager/entreprises/$id')({ component: ConciergeCompanyDetail })
 
 type Item = { id: string; title?: string; name?: string; status?: string }
 type Registration = {
@@ -36,7 +36,7 @@ type Payload = {
 const STATUS_LABEL: Record<string, string> = {
   demande_recue: 'Demande reçue',
   en_attente_affectation: 'En attente d’affectation',
-  concierge_affecte: 'Concierge affecté',
+  concierge_affecte: 'Account Manager affecté',
   en_attente_activation: 'En attente d’activation',
   actif: 'Compte actif',
 }
@@ -50,7 +50,7 @@ function ConciergeCompanyDetail() {
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch(`/api/concierge/orgs/${encodeURIComponent(id)}/data`, { credentials: 'same-origin', cache: 'no-store' })
+      const r = await fetch(`/api/account-manager/orgs/${encodeURIComponent(id)}/data`, { credentials: 'same-origin', cache: 'no-store' })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Chargement impossible')
       setData(b)
@@ -65,7 +65,7 @@ function ConciergeCompanyDetail() {
   async function act(action: 'call' | 'validate-slot') {
     setBusy(action); setError(''); setInfo('')
     try {
-      const r = await fetch(`/api/concierge/registrations/${encodeURIComponent(id)}/${action}`, { method: 'POST', credentials: 'same-origin' })
+      const r = await fetch(`/api/account-manager/registrations/${encodeURIComponent(id)}/${action}`, { method: 'POST', credentials: 'same-origin' })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Action impossible')
       setInfo(action === 'call' ? 'Appel enregistré.' : 'Créneau validé et client notifié.')
@@ -95,17 +95,17 @@ function ConciergeCompanyDetail() {
               description={`${data.org.sector === 'sante' ? 'Santé' : data.org.sector} · ${data.org.city || 'Ville non renseignée'} · ${data.org.contactName || registration?.name || 'Contact non renseigné'}`}
               actions={
                 <>
-                  <Link to="/concierge/entreprises"><Button size="sm" variant="outline"><ArrowLeft size={14} />Entreprises</Button></Link>
-                  {diagnostic ? <Link to="/concierge/diagnostics/$id" params={{ id: diagnostic.id }}><Button size="sm"><ClipboardCheck size={14} />Ouvrir le diagnostic</Button></Link> : null}
+                  <Link to="/account-manager/entreprises"><Button size="sm" variant="outline"><ArrowLeft size={14} />Entreprises</Button></Link>
+                  {diagnostic ? <Link to="/account-manager/diagnostics/$id" params={{ id: diagnostic.id }}><Button size="sm"><ClipboardCheck size={14} />Ouvrir le diagnostic</Button></Link> : null}
                 </>
               }
             />
 
             <div className="cg-tabs mb-6">
-              {diagnostic ? <Link to="/concierge/diagnostics/$id" params={{ id: diagnostic.id }} className="cg-filter-chip"><FileText size={14} />Rapport / restitution</Link> : <span className="cg-filter-chip is-muted"><ClipboardCheck size={14} />Diagnostic non envoyé</span>}
+              {diagnostic ? <Link to="/account-manager/diagnostics/$id" params={{ id: diagnostic.id }} className="cg-filter-chip"><FileText size={14} />Rapport / restitution</Link> : <span className="cg-filter-chip is-muted"><ClipboardCheck size={14} />Diagnostic non envoyé</span>}
               <a href="#documents" className="cg-filter-chip"><FolderOpen size={14} />Documents</a>
-              <Link to="/concierge/missions" className="cg-filter-chip">Missions</Link>
-              <Link to="/concierge/besoins" className="cg-filter-chip">Besoins</Link>
+              <Link to="/account-manager/missions" className="cg-filter-chip">Missions</Link>
+              <Link to="/account-manager/besoins" className="cg-filter-chip">Besoins</Link>
             </div>
 
             <div className="mb-6 grid gap-4 lg:grid-cols-2">

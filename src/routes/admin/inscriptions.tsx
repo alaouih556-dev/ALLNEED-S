@@ -28,7 +28,7 @@ type Registration = {
 const STATUS: Record<string, { label: string; tone: Tone }> = {
   demande_recue: { label: 'Nouvelle demande', tone: 'warning' },
   en_attente_affectation: { label: 'À affecter', tone: 'warning' },
-  concierge_affecte: { label: 'Concierge affecté', tone: 'info' },
+  concierge_affecte: { label: 'Account Manager affecté', tone: 'info' },
   en_attente_activation: { label: 'Activation en attente', tone: 'info' },
   actif: { label: 'Compte actif', tone: 'success' },
   refusee: { label: 'Refusée', tone: 'danger' },
@@ -58,7 +58,7 @@ function AdminRegistrations() {
     try {
       const [registrationsRes, conciergesRes] = await Promise.all([
         fetch('/api/admin/registrations', { credentials: 'same-origin', cache: 'no-store' }),
-        fetch('/api/admin/concierges', { credentials: 'same-origin', cache: 'no-store' }),
+        fetch('/api/admin/account-managers', { credentials: 'same-origin', cache: 'no-store' }),
       ])
       const registrationsBody = await registrationsRes.json()
       if (!registrationsRes.ok) throw new Error(registrationsBody.error || 'Chargement impossible')
@@ -76,15 +76,15 @@ function AdminRegistrations() {
 
   async function assign(id: string) {
     const conciergeId = selection[id] || items.find((i) => i.id === id)?.conciergeId || ''
-    if (!conciergeId) { setError('Choisissez un concierge avant d’affecter.'); return }
+    if (!conciergeId) { setError('Choisissez un Account Manager avant d’affecter.'); return }
     setBusy(id); setError(''); setInfo('')
     try {
       const r = await fetch(`/api/admin/registrations/${id}/assign`, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conciergeId }) })
       const b = await r.json()
       if (!r.ok) throw new Error(b.error || 'Affectation impossible')
-      if (b.delivery && !b.delivery.sent) setInfo('Concierge affecté, mais l’e-mail d’activation n’a pas pu partir. Utilisez « Renvoyer le lien ».')
-      else if (b.registration?.status === 'actif') setInfo('Concierge affecté. Le compte était déjà actif.')
-      else setInfo('C’est fait : concierge affecté et lien d’activation envoyé au dirigeant.')
+      if (b.delivery && !b.delivery.sent) setInfo('Account Manager affecté, mais l’e-mail d’activation n’a pas pu partir. Utilisez « Renvoyer le lien ».')
+      else if (b.registration?.status === 'actif') setInfo('Account Manager affecté. Le compte était déjà actif.')
+      else setInfo('C’est fait : Account Manager affecté et lien d’activation envoyé au dirigeant.')
       await load()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Affectation impossible')
@@ -130,14 +130,14 @@ function AdminRegistrations() {
       <PageHeader
         eyebrow="Clients"
         title="Inscriptions"
-        description="Chaque nouvelle demande reçoit un concierge. Le dirigeant reçoit alors un lien pour activer son compte."
+        description="Chaque nouvelle demande reçoit un Account Manager. Le dirigeant reçoit alors un lien pour activer son compte."
         actions={<Button variant="outline" size="sm" onClick={() => { setLoading(true); void load() }}><RefreshCcw size={14} className={cn(loading && 'animate-spin')} />Actualiser</Button>}
       />
 
-      <HowItWorks steps={['Une demande arrive', 'Vous choisissez un concierge', 'Le dirigeant active son compte']} />
+      <HowItWorks steps={['Une demande arrive', 'Vous choisissez un Account Manager', 'Le dirigeant active son compte']} />
 
       <StatGrid>
-        <MiniStat icon={<Inbox size={18} />} tone="amber" label="À traiter" value={counts.a_traiter} hint="Sans concierge" active={view === 'a_traiter'} onClick={() => setView('a_traiter')} />
+        <MiniStat icon={<Inbox size={18} />} tone="amber" label="À traiter" value={counts.a_traiter} hint="Sans Account Manager" active={view === 'a_traiter'} onClick={() => setView('a_traiter')} />
         <MiniStat icon={<Clock3 size={18} />} tone="sky" label="Activation en attente" value={counts.activation} hint="Lien envoyé au dirigeant" active={view === 'activation'} onClick={() => setView('activation')} />
         <MiniStat icon={<CheckCircle2 size={18} />} tone="emerald" label="Comptes actifs" value={counts.actifs} active={view === 'actifs'} onClick={() => setView('actifs')} />
         <MiniStat icon={<UsersRound size={18} />} tone="indigo" label="Total reçu" value={counts.toutes} active={view === 'toutes'} onClick={() => setView('toutes')} />
@@ -145,7 +145,7 @@ function AdminRegistrations() {
 
       {error ? <Alert tone="danger" className="mb-4">{error}</Alert> : null}
       {info ? <Alert tone="success" className="mb-4">{info}</Alert> : null}
-      {!loading && !concierges.length ? <Alert tone="warning" className="mb-4">Aucun concierge actif : créez-en un dans « Concierges » pour pouvoir affecter les demandes.</Alert> : null}
+      {!loading && !concierges.length ? <Alert tone="warning" className="mb-4">Aucun Account Manager actif : créez-en un dans « Account Managers » pour pouvoir affecter les demandes.</Alert> : null}
 
       <Panel>
         <Toolbar>
@@ -164,7 +164,7 @@ function AdminRegistrations() {
 
         {loading ? <LoadingRows /> : null}
         {!loading && !visible.length ? (
-          <EmptyBox icon={<Inbox size={20} />} title={view === 'a_traiter' ? 'Rien à traiter' : 'Aucune inscription ici'} text={view === 'a_traiter' ? 'Toutes les demandes ont un concierge. Les nouvelles demandes apparaîtront ici.' : 'Essayez un autre filtre ou une autre recherche.'} />
+          <EmptyBox icon={<Inbox size={20} />} title={view === 'a_traiter' ? 'Rien à traiter' : 'Aucune inscription ici'} text={view === 'a_traiter' ? 'Toutes les demandes ont un Account Manager. Les nouvelles demandes apparaîtront ici.' : 'Essayez un autre filtre ou une autre recherche.'} />
         ) : null}
 
         <Rows>
@@ -195,8 +195,8 @@ function AdminRegistrations() {
                   <span className="inline-flex items-center gap-1.5 justify-self-start rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 lg:justify-self-end"><CheckCircle2 size={15} />Compte actif</span>
                 ) : (
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <Select aria-label={`Concierge pour ${item.orgName}`} className="w-full sm:w-52" value={current} onChange={(e) => setSelection((prev) => ({ ...prev, [item.id]: e.target.value }))}>
-                      <option value="">Choisir un concierge…</option>
+                    <Select aria-label={`Account Manager pour ${item.orgName}`} className="w-full sm:w-52" value={current} onChange={(e) => setSelection((prev) => ({ ...prev, [item.id]: e.target.value }))}>
+                      <option value="">Choisir un Account Manager…</option>
                       {concierges.map((concierge) => <option key={concierge.id} value={concierge.id}>{concierge.name}</option>)}
                     </Select>
                     <Button size="sm" disabled={busy === item.id || !current || current === item.conciergeId} onClick={() => void assign(item.id)}>

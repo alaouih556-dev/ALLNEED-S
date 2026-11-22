@@ -80,7 +80,7 @@ export function SectorChoice({
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-ink-50 px-4 py-3">
         <p className="text-xs text-ink-500">
-          Le secteur est conservé pour tout le parcours : diagnostic, documents, concierge, restitution et offres.
+          Le secteur est conservé pour tout le parcours : diagnostic, documents, Account Manager, restitution et offres.
         </p>
         <span className="text-xs font-semibold text-brand-700">Une seule sélection</span>
       </div>

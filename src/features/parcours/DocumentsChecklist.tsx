@@ -71,7 +71,7 @@ export function DocumentsChecklist({
               Réunissez ce qui manque à votre dossier
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-600">
-              Cette liste sert à arriver au rendez-vous concierge avec un dossier complet. Elle reprend les
+              Cette liste sert à arriver au rendez-vous Account Manager avec un dossier complet. Elle reprend les
               pièces du secteur {pack.label.toLowerCase()} et les éléments indispensables à votre compte.
             </p>
           </div>
@@ -135,9 +135,9 @@ export function DocumentsChecklist({
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <a href="#demande-concierge">
+          <a href="#demande-account-manager">
             <Button>
-              Passer à la demande concierge
+              Passer à la demande Account Manager
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </a>

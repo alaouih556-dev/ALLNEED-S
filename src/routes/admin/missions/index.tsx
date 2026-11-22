@@ -18,7 +18,7 @@ type View = 'en_cours' | 'client' | 'retard' | 'terminees' | 'toutes'
 
 function AdminMissions() {
   const { data, loading, error, refresh } = useApiResource<Mission[]>('/api/admin/missions')
-  const { data: team } = useApiResource<{ concierges: Array<{ id: string; name: string }> }>('/api/admin/concierges')
+  const { data: team } = useApiResource<{ concierges: Array<{ id: string; name: string }> }>('/api/admin/account-managers')
   const [view, setView] = useState<View>('en_cours')
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
@@ -26,7 +26,7 @@ function AdminMissions() {
 
   const missions = data ?? []
   const now = Date.now()
-  const conciergeName = (id?: string | null) => (id ? team?.concierges?.find((c) => c.id === id)?.name ?? 'Concierge' : null)
+  const conciergeName = (id?: string | null) => (id ? team?.concierges?.find((c) => c.id === id)?.name ?? 'Account Manager' : null)
   const isOpen = (m: Mission) => m.status !== 'terminee'
   const isLate = (m: Mission) => isOpen(m) && !!m.dueDate && daysUntil(m.dueDate, now) < 0
   const counts = {

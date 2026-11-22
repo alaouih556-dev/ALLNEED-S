@@ -57,7 +57,7 @@ export function RestitutionView({
           <EmptyState
             icon={<Target className="h-5 w-5" />}
             title="Votre restitution apparaîtra ici"
-            description="Répondez d’abord à votre questionnaire. Une fois votre concierge en ayant pris connaissance, vos priorités sont hiérarchisées et commentées."
+            description="Répondez d’abord à votre questionnaire. Une fois votre Account Manager en ayant pris connaissance, vos priorités sont hiérarchisées et commentées."
             action={
               <Link to="/app/diagnostic-auto">
                 <Button>Ouvrir mon diagnostic</Button>
@@ -113,7 +113,7 @@ export function RestitutionView({
           ) : (
             <span className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900">
               <CalendarClock className="h-4 w-4" />
-              En attente de la restitution de votre concierge
+              En attente de la restitution de votre Account Manager
             </span>
           )}
           <Link to="/app/abonnement">
@@ -138,7 +138,7 @@ export function RestitutionView({
           tabs={[
             { value: 'priorites', label: 'Priorités' },
             { value: 'points', label: 'Points d’appui & vigilance' },
-            { value: 'synthese', label: 'Synthèse concierge' },
+            { value: 'synthese', label: 'Synthèse Account Manager' },
           ]}
         />
 
@@ -270,7 +270,7 @@ export function RestitutionView({
             <EmptyState
               icon={<Pencil className="h-5 w-5" />}
               title="Synthèse en préparation"
-              description="Votre concierge rédige la synthèse après lecture du diagnostic et du rendez-vous. Elle apparaîtra ici, chapitre par chapitre."
+              description="Votre Account Manager rédige la synthèse après lecture du diagnostic et du rendez-vous. Elle apparaîtra ici, chapitre par chapitre."
             />
           )
         ) : null}

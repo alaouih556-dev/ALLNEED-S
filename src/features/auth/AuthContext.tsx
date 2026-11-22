@@ -13,6 +13,8 @@ export interface AuthUser {
   jobTitle?: string
   active?: boolean
   permissions?: string[]
+  orgPosition?: { level: string; departmentId: string | null; teamId: string | null; strategyManager: boolean } | null
+  crmAccess?: boolean
   sectors?: Array<'sante' | 'enseignement' | 'tourisme'>
   organization?: { id:string; name:string; slug:string; sector?:string; city?:string; kind?:string; size?:string; contactName?:string; contactRole?:string; contactEmail?:string; contactPhone?:string; concierge?: { name:string; email:string } | null; active:boolean; modules:Record<string,boolean>; saas?: { subscriptionActive?:boolean; enabled?:boolean; startDate?:string|null; endDate?:string|null; plan?:string|null } | null } | null
 }
@@ -28,11 +30,11 @@ type AuthState = {
 const AuthContext = createContext<AuthState | null>(null)
 
 /** Espace de travail ouvert par défaut pour un rôle (null si aucun espace n’existe). */
-export function workspacePathForRole(role?: string | null): '/admin' | '/concierge' | '/expert' | '/app' | '/sales-presentation' | '/crm' | null {
-  if (role === 'admin') return '/admin'
+export function workspacePathForRole(role?: string | null): '/organisation' | '/account-manager' | '/expert' | '/app' | '/sales-presentation' | '/crm' | null {
+  if (role === 'admin' || role === 'staff') return '/organisation'
   if (role === 'agent' || role === 'crm') return '/crm'
   if (role === 'sales') return '/sales-presentation'
-  if (role === 'concierge') return '/concierge'
+  if (role === 'concierge') return '/account-manager'
   if (role === 'prestataire') return '/expert'
   if (role && ['dirigeant', 'manager', 'collaborateur'].includes(role)) return '/app'
   return null

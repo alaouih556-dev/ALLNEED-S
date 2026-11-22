@@ -177,7 +177,7 @@ export function patchMission(id: string, patch: MissionPatch): Promise<Mission> 
 }
 
 export function fetchConciergeMissions(): Promise<Mission[]> {
-  return apiRequest<Mission[]>('/api/concierge/missions')
+  return apiRequest<Mission[]>('/api/account-manager/missions')
 }
 
 export function fetchAdminMissions(): Promise<Mission[]> {

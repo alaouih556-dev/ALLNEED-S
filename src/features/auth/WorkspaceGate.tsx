@@ -64,7 +64,7 @@ function ClientAccessGate({org,path,children}:{org:AuthUser['organization'] & {i
 function DiagnosticRequiredGate(){
   const steps=[
     {title:'Répondez au diagnostic 360°',text:'Une question à la fois, vos réponses sont enregistrées.'},
-    {title:'Votre concierge l’analyse',text:'Rapport, priorités et recommandations.'},
+    {title:'Votre Account Manager l’analyse',text:'Rapport, priorités et recommandations.'},
     {title:'Cet espace s’ouvre',text:'Rapport, offres puis modules de votre accompagnement.'},
   ]
   return (

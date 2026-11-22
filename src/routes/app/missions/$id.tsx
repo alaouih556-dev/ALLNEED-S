@@ -95,7 +95,7 @@ function MissionDetail() {
 
       {mission.contentStatus === 'a_valider' ? (
         <Alert tone="warning" className="mb-5" title="Contenu à valider">
-          Le détail de cette mission sera précisé et confirmé par votre concierge.
+          Le détail de cette mission sera précisé et confirmé par votre Account Manager.
         </Alert>
       ) : null}
 
@@ -103,7 +103,7 @@ function MissionDetail() {
         <div className="space-y-6">
           {mission.instructions ? (
             <Card>
-              <CardHeader title="Instructions de votre concierge" />
+              <CardHeader title="Instructions de votre Account Manager" />
               <CardBody>
                 <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700">{mission.instructions}</p>
               </CardBody>
@@ -112,7 +112,7 @@ function MissionDetail() {
 
           {mission.instructionsResponse ? (
             <Card>
-              <CardHeader title="Votre réponse" description="Votre retour au concierge sur les instructions." />
+              <CardHeader title="Votre réponse" description="Votre retour à l’Account Manager sur les instructions." />
               <CardBody>
                 <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700">{mission.instructionsResponse}</p>
               </CardBody>
@@ -142,7 +142,7 @@ function MissionDetail() {
             <CardHeader title="Livrables attendus" description={`${mission.deliverables.length} élément(s)`} />
             <CardBody>
               {mission.deliverables.length === 0 ? (
-                <p className="text-sm text-ink-500">Les livrables seront précisés par votre concierge.</p>
+                <p className="text-sm text-ink-500">Les livrables seront précisés par votre Account Manager.</p>
               ) : (
                 <ul className="space-y-2">
                   {mission.deliverables.map((item) => (
@@ -182,7 +182,7 @@ function MissionDetail() {
               </div>
               {mission.assignedConciergeId ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-ink-500">Concierge assigné</span>
+                  <span className="text-xs text-ink-500">Account Manager assigné</span>
                   <span className="font-medium text-ink-900">{mission.assignedConciergeId}</span>
                 </div>
               ) : null}
@@ -236,7 +236,7 @@ function MissionDetail() {
               <Clock size={12} /> Dernière mise à jour {longDate(mission.updatedAt)}
             </p>
             <Link to="/app/messages" className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700">
-              <MessageSquare className="h-3.5 w-3.5" /> Contacter mon concierge
+              <MessageSquare className="h-3.5 w-3.5" /> Contacter mon Account Manager
             </Link>
             <p className="mt-3 flex items-center gap-1.5 text-xs text-ink-400">
                <Flag size={12} /> Axe {mission.id}

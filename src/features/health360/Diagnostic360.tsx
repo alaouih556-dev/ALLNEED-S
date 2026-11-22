@@ -66,13 +66,13 @@ export function Diagnostic360({sector='sante', audience='client', readOnly=false
  const availableTabs=STAFF?allTabs:allTabs.filter(([id])=>id==='cadre'||id==='questions');
  const visibleTabs=!data.meta.started?availableTabs.filter(([id])=>id==='cadre'):questionsComplete?availableTabs:availableTabs.filter(([id])=>id==='cadre'||id==='questions');
  return <section className="diag360">
-  <div className="diag-hero"><div><span className="eyebrow">DIAGNOSTIC 360° · {pack.labelUpper}</span><h2>Repérons ensemble vos priorités.</h2><p>Un premier échange ciblé pour comprendre votre situation et décider de la suite avec votre concierge.</p>{data.meta.structure?<span className="dg-hero-chip"><Building2 size={14}/>{data.meta.structure}</span>:null}</div>{data.meta.started?<div className="diag-summary"><strong>{treatedCount}/{questionsTotal}</strong><span>questions parcourues</span><small>Enregistré automatiquement</small></div>:<div className="dg-hero-facts"><span><b>{questionsTotal}</b>questions</span><span><b>{pack.volets.length}</b>axes</span><span><b>≈ 2 h 15</b>au total</span></div>}</div>
+  <div className="diag-hero"><div><span className="eyebrow">DIAGNOSTIC 360° · {pack.labelUpper}</span><h2>Repérons ensemble vos priorités.</h2><p>Un premier échange ciblé pour comprendre votre situation et décider de la suite avec votre Account Manager.</p>{data.meta.structure?<span className="dg-hero-chip"><Building2 size={14}/>{data.meta.structure}</span>:null}</div>{data.meta.started?<div className="diag-summary"><strong>{treatedCount}/{questionsTotal}</strong><span>questions parcourues</span><small>Enregistré automatiquement</small></div>:<div className="dg-hero-facts"><span><b>{questionsTotal}</b>questions</span><span><b>{pack.volets.length}</b>axes</span><span><b>≈ 2 h 15</b>au total</span></div>}</div>
   {data.meta.started?<><div className="diag-progress-head"><strong>{questionsComplete?'Diagnostic prêt pour la synthèse':`Diagnostic en cours · ${treatedCount}/${questionsTotal} questions parcourues`}</strong><span>{questionsComplete?'Vous pouvez désormais relire vos réponses et transmettre votre diagnostic.':'Vous pouvez revenir à une question précédente. Votre progression est enregistrée automatiquement.'}</span></div><div className="diag-tabs">{visibleTabs.map(([id,label])=><button key={id} disabled={readOnly} className={tab===id?'active':''} onClick={()=>setTab(id)}>{id==='questions'?`${treatedCount}/${questionsTotal} · Questions`:label}</button>)}</div></>:null}
 
   {tab==='cadre'&&<div className="dg-intro">
    <div className="dg-col">
     <section className="dg-card">
-     <header className="dg-card-head"><span className="dg-step">1</span><div><h3>Qui participe ?</h3><p>Ces informations préparent l’échange avec votre concierge.</p></div></header>
+     <header className="dg-card-head"><span className="dg-step">1</span><div><h3>Qui participe ?</h3><p>Ces informations préparent l’échange avec votre Account Manager.</p></div></header>
      <div className="dg-fields">
       <label><span>Votre établissement</span><input disabled={readOnly} value={data.meta.structure} placeholder="Nom de l’établissement" onChange={e=>updateMeta('structure',e.target.value)}/></label>
       <label><span>Votre nom et fonction</span><input disabled={readOnly} value={data.meta.contact} placeholder="Ex. : Prénom Nom, direction" onChange={e=>updateMeta('contact',e.target.value)}/></label>
@@ -98,13 +98,13 @@ export function Diagnostic360({sector='sante', audience='client', readOnly=false
      <ol className="dg-flow">
       <li><span><ClipboardCheck size={16}/></span><div><strong>Vous répondez</strong><small>{questionsTotal} questions réparties en {pack.volets.length} axes. Vous pouvez faire des pauses.</small></div></li>
       <li><span><Send size={16}/></span><div><strong>Vous envoyez</strong><small>Relisez la synthèse puis transmettez-la à ALLNEEDS.</small></div></li>
-      <li><span><Stethoscope size={16}/></span><div><strong>Votre concierge analyse</strong><small>Rapport, priorités et recommandations publiés dans votre espace.</small></div></li>
+      <li><span><Stethoscope size={16}/></span><div><strong>Votre Account Manager analyse</strong><small>Rapport, priorités et recommandations publiés dans votre espace.</small></div></li>
      </ol>
      <ul className="dg-axes">{pack.volets.map(v=><li key={v.id}><b>{v.id}</b>{v.title}</li>)}</ul>
     </section>
     <section className="dg-card dg-card-soft">
      <small className="dg-kicker">SI UN APPROFONDISSEMENT EST UTILE</small>
-     <p className="dg-soft-title">Le diagnostic complet sera proposé par votre concierge après cet échange.</p>
+     <p className="dg-soft-title">Le diagnostic complet sera proposé par votre Account Manager après cet échange.</p>
      <p className="dg-soft-text">Il représente environ 6 h 45 sur plusieurs séances. Vous recevrez d’abord le périmètre, le calendrier et le tarif. Rien ne commence sans votre accord.</p>
     </section>
    </aside>

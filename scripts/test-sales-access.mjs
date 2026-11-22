@@ -82,7 +82,7 @@ try {
   /* 3. Ce que le compte commercial peut et ne peut pas faire */
   x = await req('/api/sales/presentation', { cookie: sales })
   assert(x.status === 200 && Array.isArray(x.data.sections) && x.data.sections.length === 8, 'commercial : présentation accessible (8 sections)')
-  for (const path of ['/api/admin/orgs', '/api/admin/registrations', '/api/admin/sales-access', '/api/needs', '/api/diagnostics', '/api/notifications', '/api/admin/concierges', '/api/staff/requests']) {
+  for (const path of ['/api/admin/orgs', '/api/admin/registrations', '/api/admin/sales-access', '/api/needs', '/api/diagnostics', '/api/notifications', '/api/admin/account-managers', '/api/staff/requests']) {
     x = await req(path, { cookie: sales })
     assert(x.status === 403, `commercial : ${path} refusé (403)`)
   }
@@ -113,7 +113,7 @@ try {
   x = await req('/api/admin/sales-access/conc', { method: 'PATCH', cookie: admin, body: { enabled: true } })
   assert(x.status === 200 && x.data.salesAccess === true, 'admin : accès accordé au concierge')
   assert((await req('/api/sales/presentation', { cookie: conc })).status === 200, 'concierge autorisé : 200')
-  assert((await req('/api/concierge/orgs', { cookie: conc })).status === 200, 'concierge autorisé : son espace reste accessible')
+  assert((await req('/api/account-manager/orgs', { cookie: conc })).status === 200, 'concierge autorisé : son espace reste accessible')
   await req('/api/admin/sales-access/conc', { method: 'PATCH', cookie: admin, body: { enabled: false } })
   assert((await req('/api/sales/presentation', { cookie: conc })).status === 403, 'admin : accès retiré au concierge')
 
