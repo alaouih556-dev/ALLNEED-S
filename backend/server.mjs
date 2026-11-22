@@ -1206,7 +1206,7 @@ async function routeRequest(req, res) {
       clearLoginFailures(key)
       user.lastLoginAt = new Date().toISOString(); saveDb(db)
       audit('auth.login.ok', { by: user.id })
-      const org = orgForUser(user); return json(res, 200, { user: { ...safeUser(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null } }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
+      const org = orgForUser(user); return json(res, 200, { user: { ...safeUser(user), orgPosition: positionOf(user), crmAccess: isCrmAccount(user), organization: org ? { id: org.id, name: org.name, slug: org.slug, sector: org.sector, active: org.active, modules: org.modules, saas: org.saas, city: org.city || '', kind: org.kind || '', size: org.size || '', contactName: org.contactName || '', contactRole: org.contactRole || '', contactEmail: org.contactEmail || '', contactPhone: org.contactPhone || '' } : null } }, { ...cors, 'set-cookie': cookie(issueSession(user), SESSION_TTL_SECONDS) })
     }
 
     if (req.method === 'POST' && url.pathname === '/api/auth/logout') {

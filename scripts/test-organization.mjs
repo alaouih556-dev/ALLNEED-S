@@ -68,6 +68,15 @@ let child = await start()
 try {
   for (const id of ['pdg', 'mkt-head', 'com-head', 'dev-lead', 'dev-one', 'design-one', 'strategist', 'am-legacy', 'agent-legacy', 'owner']) await login(id)
 
+  // La réponse de connexion porte les mêmes droits que /api/me : l'accès CRM marche sans recharger la page.
+  for (const [id, access] of [['pdg', true], ['com-head', true], ['agent-legacy', true], ['dev-one', false], ['owner', false]]) {
+    const response = await fetch(`${origin}/api/auth/login`, { method: 'POST', headers: { 'content-type': 'application/json', origin }, body: JSON.stringify({ email: `${id}@x.test`, password }) })
+    const { user } = await response.json()
+    assert.equal(user.crmAccess, access, `crmAccess à la connexion : ${id}`)
+    assert.equal('passwordHash' in user, false)
+  }
+  assert.equal((await (await fetch(`${origin}/api/auth/login`, { method: 'POST', headers: { 'content-type': 'application/json', origin }, body: JSON.stringify({ email: 'com-head@x.test', password }) })).json()).user.orgPosition.departmentId, 'commercial')
+
   // Positions et comptes historiques
   assert.equal((await expect(200, 'pdg', 'GET', '/api/org/me')).position.level, 'pdg')
   const am = await expect(200, 'am-legacy', 'GET', '/api/org/me')
