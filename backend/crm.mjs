@@ -47,7 +47,7 @@ const DEFAULT_LABELS = {
 /** Permissions qu'un rôle non administrateur peut recevoir. L'administrateur a toujours tout. */
 export const AGENT_PERMISSIONS = ['dashboard.view', 'contacts.view', 'contacts.create', 'contacts.edit', 'contacts.export', 'calls.create', 'calls.edit', 'appointments.view', 'appointments.create', 'appointments.edit', 'map.view', 'campaigns.view', 'reports.view', 'notifications.view']
 /** Permissions réservées à l'administration (jamais attribuables à un agent). */
-export const ADMIN_PERMISSIONS = ['users.manage', 'databases.manage', 'imports.run', 'campaigns.manage', 'zones.manage', 'agents.view', 'settings.manage', 'audit.view', 'geocode.run']
+export const ADMIN_PERMISSIONS = ['users.manage', 'databases.manage', 'databases.create', 'imports.run', 'campaigns.manage', 'zones.manage', 'agents.view', 'settings.manage', 'audit.view', 'geocode.run']
 /** Rôles CRM. Ajouter un rôle = ajouter une entrée ici + ses permissions par défaut dans les réglages. */
 export const CRM_ROLES = {
   admin: { label: 'Administrateur', admin: true },
@@ -55,6 +55,9 @@ export const CRM_ROLES = {
   // Rôle « CRM » : mêmes droits qu'un agent dans le CRM, plus la présentation commerciale (rien d'autre dans ALLNEEDS).
   crm: { label: 'CRM', admin: false },
 }
+
+/** Droits fixes du rôle CRM : créer une base et importer dans son propre périmètre. */
+const ROLE_DATA_PERMISSIONS = { crm: ['databases.create', 'imports.run'] }
 
 const NOTIFICATION_TYPES = ['appointment.created', 'appointment.confirmed', 'appointment.cancelled', 'appointment.rescheduled', 'callback.reminder', 'database.assigned', 'contacts.assigned', 'campaign.assigned', 'campaign.started', 'campaign.completed', 'user.created', 'agent.alert', 'import.completed', 'import.failed']
 
@@ -213,7 +216,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     if (!isCrmUser(u)) return []
     if (isCrmAdmin(u)) return [...AGENT_PERMISSIONS, ...ADMIN_PERMISSIONS]
     const base = Array.isArray(u.crm?.permissions) ? u.crm.permissions : settings().rolePermissions[u.role] || []
-    return base.filter((p) => AGENT_PERMISSIONS.includes(p))
+    return [...base.filter((p) => AGENT_PERMISSIONS.includes(p)), ...(ROLE_DATA_PERMISSIONS[u.role] || [])]
   }
   const can = (u, perm) => permissionsOf(u).includes(perm)
   function need(u, perm) { if (!can(u, perm)) throw httpError(403, 'permission refusée') }
@@ -231,26 +234,43 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   const agents = () => db.users.filter(isFieldRole)
   const campaignOfContact = (c) => c.campaignId || dbById(c.databaseId)?.campaignId || null
 
-  function contactVisible(u, c, sc = scopeOf(u)) {
-    if (sc.all) return true
-    if (c.archived) return false
-    return c.agentId === u.id || (!c.agentId && sc.dbs.has(c.databaseId))
-  }
+  // Lecture partagée : tout compte CRM voit les bases, contacts, appels et rendez-vous non archivés.
+  const contactVisible = (u, c, sc = scopeOf(u)) => sc.all || !c.archived
+  const databaseVisible = (u, d, sc = scopeOf(u)) => sc.all || d.status !== 'archived'
   function appointmentVisible(u, a, sc = scopeOf(u)) {
-    if (sc.all) return true
-    if (a.agentId === u.id) return true
+    if (sc.all || a.agentId === u.id) return true
     const c = contactById(a.contactId)
     return Boolean(c && contactVisible(u, c, sc))
   }
   function callVisible(u, call, sc = scopeOf(u)) {
-    if (sc.all) return true
-    if (call.agentId === u.id) return true
+    if (sc.all || call.agentId === u.id) return true
     const c = contactById(call.contactId)
     return Boolean(c && contactVisible(u, c, sc))
   }
-  const databaseVisible = (u, d, sc = scopeOf(u)) => sc.all || (sc.dbs.has(d.id) && d.status !== 'archived')
+  // Périmètre assigné : chiffres personnels, export, campagnes et mises à jour massives par import.
+  function contactEditable(u, c, sc = scopeOf(u)) {
+    if (sc.all) return true
+    if (c.archived) return false
+    return c.agentId === u.id || (!c.agentId && sc.dbs.has(c.databaseId))
+  }
+  const databaseEditable = (u, d, sc = scopeOf(u)) => sc.all || (sc.dbs.has(d.id) && d.status !== 'archived')
+  function appointmentInScope(u, a, sc = scopeOf(u)) {
+    if (sc.all || a.agentId === u.id) return true
+    const c = contactById(a.contactId)
+    return Boolean(c && contactEditable(u, c, sc))
+  }
+  function callInScope(u, call, sc = scopeOf(u)) {
+    if (sc.all || call.agentId === u.id) return true
+    const c = contactById(call.contactId)
+    return Boolean(c && contactEditable(u, c, sc))
+  }
+  function needContactWork(u, c) {
+    // Tout compte CRM peut travailler sur un contact partagé ; chaque route vérifie sa permission.
+    if (!c || !contactVisible(u, c)) throw httpError(404, 'contact introuvable')
+  }
   const campaignVisible = (u, c, sc = scopeOf(u)) => sc.all || (sc.camps.has(c.id) && c.status !== 'archived')
   const zoneVisible = (u, z, sc = scopeOf(u)) => sc.all || sc.zones.has(z.id)
+  const canDeleteDatabase = (u, d) => isCrmAdmin(u) || (can(u, 'databases.create') && d.createdBy === u.id)
 
   /* ---------- Journal d'activité ---------- */
   function log(u, action, entityType, entityId, details = {}) {
@@ -380,7 +400,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   function filteredData(u, f) {
     const sc = scopeOf(u)
     const zone = f.zoneId ? zoneById(f.zoneId) : null
-    const contactOk = (c) => contactVisible(u, c, sc) && !c.archived
+    const contactInView = f.shared ? contactVisible : contactEditable
+    const contactOk = (c) => contactInView(u, c, sc) && !c.archived
       && (!f.agentId || c.agentId === f.agentId)
       && (!f.campaignId || campaignOfContact(c) === f.campaignId)
       && (!f.databaseId || c.databaseId === f.databaseId)
@@ -390,13 +411,13 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       && (!f.contactStatus || c.status === f.contactStatus)
     const contacts = db.crmContacts.filter(contactOk)
     const visibleIds = new Set(contacts.map((c) => c.id))
-    const calls = db.crmCalls.filter((call) => callVisible(u, call, sc)
+    const calls = db.crmCalls.filter((call) => (f.shared ? callVisible : callInScope)(u, call, sc)
       && (!f.agentId || call.agentId === f.agentId)
       && (!f.campaignId || call.campaignId === f.campaignId)
       && (!f.databaseId || call.databaseId === f.databaseId)
       && (!zone && !f.city && !f.region && !f.contactStatus ? true : visibleIds.has(call.contactId))
       && (!f.callStatus || call.status === f.callStatus))
-    const appts = db.crmAppointments.filter((a) => appointmentVisible(u, a, sc)
+    const appts = db.crmAppointments.filter((a) => (f.shared ? appointmentVisible : appointmentInScope)(u, a, sc)
       && (!f.agentId || a.agentId === f.agentId)
       && (!f.campaignId || a.campaignId === f.campaignId)
       && (!f.databaseId || a.databaseId === f.databaseId)
@@ -440,7 +461,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
 
   function assignAgentToContacts(u, contactIds, agentId) {
     const agent = agentId ? userById(agentId) : null
-    if (agentId && (!agent || !isCrmUser(agent))) throw httpError(400, 'agent introuvable')
+    if (agentId && (!agent || !isCrmUser(agent) || agent.active === false)) throw httpError(400, 'membre du CRM introuvable ou inactif')
     let n = 0
     for (const cid of contactIds) {
       const c = contactById(cid)
@@ -455,7 +476,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   /* ---------- Appels ---------- */
   function recordCall(u, body) {
     const c = contactById(String(body.contactId || ''))
-    if (!c || !contactVisible(u, c)) throw httpError(404, 'contact introuvable')
+    needContactWork(u, c)
     const status = oneOf(body.status, CALL_STATUSES, 'statut d’appel', null)
     if (!status) throw httpError(400, 'statut d’appel requis')
     const notes = text(body.notes, 4000, 'notes')
@@ -511,7 +532,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       return { id: a.id, name: a.name, active: a.active !== false, calls: ac.length, reached: ac.filter((c) => REACHED_CALL_STATUSES.has(c.status)).length, appointments: aa.filter((x) => x.status !== 'cancelled').length, conversionRate: pct(new Set(aa.filter((x) => x.status !== 'cancelled').map((x) => x.contactId)).size, called), lastActivityAt: lastActivityOf(a.id) }
     }).sort((a, b) => b.appointments - a.appointments || b.calls - a.calls)
     const sc = scopeOf(u)
-    const perDatabase = db.crmDatabases.filter((d) => databaseVisible(u, d, sc) && (!f.databaseId || d.id === f.databaseId)).map((d) => {
+    const perDatabase = db.crmDatabases.filter((d) => (f.shared ? databaseVisible : databaseEditable)(u, d, sc) && (!f.databaseId || d.id === f.databaseId)).map((d) => {
       const dc = contacts.filter((c) => c.databaseId === d.id), dcalls = calls.filter((c) => c.databaseId === d.id), dap = appts.filter((a) => a.databaseId === d.id)
       const s = contactStats(dc, dcalls, dap)
       return { id: d.id, name: d.name, contacts: s.total, called: s.called, reached: s.reached, appointments: dap.filter((a) => a.status !== 'cancelled').length, conversionRate: pct(s.booked, s.called) }
@@ -698,7 +719,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     }
 
     /* ---------- Tableau de bord & rapports ---------- */
-    if (M === 'GET' && path === '/stats') { need(user, 'dashboard.view'); return send(200, stats(user, readFilters(q))) }
+    if (M === 'GET' && path === '/stats') { need(user, 'dashboard.view'); return send(200, stats(user, { ...readFilters(q), shared: q.get('shared') === '1' })) }
     if (M === 'GET' && path === '/reports') {
       need(user, 'reports.view')
       const f = readFilters(q)
@@ -838,11 +859,13 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       return send(200, paginate(list, q, { name: (d) => lower(d.name), source: (d) => lower(d.source), total: (d) => d.totalContacts, called: (d) => d.contactsCalled, remaining: (d) => d.contactsRemaining, appointments: (d) => d.appointmentsBooked, status: (d) => d.status, createdAt: (d) => d.createdAt }))
     }
     if (path === '/databases' && M === 'POST') {
-      need(user, 'databases.manage')
-      const d = { id: id('db'), name: text(body.name, 120, 'nom', { required: true }), description: text(body.description, 1000, 'description'), source: text(body.source, 120, 'source'), status: oneOf(body.status, DATABASE_STATUSES, 'statut', 'draft'), campaignId: body.campaignId ? (campById(body.campaignId) ? body.campaignId : (() => { throw httpError(400, 'campagne introuvable') })()) : null, zoneId: body.zoneId ? (zoneById(body.zoneId) ? body.zoneId : (() => { throw httpError(400, 'zone introuvable') })()) : null, createdBy: user.id, createdAt: nowIso(), updatedAt: nowIso(), importedAt: null, history: [{ at: nowIso(), by: user.id, byName: user.name, action: 'Création' }] }
+      need(user, 'databases.create')
+      // Hors administration : seuls le nom, la source et la description sont acceptés, et la base revient à son créateur.
+      const input = isCrmAdmin(user) ? body : { name: body.name, description: body.description, source: body.source }
+      const d = { id: id('db'), name: text(input.name, 120, 'nom', { required: true }), description: text(input.description, 1000, 'description'), source: text(input.source, 120, 'source'), status: oneOf(input.status, DATABASE_STATUSES, 'statut', 'draft'), campaignId: input.campaignId ? (campById(input.campaignId) ? input.campaignId : (() => { throw httpError(400, 'campagne introuvable') })()) : null, zoneId: input.zoneId ? (zoneById(input.zoneId) ? input.zoneId : (() => { throw httpError(400, 'zone introuvable') })()) : null, createdBy: user.id, createdAt: nowIso(), updatedAt: nowIso(), importedAt: null, history: [{ at: nowIso(), by: user.id, byName: user.name, action: 'Création' }] }
       if (db.crmDatabases.some((x) => lower(x.name) === lower(d.name) && x.status !== 'archived')) throw httpError(409, 'une base porte déjà ce nom')
       db.crmDatabases.push(d)
-      const agentIds = idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents') || []
+      const agentIds = isCrmAdmin(user) ? idList(body.agentIds, (x) => isFieldRole(userById(x)), 'agents') || [] : [user.id]
       setDatabaseAgents(user, d, agentIds)
       log(user, 'database.created', 'database', d.id, { name: d.name })
       saveDb(db)
@@ -852,10 +875,10 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const d = dbById(m[1])
       if (!d || !databaseVisible(user, d)) throw httpError(404, 'base introuvable')
       if (M === 'GET') {
-        const imports = db.crmImports.filter((i) => i.databaseId === d.id).slice().reverse()
+        const imports = db.crmImports.filter((i) => i.databaseId === d.id && (isCrmAdmin(user) || i.createdBy === user.id)).slice().reverse()
         return send(200, { ...databaseOut(d, user), history: d.history || [], imports })
       }
-      need(user, 'databases.manage')
+      if (!(M === 'DELETE' && q.get('hard') === '1' && canDeleteDatabase(user, d))) need(user, 'databases.manage')
       if (M === 'PATCH') {
         const changed = []
         if ('name' in body) { const n = text(body.name, 120, 'nom', { required: true }); if (db.crmDatabases.some((x) => x.id !== d.id && lower(x.name) === lower(n) && x.status !== 'archived')) throw httpError(409, 'une base porte déjà ce nom'); d.name = n; changed.push('nom') }
@@ -874,6 +897,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
         if (q.get('hard') === '1') {
           const contactIds = new Set(db.crmContacts.filter((c) => c.databaseId === d.id).map((c) => c.id))
           if (db.crmCalls.some((c) => contactIds.has(c.contactId)) || db.crmAppointments.some((a) => contactIds.has(a.contactId))) throw httpError(409, 'cette base a des appels ou rendez-vous : archivez-la plutôt que de la supprimer')
+          // Hors administration, on ne supprime jamais le travail d'un autre utilisateur.
+          if (!isCrmAdmin(user) && db.crmContacts.some((c) => c.databaseId === d.id && (c.createdBy !== user.id || (c.agentId && c.agentId !== user.id)))) throw httpError(409, 'cette base contient des contacts d’autres utilisateurs : demandez à un administrateur')
           db.crmContacts = db.crmContacts.filter((c) => c.databaseId !== d.id)
           db.crmDatabases.splice(db.crmDatabases.indexOf(d), 1)
           for (const u of crmUsers()) if (u.crm?.databaseIds) u.crm.databaseIds = u.crm.databaseIds.filter((x) => x !== d.id)
@@ -892,6 +917,9 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     /* ---------- Import ---------- */
     if (path === '/imports/check' && M === 'POST') {
       need(user, 'imports.run')
+      const target = dbById(String(body.databaseId || ''))
+      if (!isCrmAdmin(user) && (!target || !databaseVisible(user, target))) throw httpError(400, 'base introuvable ou archivée')
+      const sc = scopeOf(user)
       const rows = Array.isArray(body.rows) ? body.rows.slice(0, 1000) : []
       const keyMode = ['phone', 'email', 'phone_or_email'].includes(body.duplicateKey) ? body.duplicateKey : settings().imports.duplicateKey
       const out = rows.map((r, i) => {
@@ -899,22 +927,22 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
         const c = {}
         try { applyContactFields(c, r || {}, { partial: false }) } catch (e) { errors.push(e.message) }
         const dup = errors.length ? null : findDuplicate(c, keyMode)
-        return { index: Number(body.offset || 0) + i, errors, duplicateOf: dup ? { id: dup.id, name: dup.fullName, databaseName: dbById(dup.databaseId)?.name || '' } : null }
+        return { index: Number(body.offset || 0) + i, errors, duplicateOf: !dup ? null : contactVisible(user, dup, sc) ? { id: dup.id, name: dup.fullName, databaseName: dbById(dup.databaseId)?.name || '' } : { id: null, name: 'Contact déjà présent', databaseName: 'hors de votre périmètre' } }
       })
       return send(200, { results: out })
     }
     if (path === '/imports' && M === 'GET') {
       need(user, 'imports.run')
-      const list = db.crmImports.filter((i) => !q.get('databaseId') || i.databaseId === q.get('databaseId')).slice().reverse().map((i) => ({ ...i, databaseName: dbById(i.databaseId)?.name || '' }))
+      const list = db.crmImports.filter((i) => (isCrmAdmin(user) || i.createdBy === user.id) && (!q.get('databaseId') || i.databaseId === q.get('databaseId'))).slice().reverse().map((i) => ({ ...i, databaseName: dbById(i.databaseId)?.name || '' }))
       return send(200, paginate(list, q, {}))
     }
     if (path === '/imports' && M === 'POST') {
       need(user, 'imports.run')
       const d = dbById(String(body.databaseId || ''))
-      if (!d || d.status === 'archived') throw httpError(400, 'base introuvable ou archivée')
+      if (!d || d.status === 'archived' || !databaseVisible(user, d)) throw httpError(400, 'base introuvable ou archivée')
       const total = Number(body.total) || 0
       if (total < 1 || total > settings().imports.maxRows) throw httpError(400, `le fichier doit contenir entre 1 et ${settings().imports.maxRows} lignes`)
-      const job = { id: id('imp'), databaseId: d.id, fileName: text(body.fileName, 200, 'nom du fichier') || 'import', status: 'running', total, received: 0, inserted: 0, updated: 0, skipped: 0, invalid: 0, duplicates: 0, errors: [], mapping: typeof body.mapping === 'object' && body.mapping ? body.mapping : {}, duplicateStrategy: ['skip', 'update', 'create'].includes(body.duplicateStrategy) ? body.duplicateStrategy : settings().imports.defaultStrategy, duplicateKey: ['phone', 'email', 'phone_or_email'].includes(body.duplicateKey) ? body.duplicateKey : settings().imports.duplicateKey, createdBy: user.id, createdAt: nowIso(), completedAt: null }
+      const job = { id: id('imp'), databaseId: d.id, fileName: text(body.fileName, 200, 'nom du fichier') || 'import', status: 'running', total, received: 0, inserted: 0, updated: 0, skipped: 0, invalid: 0, duplicates: 0, errors: [], mapping: typeof body.mapping === 'object' && body.mapping ? body.mapping : {}, duplicateStrategy: (isCrmAdmin(user) ? ['skip', 'update', 'create'] : ['skip', 'update']).includes(body.duplicateStrategy) ? body.duplicateStrategy : 'skip', duplicateKey: ['phone', 'email', 'phone_or_email'].includes(body.duplicateKey) ? body.duplicateKey : settings().imports.duplicateKey, createdBy: user.id, createdAt: nowIso(), completedAt: null }
       db.crmImports.push(job)
       saveDb(db)
       return send(201, job)
@@ -927,6 +955,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       if (job.received + rows.length > job.total) throw httpError(400, 'nombre de lignes supérieur au total annoncé')
       const offset = Number(body.offset) || job.received
       const d = dbById(job.databaseId)
+      if (!d || d.status === 'archived' || !databaseVisible(user, d)) throw httpError(403, 'cette base n’est plus accessible')
+      const sc = scopeOf(user)
       const stamp = nowIso()
       rows.forEach((r, i) => {
         const c = { id: id('ct'), databaseId: d.id, campaignId: null, agentId: null, callStatus: null, lastContactAt: null, archived: false, createdAt: stamp, updatedAt: stamp, createdBy: user.id, importId: job.id, noteLog: [] }
@@ -934,7 +964,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
         const dup = findDuplicate(c, job.duplicateKey)
         if (dup) {
           job.duplicates++
-          if (job.duplicateStrategy === 'skip') { job.skipped++; return }
+          // Un doublon hors périmètre n'est jamais modifié ni recréé.
+          if (job.duplicateStrategy === 'skip' || !contactEditable(user, dup, sc)) { job.skipped++; return }
           if (job.duplicateStrategy === 'update') {
             for (const k of ['firstName', 'lastName', 'fullName', 'phone2', 'email', 'address', 'city', 'region', 'postalCode', 'country', 'notes']) if (c[k]) dup[k] = c[k]
             if (c.lat !== null) { dup.lat = c.lat; dup.lng = c.lng }
@@ -975,7 +1006,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     }
     if (path === '/contacts/export' && M === 'GET') {
       need(user, 'contacts.export')
-      const list = filterContacts(user, q).slice(0, 50000).map(contactOut)
+      const list = filterContacts(user, q, { own: true }).slice(0, 50000).map(contactOut)
       log(user, 'contact.exported', 'contact', null, { count: list.length })
       saveDb(db)
       return send(200, { rows: list.map((c) => ({ ...c, noteLog: undefined, custom: c.custom || {} })) })
@@ -1016,6 +1047,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       need(user, 'contacts.view')
       const c = contactById(m[1])
       if (!c || !contactVisible(user, c)) throw httpError(404, 'contact introuvable')
+      if (M !== 'GET') needContactWork(user, c)
       if (M === 'GET') {
         const calls = db.crmCalls.filter((x) => x.contactId === c.id).sort((a, b) => b.at.localeCompare(a.at)).map(callOut)
         const appointments = db.crmAppointments.filter((x) => x.contactId === c.id).sort((a, b) => `${b.date}${b.start}`.localeCompare(`${a.date}${a.start}`)).map(appointmentOut)
@@ -1059,7 +1091,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     if ((m = path.match(/^\/contacts\/([^/]+)\/notes$/)) && M === 'POST') {
       need(user, 'contacts.edit')
       const c = contactById(m[1])
-      if (!c || !contactVisible(user, c)) throw httpError(404, 'contact introuvable')
+      needContactWork(user, c)
       const note = { id: id('note'), at: nowIso(), by: user.id, byName: user.name, text: text(body.text, 4000, 'note', { required: true }) }
       c.noteLog = [...(c.noteLog || []), note].slice(-200); c.updatedAt = nowIso()
       log(user, 'contact.updated', 'contact', c.id, { fields: ['note'] })
@@ -1069,7 +1101,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     if ((m = path.match(/^\/contacts\/([^/]+)\/location$/)) && M === 'POST') {
       need(user, 'contacts.edit')
       const c = contactById(m[1])
-      if (!c || !contactVisible(user, c)) throw httpError(404, 'contact introuvable')
+      needContactWork(user, c)
       c.lat = optCoord(body.lat, -90, 90, 'latitude'); c.lng = optCoord(body.lng, -180, 180, 'longitude')
       if ((c.lat === null) !== (c.lng === null)) throw httpError(400, 'latitude et longitude vont ensemble')
       c.locationSource = c.lat === null ? null : 'manual'; c.updatedAt = nowIso()
@@ -1124,7 +1156,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       need(user, 'appointments.create')
       if (!isCrmAdmin(user) && !settings().appointments.agentsCanCreate) throw httpError(403, 'la création de rendez-vous est réservée à l’administration')
       const c = contactById(String(body.contactId || ''))
-      if (!c || !contactVisible(user, c)) throw httpError(400, 'contact introuvable')
+      needContactWork(user, c)
       const agentId = isCrmAdmin(user) ? (body.agentId || c.agentId || null) : user.id
       if (agentId && !isCrmUser(userById(agentId))) throw httpError(400, 'agent introuvable')
       const s = settings()
@@ -1212,7 +1244,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       if (!c || !campaignVisible(user, c)) throw httpError(404, 'campagne introuvable')
       if (M === 'GET') {
         const st = stats(user, { ...readFilters(q), campaignId: c.id })
-        const campContacts = db.crmContacts.filter((x) => !x.archived && campaignOfContact(x) === c.id && contactVisible(user, x))
+        const campContacts = db.crmContacts.filter((x) => !x.archived && campaignOfContact(x) === c.id && contactEditable(user, x))
         const extra = { contactsAssigned: campContacts.filter((x) => x.agentId).length, interested: campContacts.filter((x) => ['interested', 'appointment_booked'].includes(x.status)).length, completedAppointments: st.appointmentStatus.find((s) => s.key === 'completed')?.value || 0 }
         return send(200, { ...campaignOut(c, st.perCampaign.find((x) => x.id === c.id)), extra, stats: { kpis: st.kpis, series: st.series, perAgent: st.perAgent, callStatus: st.callStatus, appointmentStatus: st.appointmentStatus } })
       }
@@ -1294,7 +1326,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     if (path === '/map' && M === 'GET') {
       need(user, 'map.view')
       const f = readFilters(q)
-      const { contacts, appts } = filteredData(user, f)
+      const { contacts, appts } = filteredData(user, { ...f, shared: true })
       const lastCall = new Map()
       for (const c of db.crmCalls) { const p = lastCall.get(c.contactId); if (!p || c.at > p.at) lastCall.set(c.contactId, c) }
       const nextAppt = new Map()
@@ -1433,7 +1465,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
 
   /* ---------- Aides dépendantes du routeur ---------- */
   const contactSorters = { name: (c) => lower(c.fullName), city: (c) => lower(c.city), status: (c) => c.status, lastContact: (c) => c.lastContactAt || '', nextCallback: (c) => c.nextCallbackAt || '', createdAt: (c) => c.createdAt, updatedAt: (c) => c.updatedAt }
-  function filterContacts(u, q) {
+  function filterContacts(u, q, { own = false } = {}) {
     const f = readFilters(q)
     const sc = scopeOf(u)
     const zone = f.zoneId ? zoneById(f.zoneId) : null
@@ -1442,7 +1474,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const callbackDue = q.get('callbackDue') === '1'
     const hasLocation = q.get('hasLocation')
     const unassigned = q.get('unassigned') === '1'
-    return db.crmContacts.filter((c) => contactVisible(u, c, sc) && Boolean(c.archived) === archived
+    return db.crmContacts.filter((c) => (own ? contactEditable : contactVisible)(u, c, sc) && Boolean(c.archived) === archived
       && (!f.q || `${c.fullName} ${c.phone} ${c.phone2} ${c.email} ${c.city} ${c.address} ${(c.tags || []).join(' ')}`.toLowerCase().includes(f.q))
       && (!f.databaseId || c.databaseId === f.databaseId)
       && (!f.campaignId || campaignOfContact(c) === f.campaignId)
@@ -1467,7 +1499,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const appts = db.crmAppointments.filter((a) => ids.has(a.contactId))
     const s = contactStats(contacts, calls, appts)
     const assigned = agents().filter((a) => (a.crm?.databaseIds || []).includes(d.id))
-    return { ...d, history: undefined, totalContacts: s.total, contactsCalled: s.called, contactsRemaining: s.total - s.called, contactsReached: s.reached, appointmentsBooked: appts.filter((a) => a.status !== 'cancelled').length, agentIds: assigned.map((a) => a.id), agentNames: assigned.map((a) => a.name), campaignName: d.campaignId ? campById(d.campaignId)?.name || '' : '', zoneName: d.zoneId ? zoneById(d.zoneId)?.name || '' : '', createdByName: userById(d.createdBy)?.name || '' }
+    return { ...d, history: undefined, totalContacts: s.total, contactsCalled: s.called, contactsRemaining: s.total - s.called, contactsReached: s.reached, appointmentsBooked: appts.filter((a) => a.status !== 'cancelled').length, agentIds: assigned.map((a) => a.id), agentNames: assigned.map((a) => a.name), campaignName: d.campaignId ? campById(d.campaignId)?.name || '' : '', zoneName: d.zoneId ? zoneById(d.zoneId)?.name || '' : '', createdByName: userById(d.createdBy)?.name || '', canDelete: canDeleteDatabase(u, d), canImport: can(u, 'imports.run') && databaseVisible(u, d) }
   }
   function setDatabaseAgents(u, d, agentIds) {
     for (const a of agents()) {

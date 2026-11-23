@@ -6274,7 +6274,20 @@
   "Votre activité": "Business",
   "Image de marque": "Branding",
   "Vos exigences": "Requirements",
-  "Relecture finale": "Review"
+  "Relecture finale": "Review",
+  "Créez vos bases, importez vos fichiers CSV ou Excel et retrouvez celles qui vous sont assignées.": "Create your databases, import your CSV or Excel files, and find the ones assigned to you.",
+  "Contact déjà présent": "Existing contact",
+  "hors de votre périmètre": "outside your access",
+  "Cette base et ses contacts seront supprimés définitivement. Cette action est irréversible. Si des appels ou rendez-vous existent, la suppression sera refusée.": "This database and its contacts will be permanently deleted. This cannot be undone. If calls or appointments exist, deletion will be refused.",
+  "Les bases partagées par toute l’équipe CRM. Créez vos bases et importez vos fichiers CSV ou Excel.": "Databases shared by the whole CRM team. Create your databases and import your CSV or Excel files.",
+  "Les bases partagées par toute l’équipe CRM.": "Databases shared by the whole CRM team.",
+  "Un administrateur doit créer une base.": "An administrator needs to create a database.",
+  "Bases, contacts et activité partagés par toute l’équipe CRM.": "Databases, contacts, and activity shared by the whole CRM team.",
+  "Tous les contacts de l’équipe CRM. Modifiez-les, appelez et prenez des rendez-vous.": "All CRM team contacts. Edit them, call them, and book appointments.",
+  "Assigner à un membre du CRM": "Assign to a CRM member",
+  "Membre du CRM": "CRM member",
+  "Assignation mise à jour": "Assignment updated",
+  "Assignation impossible": "Could not assign"
  },
  "fragments": {
   "— commentaire": "— comment",

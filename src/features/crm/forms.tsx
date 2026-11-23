@@ -5,6 +5,9 @@ import { Alert, Button, Checkbox, Field, Input, Modal, Select, Textarea } from '
 import { addDays, crmGet, crmSend, errorText, fromLocalInput, localDay, statusOptions, toLocalInput, useCrm, useNotify, type Appointment, type Call, type Contact, type Page } from './core'
 
 /* ---------- Contact ---------- */
+/** Nom d'un membre du CRM avec son rôle, pour les listes d'assignation. */
+export const crmMemberLabel = (member: { name: string; role?: string }) => `${member.name}${member.role === 'admin' ? ' · Administrateur' : member.role === 'crm' ? ' · CRM' : member.role === 'agent' ? ' · Agent' : ''}`
+
 export function ContactModal({ contact, defaultDatabaseId, onClose, onSaved }: { contact: Contact | null; defaultDatabaseId?: string; onClose: () => void; onSaved: (c: Contact) => void }) {
   const { me, lookups } = useCrm()
   const notify = useNotify()

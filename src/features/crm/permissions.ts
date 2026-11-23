@@ -1,7 +1,7 @@
 /** Libellés des permissions CRM attribuables aux agents (les clés viennent du serveur). */
 export const PERMISSION_LABELS: Record<string, { label: string; hint: string }> = {
   'dashboard.view': { label: 'Tableau de bord', hint: 'Voir ses indicateurs et son activité.' },
-  'contacts.view': { label: 'Voir les contacts', hint: 'Contacts assignés et contacts non assignés de ses bases.' },
+  'contacts.view': { label: 'Voir les contacts', hint: 'Bases, contacts et activité partagés par toute l’équipe CRM.' },
   'contacts.create': { label: 'Créer des contacts', hint: 'Ajouter un contact dans une de ses bases.' },
   'contacts.edit': { label: 'Modifier les contacts', hint: 'Coordonnées, statut, notes, tags, rappels.' },
   'contacts.export': { label: 'Exporter les contacts', hint: 'Télécharger ses contacts en CSV ou Excel.' },

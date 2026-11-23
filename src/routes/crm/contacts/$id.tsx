@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/layouts'
 import { Alert, Badge, Button, Input, Select, Tabs, Textarea } from '@/components/ui'
 import { EmptyBox, LoadingRows, Panel, Rows } from '@/components/admin-kit'
 import { ConfirmDialog, Info, RequirePermission, STATUS_HEX, StatusPill, crmSend, errorText, fmtDate, fmtDateTime, fmtDuration, fromLocalInput, statusOptions, toLocalInput, useCrm, useCrmQuery, useNotify, type Appointment, type Call, type Contact } from '@/features/crm/core'
-import { AppointmentModal, CallModal, ContactModal } from '@/features/crm/forms'
+import { AppointmentModal, CallModal, ContactModal, crmMemberLabel } from '@/features/crm/forms'
 import { CrmMap } from '@/features/crm/CrmMap'
 
 export const Route = createFileRoute('/crm/contacts/$id')({ component: () => <RequirePermission perm="contacts.view"><ContactDetail /></RequirePermission> })
@@ -14,7 +14,7 @@ type Detail = { contact: Contact; calls: Call[]; appointments: Appointment[]; ti
 
 function ContactDetail() {
   const { id } = Route.useParams()
-  const { me, can } = useCrm()
+  const { me, can, lookups } = useCrm()
   const notify = useNotify()
   const isAdmin = Boolean(me?.isAdmin)
   const { data, loading, error, reload } = useCrmQuery<Detail>(`/contacts/${id}`)
@@ -83,6 +83,9 @@ function ContactDetail() {
                   <label className="text-xs font-semibold text-ink-600">Statut du contact
                     <Select className="mt-1" value={c.status} disabled={busy} onChange={(e) => void patch({ status: e.target.value }, 'Statut mis à jour')}>{statusOptions(me?.labels, 'contact').map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select>
                   </label>
+                  {isAdmin ? <label className="text-xs font-semibold text-ink-600">Assigné à
+                    <Select className="mt-1" value={c.agentId || ''} disabled={busy} onChange={(e) => void patch({ agentId: e.target.value || null }, 'Assignation mise à jour')}><option value="">Non assigné</option>{(lookups?.agents || []).filter((a) => a.active || a.id === c.agentId).map((a) => <option key={a.id} value={a.id}>{crmMemberLabel(a)}</option>)}</Select>
+                  </label> : null}
                   <label className="text-xs font-semibold text-ink-600">Prochain rappel
                     <Input className="mt-1" type="datetime-local" disabled={busy} defaultValue={toLocalInput(c.nextCallbackAt)} onBlur={(e) => { if (e.target.value !== toLocalInput(c.nextCallbackAt)) void patch({ nextCallbackAt: fromLocalInput(e.target.value) }, e.target.value ? 'Rappel programmé' : 'Rappel retiré') }} />
                   </label>

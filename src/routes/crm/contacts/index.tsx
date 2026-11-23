@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Archive, CalendarPlus, Contact as ContactIcon, PhoneCall, Plus, Tags, UserCheck, X } from 'lucide-react'
+import { Archive, CalendarPlus, Contact as ContactIcon, Pencil, PhoneCall, Plus, Tags, UserCheck, X } from 'lucide-react'
 import { PageHeader } from '@/components/layouts'
 import { Button, Field, Input, Modal, Select } from '@/components/ui'
 import { DataTable, ExportButtons, FilterBar, RequirePermission, StatusPill, crmGet, crmSend, errorText, fmtDateTime, statusOptions, useCrm, useCrmQuery, useFilterState, useLookupFilters, useNotify, type Column, type Contact, type Page } from '@/features/crm/core'
-import { AppointmentModal, CallModal, ContactModal } from '@/features/crm/forms'
+import { AppointmentModal, CallModal, ContactModal, crmMemberLabel } from '@/features/crm/forms'
 import { EXPORT_COLUMNS, exportValue } from '../bases/$id'
 
 export const Route = createFileRoute('/crm/contacts/')({ component: () => <RequirePermission perm="contacts.view"><ContactsPage /></RequirePermission> })
@@ -19,6 +19,8 @@ function ContactsPage() {
   const filters = useLookupFilters(['database', 'campaign', 'agent', 'contactStatus', 'callStatus', 'appointmentStatus', 'city', 'region', 'zone'])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
+  const [editing, setEditing] = useState<Contact | null>(null)
+  const [assigning, setAssigning] = useState<Contact | null>(null)
   const [calling, setCalling] = useState<Contact | null>(null)
   const [booking, setBooking] = useState<{ contact: Contact; callId?: string } | null>(null)
   const [bulk, setBulk] = useState<'assign' | 'status' | 'tags' | 'campaign' | null>(null)
@@ -32,6 +34,17 @@ function ContactsPage() {
       await reload()
     } catch (e) {
       notify('Action impossible', 'warning', errorText(e))
+    }
+  }
+
+  async function assignContact(contact: Contact, agentId: string | null) {
+    try {
+      await crmSend(`/contacts/${contact.id}`, 'PATCH', { agentId })
+      notify('Assignation mise à jour')
+      setAssigning(null)
+      await reload()
+    } catch (e) {
+      notify('Assignation impossible', 'warning', errorText(e))
     }
   }
 
@@ -49,8 +62,8 @@ function ContactsPage() {
     <div>
       <PageHeader
         eyebrow="CRM · Données"
-        title={isAdmin ? 'Contacts' : 'Mes contacts'}
-        description={isAdmin ? 'Tous les contacts des bases. Filtrez, assignez en masse, appelez et prenez des rendez-vous.' : 'Vos contacts assignés et les contacts non assignés de vos bases.'}
+        title="Contacts"
+        description={isAdmin ? 'Tous les contacts des bases. Filtrez, assignez en masse, appelez et prenez des rendez-vous.' : 'Tous les contacts de l’équipe CRM. Modifiez-les, appelez et prenez des rendez-vous.'}
         actions={
           <>
             {can('contacts.create') ? <Button size="sm" onClick={() => setCreating(true)}><Plus size={14} />Nouveau contact</Button> : null}
@@ -90,6 +103,8 @@ function ContactsPage() {
         empty={{ icon: <ContactIcon size={20} />, title: 'Aucun contact', text: Object.keys(values).some((k) => !['page', 'pageSize', 'sort', 'dir'].includes(k)) ? 'Aucun contact ne correspond à ces filtres.' : isAdmin ? 'Importez un fichier dans une base, ou créez un contact.' : 'Aucun contact ne vous est assigné pour le moment.' }}
         rowActions={(c) => (
           <>
+            {can('contacts.edit') ? <Button size="sm" variant="ghost" title="Modifier" aria-label={`Modifier ${c.fullName}`} onClick={() => setEditing(c)}><Pencil size={14} /></Button> : null}
+            {isAdmin ? <Button size="sm" variant="ghost" title="Assigner" aria-label={`Assigner ${c.fullName}`} onClick={() => setAssigning(c)}><UserCheck size={14} /></Button> : null}
             {can('calls.create') ? <Button size="sm" variant="ghost" title="Enregistrer un appel" aria-label={`Appel avec ${c.fullName}`} onClick={() => setCalling(c)}><PhoneCall size={14} /></Button> : null}
             {can('appointments.create') ? <Button size="sm" variant="ghost" title="Prendre un rendez-vous" aria-label={`Rendez-vous avec ${c.fullName}`} onClick={() => setBooking({ contact: c })}><CalendarPlus size={14} /></Button> : null}
           </>
@@ -97,6 +112,8 @@ function ContactsPage() {
       />
 
       {creating ? <ContactModal contact={null} defaultDatabaseId={values.databaseId} onClose={() => setCreating(false)} onSaved={() => void reload()} /> : null}
+      {editing ? <ContactModal contact={editing} onClose={() => setEditing(null)} onSaved={() => void reload()} /> : null}
+      {assigning ? <BulkModal kind="assign" count={1} initial={assigning.agentId || ''} onClose={() => setAssigning(null)} onRun={(extra) => void assignContact(assigning, (extra.agentId as string | null) ?? null)} agents={(lookups?.agents || []).filter((a) => a.active || a.id === assigning.agentId)} campaigns={[]} statuses={[]} /> : null}
       {calling ? <CallModal contact={calling} onClose={() => setCalling(null)} onSaved={(call, book) => { void reload(); if (book) setBooking({ contact: calling, callId: call.id }) }} /> : null}
       {booking ? <AppointmentModal contact={booking.contact} callId={booking.callId} onClose={() => setBooking(null)} onSaved={() => void reload()} /> : null}
       {bulk ? <BulkModal kind={bulk} count={selected.size} onClose={() => setBulk(null)} onRun={(extra) => void bulkRun(bulk, extra)} agents={(lookups?.agents || []).filter((a) => a.active)} campaigns={lookups?.campaigns || []} statuses={statusOptions(me?.labels, 'contact')} /> : null}
@@ -104,13 +121,13 @@ function ContactsPage() {
   )
 }
 
-function BulkModal({ kind, count, agents, campaigns, statuses, onClose, onRun }: { kind: 'assign' | 'status' | 'tags' | 'campaign'; count: number; agents: Array<{ id: string; name: string }>; campaigns: Array<{ id: string; name: string }>; statuses: Array<{ value: string; label: string }>; onClose: () => void; onRun: (extra: Record<string, unknown>) => void }) {
-  const [value, setValue] = useState('')
-  const titles = { assign: 'Assigner à un agent', status: 'Changer le statut', tags: 'Ajouter des tags', campaign: 'Rattacher à une campagne' }
+function BulkModal({ kind, count, initial = '', agents, campaigns, statuses, onClose, onRun }: { kind: 'assign' | 'status' | 'tags' | 'campaign'; count: number; initial?: string; agents: Array<{ id: string; name: string; role?: string }>; campaigns: Array<{ id: string; name: string }>; statuses: Array<{ value: string; label: string }>; onClose: () => void; onRun: (extra: Record<string, unknown>) => void }) {
+  const [value, setValue] = useState(initial)
+  const titles = { assign: 'Assigner à un membre du CRM', status: 'Changer le statut', tags: 'Ajouter des tags', campaign: 'Rattacher à une campagne' }
   return (
     <Modal open onClose={onClose} title={titles[kind]} description={`${count} contact(s) sélectionné(s).`} size="sm">
       <div className="space-y-4">
-        {kind === 'assign' ? <Field label="Agent"><Select value={value} onChange={(e) => setValue(e.target.value)}><option value="">Retirer l’assignation</option>{agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</Select></Field> : null}
+        {kind === 'assign' ? <Field label="Membre du CRM"><Select value={value} onChange={(e) => setValue(e.target.value)}><option value="">Retirer l’assignation</option>{agents.map((a) => <option key={a.id} value={a.id}>{crmMemberLabel(a)}</option>)}</Select></Field> : null}
         {kind === 'status' ? <Field label="Nouveau statut"><Select value={value} onChange={(e) => setValue(e.target.value)}><option value="">Choisir…</option>{statuses.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</Select></Field> : null}
         {kind === 'tags' ? <Field label="Tags" hint="Séparés par des virgules"><Input value={value} onChange={(e) => setValue(e.target.value)} autoFocus /></Field> : null}
         {kind === 'campaign' ? <Field label="Campagne"><Select value={value} onChange={(e) => setValue(e.target.value)}><option value="">Celle de la base</option>{campaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select></Field> : null}

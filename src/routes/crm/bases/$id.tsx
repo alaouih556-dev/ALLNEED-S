@@ -54,7 +54,7 @@ function DatabaseDetail() {
           <>
             <Link to={'/crm/bases' as any}><Button size="sm" variant="outline"><ArrowLeft size={14} />Bases</Button></Link>
             <Link to={'/crm/contacts' as any} search={{ databaseId: id } as any}><Button size="sm" variant="outline"><ContactIcon size={14} />Contacts</Button></Link>
-            {isAdmin && data.status !== 'archived' ? <Button size="sm" onClick={() => setImporting(true)}><Upload size={14} />Importer</Button> : null}
+            {data.canImport && data.status !== 'archived' ? <Button size="sm" onClick={() => setImporting(true)}><Upload size={14} />Importer</Button> : null}
           </>
         }
       />
@@ -81,14 +81,14 @@ function DatabaseDetail() {
           <div className="flex flex-wrap gap-2 border-t border-ink-100 p-4">
             {can('contacts.export') ? <ExportButtons name={`contacts-${data.name}`} getData={async () => { const r = await crmGet<{ rows: Contact[] }>('/contacts/export', { databaseId: id }); return { columns: EXPORT_COLUMNS.map((c) => c[1]), rows: r.rows.map((c) => EXPORT_COLUMNS.map(([k]) => exportValue(c, k))) } }} /> : null}
             {isAdmin && data.status !== 'archived' ? <Button size="sm" variant="ghost" onClick={() => setConfirm('archive')}><Archive size={14} />Archiver</Button> : null}
-            {isAdmin ? <Button size="sm" variant="ghost" onClick={() => setConfirm('delete')}><Trash2 size={14} className="text-red-600" />Supprimer</Button> : null}
+            {data.canDelete ? <Button size="sm" variant="ghost" onClick={() => setConfirm('delete')}><Trash2 size={14} className="text-red-600" />Supprimer</Button> : null}
           </div>
         </Panel>
 
         <div className="space-y-5">
-          {isAdmin ? (
+          {can('imports.run') ? (
             <Panel title="Imports" description="Historique des fichiers importés dans cette base.">
-              {!data.imports.length ? <EmptyBox icon={<Upload size={20} />} title="Aucun import" text="Importez un fichier CSV ou Excel." action={data.status !== 'archived' ? <Button size="sm" onClick={() => setImporting(true)}><Upload size={14} />Importer</Button> : undefined} /> : null}
+              {!data.imports.length ? <EmptyBox icon={<Upload size={20} />} title="Aucun import" text="Importez un fichier CSV ou Excel." action={data.canImport && data.status !== 'archived' ? <Button size="sm" onClick={() => setImporting(true)}><Upload size={14} />Importer</Button> : undefined} /> : null}
               <Rows>
                 {data.imports.map((i) => (
                   <li key={i.id} className="px-5 py-3">
@@ -117,7 +117,7 @@ function DatabaseDetail() {
         danger
         title={confirm === 'delete' ? 'Supprimer définitivement cette base ?' : 'Archiver cette base ?'}
         confirmLabel={confirm === 'delete' ? 'Supprimer' : 'Archiver'}
-        text={confirm === 'delete' ? <>La base <b>{data.name}</b> et ses {data.totalContacts} contact(s) seront supprimés définitivement. Si des appels ou rendez-vous existent, la suppression est refusée : archivez plutôt.</> : <>La base <b>{data.name}</b> ne sera plus proposée aux agents. Ses contacts et son historique sont conservés.</>}
+        text={confirm === 'delete' ? <><b>{data.name}</b> · {data.totalContacts} contact(s)<br />Cette base et ses contacts seront supprimés définitivement. Cette action est irréversible. Si des appels ou rendez-vous existent, la suppression sera refusée.</> : <>La base <b>{data.name}</b> ne sera plus proposée aux agents. Ses contacts et son historique sont conservés.</>}
         onConfirm={() => void runConfirm()}
         onClose={() => setConfirm(null)}
       />

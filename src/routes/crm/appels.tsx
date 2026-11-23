@@ -21,7 +21,7 @@ function CallsPage() {
   const range = periodParams(values)
   const listParams = { ...values, ...range, period: undefined }
   const { data, loading, error, reload } = useCrmQuery<Page<Call>>('/calls', listParams)
-  const stats = useCrmQuery<Stats>('/stats', { ...range, agentId: values.agentId, campaignId: values.campaignId, databaseId: values.databaseId, callStatus: values.callStatus })
+  const stats = useCrmQuery<Stats>('/stats', { shared: '1', ...range, agentId: values.agentId, campaignId: values.campaignId, databaseId: values.databaseId, callStatus: values.callStatus })
   const filters = useLookupFilters(['agent', 'campaign', 'database', 'callStatus'])
   const [editing, setEditing] = useState<Call | null>(null)
   const k = stats.data?.kpis

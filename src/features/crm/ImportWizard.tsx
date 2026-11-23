@@ -6,7 +6,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { AlertTriangle, CheckCircle2, FileSpreadsheet, Upload } from 'lucide-react'
 import { Alert, Badge, Button, Field, Modal, Select, Steps } from '@/components/ui'
-import { crmSend, errorText } from './core'
+import { crmSend, errorText, useCrm } from './core'
 
 export const CRM_FIELDS: Array<{ key: string; label: string; synonyms: string[] }> = [
   { key: 'firstName', label: 'Prénom', synonyms: ['prenom', 'prénom', 'first name', 'firstname', 'first', 'given name'] },
@@ -87,6 +87,7 @@ type CheckResult = { index: number; errors: string[]; duplicateOf: { id: string;
 type Summary = { inserted: number; updated: number; skipped: number; invalid: number; duplicates: number; status: string }
 
 export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { databaseId: string; databaseName: string; onClose: () => void; onDone: () => void }) {
+  const { me } = useCrm()
   const [step, setStep] = useState(0)
   const [file, setFile] = useState<File | null>(null)
   const [headers, setHeaders] = useState<string[]>([])
@@ -261,7 +262,7 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
                 <Select value={strategy} onChange={(e) => setStrategy(e.target.value as typeof strategy)}>
                   <option value="skip">Les ignorer (recommandé)</option>
                   <option value="update">Mettre à jour la fiche existante avec les nouvelles informations</option>
-                  <option value="create">Les importer quand même (créer des doublons)</option>
+                  {me?.isAdmin ? <option value="create">Les importer quand même (créer des doublons)</option> : null}
                 </Select>
               </Field>
             ) : null}
