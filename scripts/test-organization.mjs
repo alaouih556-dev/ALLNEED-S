@@ -82,6 +82,9 @@ try {
   const am = await expect(200, 'am-legacy', 'GET', '/api/org/me')
   assert.deepEqual([am.position.departmentId, am.position.teamId], ['commercial', 'account-manager'])
   assert.equal((await expect(200, 'agent-legacy', 'GET', '/api/org/me')).position.teamId, 'teleprospection')
+  assert.ok(Array.isArray(await expect(200, 'pdg', 'GET', '/api/org/client-accounts')), 'PDG : portefeuille client sous forme de liste')
+  await expect(403, 'am-legacy', 'GET', '/api/org/client-accounts')
+  await expect(403, 'dev-one', 'GET', '/api/org/client-accounts')
   await expect(403, 'owner', 'GET', '/api/org/me')
   await expect(401, null, 'GET', '/api/org/me')
 

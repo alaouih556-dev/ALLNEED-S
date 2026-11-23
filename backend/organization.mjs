@@ -347,7 +347,8 @@ export function createOrganization({ db, saveDb, json, readBody, audit, createIn
       return send(200, { ...summary, departmentName: departmentById(team.departmentId).name, memberList: canSeeMembers ? members().filter((u) => positionOf(u).teamId === team.id).map(publicMember) : [], tasks: summary.tasks, taskList: db.orgTasks.filter((t) => t.teamId === team.id && taskVisible(user, t)).map(taskOut) })
     }
 
-    if (path === '/accounts' && M === 'GET') {
+    // « /accounts » est réservé à la gestion des comptes du PDG (accounts.mjs).
+    if (path === '/client-accounts' && M === 'GET') {
       need(user, 'accounts.view')
       if (!managesDepartment(position, 'commercial') && position.teamId !== 'account-manager') throw httpError(403, 'comptes clients hors de votre périmètre')
       const managers = db.users.filter((u) => u.role === 'concierge')

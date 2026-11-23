@@ -53,6 +53,7 @@ import { useDemo } from '@/store/store'
 import { canAccessSalesPresentation, useAuth, type AuthUser } from '@/features/auth/AuthContext'
 import { useCrmOptional } from '@/features/crm/core'
 import { clientModules, orgSaasActive, type AccessModule } from '@/lib/access'
+import { HeroLogo } from '@/components/HeroLogo'
 import { useOrgOptional, type OrgMe } from '@/features/organization/core'
 import { cn } from '@/lib/utils'
 import { THEMES, useWorkspaceTheme, type ThemeMode } from '@/lib/theme'
@@ -138,7 +139,8 @@ function buildClientNav(
   ]
 
   for (const def of optional) {
-    if (modules[def.key]) items.push({ group: def.group, label: def.label, to: def.to as any, icon: def.icon, badge: def.badge })
+    // Missions reste visible : la page et l'API dépendent de l'offre active, pas du module.
+    if (modules[def.key] || def.key === 'missions') items.push({ group: def.group, label: def.label, to: def.to as any, icon: def.icon, badge: def.badge })
   }
 
   items.push({ group: 'Réseau', label: 'Espace métier', to: '/app/espace-metier' as any, icon: <Building2 className="h-4 w-4" /> })
@@ -370,6 +372,7 @@ export function AppShell({
     <div
       className={cn('an-shell', `workspace-${variant}`, collapsed && 'is-collapsed')}
       data-mode={theme.dark ? 'dark' : 'light'}
+      data-palette={theme.palette.id}
       style={{ ['--an-accent' as string]: theme.palette.accent, ['--an-accent-2' as string]: theme.palette.accent2, colorScheme: theme.dark ? 'dark' : 'light' }}
     >
       <div className="an-shell-sidebar-wrap">
@@ -699,8 +702,9 @@ export function PageHeader({
 }) {
   return (
     <section className={cn('an-page-header an-hero-banner mb-6', className)}>
-      <div className="relative z-[1] flex flex-wrap items-end justify-between gap-5">
-        <div className="min-w-0 max-w-3xl">
+      <div className="an-hero-layout relative z-[1] flex flex-wrap items-end justify-between gap-5">
+        <HeroLogo />
+        <div className="an-hero-copy min-w-0 max-w-3xl">
           {eyebrow ? <span className="an-hero-chip"><Sparkles size={12} />{eyebrow}</span> : null}
           <h1 className="mt-3.5 font-display text-2xl font-extrabold tracking-tight sm:text-[1.9rem]">{title}</h1>
           {description ? <div className="an-hero-desc mt-2 text-sm leading-relaxed">{description}</div> : null}

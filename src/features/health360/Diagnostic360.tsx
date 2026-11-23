@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {ArrowRight,Building2,CheckCircle2,ClipboardCheck,FileText,Send,ShieldAlert,Stethoscope,Target,TrendingUp,UsersRound} from 'lucide-react';
 import {computeDiagnostic} from '@/lib/diagnostic360';
+import { HeroLogo } from '@/components/HeroLogo';
 import type { DiagnosticQuestion } from './diagnosticData';
 import { PACKS, type SectorKey, type SectorPack } from './packs';
 
@@ -66,7 +67,7 @@ export function Diagnostic360({sector='sante', audience='client', readOnly=false
  const availableTabs=STAFF?allTabs:allTabs.filter(([id])=>id==='cadre'||id==='questions');
  const visibleTabs=!data.meta.started?availableTabs.filter(([id])=>id==='cadre'):questionsComplete?availableTabs:availableTabs.filter(([id])=>id==='cadre'||id==='questions');
  return <section className="diag360">
-  <div className="diag-hero"><div><span className="eyebrow">DIAGNOSTIC 360° · {pack.labelUpper}</span><h2>Repérons ensemble vos priorités.</h2><p>Un premier échange ciblé pour comprendre votre situation et décider de la suite avec votre Account Manager.</p>{data.meta.structure?<span className="dg-hero-chip"><Building2 size={14}/>{data.meta.structure}</span>:null}</div>{data.meta.started?<div className="diag-summary"><strong>{treatedCount}/{questionsTotal}</strong><span>questions parcourues</span><small>Enregistré automatiquement</small></div>:<div className="dg-hero-facts"><span><b>{questionsTotal}</b>questions</span><span><b>{pack.volets.length}</b>axes</span><span><b>≈ 2 h 15</b>au total</span></div>}</div>
+  <div className="diag-hero"><HeroLogo /><div className="diag-hero-copy"><span className="eyebrow">DIAGNOSTIC 360° · {pack.labelUpper}</span><h2>Repérons ensemble vos priorités.</h2><p>Un premier échange ciblé pour comprendre votre situation et décider de la suite avec votre Account Manager.</p>{data.meta.structure?<span className="dg-hero-chip"><Building2 size={14}/>{data.meta.structure}</span>:null}</div>{data.meta.started?<div className="diag-summary"><strong>{treatedCount}/{questionsTotal}</strong><span>questions parcourues</span><small>Enregistré automatiquement</small></div>:<div className="dg-hero-facts"><span><b>{questionsTotal}</b>questions</span><span><b>{pack.volets.length}</b>axes</span><span><b>≈ 2 h 15</b>au total</span></div>}</div>
   {data.meta.started?<><div className="diag-progress-head"><strong>{questionsComplete?'Diagnostic prêt pour la synthèse':`Diagnostic en cours · ${treatedCount}/${questionsTotal} questions parcourues`}</strong><span>{questionsComplete?'Vous pouvez désormais relire vos réponses et transmettre votre diagnostic.':'Vous pouvez revenir à une question précédente. Votre progression est enregistrée automatiquement.'}</span></div><div className="diag-tabs">{visibleTabs.map(([id,label])=><button key={id} disabled={readOnly} className={tab===id?'active':''} onClick={()=>setTab(id)}>{id==='questions'?`${treatedCount}/${questionsTotal} · Questions`:label}</button>)}</div></>:null}
 
   {tab==='cadre'&&<div className="dg-intro">

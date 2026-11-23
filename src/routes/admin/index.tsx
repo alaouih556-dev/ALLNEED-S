@@ -1,3 +1,4 @@
+import { HeroLogo } from '@/components/HeroLogo'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
@@ -294,8 +295,9 @@ function AdminDashboard() {
     <div className="space-y-6">
       {/* Hero */}
       <section className="an-hero">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="max-w-xl">
+        <div className="an-hero-layout flex flex-wrap items-start justify-between gap-6">
+          <HeroLogo />
+          <div className="an-hero-copy max-w-xl">
             <span className="an-hero-chip"><Sparkles size={13} />{today}</span>
             <h1 className="mt-4">{greeting}, {firstName}</h1>
             <p className="mt-2 text-sm leading-relaxed text-indigo-100/90">

@@ -29,7 +29,7 @@ function TeamPage() {
   const { can, me } = useOrg()
   const { data, loading, error, reload } = useOrgResource<Team>(`/teams/${teamId}`)
   const showAccounts = teamId === 'account-manager' && can('accounts.view')
-  const accounts = useOrgResource<Account[]>(showAccounts ? '/accounts' : null)
+  const accounts = useOrgResource<Account[]>(showAccounts ? '/client-accounts' : null)
   if (loading && !data) return <LoadingRows count={5} />
   if (error || !data) return <Alert tone="danger">{error || 'Équipe introuvable.'}</Alert>
 
