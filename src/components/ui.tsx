@@ -71,7 +71,7 @@ export function Card({ className, children, ...props }: { className?: string; ch
 
 export function CardHeader({ title, description, action, className }: { title: ReactNode; description?: ReactNode; action?: ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-start justify-between gap-4 border-b border-ink-100 px-5 py-4', className)}>
+    <div className={cn('an-panel-header flex items-start justify-between gap-4 border-b border-ink-100 px-5 py-4', className)}>
       <div>
         <h3 className="text-[0.95rem] font-bold tracking-tight text-ink-950">{title}</h3>
         {description ? <p className="mt-0.5 text-xs text-ink-500">{description}</p> : null}

@@ -66,7 +66,7 @@ function DatabaseDetail() {
       </StatGrid>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
-        <Panel tone="indigo" title="Informations" action={isAdmin ? <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil size={13} />Modifier</Button> : undefined}>
+        <Panel title="Informations" action={isAdmin ? <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil size={13} />Modifier</Button> : undefined}>
           <dl className="crm-info-grid p-5">
             <Info label="Statut"><StatusPill kind="database" value={data.status} /></Info>
             <Info label="Source">{data.source}</Info>
@@ -87,7 +87,7 @@ function DatabaseDetail() {
 
         <div className="space-y-5">
           {can('imports.run') ? (
-            <Panel tone="emerald" title="Imports" description="Historique des fichiers importés dans cette base.">
+            <Panel title="Imports" description="Historique des fichiers importés dans cette base.">
               {!data.imports.length ? <EmptyBox icon={<Upload size={20} />} title="Aucun import" text="Importez un fichier CSV ou Excel." action={data.canImport && data.status !== 'archived' ? <Button size="sm" onClick={() => setImporting(true)}><Upload size={14} />Importer</Button> : undefined} /> : null}
               <Rows>
                 {data.imports.map((i) => (
@@ -100,7 +100,7 @@ function DatabaseDetail() {
               </Rows>
             </Panel>
           ) : null}
-          <Panel tone="teal" title="Historique" description="Création, modifications, imports et archivage.">
+          <Panel title="Historique" description="Création, modifications, imports et archivage.">
             {!data.history.length ? <EmptyBox icon={<History size={20} />} title="Aucun historique" /> : null}
             <Rows>
               {[...data.history].reverse().slice(0, 40).map((h, i) => <li key={i} className="px-5 py-2.5 text-sm"><span className="text-ink-900">{h.action}</span><span className="block text-xs text-ink-500">{fmtDateTime(h.at)} · {h.byName}</span></li>)}

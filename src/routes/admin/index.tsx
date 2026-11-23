@@ -344,7 +344,7 @@ function AdminDashboard() {
       {/* Activité + secteurs */}
       <section className="grid gap-4 xl:grid-cols-3">
         <div className="an-panel xl:col-span-2">
-          <div className="an-panel-head">
+          <div className="an-panel-head an-panel-header">
             <div>
               <h2>Activité de la plateforme</h2>
               <p>Inscriptions et diagnostics reçus, par semaine</p>
@@ -371,7 +371,7 @@ function AdminDashboard() {
         </div>
 
         <div className="an-panel">
-          <div className="an-panel-head">
+          <div className="an-panel-head an-panel-header">
             <div>
               <h2>Répartition par secteur</h2>
               <p>Entreprises clientes enregistrées</p>
@@ -389,7 +389,7 @@ function AdminDashboard() {
       {/* Pipelines */}
       <section className="grid gap-4 xl:grid-cols-2">
         <div className="an-panel">
-          <div className="an-panel-head">
+          <div className="an-panel-head an-panel-header">
             <div>
               <h2>Pipeline des diagnostics</h2>
               <p>Où en sont les diagnostics 360° des clients</p>
@@ -400,7 +400,7 @@ function AdminDashboard() {
         </div>
 
         <div className="an-panel">
-          <div className="an-panel-head">
+          <div className="an-panel-head an-panel-header">
             <div>
               <h2>Statut des inscriptions</h2>
               <p>Du formulaire public jusqu’au compte actif</p>
@@ -416,7 +416,7 @@ function AdminDashboard() {
       {/* À traiter + activité récente */}
       <section className="grid gap-4 xl:grid-cols-5">
         <div className="an-panel xl:col-span-3">
-          <div className="an-panel-head pb-3">
+          <div className="an-panel-head an-panel-header pb-3">
             <div>
               <h2>À traiter</h2>
               <p>Les files de travail qui attendent une décision</p>
@@ -457,7 +457,7 @@ function AdminDashboard() {
         </div>
 
         <div className="an-panel xl:col-span-2">
-          <div className="an-panel-head pb-3">
+          <div className="an-panel-head an-panel-header pb-3">
             <div>
               <h2>Activité récente</h2>
               <p>Mis à jour {relativeTime(refreshedAt)}</p>

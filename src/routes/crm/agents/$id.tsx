@@ -42,11 +42,11 @@ function AgentDetail() {
         <MiniStat icon={<Timer size={18} />} tone="slate" label="Durée moyenne" value={fmtDuration(m.avgCallDurationSec as number | null)} hint={`${m.callbacks ?? 0} rappel(s) programmé(s)`} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Panel tone="teal" title="Activité dans le temps"><div className="p-4">{series.length > 1 ? <AreaChart labels={series.map((s) => `${s.day.slice(8)}/${s.day.slice(5, 7)}`)} series={[{ name: 'Appels', color: CHART_COLORS[0], values: series.map((s) => s.calls) }, { name: 'Joints', color: CHART_COLORS[2], values: series.map((s) => s.reached) }, { name: 'RDV', color: CHART_COLORS[3], values: series.map((s) => s.appointments) }]} height={220} /> : <EmptyBox icon={<Clock3 size={20} />} title="Choisissez une période de 2 à 62 jours" />}</div></Panel>
-        <Panel tone="blue" title="Résultat des appels"><div className="flex flex-col items-center gap-4 p-5 sm:flex-row xl:flex-col 2xl:flex-row"><DonutChart slices={callSlices} center={m.callsMade ?? 0} sub="appels" />{callSlices.length ? <Legend items={callSlices.map((s) => ({ label: s.label, color: s.color, value: s.value }))} /> : <p className="text-sm text-ink-500">Aucun appel sur la période.</p>}</div></Panel>
+        <Panel title="Activité dans le temps"><div className="p-4">{series.length > 1 ? <AreaChart labels={series.map((s) => `${s.day.slice(8)}/${s.day.slice(5, 7)}`)} series={[{ name: 'Appels', color: CHART_COLORS[0], values: series.map((s) => s.calls) }, { name: 'Joints', color: CHART_COLORS[2], values: series.map((s) => s.reached) }, { name: 'RDV', color: CHART_COLORS[3], values: series.map((s) => s.appointments) }]} height={220} /> : <EmptyBox icon={<Clock3 size={20} />} title="Choisissez une période de 2 à 62 jours" />}</div></Panel>
+        <Panel title="Résultat des appels"><div className="flex flex-col items-center gap-4 p-5 sm:flex-row xl:flex-col 2xl:flex-row"><DonutChart slices={callSlices} center={m.callsMade ?? 0} sub="appels" />{callSlices.length ? <Legend items={callSlices.map((s) => ({ label: s.label, color: s.color, value: s.value }))} /> : <p className="text-sm text-ink-500">Aucun appel sur la période.</p>}</div></Panel>
       </div>
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <Panel tone="amber" title="Profil et affectations">
+        <Panel title="Profil et affectations">
           <dl className="crm-info-grid p-5">
             <Info label="Statut"><StatusPill kind="user" value={data.agent.status} /></Info>
             <Info label="Contacts assignés">{String(m.contactsAssigned ?? 0)}</Info>
@@ -57,8 +57,8 @@ function AgentDetail() {
           </dl>
           {me?.isAdmin ? <div className="border-t border-ink-100 p-4"><Link to={'/crm/utilisateurs' as any} search={{ q: data.agent.email } as any}><Button size="sm" variant="outline">Modifier le compte et les affectations</Button></Link></div> : null}
         </Panel>
-        <Panel tone="violet" title="Prochains rendez-vous" action={<CalendarClock size={16} className="text-ink-400" />}><AppointmentRows rows={data.upcoming} loading={false} empty="Aucun rendez-vous à venir." withDate /></Panel>
-        <Panel tone="teal" title="Dernières actions">
+        <Panel title="Prochains rendez-vous" action={<CalendarClock size={16} className="text-ink-400" />}><AppointmentRows rows={data.upcoming} loading={false} empty="Aucun rendez-vous à venir." withDate /></Panel>
+        <Panel title="Dernières actions">
           {!data.activity.length ? <EmptyBox icon={<Clock3 size={20} />} title="Aucune action" /> : null}
           <Rows>{data.activity.map((a) => <li key={a.id} className="px-5 py-2.5 text-sm"><span className="text-ink-900">{actionLabel(a.action)}</span><span className="block text-xs text-ink-500">{fmtDateTime(a.at)}</span></li>)}</Rows>
         </Panel>

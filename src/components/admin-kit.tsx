@@ -89,7 +89,6 @@ export function Panel({
   children,
   className,
   bodyClassName,
-  tone,
 }: {
   title?: ReactNode
   description?: ReactNode
@@ -97,11 +96,9 @@ export function Panel({
   children: ReactNode
   className?: string
   bodyClassName?: string
-  /** Couleur de la rubrique (thème clair du CRM). */
-  tone?: 'violet' | 'blue' | 'teal' | 'coral' | 'indigo' | 'amber' | 'emerald' | 'cyan'
 }) {
   return (
-    <section className={cn('an-panel overflow-hidden', className)} data-tone={tone}>
+    <section className={cn('an-panel overflow-hidden', className)}>
       {title || action ? (
         <header className="an-panel-header flex flex-wrap items-start justify-between gap-3 border-b border-ink-100 px-5 py-4">
           <div className="min-w-0">

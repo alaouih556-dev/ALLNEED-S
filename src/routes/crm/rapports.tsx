@@ -84,7 +84,7 @@ function ReportsPage() {
               )}
             </div>
           </Panel>
-          <Panel tone="indigo" title="Données détaillées" description={`${rows.length} ligne(s)${rows.length >= 5000 ? ' (limitées aux 5 000 premières)' : ''}`}>
+          <Panel title="Données détaillées" description={`${rows.length} ligne(s)${rows.length >= 5000 ? ' (limitées aux 5 000 premières)' : ''}`}>
             {!rows.length ? <EmptyBox icon={<FileText size={20} />} title="Aucune donnée pour ces filtres" /> : (
               <>
                 <div className="overflow-x-auto"><table className="crm-table"><thead><tr>{data.columns.map((c) => <th key={c}>{c}</th>)}</tr></thead><tbody>{pageRows.map((r, i) => <tr key={i}>{r.map((v, j) => <td key={j} className="whitespace-nowrap">{/^\d{4}-\d{2}-\d{2}T/.test(String(v)) ? new Date(String(v)).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : String(v ?? '')}</td>)}</tr>)}</tbody></table></div>

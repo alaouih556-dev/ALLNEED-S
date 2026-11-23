@@ -244,7 +244,7 @@ function ZoneEditor({ zone, draft, setDraft, onCancel, onSaved }: { zone: Zone |
     } catch (e) { setError(errorText(e)) } finally { setBusy(false) }
   }
   return (
-    <Panel tone="cyan" title={zone ? `Modifier · ${zone.name}` : 'Nouvelle zone'}>
+    <Panel title={zone ? `Modifier · ${zone.name}` : 'Nouvelle zone'}>
       <div className="space-y-4 p-4">
         {error ? <Alert tone="danger">{error}</Alert> : null}
         <div className="grid grid-cols-[1fr_auto] gap-3">
