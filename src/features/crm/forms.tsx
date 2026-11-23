@@ -14,7 +14,7 @@ export function ContactModal({ contact, defaultDatabaseId, onClose, onSaved }: {
   const isAdmin = Boolean(me?.isAdmin)
   const [form, setForm] = useState({
     firstName: contact?.firstName || '', lastName: contact?.lastName || '', fullName: contact?.fullName || '', phone: contact?.phone || '', phone2: contact?.phone2 || '', email: contact?.email || '',
-    address: contact?.address || '', city: contact?.city || '', region: contact?.region || '', postalCode: contact?.postalCode || '', country: contact?.country || '',
+    address: contact?.address || '', city: contact?.city || '', region: contact?.region || '', postalCode: contact?.postalCode || '', country: contact?.country || '', mainSector: contact?.mainSector || '', businessCategory: contact?.businessCategory || '',
     lat: contact?.lat?.toString() || '', lng: contact?.lng?.toString() || '', status: contact?.status || 'new', notes: contact?.notes || '', tags: (contact?.tags || []).join(', '),
     databaseId: contact?.databaseId || defaultDatabaseId || lookups?.databases.find((d) => d.status !== 'archived')?.id || '', agentId: contact?.agentId || '', campaignId: contact?.campaignId || '', nextCallbackAt: toLocalInput(contact?.nextCallbackAt),
   })
@@ -27,7 +27,8 @@ export function ContactModal({ contact, defaultDatabaseId, onClose, onSaved }: {
   function validate() {
     const e: Record<string, string> = {}
     if (!form.firstName.trim() && !form.lastName.trim() && !form.fullName.trim()) e.lastName = 'Indiquez au moins un nom.'
-    if (!form.phone.trim() && !form.email.trim()) e.phone = 'Un téléphone ou un e-mail est requis.'
+    const importedWithoutContact = Boolean(contact && !contact.phone && !contact.email)
+    if (!importedWithoutContact && !form.phone.trim() && !form.email.trim()) e.phone = 'Un téléphone ou un e-mail est requis.'
     if (form.phone && !/^[+0-9\s().-]{4,30}$/.test(form.phone)) e.phone = 'Numéro invalide.'
     if (form.phone2 && !/^[+0-9\s().-]{4,30}$/.test(form.phone2)) e.phone2 = 'Numéro invalide.'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'E-mail invalide.'
@@ -70,6 +71,8 @@ export function ContactModal({ contact, defaultDatabaseId, onClose, onSaved }: {
           <Field label="Téléphone" error={errors.phone}><Input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} maxLength={30} /></Field>
           <Field label="Téléphone 2" error={errors.phone2}><Input type="tel" value={form.phone2} onChange={(e) => set('phone2', e.target.value)} maxLength={30} /></Field>
           <Field label="E-mail" error={errors.email}><Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} maxLength={200} /></Field>
+          <Field label="Main_Sector"><Input value={form.mainSector} onChange={(e) => set('mainSector', e.target.value)} maxLength={120} /></Field>
+          <Field label="Business_Category"><Input value={form.businessCategory} onChange={(e) => set('businessCategory', e.target.value)} maxLength={120} /></Field>
           <Field label="Adresse" className="sm:col-span-2"><Input value={form.address} onChange={(e) => set('address', e.target.value)} maxLength={240} /></Field>
           <Field label="Code postal"><Input value={form.postalCode} onChange={(e) => set('postalCode', e.target.value)} maxLength={20} /></Field>
           <Field label="Ville"><Input value={form.city} onChange={(e) => set('city', e.target.value)} maxLength={100} list="crm-cities" /></Field>

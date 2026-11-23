@@ -98,12 +98,14 @@ try {
   const rows = [
     { firstName: 'Salma', lastName: 'Benali', phone: '0612345678', email: 'salma@cab.ma', city: 'Rabat', lat: 34.02, lng: -6.83, tags: 'dentiste' },
     { firstName: 'Youssef', lastName: 'Idrissi', phone: '+212 6 22 33 44 55', city: 'Rabat' },
-    { firstName: 'Sans', lastName: 'Contact' },
+    { city: 'Ligne sans nom', phone: '0600000099' },
     { firstName: 'Salma', lastName: 'Doublon', phone: '06 12 34 56 78' },
     { fullName: 'Clinique Nour', phone: '0537000000', city: 'Casablanca', lat: 33.57, lng: -7.59 },
   ]
   x = await req('/api/crm/imports/check', { method: 'POST', cookie: admin, body: { databaseId: dbA.id, rows } })
   assert(x.status === 200 && x.data.results[2].errors.length === 1, 'import : ligne invalide détectée avant import')
+  const tolerant = await req('/api/crm/imports/check', { method: 'POST', cookie: admin, body: { databaseId: dbA.id, rows: [{ firstName: 'Sans', lastName: 'Contact' }, { fullName: 'Mail Faux', email: 'pas-un-mail' }, { firstName: 'Long', lastName: 'L'.repeat(120), phone: '0600000098' }] } })
+  assert(tolerant.status === 200 && tolerant.data.results.every((r) => !r.errors.length && r.warnings.length === (r.index === 2 ? 1 : r.index === 1 ? 2 : 1)), 'import : sans coordonnées, e-mail invalide et nom long acceptés')
   x = await req('/api/crm/imports', { method: 'POST', cookie: admin, body: { databaseId: dbA.id, fileName: 'cabinets.csv', total: rows.length, duplicateStrategy: 'skip' } })
   assert(x.status === 201, 'import : tâche créée'); const job = x.data
   x = await req(`/api/crm/imports/${job.id}/rows`, { method: 'POST', cookie: admin, body: { rows, offset: 0 } })

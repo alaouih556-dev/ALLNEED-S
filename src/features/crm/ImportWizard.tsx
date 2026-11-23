@@ -20,6 +20,8 @@ export const CRM_FIELDS: Array<{ key: string; label: string; synonyms: string[] 
   { key: 'region', label: 'Région', synonyms: ['region', 'région', 'province', 'state', 'departement', 'département'] },
   { key: 'postalCode', label: 'Code postal', synonyms: ['code postal', 'cp', 'postal code', 'zip', 'zipcode', 'code_postal'] },
   { key: 'country', label: 'Pays', synonyms: ['pays', 'country'] },
+  { key: 'mainSector', label: 'Main_Sector', synonyms: ['main sector', 'mainsector', 'secteur principal', 'secteur', 'sector'] },
+  { key: 'businessCategory', label: 'Business_Category', synonyms: ['business category', 'businesscategory', 'categorie business', 'categorie d activite', 'catégorie d’activité'] },
   { key: 'lat', label: 'Latitude', synonyms: ['latitude', 'lat'] },
   { key: 'lng', label: 'Longitude', synonyms: ['longitude', 'lng', 'lon', 'long'] },
   { key: 'notes', label: 'Notes', synonyms: ['notes', 'note', 'commentaire', 'commentaires', 'remarque', 'remarques', 'comment'] },
@@ -83,10 +85,28 @@ function guessMapping(headers: string[]): Record<number, string> {
 }
 const phoneKey = (v: string) => v.replace(/[^0-9]/g, '').replace(/^(00212|212|0)/, '')
 
-type CheckResult = { index: number; errors: string[]; duplicateOf: { id: string; name: string; databaseName: string } | null }
+/** Nom de base issu du nom du fichier, sans son extension. */
+const baseNameFromFile = (fileName: string) => fileName.replace(/\.[^.]+$/, '').replace(/[\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)
+
+/** Crée la base au nom du fichier ; si ce nom est pris, ajoute (2), (3)… */
+async function createBaseFromFile(fileName: string) {
+  const base = baseNameFromFile(fileName)
+  for (let n = 1; n <= 100; n++) {
+    const suffix = n === 1 ? '' : ` (${n})`
+    try {
+      return await crmSend<{ id: string; name: string }>('/databases', 'POST', { name: `${base.slice(0, 120 - suffix.length).trim()}${suffix}`, source: fileName.slice(0, 120) })
+    } catch (e) {
+      if ((e as { status?: number }).status !== 409) throw e
+    }
+  }
+  throw new Error('Impossible de trouver un nom disponible pour cette base.')
+}
+
+type CheckResult = { index: number; errors: string[]; warnings?: string[]; duplicateOf: { id: string; name: string; databaseName: string } | null }
 type Summary = { inserted: number; updated: number; skipped: number; invalid: number; duplicates: number; status: string }
 
-export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { databaseId: string; databaseName: string; onClose: () => void; onDone: () => void }) {
+/** Sans `databaseId`, la base est créée au nom du fichier, seulement au moment de lancer l'import. */
+export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { databaseId?: string; databaseName?: string; onClose: () => void; onDone: () => void }) {
   const { me } = useCrm()
   const [step, setStep] = useState(0)
   const [file, setFile] = useState<File | null>(null)
@@ -99,6 +119,7 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
   const [summary, setSummary] = useState<Summary | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [createdName, setCreatedName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   const mapped = useMemo(() => rows.map((r) => {
@@ -131,6 +152,7 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
     setError('')
     setBusy(true)
     try {
+      if (!databaseId && !baseNameFromFile(f.name)) throw new Error('Le nom du fichier ne permet pas de nommer la base.')
       const { headers, rows } = await readFile(f)
       setFile(f); setHeaders(headers); setRows(rows); setMapping(guessMapping(headers)); setChecks(null); setStep(1)
     } catch (e) {
@@ -165,18 +187,31 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
 
   const invalid = checks?.filter((c) => c.errors.length) || []
   const existingDup = checks?.filter((c) => !c.errors.length && c.duplicateOf) || []
+  const adjusted = checks?.filter((c) => !c.errors.length && c.warnings?.length) || []
   const importable = mapped.map((r, i) => ({ r, i })).filter(({ i }) => !checks?.[i]?.errors.length && !inFileDuplicates.has(i))
+
+  // Une nouvelle base ne doit pas rester vide quand tout le fichier existe déjà.
+  const nothingNew = !databaseId && strategy !== 'create' && importable.length > 0 && importable.every(({ i }) => checks?.[i]?.duplicateOf)
 
   async function runImport() {
     setBusy(true)
     setError('')
     setProgress(0)
     let jobId = ''
+    let targetId = databaseId
+    let createdId = ''
+    let sentRows = false
     try {
-      const job = await crmSend<{ id: string }>('/imports', 'POST', { databaseId, fileName: file?.name, total: importable.length, duplicateStrategy: strategy, mapping: Object.fromEntries(Object.entries(mapping).map(([i, k]) => [headers[Number(i)], k])) })
+      if (!targetId && file) {
+        const created = await createBaseFromFile(file.name)
+        targetId = createdId = created.id
+        setCreatedName(created.name)
+      }
+      const job = await crmSend<{ id: string }>('/imports', 'POST', { databaseId: targetId, fileName: file?.name, total: importable.length, duplicateStrategy: strategy, mapping: Object.fromEntries(Object.entries(mapping).map(([i, k]) => [headers[Number(i)], k])) })
       jobId = job.id
       setStep(3)
       for (let i = 0; i < importable.length; i += 300) {
+        sentRows = true
         await crmSend(`/imports/${job.id}/rows`, 'POST', { rows: importable.slice(i, i + 300).map((x) => x.r), offset: i })
         setProgress(Math.min(100, Math.round(((i + 300) / importable.length) * 100)))
       }
@@ -186,6 +221,11 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
     } catch (e) {
       setError(errorText(e))
       if (jobId) await crmSend(`/imports/${jobId}/fail`, 'POST', { error: errorText(e) }).catch(() => undefined)
+      if (createdId && !sentRows) {
+        await crmSend(`/databases/${createdId}?hard=1`, 'DELETE').catch(() => undefined)
+        setCreatedName('')
+        setStep(2)
+      }
     } finally {
       setBusy(false)
     }
@@ -195,10 +235,12 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
   const usedFields = [...new Set(Object.values(mapping).filter((k) => k && k !== 'ignore'))]
 
   return (
-    <Modal open onClose={busy ? () => undefined : onClose} title={`Importer des contacts · ${databaseName}`} description="CSV ou Excel (.xlsx). L’ordre des colonnes n’a pas d’importance." size="lg">
+    <Modal open onClose={busy ? () => undefined : onClose} title={databaseId ? `Importer des contacts · ${databaseName}` : 'Nouvelle base depuis un fichier Excel'} description={databaseId ? 'CSV ou Excel (.xlsx). L’ordre des colonnes n’a pas d’importance.' : 'La base prendra automatiquement le nom du fichier.'} size="lg">
       <div className="space-y-5">
         <Steps steps={['Fichier', 'Colonnes', 'Vérification', 'Import']} current={step} />
         {error ? <Alert tone="danger">{error}</Alert> : null}
+
+        {!databaseId && file && step > 0 ? <p className="text-sm text-ink-600">{createdName ? 'Base créée :' : 'Nom de la nouvelle base :'} <b className="text-ink-950">{createdName || baseNameFromFile(file.name)}</b></p> : null}
 
         {step === 0 ? (
           <div
@@ -256,6 +298,13 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
                 <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-red-800">{invalid.slice(0, 200).map((c) => <li key={c.index}>Ligne {c.index + 2} : {c.errors.join(', ')}</li>)}</ul>
               </details>
             ) : null}
+            {adjusted.length ? (
+              <details className="rounded-xl border border-ink-200 p-3 text-sm">
+                <summary className="cursor-pointer font-semibold text-ink-800">{adjusted.length} ligne(s) importée(s) avec ajustement</summary>
+                <p className="mt-2 text-xs text-ink-600">Les e-mails invalides restent visibles dans le champ « E-mail à vérifier ».</p>
+                <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-ink-700">{adjusted.slice(0, 200).map((c) => <li key={c.index}>Ligne {c.index + 2} : {c.warnings?.join(', ')}</li>)}</ul>
+              </details>
+            ) : null}
             {inFileDuplicates.size ? <Alert tone="info">Les doublons internes au fichier (même téléphone ou e-mail) ne sont importés qu’une fois : la première ligne est conservée.</Alert> : null}
             {existingDup.length ? (
               <Field label={`Que faire des ${existingDup.length} contact(s) déjà présents dans le CRM ?`}>
@@ -267,9 +316,10 @@ export function ImportWizard({ databaseId, databaseName, onClose, onDone }: { da
               </Field>
             ) : null}
             {existingDup.length ? <ul className="max-h-28 space-y-1 overflow-y-auto text-xs text-ink-600">{existingDup.slice(0, 50).map((c) => <li key={c.index}>Ligne {c.index + 2} ≈ <b>{c.duplicateOf?.name}</b> ({c.duplicateOf?.databaseName})</li>)}</ul> : null}
+            {nothingNew ? <Alert tone="warning">Tous ces contacts existent déjà dans le CRM. Aucune base n’a été créée : importez un autre fichier.</Alert> : null}
             <div className="flex justify-between gap-2">
               <Button variant="ghost" onClick={() => setStep(1)}>Revoir les colonnes</Button>
-              <Button disabled={busy || !importable.length} onClick={() => void runImport()}>Importer {importable.length} contact(s)</Button>
+              <Button disabled={busy || !importable.length || nothingNew} onClick={() => void runImport()}>Importer {importable.length} contact(s)</Button>
             </div>
           </>
         ) : null}

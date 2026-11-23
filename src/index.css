@@ -2355,3 +2355,9 @@ a.cl-space:hover{border-color:color-mix(in srgb,var(--an-accent) 35%,white);tran
 @media(min-width:1101px) and (max-width:1600px){.an-shell .an-main .an-hero-copy,.an-shell .an-main .cl-home .cl-hero-copy{flex-basis:34%;max-width:34%}}
 /* V76 bandeau : logo, texte et actions centrés verticalement */
 @media(min-width:1101px){.an-shell .an-main :is(section.an-hero-banner.an-hero-banner,section.an-hero.an-hero,.cl-home section.cl-hero.cl-hero,.diag360 .diag-hero.diag-hero){display:flex;align-items:center}.an-shell .an-main .an-hero-layout.an-hero-layout{align-items:center}.an-shell .an-main :is(.an-hero-logo,.an-hero-actions,.cl-home .cl-hero-cta){align-self:center}}
+
+/* V77 tableaux CRM : colonne Actions toujours visible au défilement horizontal */
+.an-shell .an-main .crm-table .crm-actions-cell{position:sticky;right:0;z-index:2;box-shadow:-10px 0 12px -12px rgba(8,18,38,.5)}
+.an-shell .an-main .crm-table thead .crm-actions-cell{z-index:3}
+.an-shell .an-main .crm-table tbody .crm-actions-cell{background:var(--an-surface,#fff)}
+.an-shell .an-main .crm-table tbody tr:is(:hover,.is-selected) .crm-actions-cell{background:color-mix(in srgb,var(--an-accent) 9%,var(--an-surface,#fff))}

@@ -6302,7 +6302,17 @@
   "Cliquez sur la carte à l’emplacement de": "Click the map at the location of",
   "rendez-vous à placer sur la carte.": "appointments to place on the map.",
   "Changez la période ou les filtres pour en voir d’autres.": "Change the period or filters to see more.",
-  "apparaît maintenant sur la carte.": "now appears on the map."
+  "apparaît maintenant sur la carte.": "now appears on the map.",
+  "Importer un fichier Excel": "Upload an Excel file",
+  "Nouvelle base depuis un fichier Excel": "New base from an Excel file",
+  "La base prendra automatiquement le nom du fichier.": "The base will automatically use the file name.",
+  "Base créée :": "Base created:",
+  "Nom de la nouvelle base :": "New base name:",
+  "Tous ces contacts existent déjà dans le CRM. Aucune base n’a été créée : importez un autre fichier.": "All these contacts are already in the CRM. No base was created: upload another file.",
+  "Le nom du fichier ne permet pas de nommer la base.": "This file name cannot be used to name the base.",
+  "Impossible de trouver un nom disponible pour cette base.": "Could not find an available name for this base.",
+  "ligne(s) importée(s) avec ajustement": "row(s) imported with adjustments",
+  "Les e-mails invalides restent visibles dans le champ « E-mail à vérifier ».": "Invalid emails stay visible in the “E-mail à vérifier” field."
  },
  "fragments": {
   "— commentaire": "— comment",

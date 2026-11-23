@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Archive, Database, Pencil, Plus, Trash2, Upload } from 'lucide-react'
+import { Archive, Database, FileSpreadsheet, Pencil, Plus, Trash2, Upload } from 'lucide-react'
 import { PageHeader } from '@/components/layouts'
 import { Alert, Button, Field, Input, Modal, Select, Textarea } from '@/components/ui'
 import { ConfirmDialog, DataTable, FilterBar, MultiPick, RequirePermission, StatusPill, crmSend, errorText, fmtDate, useCrm, useCrmQuery, useFilterState, useNotify, type Column, type Page } from '@/features/crm/core'
@@ -21,6 +21,7 @@ function DatabasesPage() {
   const { data, loading, error, reload } = useCrmQuery<Page<DatabaseRow>>('/databases', values)
   const [editing, setEditing] = useState<DatabaseRow | 'new' | null>(null)
   const [importing, setImporting] = useState<DatabaseRow | null>(null)
+  const [importingFile, setImportingFile] = useState(false)
   const [deleting, setDeleting] = useState<DatabaseRow | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -38,6 +39,8 @@ function DatabasesPage() {
       setDeleting(null)
     }
   }
+
+  const uploadButton = canCreate && canImport ? <Button size="sm" onClick={() => setImportingFile(true)}><FileSpreadsheet size={14} />Importer un fichier Excel</Button> : null
 
   const filters = [
     { key: 'status', label: 'Statut', options: [{ value: 'draft', label: 'Brouillon' }, { value: 'active', label: 'Active' }, { value: 'completed', label: 'Terminée' }, { value: 'archived', label: 'Archivée' }] },
@@ -63,7 +66,7 @@ function DatabasesPage() {
         eyebrow="CRM · Données"
         title="Bases de contacts"
         description={isAdmin ? 'Créez vos bases, importez des fichiers CSV ou Excel, puis assignez-les à des agents et à une campagne.' : canCreate ? 'Les bases partagées par toute l’équipe CRM. Créez vos bases et importez vos fichiers CSV ou Excel.' : 'Les bases partagées par toute l’équipe CRM.'}
-        actions={canCreate ? <Button size="sm" onClick={() => setEditing('new')}><Plus size={14} />Nouvelle base</Button> : undefined}
+        actions={canCreate ? <>{uploadButton}<Button size="sm" variant="outline" onClick={() => setEditing('new')}><Plus size={14} />Nouvelle base</Button></> : undefined}
       />
       <FilterBar values={values} onChange={setValues} filters={filters} searchPlaceholder="Nom, source, description…" />
       <DataTable
@@ -74,7 +77,7 @@ function DatabasesPage() {
         values={values}
         onChange={setValues}
         onRowClick={(d) => void navigate({ to: '/crm/bases/$id' as any, params: { id: d.id } as any })}
-        empty={{ icon: <Database size={20} />, title: 'Aucune base', text: canCreate ? 'Créez une base puis importez un fichier de contacts.' : 'Un administrateur doit créer une base.', action: canCreate ? <Button size="sm" onClick={() => setEditing('new')}><Plus size={14} />Nouvelle base</Button> : undefined }}
+        empty={{ icon: <Database size={20} />, title: 'Aucune base', text: canCreate ? 'Créez une base puis importez un fichier de contacts.' : 'Un administrateur doit créer une base.', action: canCreate ? <div className="flex flex-wrap justify-center gap-2">{uploadButton}<Button size="sm" variant="outline" onClick={() => setEditing('new')}><Plus size={14} />Nouvelle base</Button></div> : undefined }}
         rowActions={canImport ? (d) => (
           <>
             {d.canImport ? <Button size="sm" variant="ghost" title="Importer" aria-label={`Importer dans ${d.name}`} disabled={d.status === 'archived'} onClick={() => setImporting(d)}><Upload size={14} /></Button> : null}
@@ -86,6 +89,7 @@ function DatabasesPage() {
       />
       {editing ? <DatabaseModal database={editing === 'new' ? null : editing} onClose={() => setEditing(null)} onSaved={async (d, openImport) => { await reload(); await refreshLookups(); if (openImport) setImporting(d) }} /> : null}
       {importing ? <ImportWizard databaseId={importing.id} databaseName={importing.name} onClose={() => setImporting(null)} onDone={() => { void reload(); void refreshLookups() }} /> : null}
+      {importingFile ? <ImportWizard onClose={() => setImportingFile(false)} onDone={() => { void reload(); void refreshLookups() }} /> : null}
       <ConfirmDialog open={Boolean(deleting)} busy={busy} danger title="Supprimer définitivement cette base ?" confirmLabel="Supprimer" text={<><b>{deleting?.name}</b> · {deleting?.totalContacts} contact(s)<br />Cette base et ses contacts seront supprimés définitivement. Cette action est irréversible. Si des appels ou rendez-vous existent, la suppression sera refusée.</>} onConfirm={() => void removeDatabase()} onClose={() => setDeleting(null)} />
     </div>
   )

@@ -127,7 +127,7 @@ function DatabaseDetail() {
 }
 
 export const EXPORT_COLUMNS: Array<[keyof Contact | 'tagsText' | 'customText', string]> = [
-  ['fullName', 'Nom complet'], ['firstName', 'Prénom'], ['lastName', 'Nom'], ['phone', 'Téléphone'], ['phone2', 'Téléphone 2'], ['email', 'E-mail'], ['address', 'Adresse'], ['city', 'Ville'], ['region', 'Région'], ['postalCode', 'Code postal'], ['country', 'Pays'], ['lat', 'Latitude'], ['lng', 'Longitude'],
+  ['fullName', 'Nom complet'], ['firstName', 'Prénom'], ['lastName', 'Nom'], ['phone', 'Téléphone'], ['phone2', 'Téléphone 2'], ['email', 'E-mail'], ['address', 'Adresse'], ['city', 'Ville'], ['region', 'Région'], ['postalCode', 'Code postal'], ['country', 'Pays'], ['mainSector', 'Main_Sector'], ['businessCategory', 'Business_Category'], ['lat', 'Latitude'], ['lng', 'Longitude'],
   ['databaseName', 'Base de contacts'], ['campaignName', 'Campagne'], ['agentName', 'Agent'], ['status', 'Statut'], ['callStatus', 'Statut d’appel'], ['tagsText', 'Tags'], ['notes', 'Notes'], ['lastContactAt', 'Dernier contact'], ['nextCallbackAt', 'Prochain rappel'], ['createdAt', 'Créé le'], ['customText', 'Champs personnalisés'],
 ]
 export function exportValue(c: Contact, k: string): unknown {

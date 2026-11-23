@@ -51,6 +51,8 @@ function ContactsPage() {
   const columns: Column<Contact>[] = [
     { key: 'name', label: 'Contact', sort: 'name', render: (c) => <div className="min-w-0"><p className="truncate font-semibold text-ink-950">{c.fullName}</p><p className="truncate text-xs text-ink-500">{c.phone || c.email}{c.tags?.length ? ` · ${c.tags.slice(0, 3).join(', ')}` : ''}</p></div> },
     { key: 'city', label: 'Ville', sort: 'city', hideOn: 'md', render: (c) => <span className="text-xs text-ink-600">{c.city || '—'}</span> },
+    { key: 'mainSector', label: 'Main_Sector', sort: 'mainSector', hideOn: 'md', render: (c) => <span className="block max-w-[150px] truncate text-xs text-ink-600" title={c.mainSector || undefined}>{c.mainSector || '—'}</span> },
+    { key: 'businessCategory', label: 'Business_Category', sort: 'businessCategory', hideOn: 'md', render: (c) => <span className="block max-w-[170px] truncate text-xs text-ink-600" title={c.businessCategory || undefined}>{c.businessCategory || '—'}</span> },
     { key: 'status', label: 'Statut', sort: 'status', render: (c) => <StatusPill kind="contact" value={c.status} /> },
     { key: 'call', label: 'Dernier appel', hideOn: 'lg', render: (c) => <div className="flex flex-col gap-1"><StatusPill kind="call" value={c.callStatus} /><span className="text-[0.68rem] text-ink-400">{c.lastContactAt ? fmtDateTime(c.lastContactAt) : ''}</span></div> },
     { key: 'agent', label: 'Agent', hideOn: 'lg', render: (c) => <span className="text-xs text-ink-600">{c.agentName || 'Non assigné'}</span> },

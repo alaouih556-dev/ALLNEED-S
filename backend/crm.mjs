@@ -335,9 +335,17 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     for (let i = db.crmActivity.length - 1; i >= 0; i--) if (db.crmActivity[i].userId === userId) return db.crmActivity[i].at
     return null
   }
+  const CLASSIFICATION_KEYS = { mainSector: 'mainsector', businessCategory: 'businesscategory' }
+  const classificationKey = (k) => String(k).toLowerCase().replace(/[^a-z0-9]/g, '')
+  /** Valeur du champ, ou celle d'une colonne Main_Sector / Business_Category importée avant l'ajout du champ. */
+  function classificationValue(c, field) {
+    if (c[field] !== undefined) return c[field]
+    return Object.entries(c.custom || {}).find(([k]) => classificationKey(k) === CLASSIFICATION_KEYS[field])?.[1] || ''
+  }
   function contactOut(c) {
     const d = dbById(c.databaseId), campId = campaignOfContact(c), camp = campId ? campById(campId) : null, agent = c.agentId ? userById(c.agentId) : null
-    return { ...c, databaseName: d?.name || '', campaignId: campId, campaignName: camp?.name || '', agentName: agent?.name || '' }
+    const custom = c.custom ? Object.fromEntries(Object.entries(c.custom).filter(([k]) => !Object.values(CLASSIFICATION_KEYS).includes(classificationKey(k)))) : c.custom
+    return { ...c, custom, mainSector: classificationValue(c, 'mainSector'), businessCategory: classificationValue(c, 'businessCategory'), databaseName: d?.name || '', campaignId: campId, campaignName: camp?.name || '', agentName: agent?.name || '' }
   }
   function callOut(call) {
     const c = contactById(call.contactId), agent = userById(call.agentId)
@@ -435,8 +443,9 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   }
 
   /* ---------- Contacts : création / mise à jour ---------- */
-  const CONTACT_TEXT_FIELDS = { firstName: 80, lastName: 80, address: 240, city: 100, region: 100, postalCode: 20, country: 80, notes: 4000 }
-  function applyContactFields(c, body, { partial }) {
+  const CONTACT_TEXT_FIELDS = { firstName: 80, lastName: 80, address: 240, city: 100, region: 100, postalCode: 20, country: 80, notes: 4000, mainSector: 120, businessCategory: 120 }
+  const IMPORT_FIELD_LABELS = { firstName: 'prénom', lastName: 'nom', fullName: 'nom complet', address: 'adresse', city: 'ville', region: 'région', postalCode: 'code postal', country: 'pays', notes: 'notes', mainSector: 'Main_Sector', businessCategory: 'Business_Category' }
+  function applyContactFields(c, body, { partial, allowNoContact = false }) {
     for (const [k, max] of Object.entries(CONTACT_TEXT_FIELDS)) if (!partial || k in body) c[k] = text(body[k], max, k)
     if (!partial || 'phone' in body) c.phone = normalizePhone(body.phone)
     if (!partial || 'phone2' in body) c.phone2 = normalizePhone(body.phone2)
@@ -455,7 +464,39 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const full = text(body.fullName, 160, 'nom complet')
     c.fullName = [c.firstName, c.lastName].filter(Boolean).join(' ') || full || c.fullName || ''
     if (!c.fullName) throw httpError(400, 'nom du contact requis')
-    if (!c.phone && !c.email) throw httpError(400, 'un téléphone ou un e-mail est requis')
+    if (!allowNoContact && !c.phone && !c.email) throw httpError(400, 'un téléphone ou un e-mail est requis')
+  }
+  /** Prépare une ligne d'import : textes trop longs raccourcis, e-mail invalide retiré et conservé à part. */
+  function prepareImportRow(raw) {
+    const r = raw && typeof raw === 'object' && !Array.isArray(raw) ? { ...raw } : {}
+    const warnings = []
+    if (r.custom && typeof r.custom === 'object' && !Array.isArray(r.custom)) {
+      const custom = { ...r.custom }
+      for (const [field, key] of Object.entries(CLASSIFICATION_KEYS)) for (const k of Object.keys(custom)) if (classificationKey(k) === key) { if (!r[field]) r[field] = custom[k]; delete custom[k] }
+      r.custom = custom
+    }
+    for (const [k, max] of Object.entries({ ...CONTACT_TEXT_FIELDS, fullName: 160 })) {
+      if (typeof r[k] !== 'string' && typeof r[k] !== 'number') continue
+      const v = String(r[k]).trim()
+      r[k] = v.slice(0, max).trim()
+      if (v.length > max) warnings.push(`${IMPORT_FIELD_LABELS[k]} raccourci`)
+    }
+    if (r.email !== undefined && r.email !== null && String(r.email).trim()) {
+      try { optEmail(r.email) } catch {
+        const custom = r.custom && typeof r.custom === 'object' && !Array.isArray(r.custom) ? r.custom : {}
+        r.custom = { 'E-mail à vérifier': String(r.email).trim().slice(0, 500), ...custom }
+        r.email = ''
+        warnings.push('e-mail invalide retiré')
+      }
+    }
+    if (!String(r.phone ?? '').trim() && !String(r.email ?? '').trim()) warnings.push('sans téléphone ni e-mail')
+    return { row: r, warnings }
+  }
+  /** Sans téléphone ni e-mail, un doublon se reconnaît au nom, à la ville et à l'adresse. */
+  function findImportDuplicate(contact, keyMode) {
+    if (contact.phone || contact.email) return findDuplicate(contact, keyMode)
+    const same = (a, b) => lower(a) === lower(b)
+    return db.crmContacts.find((c) => !c.archived && !c.phone && !c.email && same(c.fullName, contact.fullName) && same(c.city, contact.city) && same(c.address, contact.address)) || null
   }
   function findDuplicate(contact, keyMode, exceptId = null) {
     const pk = phoneKey(contact.phone), em = lower(contact.email)
@@ -923,17 +964,22 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     /* ---------- Import ---------- */
     if (path === '/imports/check' && M === 'POST') {
       need(user, 'imports.run')
-      const target = dbById(String(body.databaseId || ''))
-      if (!isCrmAdmin(user) && (!target || !databaseVisible(user, target))) throw httpError(400, 'base introuvable ou archivée')
+      // Sans base cible : vérification préalable à la création d'une base nommée d'après le fichier.
+      if (!body.databaseId) need(user, 'databases.create')
+      else {
+        const target = dbById(String(body.databaseId))
+        if (!isCrmAdmin(user) && (!target || !databaseVisible(user, target))) throw httpError(400, 'base introuvable ou archivée')
+      }
       const sc = scopeOf(user)
       const rows = Array.isArray(body.rows) ? body.rows.slice(0, 1000) : []
       const keyMode = ['phone', 'email', 'phone_or_email'].includes(body.duplicateKey) ? body.duplicateKey : settings().imports.duplicateKey
       const out = rows.map((r, i) => {
         const errors = []
         const c = {}
-        try { applyContactFields(c, r || {}, { partial: false }) } catch (e) { errors.push(e.message) }
-        const dup = errors.length ? null : findDuplicate(c, keyMode)
-        return { index: Number(body.offset || 0) + i, errors, duplicateOf: !dup ? null : contactVisible(user, dup, sc) ? { id: dup.id, name: dup.fullName, databaseName: dbById(dup.databaseId)?.name || '' } : { id: null, name: 'Contact déjà présent', databaseName: 'hors de votre périmètre' } }
+        const prepared = prepareImportRow(r)
+        try { applyContactFields(c, prepared.row, { partial: false, allowNoContact: true }) } catch (e) { errors.push(e.message) }
+        const dup = errors.length ? null : findImportDuplicate(c, keyMode)
+        return { index: Number(body.offset || 0) + i, errors, warnings: errors.length ? [] : prepared.warnings, duplicateOf: !dup ? null : contactVisible(user, dup, sc) ? { id: dup.id, name: dup.fullName, databaseName: dbById(dup.databaseId)?.name || '' } : { id: null, name: 'Contact déjà présent', databaseName: 'hors de votre périmètre' } }
       })
       return send(200, { results: out })
     }
@@ -966,14 +1012,21 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const stamp = nowIso()
       rows.forEach((r, i) => {
         const c = { id: id('ct'), databaseId: d.id, campaignId: null, agentId: null, callStatus: null, lastContactAt: null, archived: false, createdAt: stamp, updatedAt: stamp, createdBy: user.id, importId: job.id, noteLog: [] }
-        try { applyContactFields(c, r || {}, { partial: false }) } catch (e) { job.invalid++; if (job.errors.length < 300) job.errors.push({ row: offset + i + 1, error: e.message }); return }
-        const dup = findDuplicate(c, job.duplicateKey)
+        try { applyContactFields(c, prepareImportRow(r).row, { partial: false, allowNoContact: true }) } catch (e) { job.invalid++; if (job.errors.length < 300) job.errors.push({ row: offset + i + 1, error: e.message }); return }
+        const dup = findImportDuplicate(c, job.duplicateKey)
         if (dup) {
           job.duplicates++
+          // Hors périmètre, la mise à jour complète seulement Main_Sector et Business_Category s'ils sont vides.
+          if (job.duplicateStrategy === 'update' && !contactEditable(user, dup, sc) && contactVisible(user, dup, sc)) {
+            let filled = false
+            for (const k of Object.keys(CLASSIFICATION_KEYS)) if (c[k] && !classificationValue(dup, k)) { dup[k] = c[k]; filled = true }
+            if (filled) { dup.updatedAt = stamp; job.updated++ } else job.skipped++
+            return
+          }
           // Un doublon hors périmètre n'est jamais modifié ni recréé.
           if (job.duplicateStrategy === 'skip' || !contactEditable(user, dup, sc)) { job.skipped++; return }
           if (job.duplicateStrategy === 'update') {
-            for (const k of ['firstName', 'lastName', 'fullName', 'phone2', 'email', 'address', 'city', 'region', 'postalCode', 'country', 'notes']) if (c[k]) dup[k] = c[k]
+            for (const k of ['firstName', 'lastName', 'fullName', 'phone2', 'email', 'address', 'city', 'region', 'postalCode', 'country', 'notes', 'mainSector', 'businessCategory']) if (c[k]) dup[k] = c[k]
             if (c.lat !== null) { dup.lat = c.lat; dup.lng = c.lng }
             dup.tags = [...new Set([...(dup.tags || []), ...(c.tags || [])])]
             dup.updatedAt = stamp; job.updated++; return
@@ -1076,7 +1129,8 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
           if ('campaignId' in editable) { if (editable.campaignId && !campById(editable.campaignId)) throw httpError(400, 'campagne introuvable'); c.campaignId = editable.campaignId || null }
           if ('agentId' in editable && editable.agentId !== c.agentId) assignAgentToContacts(user, [c.id], editable.agentId || null)
         }
-        applyContactFields(c, { ...c, ...editable }, { partial: true })
+        // Un contact importé sans coordonnées reste modifiable ; un contact qui en a ne peut pas tout perdre.
+        applyContactFields(c, { ...c, ...editable }, { partial: true, allowNoContact: !before.phone && !before.email })
         if ('nextCallbackAt' in editable && editable.nextCallbackAt) c.callbackNotifiedFor = null
         c.updatedAt = nowIso()
         log(user, 'contact.updated', 'contact', c.id, { fields: Object.keys(editable).filter((k) => JSON.stringify(before[k]) !== JSON.stringify(c[k])) })
@@ -1471,7 +1525,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
   }
 
   /* ---------- Aides dépendantes du routeur ---------- */
-  const contactSorters = { name: (c) => lower(c.fullName), city: (c) => lower(c.city), status: (c) => c.status, lastContact: (c) => c.lastContactAt || '', nextCallback: (c) => c.nextCallbackAt || '', createdAt: (c) => c.createdAt, updatedAt: (c) => c.updatedAt }
+  const contactSorters = { mainSector: (c) => lower(classificationValue(c, 'mainSector')), businessCategory: (c) => lower(classificationValue(c, 'businessCategory')), name: (c) => lower(c.fullName), city: (c) => lower(c.city), status: (c) => c.status, lastContact: (c) => c.lastContactAt || '', nextCallback: (c) => c.nextCallbackAt || '', createdAt: (c) => c.createdAt, updatedAt: (c) => c.updatedAt }
   function filterContacts(u, q, { own = false } = {}) {
     const f = readFilters(q)
     const sc = scopeOf(u)
@@ -1482,7 +1536,7 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const hasLocation = q.get('hasLocation')
     const unassigned = q.get('unassigned') === '1'
     return db.crmContacts.filter((c) => (own ? contactEditable : contactVisible)(u, c, sc) && Boolean(c.archived) === archived
-      && (!f.q || `${c.fullName} ${c.phone} ${c.phone2} ${c.email} ${c.city} ${c.address} ${(c.tags || []).join(' ')}`.toLowerCase().includes(f.q))
+      && (!f.q || `${c.fullName} ${c.phone} ${c.phone2} ${c.email} ${c.city} ${c.address} ${classificationValue(c, 'mainSector')} ${classificationValue(c, 'businessCategory')} ${(c.tags || []).join(' ')}`.toLowerCase().includes(f.q))
       && (!f.databaseId || c.databaseId === f.databaseId)
       && (!f.campaignId || campaignOfContact(c) === f.campaignId)
       && (!f.agentId || c.agentId === f.agentId) && (!unassigned || !c.agentId)

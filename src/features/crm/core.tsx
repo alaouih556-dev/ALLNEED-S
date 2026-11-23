@@ -19,7 +19,7 @@ export type CrmUser = { id: string; name: string; email: string; phone: string; 
 export type CrmMe = { user: CrmUser; isAdmin: boolean; permissions: string[]; labels: Labels; appointmentTypes: string[]; campaignTypes: string[]; defaultDurationMin: number; geocoding: string; crmName: string; unread: number }
 export type Lookups = { agents: Array<{ id: string; name: string; role: string; active: boolean }>; databases: Array<{ id: string; name: string; status: string }>; campaigns: Array<{ id: string; name: string; status: string }>; zones: Array<{ id: string; name: string; color: string }>; cities: string[]; regions: string[] }
 export type Page<T> = { rows: T[]; page: number; pageSize: number; total: number; pages: number }
-export type Contact = { id: string; databaseId: string; databaseName: string; campaignId: string | null; campaignName: string; agentId: string | null; agentName: string; firstName: string; lastName: string; fullName: string; phone: string; phone2: string; email: string; address: string; city: string; region: string; postalCode: string; country: string; lat: number | null; lng: number | null; status: string; callStatus: string | null; appointmentStatus?: string | null; notes: string; tags: string[]; custom?: Record<string, string>; createdAt: string; updatedAt: string; lastContactAt: string | null; nextCallbackAt: string | null; archived?: boolean; locationSource?: string | null; geocodeError?: string | null; noteLog?: Array<{ id: string; at: string; byName: string; text: string }> }
+export type Contact = { id: string; databaseId: string; databaseName: string; campaignId: string | null; campaignName: string; agentId: string | null; agentName: string; firstName: string; lastName: string; fullName: string; phone: string; phone2: string; email: string; address: string; city: string; region: string; postalCode: string; country: string; mainSector: string; businessCategory: string; lat: number | null; lng: number | null; status: string; callStatus: string | null; appointmentStatus?: string | null; notes: string; tags: string[]; custom?: Record<string, string>; createdAt: string; updatedAt: string; lastContactAt: string | null; nextCallbackAt: string | null; archived?: boolean; locationSource?: string | null; geocodeError?: string | null; noteLog?: Array<{ id: string; at: string; byName: string; text: string }> }
 export type Call = { id: string; contactId: string; contactName: string; agentId: string; agentName: string; phone: string; at: string; durationSec: number | null; status: string; result: string; notes: string; callbackAt: string | null; campaignId: string | null; campaignName: string; databaseId: string; databaseName: string; appointmentId: string | null }
 export type Appointment = { id: string; title: string; contactId: string; contactName: string; phone: string; agentId: string | null; agentName: string; date: string; start: string; end: string; address: string; city: string; region: string; lat: number | null; lng: number | null; type: string; status: string; notes: string; campaignId: string | null; campaignName: string; databaseId: string; databaseName: string; createdAt: string; history?: Array<{ at: string; byName: string; action: string }> }
 
@@ -317,7 +317,7 @@ export function DataTable<T extends { id: string }>({ columns, page, loading, er
                   ) : c.label}
                 </th>
               ))}
-              {rowActions ? <th className="text-right">Actions</th> : null}
+              {rowActions ? <th className="crm-actions-cell text-right">Actions</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -329,7 +329,7 @@ export function DataTable<T extends { id: string }>({ columns, page, loading, er
                   </td>
                 ) : null}
                 {columns.map((c) => <td key={c.key} className={cn(c.className, c.hideOn === 'md' && 'hidden md:table-cell', c.hideOn === 'lg' && 'hidden lg:table-cell')}>{c.render(r)}</td>)}
-                {rowActions ? <td className="text-right" onClick={(e) => e.stopPropagation()}><div className="inline-flex items-center justify-end gap-1">{rowActions(r)}</div></td> : null}
+                {rowActions ? <td className="crm-actions-cell text-right" onClick={(e) => e.stopPropagation()}><div className="inline-flex items-center justify-end gap-1">{rowActions(r)}</div></td> : null}
               </tr>
             ))}
           </tbody>

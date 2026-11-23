@@ -97,6 +97,8 @@ function ContactDetail() {
                 <Info label="E-mail">{c.email ? <a className="text-brand-700" href={`mailto:${c.email}`}>{c.email}</a> : ''}</Info>
                 <Info label="Agent">{c.agentName || 'Non assigné'}</Info>
                 <Info label="Base">{c.databaseName}</Info>
+                <Info label="Main_Sector">{c.mainSector}</Info>
+                <Info label="Business_Category">{c.businessCategory}</Info>
                 <Info label="Campagne">{c.campaignName}</Info>
                 <Info label="Dernier contact">{c.lastContactAt ? fmtDateTime(c.lastContactAt) : ''}</Info>
                 <Info label="Prochain rappel">{c.nextCallbackAt ? <span className={new Date(c.nextCallbackAt) <= new Date() ? 'font-semibold text-red-600' : 'font-semibold text-amber-700'}>{fmtDateTime(c.nextCallbackAt)}</span> : ''}</Info>
