@@ -75,7 +75,7 @@ function ContactDetail() {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <div className="space-y-5">
-          <Panel title="Situation" action={can('contacts.edit') ? <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil size={13} />Modifier</Button> : undefined}>
+          <Panel tone="indigo" title="Situation" action={can('contacts.edit') ? <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil size={13} />Modifier</Button> : undefined}>
             <div className="space-y-4 p-5">
               <div className="flex flex-wrap items-center gap-2"><StatusPill kind="contact" value={c.status} /><StatusPill kind="call" value={c.callStatus} />{c.appointmentStatus ? <StatusPill kind="appointment" value={c.appointmentStatus} /> : null}{(c.tags || []).map((t) => <Badge key={t}>{t}</Badge>)}</div>
               {can('contacts.edit') ? (
@@ -111,7 +111,7 @@ function ContactDetail() {
             </div>
           </Panel>
 
-          <Panel title="Adresse et localisation" description={[c.address, c.postalCode, c.city, c.region, c.country].filter(Boolean).join(', ') || 'Aucune adresse renseignée.'}>
+          <Panel tone="cyan" title="Adresse et localisation" description={[c.address, c.postalCode, c.city, c.region, c.country].filter(Boolean).join(', ') || 'Aucune adresse renseignée.'}>
             <div className="space-y-3 p-4">
               {picking ? <Alert tone="info">Cliquez sur la carte à l’emplacement exact du contact.</Alert> : null}
               {located || picking ? <CrmMap height={260} cluster={false} fitKey={`${c.lat},${c.lng}`} points={located ? [{ id: c.id, lat: c.lat!, lng: c.lng!, color: STATUS_HEX[c.status] || '#6366f1', kind: 'contact', popup: c.fullName }] : []} onMapClick={picking ? (lat, lng) => void setLocation(lat, lng) : undefined} /> : <EmptyBox icon={<MapPin size={20} />} title="Pas de coordonnées" text="Le contact n’apparaît pas sur la carte tant que sa position n’est pas connue. Aucune position n’est inventée." />}

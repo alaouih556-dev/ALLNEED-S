@@ -62,7 +62,7 @@ function SettingsPage() {
       {loading && !s ? <LoadingRows count={5} /> : null}
 
       {s && tab === 'general' ? (
-        <Panel title="Général"><div className="space-y-4 p-5">
+        <Panel tone="indigo" title="Général"><div className="space-y-4 p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nom du CRM" required><Input value={s.general.crmName} onChange={(e) => upd('general', { ...s.general, crmName: e.target.value })} maxLength={80} /></Field>
             <Field label="Pays par défaut" hint="Utilisé pour le géocodage des adresses"><Input value={s.general.defaultCountry} onChange={(e) => upd('general', { ...s.general, defaultCountry: e.target.value })} /></Field>
@@ -74,7 +74,7 @@ function SettingsPage() {
       ) : null}
 
       {s && data && tab === 'users' ? (
-        <Panel title="Utilisateurs et rôles"><div className="space-y-4 p-5 text-sm text-ink-700">
+        <Panel tone="amber" title="Utilisateurs et rôles"><div className="space-y-4 p-5 text-sm text-ink-700">
           <ul className="space-y-2">{data.roles.map((r) => <li key={r.key} className="rounded-xl border border-ink-100 p-3"><b className="text-ink-950">{r.label}</b> — {r.admin ? 'accès complet à toutes les pages, données et réglages du CRM.' : `accès limité à son périmètre (bases, contacts assignés, campagnes et zones), avec les permissions définies dans l’onglet Permissions.`}</li>)}</ul>
           <p>Les rôles sont déclarés côté serveur : un nouveau rôle (par exemple « Superviseur ») s’ajoute avec ses permissions par défaut, sans changer l’authentification.</p>
           <Link to={'/crm/utilisateurs' as any}><Button size="sm"><UsersRound size={14} />Gérer les utilisateurs</Button></Link>
@@ -82,7 +82,7 @@ function SettingsPage() {
       ) : null}
 
       {s && data && tab === 'permissions' ? (
-        <Panel title="Permissions par rôle" description="Les administrateurs ont toujours tous les droits. Chaque permission est vérifiée par le serveur sur chaque requête.">
+        <Panel tone="amber" title="Permissions par rôle" description="Les administrateurs ont toujours tous les droits. Chaque permission est vérifiée par le serveur sur chaque requête.">
           <div className="space-y-4 p-5">
             {data.roles.filter((r) => !r.admin).map((role) => (
               <div key={role.key}>
@@ -102,7 +102,7 @@ function SettingsPage() {
       ) : null}
 
       {s && tab === 'appointments' ? (
-        <Panel title="Rendez-vous"><div className="space-y-4 p-5">
+        <Panel tone="violet" title="Rendez-vous"><div className="space-y-4 p-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Durée par défaut (minutes)"><Input type="number" min={5} max={480} value={s.appointments.defaultDurationMin} onChange={(e) => upd('appointments', { ...s.appointments, defaultDurationMin: Number(e.target.value) })} /></Field>
             <Field label="Début de journée"><Input type="time" value={s.appointments.workdayStart} onChange={(e) => upd('appointments', { ...s.appointments, workdayStart: e.target.value })} /></Field>
@@ -115,7 +115,7 @@ function SettingsPage() {
       ) : null}
 
       {s && tab === 'calls' ? (
-        <Panel title="Appels"><div className="space-y-4 p-5">
+        <Panel tone="blue" title="Appels"><div className="space-y-4 p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Rappel envoyé avant un rappel programmé (minutes)"><Input type="number" min={0} max={1440} value={s.calls.callbackReminderMinutes} onChange={(e) => upd('calls', { ...s.calls, callbackReminderMinutes: Number(e.target.value) })} /></Field>
             <Field label="Alerte d’inactivité d’un agent (jours)"><Input type="number" min={1} max={60} value={s.calls.inactivityAlertDays} onChange={(e) => upd('calls', { ...s.calls, inactivityAlertDays: Number(e.target.value) })} /></Field>
@@ -126,7 +126,7 @@ function SettingsPage() {
       ) : null}
 
       {s && tab === 'campaigns' ? (
-        <Panel title="Campagnes"><div className="space-y-4 p-5">
+        <Panel tone="coral" title="Campagnes"><div className="space-y-4 p-5">
           <Field label="Types de campagne" hint="Séparés par des virgules"><Input value={s.campaigns.types.join(', ')} onChange={(e) => upd('campaigns', { ...s.campaigns, types: e.target.value.split(',').map((t) => t.trim()) })} /></Field>
           <Field label="Objectif de rendez-vous proposé par défaut"><Input type="number" min={0} value={s.campaigns.defaultGoalAppointments} onChange={(e) => upd('campaigns', { ...s.campaigns, defaultGoalAppointments: Number(e.target.value) })} /></Field>
           <SaveBar section="campaigns" values={{ ...s.campaigns, types: s.campaigns.types.filter(Boolean) }} />
@@ -134,7 +134,7 @@ function SettingsPage() {
       ) : null}
 
       {s && tab === 'imports' ? (
-        <Panel title="Import des bases"><div className="space-y-4 p-5">
+        <Panel tone="emerald" title="Import des bases"><div className="space-y-4 p-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Détection des doublons"><Select value={s.imports.duplicateKey} onChange={(e) => upd('imports', { ...s.imports, duplicateKey: e.target.value })}><option value="phone_or_email">Téléphone ou e-mail</option><option value="phone">Téléphone seulement</option><option value="email">E-mail seulement</option></Select></Field>
             <Field label="Stratégie par défaut"><Select value={s.imports.defaultStrategy} onChange={(e) => upd('imports', { ...s.imports, defaultStrategy: e.target.value })}><option value="skip">Ignorer les doublons</option><option value="update">Mettre à jour</option><option value="create">Créer quand même</option></Select></Field>
@@ -145,7 +145,7 @@ function SettingsPage() {
       ) : null}
 
       {s && data && tab === 'labels' ? (
-        <Panel title="Statuts" description="Les statuts sont fixes (pour garder des statistiques cohérentes) ; vous pouvez renommer leur libellé.">
+        <Panel tone="indigo" title="Statuts" description="Les statuts sont fixes (pour garder des statistiques cohérentes) ; vous pouvez renommer leur libellé.">
           <div className="space-y-6 p-5">
             {(['contact', 'call', 'appointment'] as const).map((kind) => (
               <div key={kind}>
@@ -159,11 +159,11 @@ function SettingsPage() {
       ) : null}
 
       {s && tab === 'zones' ? (
-        <Panel title="Zones géographiques"><div className="space-y-3 p-5 text-sm text-ink-700"><p>Les zones se dessinent et s’assignent directement sur la carte : cercle, polygone, ou liste de villes et régions, avec les agents, bases et campagnes concernés.</p><Link to={'/crm/carte' as any}><Button size="sm"><MapPinned size={14} />Gérer les zones sur la carte</Button></Link></div></Panel>
+        <Panel tone="cyan" title="Zones géographiques"><div className="space-y-3 p-5 text-sm text-ink-700"><p>Les zones se dessinent et s’assignent directement sur la carte : cercle, polygone, ou liste de villes et régions, avec les agents, bases et campagnes concernés.</p><Link to={'/crm/carte' as any}><Button size="sm"><MapPinned size={14} />Gérer les zones sur la carte</Button></Link></div></Panel>
       ) : null}
 
       {s && data && tab === 'notifications' ? (
-        <Panel title="Notifications" description="Désactiver un type ici le coupe pour tout le monde. Chaque utilisateur peut aussi choisir les siennes.">
+        <Panel tone="teal" title="Notifications" description="Désactiver un type ici le coupe pour tout le monde. Chaque utilisateur peut aussi choisir les siennes.">
           <div className="space-y-4 p-5">
             <div className="grid gap-2 sm:grid-cols-2">{data.notificationTypes.map((t) => <Checkbox key={t} label={NOTIFICATION_LABELS[t] || t} checked={s.notifications[t] !== false} onChange={(e) => upd('notifications', { ...s.notifications, [t]: e.target.checked })} />)}</div>
             <SaveBar section="notifications" values={s.notifications} />
@@ -172,7 +172,7 @@ function SettingsPage() {
       ) : null}
 
       {s && tab === 'integrations' ? (
-        <Panel title="Intégrations"><div className="space-y-5 p-5">
+        <Panel tone="indigo" title="Intégrations"><div className="space-y-5 p-5">
           <Field label="Géocodage des adresses" hint="Convertit une adresse en coordonnées pour la carte. Désactivé par défaut.">
             <Select value={s.integrations.geocoding} onChange={(e) => upd('integrations', { ...s.integrations, geocoding: e.target.value })}><option value="disabled">Désactivé (placement manuel uniquement)</option><option value="nominatim">OpenStreetMap Nominatim</option></Select>
           </Field>
@@ -206,7 +206,7 @@ function AuditLog() {
     { key: 'details', label: 'Détails', hideOn: 'md', render: (a) => <code className="line-clamp-2 max-w-md text-[0.68rem] text-ink-500">{JSON.stringify(a.details)}</code> },
   ]
   return (
-    <Panel title="Journal d’audit" description="Toutes les actions importantes du CRM : qui, quoi, quand." action={<ExportButtons name="journal-audit" getData={async () => { const r = await crmGet<Page<Act>>('/activity', { ...params, page: 1, pageSize: 200 }); return { columns: ['Date', 'Utilisateur', 'Action', 'Élément', 'Identifiant', 'Détails'], rows: r.rows.map((a) => [a.at, a.userName, actionLabel(a.action), a.entityType, a.entityId || '', JSON.stringify(a.details)]) } }} />}>
+    <Panel tone="teal" title="Journal d’audit" description="Toutes les actions importantes du CRM : qui, quoi, quand." action={<ExportButtons name="journal-audit" getData={async () => { const r = await crmGet<Page<Act>>('/activity', { ...params, page: 1, pageSize: 200 }); return { columns: ['Date', 'Utilisateur', 'Action', 'Élément', 'Identifiant', 'Détails'], rows: r.rows.map((a) => [a.at, a.userName, actionLabel(a.action), a.entityType, a.entityId || '', JSON.stringify(a.details)]) } }} />}>
       <div className="p-4"><FilterBar values={values} onChange={setValues} filters={filters} period searchPlaceholder="Rechercher dans le journal…" /></div>
       <DataTable columns={columns} page={data} loading={loading} error={error} values={values} onChange={setValues} empty={{ icon: <History size={20} />, title: 'Aucune action sur cette période' }} />
     </Panel>

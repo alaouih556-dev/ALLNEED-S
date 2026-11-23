@@ -2051,3 +2051,52 @@ a.cl-space:hover{border-color:color-mix(in srgb,var(--an-accent) 35%,white);tran
 .crm-map-date b{font-size:1rem;color:var(--an-text,#0f172a)}
 .an-shell[data-mode="dark"] .crm-map-date b{color:#f8fafc}
 @media (max-width:640px){.crm-mapbar>*{max-width:100%}.crm-mapbar-search{flex-basis:100%}.crm-map-list{max-height:420px}}
+
+/* V66 lisibilité CRM clair */
+.an-shell.workspace-crm[data-mode="light"] .an-main{--an-text:#0b1730;--an-text-2:#1f2d44;--an-muted:#44536a;--an-faint:#526178;--an-accent-ink:color-mix(in srgb,var(--an-accent) 62%,#0b1730);color:var(--an-text)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-page-header{--an-text:#0f1b33;--an-text-2:#334155;--an-muted:#64748b;--an-faint:#94a3b8;--an-accent-ink:var(--an-accent)}
+.an-shell.workspace-crm[data-mode="light"] .an-main :is(.text-ink-950,.text-ink-900,.text-ink-800):not(.an-page-header *){color:#0b1730!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main :is(.text-ink-700,.text-ink-600):not(.an-page-header *){color:#1f2d44!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main :is(.text-ink-500,.text-ink-400,.text-ink-300):not(.an-page-header *){color:#44536a!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main :is(small,dt,.an-seg-count,.an-statcard-hint):not(.an-page-header *){font-size:.75rem;color:#44536a}
+.an-shell.workspace-crm[data-mode="light"] .an-main [class*="text-[0.6"]:not(.an-page-header *){font-size:.75rem!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-statcard-label{font-size:.84rem;font-weight:600;color:#1f2d44}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-table thead th{font-size:.75rem;color:#1f2d44}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-seg button{font-size:.8rem;color:#1f2d44}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-seg button.is-on{color:var(--an-accent-ink)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel-head p{font-size:.8rem;color:#44536a}
+.an-shell.workspace-crm[data-mode="light"] .an-main :is(.crm-time,.crm-rank,.crm-week-head.is-today,.an-panel-head a,.cg-link){color:var(--an-accent-ink);opacity:1}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-time small{font-size:.72rem;opacity:1;color:var(--an-accent-ink)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-map-date{font-size:.7rem;color:#44536a}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-btn-primary:not(.an-page-header *):not(.an-hero-banner *){background:linear-gradient(135deg,color-mix(in srgb,var(--an-accent) 70%,#0b1730),color-mix(in srgb,var(--an-accent) 58%,#0b1730))!important;color:#fff!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-week-hours span{font-size:.72rem;color:#44536a}
+.an-shell.workspace-crm[data-mode="light"] .an-main .cg-org-row>span:first-child{color:#0b1730}
+.an-shell.workspace-crm[data-mode="light"] .an-main :is(.text-red-500,.text-red-600){color:#b91c1c!important}
+
+/* V67 couleurs CRM clair : chaque rubrique a sa couleur. */
+.an-shell.workspace-crm[data-mode="light"]{--an-bg:#e9eef9}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel{--tone:#27408b;--tone-2:#3730a3;--tone-soft:#f4f6fe;border-color:color-mix(in srgb,var(--tone) 24%,#e4e9f2);background:linear-gradient(180deg,var(--tone-soft),#fff 170px);box-shadow:0 1px 2px rgba(15,27,51,.06),0 12px 26px -18px color-mix(in srgb,var(--tone) 60%,transparent)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="violet"]{--tone:#6d28d9;--tone-2:#a21caf;--tone-soft:#f6f0ff;--an-accent:#6d28d9;--an-accent-2:#a21caf;--an-accent-ink:#6d28d9}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="blue"]{--tone:#1d4ed8;--tone-2:#0369a1;--tone-soft:#edf4ff;--an-accent:#1d4ed8;--an-accent-2:#0369a1;--an-accent-ink:#1d4ed8}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="teal"]{--tone:#0f766e;--tone-2:#0e7490;--tone-soft:#e8f8f5;--an-accent:#0f766e;--an-accent-2:#0e7490;--an-accent-ink:#0f766e}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="coral"]{--tone:#c2410c;--tone-2:#be123c;--tone-soft:#fff1ea;--an-accent:#c2410c;--an-accent-2:#be123c;--an-accent-ink:#c2410c}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="indigo"]{--tone:#3730a3;--tone-2:#1d4ed8;--tone-soft:#eff0ff;--an-accent:#3730a3;--an-accent-2:#1d4ed8;--an-accent-ink:#3730a3}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="amber"]{--tone:#b45309;--tone-2:#a16207;--tone-soft:#fff7e6;--an-accent:#b45309;--an-accent-2:#a16207;--an-accent-ink:#b45309}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="emerald"]{--tone:#047857;--tone-2:#15803d;--tone-soft:#e8f8ef;--an-accent:#047857;--an-accent-2:#15803d;--an-accent-ink:#047857}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel[data-tone="cyan"]{--tone:#0e7490;--tone-2:#0369a1;--tone-soft:#e6f7fb;--an-accent:#0e7490;--an-accent-2:#0369a1;--an-accent-ink:#0e7490}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header{position:relative;align-items:center;padding:14px 20px;border-bottom:0!important;background:linear-gradient(120deg,var(--tone),var(--tone-2));border:0}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header h2.text-ink-950{color:#fff!important;font-size:1rem!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header h2 svg{color:#fff}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header p.text-ink-500{color:#fff!important;opacity:.94}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header :is(.cg-link,.an-badge){display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border:0;border-radius:999px;background:#fff!important;color:var(--tone)!important;font-size:.75rem;font-weight:800;box-shadow:0 3px 9px -4px rgba(15,27,51,.45)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header :is(button,a):not(.cg-link){background:#fff!important;border-color:transparent!important;color:var(--tone)!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .an-panel-header :is(button,a):not(.cg-link) *{color:var(--tone)!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .crm-time{background:color-mix(in srgb,var(--tone) 14%,#fff);color:var(--tone)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .crm-time small{color:var(--tone)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .cg-org-row>.crm-rank,.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .crm-rank{background:linear-gradient(135deg,var(--tone),var(--tone-2));color:#fff}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .cg-org-row>span:first-child:not(.crm-rank):not(.an-badge){background:color-mix(in srgb,var(--tone) 15%,#fff);color:color-mix(in srgb,var(--tone) 70%,#0b1730)!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .an-panel .cg-org-row:hover{background:color-mix(in srgb,var(--tone) 7%,transparent)}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-table thead th{background:#172b55!important;color:#fff!important;border-color:#172b55!important}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-table thead .crm-sort:hover{color:#a5f3fc}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-table tbody tr:nth-child(even) td{background:#f4f7fe}
+.an-shell.workspace-crm[data-mode="light"] .an-main .crm-table tbody tr:hover td{background:#e8effd}

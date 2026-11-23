@@ -97,6 +97,7 @@ function AppointmentsPage() {
 
       <Panel
         className="mb-5"
+        tone="cyan"
         title={<span className="inline-flex items-center gap-2"><MapIcon size={15} />Carte géographique</span>}
         description={`${mapPoints.length} rendez-vous localisés${missing > 0 ? ` · ${missing} à placer` : ''}`}
         action={<div className="flex flex-wrap items-center gap-1"><Link to={'/crm/carte' as never}><Button size="sm" variant="outline"><Maximize2 size={13} />Ouvrir la grande carte</Button></Link><Button size="sm" variant="ghost" aria-expanded={showMap} onClick={() => setValues({ ...values, map: showMap ? '0' : '' })}>{showMap ? <ChevronUp size={14} /> : <ChevronDown size={14} />}{showMap ? 'Masquer' : 'Afficher'}</Button></div>}
@@ -106,6 +107,7 @@ function AppointmentsPage() {
 
       {view === 'calendar' ? (
         <Panel
+          tone="violet"
           title={<span className="capitalize">{title}</span>}
           action={<div className="flex items-center gap-1"><Button size="sm" variant="outline" onClick={() => move(-1)} aria-label="Période précédente"><ChevronLeft size={14} /></Button><Button size="sm" variant="outline" onClick={() => setValues({ ...values, date: localDay() })}>Aujourd’hui</Button><Button size="sm" variant="outline" onClick={() => move(1)} aria-label="Période suivante"><ChevronRight size={14} /></Button></div>}
         >

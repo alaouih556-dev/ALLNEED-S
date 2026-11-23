@@ -99,12 +99,12 @@ function CrmDashboard() {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <Panel title="Appels dans le temps" description="Appels passés et contacts effectivement joints.">
+        <Panel tone="blue" title="Appels dans le temps" description="Appels passés et contacts effectivement joints.">
           <div className="p-4">
             {grouped.rows.length > 1 ? <AreaChart labels={grouped.labels} series={[{ name: 'Appels', color: CHART_COLORS[0], values: grouped.rows.map((r) => r.calls) }, { name: 'Joints', color: CHART_COLORS[2], values: grouped.rows.map((r) => r.reached) }]} height={230} /> : <EmptyBox icon={<PhoneCall size={20} />} title="Choisissez une période de plusieurs jours" text="La courbe s’affiche sur une période d’au moins deux jours." />}
           </div>
         </Panel>
-        <Panel title="Résultat des appels" description="Aboutis ou non, par statut.">
+        <Panel tone="blue" title="Résultat des appels" description="Aboutis ou non, par statut.">
           <div className="flex flex-col items-center gap-4 p-5 sm:flex-row xl:flex-col 2xl:flex-row">
             <DonutChart slices={callSlices} center={k?.totalCalls ?? 0} sub="appels" />
             {callSlices.length ? <Legend items={callSlices.map((s) => ({ label: s.label, color: s.color, value: s.value }))} /> : <p className="text-sm text-ink-500">Aucun appel sur la période.</p>}
@@ -113,12 +113,12 @@ function CrmDashboard() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <Panel title="Rendez-vous dans le temps" description="Rendez-vous pris chaque jour (date de prise).">
+        <Panel tone="violet" title="Rendez-vous dans le temps" description="Rendez-vous pris chaque jour (date de prise).">
           <div className="p-4">
             {grouped.rows.length > 1 ? <AreaChart labels={grouped.labels} series={[{ name: 'Rendez-vous', color: CHART_COLORS[3], values: grouped.rows.map((r) => r.appointments) }]} height={200} /> : <EmptyBox icon={<CalendarClock size={20} />} title="Période trop courte pour une courbe" />}
           </div>
         </Panel>
-        <Panel title="Statut des rendez-vous" description="Répartition sur la période.">
+        <Panel tone="violet" title="Statut des rendez-vous" description="Répartition sur la période.">
           <div className="flex flex-col items-center gap-4 p-5 sm:flex-row xl:flex-col 2xl:flex-row">
             <DonutChart slices={apptSlices} center={apptSlices.reduce((a, s) => a + s.value, 0)} sub="rendez-vous" />
             {apptSlices.length ? <Legend items={apptSlices.map((s) => ({ label: s.label, color: s.color, value: s.value }))} /> : <p className="text-sm text-ink-500">Aucun rendez-vous sur la période.</p>}
@@ -126,7 +126,7 @@ function CrmDashboard() {
         </Panel>
       </div>
 
-      <Panel className="mt-5" title="Comparaisons" description="Performance par agent, base, campagne et ville sur la période.">
+      <Panel className="mt-5" tone="indigo" title="Comparaisons" description="Performance par agent, base, campagne et ville sur la période.">
         <Tabs className="px-4" value={compareTab} onChange={setCompareTab} tabs={[...(isAdmin ? [{ value: 'agents', label: 'Agents' }] : []), { value: 'databases', label: 'Bases' }, { value: 'campaigns', label: 'Campagnes' }, { value: 'geo', label: 'Géographie' }]} />
         <div className="p-5">
           {loading && !data ? <LoadingRows /> : null}
@@ -154,13 +154,13 @@ function CrmDashboard() {
       </Panel>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-        <Panel title="Rendez-vous du jour" action={<Badge tone="info">{data?.todayAppointments.length ?? 0}</Badge>}>
+        <Panel tone="violet" title="Rendez-vous du jour" action={<Badge tone="info">{data?.todayAppointments.length ?? 0}</Badge>}>
           <AppointmentRows rows={data?.todayAppointments || []} loading={loading && !data} empty="Aucun rendez-vous aujourd’hui." />
         </Panel>
-        <Panel title="Prochains rendez-vous" action={<Link to={'/crm/rendez-vous' as any} className="cg-link">Calendrier<ArrowRight size={13} /></Link>}>
+        <Panel tone="violet" title="Prochains rendez-vous" action={<Link to={'/crm/rendez-vous' as any} className="cg-link">Calendrier<ArrowRight size={13} /></Link>}>
           <AppointmentRows rows={data?.upcomingAppointments || []} loading={loading && !data} empty="Aucun rendez-vous à venir." withDate />
         </Panel>
-        <Panel title="Derniers appels" action={<Link to={'/crm/appels' as any} className="cg-link">Tout voir<ArrowRight size={13} /></Link>}>
+        <Panel tone="blue" title="Derniers appels" action={<Link to={'/crm/appels' as any} className="cg-link">Tout voir<ArrowRight size={13} /></Link>}>
           {loading && !data ? <LoadingRows /> : null}
           {data && !data.recentCalls.length ? <EmptyBox icon={<PhoneCall size={20} />} title="Aucun appel sur la période" /> : null}
           <Rows>
@@ -175,7 +175,7 @@ function CrmDashboard() {
             ))}
           </Rows>
         </Panel>
-        <Panel title="Activité récente">
+        <Panel tone="teal" title="Activité récente">
           {data && !data.recentActivity.length ? <EmptyBox icon={<RefreshCcw size={20} />} title="Aucune activité enregistrée" /> : null}
           <Rows>
             {(data?.recentActivity || []).map((a) => (
@@ -187,7 +187,7 @@ function CrmDashboard() {
           </Rows>
         </Panel>
         {isAdmin ? (
-          <Panel title="Meilleurs agents" description="Classés par rendez-vous pris sur la période.">
+          <Panel tone="amber" title="Meilleurs agents" description="Classés par rendez-vous pris sur la période.">
             {data && !data.topAgents.length ? <EmptyBox icon={<Trophy size={20} />} title="Aucun agent" /> : null}
             <Rows>
               {(data?.topAgents || []).map((a, i) => (
@@ -203,7 +203,7 @@ function CrmDashboard() {
           </Panel>
         ) : null}
         {isAdmin ? (
-          <Panel title="Agents à accompagner" description="Inactifs depuis plusieurs jours, ou peu de contacts joints.">
+          <Panel tone="amber" title="Agents à accompagner" description="Inactifs depuis plusieurs jours, ou peu de contacts joints.">
             {data && !data.agentsNeedingAttention.length ? <EmptyBox icon={<UserRoundCheck size={20} />} title="Toute l’équipe est active" /> : null}
             <Rows>
               {(data?.agentsNeedingAttention || []).map((a) => (
@@ -219,7 +219,7 @@ function CrmDashboard() {
           </Panel>
         ) : null}
         {isAdmin ? (
-          <Panel title="Derniers imports" action={<Link to={'/crm/bases' as any} className="cg-link">Bases<ArrowRight size={13} /></Link>}>
+          <Panel tone="emerald" title="Derniers imports" action={<Link to={'/crm/bases' as any} className="cg-link">Bases<ArrowRight size={13} /></Link>}>
             {data && !data.recentImports.length ? <EmptyBox icon={<Upload size={20} />} title="Aucun import" text="Importez un fichier CSV ou Excel depuis une base." /> : null}
             <Rows>
               {(data?.recentImports || []).map((i) => (
@@ -232,7 +232,7 @@ function CrmDashboard() {
             </Rows>
           </Panel>
         ) : null}
-        <Panel title="Campagnes" action={<Link to={'/crm/campagnes' as any} className="cg-link">Tout voir<ArrowRight size={13} /></Link>}>
+        <Panel tone="coral" title="Campagnes" action={<Link to={'/crm/campagnes' as any} className="cg-link">Tout voir<ArrowRight size={13} /></Link>}>
           {data && !data.perCampaign.length ? <EmptyBox icon={<Megaphone size={20} />} title="Aucune campagne" /> : null}
           <Rows>
             {(data?.perCampaign || []).slice(0, 6).map((c) => (

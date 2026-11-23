@@ -57,8 +57,8 @@ function CallsPage() {
         <MiniStat icon={<Clock3 size={18} />} tone="amber" label="Rappels échus" value={v(k?.callbacksDue)} onClick={() => void navigate({ to: '/crm/contacts' as any, search: { callbackDue: '1' } as any })} />
       </div>
       <div className="mb-5 grid gap-5 lg:grid-cols-2">
-        {isAdmin ? <Panel title="Appels par agent"><div className="p-5">{stats.data?.perAgent.length ? <BarList items={stats.data.perAgent.map((a) => ({ label: a.name, value: a.calls, hint: `${a.reached} joints` }))} /> : <p className="text-sm text-ink-500">Aucun appel sur la période.</p>}</div></Panel> : null}
-        <Panel title="Appels par campagne" description={`${v(k?.appointmentsBooked)} rendez-vous générés sur la période`}><div className="p-5">{stats.data?.perCampaign.filter((c) => c.calls).length ? <BarList color={CHART_COLORS[3]} items={stats.data.perCampaign.filter((c) => c.calls).map((c) => ({ label: c.name, value: c.calls, hint: `${c.reached} joints` }))} /> : <p className="flex items-center gap-2 text-sm text-ink-500"><CalendarCheck2 size={15} />Aucun appel rattaché à une campagne sur la période.</p>}</div></Panel>
+        {isAdmin ? <Panel tone="blue" title="Appels par agent"><div className="p-5">{stats.data?.perAgent.length ? <BarList items={stats.data.perAgent.map((a) => ({ label: a.name, value: a.calls, hint: `${a.reached} joints` }))} /> : <p className="text-sm text-ink-500">Aucun appel sur la période.</p>}</div></Panel> : null}
+        <Panel tone="blue" title="Appels par campagne" description={`${v(k?.appointmentsBooked)} rendez-vous générés sur la période`}><div className="p-5">{stats.data?.perCampaign.filter((c) => c.calls).length ? <BarList color={CHART_COLORS[3]} items={stats.data.perCampaign.filter((c) => c.calls).map((c) => ({ label: c.name, value: c.calls, hint: `${c.reached} joints` }))} /> : <p className="flex items-center gap-2 text-sm text-ink-500"><CalendarCheck2 size={15} />Aucun appel rattaché à une campagne sur la période.</p>}</div></Panel>
       </div>
 
       <DataTable

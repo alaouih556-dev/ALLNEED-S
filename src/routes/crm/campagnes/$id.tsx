@@ -43,13 +43,13 @@ function CampaignDetail() {
         <MiniStat icon={<Percent size={18} />} tone="slate" label="Conversion" value={`${k.conversionRate} %`} hint="RDV ÷ contacts appelés" />
       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Panel title="Progression dans le temps" description="Choisissez une période de 2 à 62 jours pour la courbe.">
+        <Panel tone="coral" title="Progression dans le temps" description="Choisissez une période de 2 à 62 jours pour la courbe.">
           <div className="p-4">{series.length ? <AreaChart labels={series.map((s) => `${s.day.slice(8)}/${s.day.slice(5, 7)}`)} series={[{ name: 'Appels', color: CHART_COLORS[0], values: series.map((s) => s.calls) }, { name: 'RDV', color: CHART_COLORS[3], values: series.map((s) => s.appointments) }]} height={220} /> : <EmptyBox icon={<Sparkles size={20} />} title="Courbe disponible sur une période limitée" />}</div>
         </Panel>
-        <Panel title="Statut des rendez-vous"><div className="flex flex-col items-center gap-4 p-5 sm:flex-row xl:flex-col 2xl:flex-row"><DonutChart slices={apptSlices} center={k.appointmentsBooked} sub="RDV" />{apptSlices.length ? <Legend items={apptSlices.map((s) => ({ label: s.label, color: s.color, value: s.value }))} /> : <p className="text-sm text-ink-500">Aucun rendez-vous.</p>}</div></Panel>
+        <Panel tone="violet" title="Statut des rendez-vous"><div className="flex flex-col items-center gap-4 p-5 sm:flex-row xl:flex-col 2xl:flex-row"><DonutChart slices={apptSlices} center={k.appointmentsBooked} sub="RDV" />{apptSlices.length ? <Legend items={apptSlices.map((s) => ({ label: s.label, color: s.color, value: s.value }))} /> : <p className="text-sm text-ink-500">Aucun rendez-vous.</p>}</div></Panel>
       </div>
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <Panel title="Paramètres">
+        <Panel tone="indigo" title="Paramètres">
           <dl className="crm-info-grid p-5">
             <Info label="Statut"><StatusPill kind="campaign" value={data.status} /></Info>
             <Info label="Type">{data.type}</Info>
@@ -62,7 +62,7 @@ function CampaignDetail() {
             <Info label="Créée par">{data.createdByName}</Info>
           </dl>
         </Panel>
-        <Panel title="Performance par agent">
+        <Panel tone="amber" title="Performance par agent">
           <div className="p-5">{data.stats.perAgent.length ? <BarList items={data.stats.perAgent.map((a) => ({ label: a.name, value: a.appointments, hint: `${a.calls} appels · ${a.conversionRate} %` }))} /> : <EmptyBox icon={<UserCheck size={20} />} title="Aucune activité d’agent" />}</div>
         </Panel>
       </div>
