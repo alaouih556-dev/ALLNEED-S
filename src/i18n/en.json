@@ -6287,7 +6287,22 @@
   "Assigner à un membre du CRM": "Assign to a CRM member",
   "Membre du CRM": "CRM member",
   "Assignation mise à jour": "Assignment updated",
-  "Assignation impossible": "Could not assign"
+  "Assignation impossible": "Could not assign",
+  "Voyez où se trouvent les rendez-vous de toute l’équipe CRM. Seules les positions réelles sont affichées.": "See where the whole CRM team’s appointments are. Only real locations are shown.",
+  "Calendrier, liste et carte des rendez-vous de toute l’équipe CRM. Confirmez, reportez ou annulez depuis chaque rendez-vous.": "Calendar, list, and map of the whole CRM team’s appointments. Confirm, reschedule, or cancel from each appointment.",
+  "Ouvrir la grande carte": "Open full map",
+  "Aucun rendez-vous localisé sur cette période": "No located appointments in this period",
+  "Ouvrez la grande carte pour placer vos rendez-vous en un clic.": "Open the full map to place your appointments in one click.",
+  "7 jours": "7 days",
+  "Zones": "Zones",
+  "Placer": "Place",
+  "Position manquante": "Missing location",
+  "Position enregistrée": "Location saved",
+  "Position non enregistrée": "Location not saved",
+  "Cliquez sur la carte à l’emplacement de": "Click the map at the location of",
+  "rendez-vous à placer sur la carte.": "appointments to place on the map.",
+  "Changez la période ou les filtres pour en voir d’autres.": "Change the period or filters to see more.",
+  "apparaît maintenant sur la carte.": "now appears on the map."
  },
  "fragments": {
   "— commentaire": "— comment",

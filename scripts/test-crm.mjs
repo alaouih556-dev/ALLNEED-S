@@ -280,6 +280,17 @@ try {
   assert((await req(`/api/crm/contacts/${casa.id}`, { method: 'PATCH', cookie: admin, body: { agentId: 'owner' } })).status === 400, 'assignation : compte hors CRM refusé')
   x = await req(`/api/crm/contacts/${casa.id}`, { method: 'PATCH', cookie: admin, body: { agentId: null } })
   assert(x.status === 200 && !x.data.agentId, 'admin : retire l’assignation')
+  await req(`/api/crm/contacts/${casa.id}/location`, { method: 'POST', cookie: admin, body: { lat: null, lng: null } })
+  x = await req('/api/crm/appointments', { method: 'POST', cookie: admin, body: { contactId: casa.id, date: today, start: '11:00' } })
+  assert(x.status === 201 && x.data.lat === null, 'carte : rendez-vous sans position réelle reste sans position')
+  const mapRdv = x.data
+  x = await req('/api/crm/map', { cookie: crmUser })
+  assert(x.data.unlocated.some((a) => a.id === mapRdv.id) && !x.data.appointments.some((a) => a.id === mapRdv.id), 'carte : rendez-vous d’un autre utilisateur listé à placer')
+  assert((await req(`/api/crm/contacts/${casa.id}/location`, { method: 'POST', cookie: crmUser, body: { lat: 33.5731, lng: -7.5898 } })).status === 200, 'carte : position enregistrée par un autre membre du CRM')
+  x = await req('/api/crm/map', { cookie: crmUser })
+  const placedRdv = x.data.appointments.find((a) => a.id === mapRdv.id)
+  assert(placedRdv?.lat === 33.5731 && placedRdv?.lng === -7.5898 && !x.data.unlocated.some((a) => a.id === mapRdv.id), 'carte : rendez-vous affiché à la position réelle du contact')
+  assert((await req(`/api/crm/appointments/${mapRdv.id}`, { cookie: crmUser })).data.lat === 33.5731, 'rendez-vous : position du contact reprise')
   x = await req('/api/crm/calls', { method: 'POST', cookie: crmUser, body: { contactId: casa.id, status: 'no_answer', notes: 'Appel équipe' } })
   assert(x.status < 300, 'rôle CRM : appel enregistré sur un contact partagé')
 

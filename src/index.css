@@ -2029,3 +2029,25 @@ a.cl-space:hover{border-color:color-mix(in srgb,var(--an-accent) 35%,white);tran
 
 .pj-hero-status{display:inline-flex;padding:4px 11px;font-size:.75rem;font-weight:700;color:#fff!important;opacity:1;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.34);border-radius:99px}
 @media(max-width:480px){.an-topbar:has(.pj-bell)>div:first-child>.min-w-0{display:none}}
+
+/* V65 carte CRM */
+.crm-mapbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.crm-mapbar b{margin-left:3px;font-weight:800}
+.crm-mapbar-search{flex:1 1 240px;min-width:200px;max-width:none}
+.crm-map-placing{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:12px 12px 0;padding:8px 12px;border:1px solid var(--an-line);border-radius:12px;background:color-mix(in srgb,#6366f1 12%,transparent);font-size:.84rem}
+.crm-map-placing>span{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px}
+.crm-map-note{margin:0;padding:10px 16px;border-bottom:1px solid var(--an-line);font-size:.78rem;color:var(--an-muted)}
+.crm-map-list{margin:0;padding:6px;list-style:none;max-height:min(62vh,560px);overflow-y:auto}
+.crm-map-list li{display:flex;align-items:center;gap:6px;border-radius:12px}
+.crm-map-list li:hover{background:color-mix(in srgb,#6366f1 7%,transparent)}
+.crm-map-item{display:flex;flex:1;min-width:0;align-items:center;gap:11px;padding:8px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.crm-map-item:disabled{cursor:default}
+.crm-map-item strong,.crm-map-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crm-map-item strong{font-size:.85rem}
+.crm-map-item small{font-size:.72rem;color:var(--an-muted)}
+.crm-map-list li.is-missing .crm-map-item small:last-child{color:#d97706;font-weight:600}
+.crm-map-list li>button:last-child:not(.crm-map-item){margin-right:6px;flex:none}
+.crm-map-date{display:flex;flex:none;flex-direction:column;align-items:center;justify-content:center;width:44px;height:46px;border-radius:11px;border-left:3px solid var(--pin);background:color-mix(in srgb,var(--pin) 13%,transparent);font-size:.62rem;line-height:1.1;color:var(--an-muted)}
+.crm-map-date b{font-size:1rem;color:var(--an-text,#0f172a)}
+.an-shell[data-mode="dark"] .crm-map-date b{color:#f8fafc}
+@media (max-width:640px){.crm-mapbar>*{max-width:100%}.crm-mapbar-search{flex-basis:100%}.crm-map-list{max-height:420px}}

@@ -16,7 +16,7 @@ export type MapZone = { id: string; name: string; color: string; shape: null | {
 export const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
 const MOROCCO: L.LatLngExpression = [31.8, -7.1]
 
-export function CrmMap({ points, zones = [], density = false, cluster = true, height = 520, draft, onMapClick, focus, fitKey }: {
+export function CrmMap({ points, zones = [], density = false, cluster = true, height = 520, draft, onMapClick, focus, fitKey, openPoint }: {
   points: MapPoint[]
   zones?: MapZone[]
   density?: boolean
@@ -28,12 +28,16 @@ export function CrmMap({ points, zones = [], density = false, cluster = true, he
   focus?: { lat: number; lng: number; zoom?: number } | null
   /** Change cette clé pour recadrer la carte sur les points. */
   fitKey?: string
+  /** Ouvre l'infobulle de ce point ; changer `nonce` pour la rouvrir. */
+  openPoint?: { id: string; nonce: number } | null
 }) {
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<L.Map | null>(null)
   const layer = useRef<L.LayerGroup | null>(null)
   const zoneLayer = useRef<L.LayerGroup | null>(null)
   const draftLayer = useRef<L.LayerGroup | null>(null)
+  const markers = useRef(new Map<string, L.Marker>())
+  const openedNonce = useRef<number | null>(null)
   const clickRef = useRef(onMapClick)
   const navigate = useNavigate()
   clickRef.current = onMapClick
@@ -50,7 +54,8 @@ export function CrmMap({ points, zones = [], density = false, cluster = true, he
       const a = (e.target as HTMLElement).closest('a[data-nav]') as HTMLAnchorElement | null
       if (!a) return
       e.preventDefault()
-      void navigate({ to: a.dataset.nav as never })
+      const target = new URL(a.dataset.nav || '/', window.location.origin)
+      void navigate({ to: target.pathname as never, search: Object.fromEntries(target.searchParams) as never })
     })
     map.current = m
     const ro = new ResizeObserver(() => m.invalidateSize())
@@ -64,6 +69,7 @@ export function CrmMap({ points, zones = [], density = false, cluster = true, he
     const m = map.current
     if (!m) return
     layer.current?.remove()
+    markers.current.clear()
     const group: L.LayerGroup = cluster ? (L as unknown as { markerClusterGroup: (o: object) => L.LayerGroup }).markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50, chunkedLoading: true }) : L.layerGroup()
     for (const p of points) {
       if (density) {
@@ -72,7 +78,8 @@ export function CrmMap({ points, zones = [], density = false, cluster = true, he
       }
       const shape = p.kind === 'appointment' ? 'crm-pin is-appt' : 'crm-pin'
       const icon = L.divIcon({ className: '', html: `<span class="${shape}" style="--pin:${p.color}"></span>`, iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -8] })
-      L.marker([p.lat, p.lng], { icon, title: p.label || '' }).bindPopup(p.popup, { maxWidth: 280 }).addTo(group)
+      const marker = L.marker([p.lat, p.lng], { icon, title: p.label || '' }).bindPopup(p.popup, { maxWidth: 280 }).addTo(group)
+      markers.current.set(p.id, marker)
     }
     group.addTo(m)
     layer.current = group
@@ -90,6 +97,17 @@ export function CrmMap({ points, zones = [], density = false, cluster = true, he
   }, [fitKey])
 
   useEffect(() => { if (focus && map.current) map.current.setView([focus.lat, focus.lng], focus.zoom ?? 14) }, [focus])
+
+  // Ouverture d'un point depuis une liste, même s'il est dans un groupe.
+  useEffect(() => {
+    if (!openPoint || openedNonce.current === openPoint.nonce) return
+    const marker = markers.current.get(openPoint.id)
+    if (!marker) return
+    openedNonce.current = openPoint.nonce
+    const group = layer.current as unknown as { zoomToShowLayer?: (m: L.Marker, done: () => void) => void } | null
+    if (group?.zoomToShowLayer) group.zoomToShowLayer(marker, () => marker.openPopup())
+    else { map.current?.setView(marker.getLatLng(), Math.max(map.current.getZoom(), 14)); marker.openPopup() }
+  }, [openPoint, points, density, cluster])
 
   // Zones
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, List, Map as MapIcon } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { CalendarDays, CalendarPlus, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, List, Map as MapIcon, Maximize2 } from 'lucide-react'
 import { PageHeader } from '@/components/layouts'
 import { Alert, Button } from '@/components/ui'
 import { EmptyBox, LoadingRows, Panel, Segmented } from '@/components/admin-kit'
@@ -10,7 +10,7 @@ import { CrmMap, esc } from '@/features/crm/CrmMap'
 
 export const Route = createFileRoute('/crm/rendez-vous')({ component: () => <RequirePermission perm="appointments.view"><AppointmentsPage /></RequirePermission> })
 
-type View = 'calendar' | 'list' | 'map'
+type View = 'calendar' | 'list'
 type Scale = 'day' | 'week' | 'month'
 const HOURS = Array.from({ length: 14 }, (_, i) => 7 + i)
 const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
@@ -31,14 +31,15 @@ function AppointmentsPage() {
   const { can } = useCrm()
   const label = useStatusLabel()
   const [values, setValues] = useFilterState({ view: 'calendar', scale: 'week', pageSize: '25', sort: 'date', dir: 'asc' })
-  const view = (values.view || 'calendar') as View
+  const view: View = values.view === 'list' ? 'list' : 'calendar'
+  const showMap = values.map !== '0'
   const scale = (values.scale || 'week') as Scale
   const anchor = values.date || localDay()
   const range = rangeFor(scale, anchor)
   const filters = useLookupFilters(['agent', 'campaign', 'database', 'appointmentStatus', 'city'])
   const filterParams = { agentId: values.agentId, campaignId: values.campaignId, databaseId: values.databaseId, appointmentStatus: values.appointmentStatus, city: values.city, q: values.q }
   const listFrom = values.from || '', listTo = values.to || ''
-  const cal = useCrmQuery<{ rows: Appointment[]; total: number }>(view === 'list' ? null : '/appointments', { ...filterParams, all: 1, ...(view === 'map' ? { from: listFrom || localDay(), to: listTo || addDays(localDay(), 60) } : range) })
+  const cal = useCrmQuery<{ rows: Appointment[]; total: number }>('/appointments', { ...filterParams, all: 1, ...(view === 'list' ? { from: listFrom || localDay(), to: listTo || addDays(localDay(), 60) } : range) })
   const list = useCrmQuery<Page<Appointment>>(view === 'list' ? '/appointments' : null, { ...filterParams, from: listFrom, to: listTo, page: values.page, pageSize: values.pageSize, sort: values.sort, dir: values.dir })
   const [open, setOpen] = useState<Appointment | null>(null)
   const [creating, setCreating] = useState<{ date?: string; start?: string } | null>(null)
@@ -70,7 +71,7 @@ function AppointmentsPage() {
     { key: 'status', label: 'Statut', sort: 'status', render: (a) => <StatusPill kind="appointment" value={a.status} /> },
   ]
 
-  const mapPoints = (cal.data?.rows || []).filter((a) => a.lat !== null && a.lng !== null).map((a) => ({ id: a.id, lat: a.lat!, lng: a.lng!, kind: 'appointment' as const, color: STATUS_HEX[a.status] || '#6366f1', label: a.contactName, popup: `<b>${esc(a.contactName)}</b><br>${esc(fmtDate(a.date))} · ${esc(a.start)}–${esc(a.end)}<br>${esc(a.agentName || 'Sans agent')} · ${esc(label('appointment', a.status))}<br>${esc([a.address, a.city].filter(Boolean).join(', '))}${a.phone ? `<br><a href="tel:${esc(a.phone.replace(/\s+/g, ''))}">${esc(a.phone)}</a>` : ''}<br><a href="#" data-nav="/crm/contacts/${esc(a.contactId)}">Ouvrir la fiche</a>` }))
+  const mapPoints = (cal.data?.rows || []).filter((a) => a.lat !== null && a.lng !== null).map((a) => ({ id: a.id, lat: a.lat!, lng: a.lng!, kind: 'appointment' as const, color: STATUS_HEX[a.status] || '#6366f1', label: a.contactName, popup: `<b>${esc(a.contactName)}</b><br>${esc(fmtDate(a.date))} · ${esc(a.start)}–${esc(a.end)}<br>${esc(a.agentName || 'Sans agent')} · ${esc(label('appointment', a.status))}<br>${esc([a.address, a.city].filter(Boolean).join(', '))}${a.phone ? `<br><a href="tel:${esc(a.phone.replace(/\s+/g, ''))}">${esc(a.phone)}</a>` : ''}<div class="crm-popup-actions"><a href="#" data-nav="/crm/contacts/${esc(a.contactId)}">Fiche contact</a></div>` }))
   const missing = (cal.data?.rows || []).length - mapPoints.length
 
   return (
@@ -78,7 +79,7 @@ function AppointmentsPage() {
       <PageHeader
         eyebrow="CRM · Activité"
         title="Rendez-vous"
-        description="Calendrier, liste et carte des rendez-vous. Confirmer, reporter, annuler ou marquer réalisé depuis la fiche du rendez-vous."
+        description="Calendrier, liste et carte des rendez-vous de toute l’équipe CRM. Confirmez, reportez ou annulez depuis chaque rendez-vous."
         actions={
           <>
             {can('appointments.create') ? <Button size="sm" onClick={() => setCreating({})}><CalendarPlus size={14} />Nouveau rendez-vous</Button> : null}
@@ -87,12 +88,21 @@ function AppointmentsPage() {
         }
       />
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Segmented value={view} onChange={(v) => setValues({ ...values, view: v, page: '1' })} options={[{ value: 'calendar', label: 'Calendrier', icon: <CalendarDays size={14} /> }, { value: 'list', label: 'Liste', icon: <List size={14} /> }, { value: 'map', label: 'Carte géographique', icon: <MapIcon size={14} /> }] as never} />
+        <Segmented value={view} onChange={(v) => setValues({ ...values, view: v, page: '1' })} options={[{ value: 'calendar', label: 'Calendrier', icon: <CalendarDays size={14} /> }, { value: 'list', label: 'Liste', icon: <List size={14} /> }] as never} />
         {view === 'calendar' ? <Segmented value={scale} onChange={(v) => setValues({ ...values, scale: v })} options={[{ value: 'day', label: 'Jour' }, { value: 'week', label: 'Semaine' }, { value: 'month', label: 'Mois' }] as never} /> : null}
       </div>
       <FilterBar values={values} onChange={setValues} filters={filters} searchPlaceholder="Contact, titre, adresse, agent…">
-        {view !== 'calendar' ? <span className="crm-daterange"><input className="crm-date" type="date" aria-label="Du" value={listFrom} onChange={(e) => setValues({ ...values, from: e.target.value, page: '1' })} /><span>→</span><input className="crm-date" type="date" aria-label="Au" value={listTo} onChange={(e) => setValues({ ...values, to: e.target.value, page: '1' })} /></span> : null}
+        {view === 'list' ? <span className="crm-daterange"><input className="crm-date" type="date" aria-label="Du" value={listFrom} onChange={(e) => setValues({ ...values, from: e.target.value, page: '1' })} /><span>→</span><input className="crm-date" type="date" aria-label="Au" value={listTo} onChange={(e) => setValues({ ...values, to: e.target.value, page: '1' })} /></span> : null}
       </FilterBar>
+
+      <Panel
+        className="mb-5"
+        title={<span className="inline-flex items-center gap-2"><MapIcon size={15} />Carte géographique</span>}
+        description={`${mapPoints.length} rendez-vous localisés${missing > 0 ? ` · ${missing} à placer` : ''}`}
+        action={<div className="flex flex-wrap items-center gap-1"><Link to={'/crm/carte' as never}><Button size="sm" variant="outline"><Maximize2 size={13} />Ouvrir la grande carte</Button></Link><Button size="sm" variant="ghost" aria-expanded={showMap} onClick={() => setValues({ ...values, map: showMap ? '0' : '' })}>{showMap ? <ChevronUp size={14} /> : <ChevronDown size={14} />}{showMap ? 'Masquer' : 'Afficher'}</Button></div>}
+      >
+        {showMap ? <div className="p-3">{cal.loading && !cal.data ? <LoadingRows /> : mapPoints.length ? <CrmMap points={mapPoints} fitKey={JSON.stringify([view, range.from, range.to, filterParams, listFrom, listTo, mapPoints.length])} height="min(42vh, 380px)" /> : <EmptyBox icon={<MapIcon size={20} />} title="Aucun rendez-vous localisé sur cette période" text="Ouvrez la grande carte pour placer vos rendez-vous en un clic." />}</div> : null}
+      </Panel>
 
       {view === 'calendar' ? (
         <Panel
@@ -139,12 +149,6 @@ function AppointmentsPage() {
 
       {view === 'list' ? (
         <DataTable columns={columns} page={list.data} loading={list.loading} error={list.error} values={values} onChange={setValues} onRowClick={(a) => setOpen(a)} empty={{ icon: <CalendarDays size={20} />, title: 'Aucun rendez-vous', text: 'Modifiez les filtres ou prenez un rendez-vous depuis un contact.' }} />
-      ) : null}
-
-      {view === 'map' ? (
-        <Panel title="Carte des rendez-vous" description={`${mapPoints.length} rendez-vous localisés${missing > 0 ? ` · ${missing} sans coordonnées (non affichés)` : ''}. Par défaut : les 60 prochains jours.`}>
-          <div className="p-3">{cal.loading && !cal.data ? <LoadingRows /> : mapPoints.length ? <CrmMap points={mapPoints} fitKey={JSON.stringify([filterParams, listFrom, listTo, mapPoints.length])} height={560} /> : <EmptyBox icon={<MapIcon size={20} />} title="Aucun rendez-vous localisé" text="Les rendez-vous reprennent les coordonnées du contact. Placez vos contacts sur la carte depuis leur fiche." />}</div>
-        </Panel>
       ) : null}
 
       {open ? <AppointmentModal appointment={open} onClose={closeModal} onSaved={refresh} /> : null}

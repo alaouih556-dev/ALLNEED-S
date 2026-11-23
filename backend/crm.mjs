@@ -343,9 +343,15 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
     const c = contactById(call.contactId), agent = userById(call.agentId)
     return { ...call, contactName: c?.fullName || '', agentName: agent?.name || '', campaignName: call.campaignId ? campById(call.campaignId)?.name || '' : '', databaseName: call.databaseId ? dbById(call.databaseId)?.name || '' : '' }
   }
+  /** Position réelle du rendez-vous, sinon celle enregistrée sur son contact. Jamais de position inventée. */
+  function appointmentCoords(a) {
+    if (a.lat !== null && a.lat !== undefined && a.lng !== null && a.lng !== undefined) return { lat: a.lat, lng: a.lng }
+    const c = contactById(a.contactId)
+    return c && c.lat !== null && c.lat !== undefined && c.lng !== null && c.lng !== undefined ? { lat: c.lat, lng: c.lng } : { lat: null, lng: null }
+  }
   function appointmentOut(a) {
     const c = contactById(a.contactId), agent = a.agentId ? userById(a.agentId) : null
-    return { ...a, contactName: c?.fullName || '', agentName: agent?.name || '', campaignName: a.campaignId ? campById(a.campaignId)?.name || '' : '', databaseName: a.databaseId ? dbById(a.databaseId)?.name || '' : '' }
+    return { ...a, ...appointmentCoords(a), contactName: c?.fullName || '', agentName: agent?.name || '', campaignName: a.campaignId ? campById(a.campaignId)?.name || '' : '', databaseName: a.databaseId ? dbById(a.databaseId)?.name || '' : '' }
   }
 
   /* ---------- Métriques ---------- */
@@ -1335,11 +1341,12 @@ export function createCrm({ db, saveDb, json, readBody, audit, hashPassword, cre
       const showContacts = q.get('layer') !== 'appointments'
       const showAppts = q.get('layer') !== 'contacts'
       const cList = showContacts ? contacts.filter((c) => (!f.callStatus || c.callStatus === f.callStatus) && (!f.from && !f.to ? true : inRange(dayOf(c.lastContactAt || c.createdAt), f.from, f.to))) : []
-      const aList = showAppts ? appts.filter((a) => inRange(a.date, f.from, f.to)) : []
+      const aList = showAppts ? appts.filter((a) => inRange(a.date, f.from, f.to)).map((a) => ({ ...a, ...appointmentCoords(a) })) : []
       return send(200, {
         contacts: cList.filter(located).slice(0, 8000).map((c) => { const lc = lastCall.get(c.id), na = nextAppt.get(c.id); return { id: c.id, name: c.fullName, phone: c.phone, address: [c.address, c.city].filter(Boolean).join(', '), lat: c.lat, lng: c.lng, status: c.status, callStatus: c.callStatus, agentName: c.agentId ? userById(c.agentId)?.name || '' : '', lastCallAt: lc?.at || null, lastCallStatus: lc?.status || null, nextCallbackAt: c.nextCallbackAt || null, appointment: na ? { id: na.id, date: na.date, start: na.start, status: na.status } : null } }),
         appointments: aList.filter(located).slice(0, 5000).map((a) => { const o = appointmentOut(a); return { id: a.id, title: a.title, contactId: a.contactId, contactName: o.contactName, phone: a.phone, date: a.date, start: a.start, end: a.end, agentName: o.agentName, status: a.status, address: [a.address, a.city].filter(Boolean).join(', '), lat: a.lat, lng: a.lng } }),
         missing: { contacts: cList.filter((c) => !located(c)).length, appointments: aList.filter((a) => !located(a)).length },
+        unlocated: aList.filter((a) => !located(a)).sort((x, y) => `${x.date}${x.start}`.localeCompare(`${y.date}${y.start}`)).slice(0, 300).map((a) => { const o = appointmentOut(a); return { id: a.id, contactId: a.contactId, contactName: o.contactName, date: a.date, start: a.start, end: a.end, agentName: o.agentName, status: a.status, address: [a.address, a.city].filter(Boolean).join(', ') } }),
         zones: db.crmZones.filter((z) => zoneVisible(user, z)),
       })
     }
